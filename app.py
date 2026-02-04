@@ -14,7 +14,7 @@ os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.secret_key = app.config['SECRET_KEY']
+app.secret_key = os.environ.get("SECRET_KEY", "dev_fallback_key")
 
 db.init_app(app)
 
