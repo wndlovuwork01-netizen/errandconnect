@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gas Delivery - ErrandConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --warning: #ff5722;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile - UPDATED WITH SERVICE INFO */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ESTIMATED FEE DISPLAY ON FIXED BAR - RIGHT SIDE */
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* NEW: Service Price and Phone Number Row */
+        .service-phone-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .service-phone-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 0;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header - SIMPLIFIED (just logo and title) */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* Expanding Input Fields */
+        .expanding-input {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        /* Safety Alert */
+        .safety-alert {
+            background: linear-gradient(135deg, #ff5722 0%, #ff8a65 100%);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3);
+        }
+
+        .safety-icon {
+            font-size: 20px;
+        }
+
+        /* Fuel Grid - Mobile Optimized */
+        .fuel-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .fuel-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Quantity Display */
+        .quantity-display {
+            background: var(--gradient);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .quantity-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .quantity-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* Warning Tip */
+        .warning-tip {
+            background: #fff3cd;
+            border-left: 3px solid var(--warning);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: #856404;
+            line-height: 1.4;
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+            line-height: 1.4;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            touch-action: manipulation;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* NEW: View Route Button */
+        .view-route-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+            touch-action: manipulation;
+            transition: var(--transition);
+        }
+
+        .view-route-btn:active {
+            transform: scale(0.98);
+            background: var(--primary-dark);
+        }
+
+        .view-route-btn.hidden {
+            display: none;
+        }
+
+        /* NEW: Map Modal */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(12px, env(safe-area-inset-top));
+                height: calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .fuel-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Service Phone Row for larger screens */
+            .service-phone-row {
+                gap: 15px;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            /* Service Phone Row for very small screens */
+            .service-phone-row {
+                gap: 8px;
+            }
+
+            .service-phone-row .input-with-icon i {
+                font-size: 12px;
+                left: 8px;
+            }
+
+            .service-phone-row input {
+                padding-left: 32px;
+                padding-right: 8px;
+                font-size: 13px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile WITH SERVICE INFO AND FEE -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-gas-pump"></i>
+            </div>
+            <div class="service-text">
+                <h3>Gas Delivery</h3>
+                <p>Safe and reliable fuel delivery to your location</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Fee:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
+    </div>
+
+    <!-- NEW: Map Modal for Route Viewing -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-route"></i> Fuel Delivery Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3 id="routeTitle">Supplier to Delivery Route</h3>
+                <p id="routeDescription">Route from supplier location to delivery address</p>
+                <div id="routeDetails" style="margin-top: 15px; text-align: left; font-size: 13px; width: 100%; max-width: 300px;">
+                    <p><strong>Supplier Location:</strong> <span id="mapSupplier">Not specified</span></p>
+                    <p><strong>Delivery Address:</strong> <span id="mapDelivery">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTransport">-</div>
+                    <div class="info-label">Vehicle Type</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <!-- Simplified Mobile Header (just company branding) -->
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-gas-pump"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Gas Delivery Service</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <!-- REMOVED service-indicator from here since it's now on fixed bar -->
+
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <div class="safety-alert">
+                    <div class="safety-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <strong>Safety First!</strong> Our delivery personnel are trained in fuel handling safety protocols.
+                    </div>
+                </div>
+
+                <form method="post" action="{{ url_for('create_gas_delivery_errand') }}" id="gasDeliveryForm">
+                    <!-- Fuel Information -->
+                    <h2><i class="fas fa-oil-can"></i> Fuel Information</h2>
+
+                    <div class="fuel-grid">
+                        <div class="fuel-item">
+                            <label for="fuel_type">Fuel Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-gas-pump"></i>
+                                <select id="fuel_type" name="fuel_type" required onchange="toggleOtherFuelInput(); updateFuelSafety(); updateEstimatedFee(); updateProgress()">
+                                    <option value="">Select fuel type</option>
+                                    <option value="petrol">Petrol (Gasoline)</option>
+                                    <option value="diesel">Diesel</option>
+                                    <option value="premium">Premium Petrol</option>
+                                    <option value="cng">CNG (Compressed Natural Gas)</option>
+                                    <option value="lpg">LPG (Liquefied Petroleum Gas)</option>
+                                    <option value="other">Other (Specify below)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Expanding input for Other Fuel Type -->
+                        <div id="other_fuel_input" class="fuel-item expanding-input">
+                            <label for="other_fuel_specify">Specify Fuel Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-edit"></i>
+                                <input type="text" id="other_fuel_specify" name="other_fuel_specify" placeholder="e.g., Kerosene, Biofuel, Aviation fuel" oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="fuel-item">
+                            <label for="unit">Unit of Measurement</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-ruler"></i>
+                                <select id="unit" name="unit" required onchange="toggleOtherUnitInput(); updateQuantityDisplay(); updateEstimatedFee(); updateProgress()">
+                                    <option value="liters">Liters</option>
+                                    <option value="gallons">Gallons</option>
+                                    <option value="kilograms">Kilograms</option>
+                                    <option value="pounds">Pounds</option>
+                                    <option value="other">Other (Specify below)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Expanding input for Other Unit -->
+                        <div id="other_unit_input" class="fuel-item expanding-input">
+                            <label for="other_unit_specify">Specify Unit</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-ruler-combined"></i>
+                                <input type="text" id="other_unit_specify" name="other_unit_specify" placeholder="e.g., Cubic meters, Barrels, Tonnes" oninput="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity Needed</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-weight-hanging"></i>
+                            <input type="number" id="quantity" name="quantity" placeholder="Enter quantity" step="0.1" min="0" required oninput="updateQuantityDisplay(); updateEstimatedFee(); updateProgress()">
+                        </div>
+                    </div>
+
+                    <div class="quantity-display">
+                        <div class="quantity-label">Estimated Delivery:</div>
+                        <div class="quantity-value"><span id="quantity_display">0</span> <span id="unit_display">liters</span></div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- NEW: Supplier/Location Preference -->
+                    <h2><i class="fas fa-store"></i> Supplier/Location Preference</h2>
+
+                    <div class="fuel-grid">
+                        <div class="fuel-item">
+                            <label for="specific_supplier">Need fuel from specific supplier?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-question-circle"></i>
+                                <select id="specific_supplier" name="specific_supplier" required onchange="toggleSupplierLocationInput(); updateViewRouteButton(); updateEstimatedFee(); updateProgress()">
+                                    <option value="">Select option</option>
+                                    <option value="no">No, any supplier is fine</option>
+                                    <option value="yes">Yes, specific supplier/location</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Expanding input for Supplier Location -->
+                        <div id="supplier_location_input" class="fuel-item expanding-input">
+                            <label for="supplier_location">Supplier/Location Address</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <input type="text" id="supplier_location" name="supplier_location" placeholder="Enter supplier/store address" oninput="updateViewRouteButton(); updateEstimatedFee(); updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Delivery Information -->
+                    <h2><i class="fas fa-truck"></i> Delivery Information</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="delivery_address" name="delivery_address" placeholder="Where should fuel be delivered?" required oninput="updateViewRouteButton(); updateEstimatedFee(); updateProgress()">
+                        </div>
+
+                        <!-- NEW: View Route Button (initially hidden) -->
+                        <button type="button" id="viewRouteBtn" class="view-route-btn hidden" onclick="showRouteMap()">
+                            <i class="fas fa-route"></i> View Route Map
+                        </button>
+                    </div>
+
+                    <div class="fuel-grid">
+                        <div class="fuel-item">
+                            <label for="container_type">Container Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-container-storage"></i>
+                                <select id="container_type" name="container_type" required onchange="toggleOtherContainerInput(); updateEstimatedFee(); updateProgress()">
+                                    <option value="">Select container</option>
+                                    <option value="vehicle_tank">Vehicle Fuel Tank</option>
+                                    <option value="gas_cylinder">Gas Cylinder</option>
+                                    <option value="jerry_can">Jerry Can</option>
+                                    <option value="storage_tank">Storage Tank</option>
+                                    <option value="other_container">Other Container (Specify below)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Expanding input for Other Container Type -->
+                        <div id="other_container_input" class="fuel-item expanding-input">
+                            <label for="other_container_specify">Specify Container Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-edit"></i>
+                                <input type="text" id="other_container_specify" name="other_container_specify" placeholder="e.g., Drums, IBC Tote, Bowser" oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="fuel-item">
+                            <label for="container_capacity">Container Capacity</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-arrows-alt"></i>
+                                <input type="text" id="container_capacity" name="container_capacity" placeholder="e.g., 50 liters, 20 gallons" oninput="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Safety & Contact -->
+                    <h2><i class="fas fa-shield-alt"></i> Safety & Contact</h2>
+
+                    <div class="warning-tip">
+                        <i class="fas fa-exclamation-circle"></i> Please provide accurate safety information for secure delivery
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-phone-alt"></i>
+                            <input type="text" id="emergency_contact" name="emergency_contact" placeholder="Emergency contact person and number" required oninput="updateProgress()">
+                        </div>
+                    </div>
+
+                    <div class="fuel-grid">
+                        <div class="fuel-item">
+                            <label for="safety_equipment">Safety Equipment Available</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hard-hat"></i>
+                                <select id="safety_equipment" name="safety_equipment" onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="none">No safety equipment</option>
+                                    <option value="fire_extinguisher">Fire extinguisher</option>
+                                    <option value="safety_gloves">Safety gloves</option>
+                                    <option value="full_kit">Full safety kit</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="fuel-item">
+                            <label for="storage_capacity">Storage Capacity Available</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-database"></i>
+                                <input type="text" id="storage_capacity" name="storage_capacity" placeholder="Available storage capacity" oninput="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Payment & Timing -->
+                    <h2><i class="fas fa-credit-card"></i> Payment & Timing</h2>
+
+                    <div class="fuel-grid">
+                        <div class="fuel-item">
+                            <label for="payment_method">Payment Method</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-wallet"></i>
+                                <select id="payment_method" name="payment_method" required onchange="updateProgress()">
+                                    <option value="">Select payment method</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Credit/Debit Card</option>
+                                    <option value="mobile">Mobile Payment</option>
+                                    <option value="online">Online Payment</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="fuel-item">
+                            <label for="delivery_timeframe">Delivery Timeframe</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <select id="delivery_timeframe" name="delivery_timeframe" required onchange="toggleSpecificTimeInput(); updateEstimatedFee(); updateProgress()">
+                                    <option value="asap">As soon as possible</option>
+                                    <option value="1_hour">Within 1 hour (+$1.00)</option>
+                                    <option value="2_hours">Within 2 hours (+$0.80)</option>
+                                    <option value="4_hours">Within 4 hours (+$0.50)</option>
+                                    <option value="today">Today (+$0.25)</option>
+                                    <option value="specific">Specific time</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Specific Time Input (expanding) -->
+                    <div id="specific_time_input" class="expanding-input">
+                        <div class="form-group">
+                            <label for="specific_time">Enter Specific Time</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <input type="text" id="specific_time" name="specific_time" placeholder="e.g., 2:30 PM, 14:30" oninput="updateEstimatedFee(); updateProgress()">
+                            </div>
+                            <div class="info-tip">
+                                <i class="fas fa-info-circle"></i> Price adjustment: 0-1hr: +$1.25, 1-2hrs: +$1.00, 2-4hrs: +$0.80, 4-6hrs: +$0.75, 6-12hrs: +$0.65
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-redo"></i>
+                            <select id="recurring_delivery" name="recurring_delivery" onchange="updateEstimatedFee(); updateProgress()">
+                                <option value="no">One-time delivery</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="custom">Custom schedule</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Additional Instructions -->
+                    <h2><i class="fas fa-sticky-note"></i> Additional Instructions</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-comment-alt"></i>
+                            <textarea id="special_instructions" name="special_instructions" rows="4" placeholder="Any other special instructions or requirements..." oninput="updateProgress()"></textarea>
+                        </div>
+                    </div>
+
+                     <div class="section-divider"></div>
+
+                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+
+                    <!-- NEW: Service Price and Phone Number Row -->
+                    <div class="service-phone-row">
+                        <!-- Service Price -->
+                        <div class="form-group">
+                            <label for="service_price">Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price"
+                                       placeholder="Your price"
+                                       step="0.01" min="0.50"
+                                       inputmode="decimal" required>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone_number" name="phone_number"
+                                       placeholder="Phone number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Create Gas Delivery Errand
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Prevent pull-to-refresh on mobile
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                if (window.scrollY === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+        });
+
+        // Base price constant
+        const BASE_PRICE = 1.50;
+
+        // NEW: Toggle Other Fuel Input
+        function toggleOtherFuelInput() {
+            const otherInput = document.getElementById('other_fuel_input');
+            if (document.getElementById('fuel_type').value === 'other') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('other_fuel_specify')?.focus(), 300);
+            } else {
+                otherInput.classList.remove('expanded');
+            }
+        }
+
+        // NEW: Toggle Other Unit Input
+        function toggleOtherUnitInput() {
+            const otherInput = document.getElementById('other_unit_input');
+            const unitDisplay = document.getElementById('unit_display');
+
+            if (document.getElementById('unit').value === 'other') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('other_unit_specify')?.focus(), 300);
+                // Update unit display
+                unitDisplay.textContent = 'units';
+            } else {
+                otherInput.classList.remove('expanded');
+                // Update unit display with selected unit
+                updateQuantityDisplay();
+            }
+        }
+
+        // NEW: Toggle Other Container Input
+        function toggleOtherContainerInput() {
+            const otherInput = document.getElementById('other_container_input');
+            if (document.getElementById('container_type').value === 'other_container') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('other_container_specify')?.focus(), 300);
+            } else {
+                otherInput.classList.remove('expanded');
+            }
+        }
+
+        // NEW: Toggle Supplier Location Input
+        function toggleSupplierLocationInput() {
+            const supplierInput = document.getElementById('supplier_location_input');
+            if (document.getElementById('specific_supplier').value === 'yes') {
+                supplierInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('supplier_location')?.focus(), 300);
+            } else {
+                supplierInput.classList.remove('expanded');
+            }
+            updateViewRouteButton();
+        }
+
+        // NEW: Toggle Specific Time Input
+        function toggleSpecificTimeInput() {
+            const specificTimeInput = document.getElementById('specific_time_input');
+            if (document.getElementById('delivery_timeframe').value === 'specific') {
+                specificTimeInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('specific_time')?.focus(), 300);
+            } else {
+                specificTimeInput.classList.remove('expanded');
+            }
+        }
+
+        // NEW: Update View Route Button Visibility
+        function updateViewRouteButton() {
+            const viewRouteBtn = document.getElementById('viewRouteBtn');
+            const specificSupplier = document.getElementById('specific_supplier').value;
+            const supplierLocation = document.getElementById('supplier_location').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+
+            // Show button only if:
+            // 1. User selected "Yes" for specific supplier
+            // 2. Supplier location is entered
+            // 3. Delivery address is entered
+            if (specificSupplier === 'yes' && supplierLocation && supplierLocation.trim() !== '' && deliveryAddress && deliveryAddress.trim() !== '') {
+                viewRouteBtn.classList.remove('hidden');
+            } else {
+                viewRouteBtn.classList.add('hidden');
+            }
+        }
+
+        // NEW: Show Route Map
+        function showRouteMap() {
+            const supplierLocation = document.getElementById('supplier_location').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+
+            // Validate inputs
+            if (!supplierLocation || supplierLocation.trim() === '') {
+                alert('Please enter the supplier location first.');
+                document.getElementById('supplier_location').focus();
+                return;
+            }
+
+            if (!deliveryAddress || deliveryAddress.trim() === '') {
+                alert('Please enter the delivery address first.');
+                document.getElementById('delivery_address').focus();
+                return;
+            }
+
+            // Update modal content
+            document.getElementById('mapSupplier').textContent = supplierLocation;
+            document.getElementById('mapDelivery').textContent = deliveryAddress;
+
+            // Calculate route details
+            calculateAndDisplayRoute(supplierLocation, deliveryAddress);
+
+            // Show modal
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // NEW: Calculate Route Details
+        function calculateAndDisplayRoute(from, to) {
+            // Simulate distance calculation based on input lengths
+            const fromLength = from.length;
+            const toLength = to.length;
+
+            // Generate realistic distance for fuel delivery (usually longer distances)
+            const baseDistance = 5 + (Math.abs(fromLength - toLength) / 30);
+            const randomFactor = 0.8 + (Math.random() * 1.4);
+            const distance = Math.max(2, Math.min(baseDistance * randomFactor, 50)).toFixed(1);
+
+            // Calculate estimated time based on distance (fuel trucks move slower)
+            let estimatedMinutes;
+            const distanceNum = parseFloat(distance);
+
+            if (distanceNum <= 5) {
+                // Local delivery: 10-15 minutes per km
+                estimatedMinutes = Math.round(distanceNum * 12 + Math.random() * 15);
+            } else if (distanceNum <= 20) {
+                // Medium distance: 8-12 minutes per km
+                estimatedMinutes = Math.round(distanceNum * 10 + Math.random() * 20);
+            } else {
+                // Long distance: 6-9 minutes per km (highways)
+                estimatedMinutes = Math.round(distanceNum * 7.5 + Math.random() * 30);
+            }
+
+            // Ensure minimum and maximum reasonable times
+            estimatedMinutes = Math.max(15, Math.min(estimatedMinutes, 180));
+
+            // Determine vehicle type based on fuel type and quantity
+            const fuelType = document.getElementById('fuel_type').value;
+            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+            let vehicleType = 'Fuel Truck';
+
+            if (quantity <= 50) {
+                vehicleType = 'Small Tanker';
+            }
+
+            if (quantity <= 20 && (fuelType === 'lpg' || fuelType === 'cng')) {
+                vehicleType = 'Cylinder Delivery Van';
+            }
+
+            if (quantity <= 5) {
+                vehicleType = 'Delivery Van';
+            }
+
+            // Update modal display
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedMinutes + ' min';
+            document.getElementById('mapTransport').textContent = vehicleType;
+
+            // Update route description
+            const fromShort = from.split(',')[0].substring(0, 30) + (from.split(',')[0].length > 30 ? '...' : '');
+            const toShort = to.split(',')[0].substring(0, 30) + (to.split(',')[0].length > 30 ? '...' : '');
+            document.getElementById('routeDescription').textContent = `Fuel delivery route from ${fromShort} to ${toShort}`;
+        }
+
+        // NEW: Close Map
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // NEW: Calculate hours difference for specific time
+        function calculateHoursDifference(specificTime) {
+            if (!specificTime) return null;
+
+            const now = new Date();
+            let [time, modifier] = specificTime.split(' ');
+            let [hours, minutes] = time.split(':');
+
+            // Parse 24-hour format
+            if (!modifier) {
+                hours = parseInt(hours);
+                minutes = parseInt(minutes || 0);
+            } else {
+                // Parse 12-hour format
+                hours = parseInt(hours);
+                minutes = parseInt(minutes || 0);
+
+                if (modifier.toLowerCase() === 'pm' && hours < 12) {
+                    hours += 12;
+                }
+                if (modifier.toLowerCase() === 'am' && hours === 12) {
+                    hours = 0;
+                }
+            }
+
+            // Create target date (today with specified time)
+            const target = new Date();
+            target.setHours(hours, minutes, 0, 0);
+
+            // If target time has already passed today, assume it's for tomorrow
+            if (target < now) {
+                target.setDate(target.getDate() + 1);
+            }
+
+            // Calculate difference in hours
+            const diffMs = target - now;
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            return diffHours;
+        }
+
+        // NEW: Calculate specific time price adjustment
+        function calculateSpecificTimeAdjustment() {
+            const specificTime = document.getElementById('specific_time').value;
+            if (!specificTime || specificTime.trim() === '') {
+                return 0;
+            }
+
+            const hoursDiff = calculateHoursDifference(specificTime.trim());
+            if (hoursDiff === null) {
+                return 0;
+            }
+
+            // Price adjustments based on hours difference
+            if (hoursDiff <= 1) {
+                return 1.25; // 0-1hr: +$1.25
+            } else if (hoursDiff <= 2) {
+                return 1.00; // 1-2hrs: +$1.00
+            } else if (hoursDiff <= 4) {
+                return 0.80; // 2-4hrs: +$0.80
+            } else if (hoursDiff <= 6) {
+                return 0.75; // 4-6hrs: +$0.75
+            } else if (hoursDiff <= 12) {
+                return 0.65; // 6-12hrs: +$0.65
+            } else {
+                return 0.25; // More than 12 hours: base adjustment
+            }
+        }
+
+        function initializeForm() {
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Initial calculations
+            updateQuantityDisplay();
+            updateEstimatedFee();
+            updateFuelSafety();
+            updateViewRouteButton();
+        }
+
+        // Update quantity display
+        function updateQuantityDisplay() {
+            const quantity = document.getElementById('quantity').value || 0;
+            const unit = document.getElementById('unit').value;
+            const unitDisplay = document.getElementById('unit_display');
+
+            // Update unit display text
+            if (unit === 'other') {
+                const otherUnit = document.getElementById('other_unit_specify').value;
+                unitDisplay.textContent = otherUnit || 'units';
+            } else {
+                unitDisplay.textContent = unit;
+            }
+
+            // Update quantity display
+            document.getElementById('quantity_display').textContent = quantity;
+
+            // Add animation to quantity display
+            const quantityElement = document.querySelector('.quantity-display');
+            quantityElement.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                quantityElement.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Update fuel safety warning
+        function updateFuelSafety() {
+            const fuelType = document.getElementById('fuel_type').value;
+            const safetyAlert = document.querySelector('.safety-alert');
+
+            if (fuelType === 'cng' || fuelType === 'lpg') {
+                safetyAlert.innerHTML = `
+                    <div class="safety-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <strong>High-Pressure Gas Alert!</strong> Special handling required for ${fuelType.toUpperCase()} delivery.
+                    </div>
+                `;
+                safetyAlert.style.background = 'linear-gradient(135deg, #ff5722 0%, #ff8a65 100%)';
+            } else {
+                safetyAlert.innerHTML = `
+                    <div class="safety-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <strong>Safety First!</strong> Our delivery personnel are trained in fuel handling safety protocols.
+                    </div>
+                `;
+                safetyAlert.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)';
+            }
+        }
+
+        // Calculate base fee based on fuel type
+        function calculateFuelTypeFee(fuelType) {
+            const fees = {
+                'petrol': 8.00,
+                'diesel': 8.50,
+                'premium': 9.00,
+                'cng': 12.00,
+                'lpg': 11.00,
+                'other': 10.00
+            };
+            return fees[fuelType] || 8.00;
+        }
+
+        // Calculate quantity fee
+        function calculateQuantityFee(quantity) {
+            const qty = parseFloat(quantity) || 0;
+
+            // Base fee plus per unit charge
+            const baseFee = 5.00;
+            const perUnitFee = 0.10; // $0.10 per liter/gallon
+
+            return baseFee + (qty * perUnitFee);
+        }
+
+        // Calculate container type fee
+        function calculateContainerFee(containerType) {
+            const fees = {
+                'vehicle_tank': 3.00,
+                'gas_cylinder': 5.00,
+                'jerry_can': 2.00,
+                'storage_tank': 6.00,
+                'other_container': 4.00
+            };
+            return fees[containerType] || 3.00;
+        }
+
+        // Calculate safety equipment discount
+        function calculateSafetyDiscount(safetyEquipment) {
+            const discounts = {
+                'none': 0.00,
+                'fire_extinguisher': 1.00,
+                'safety_gloves': 0.50,
+                'full_kit': 2.00
+            };
+            return discounts[safetyEquipment] || 0.00;
+        }
+
+        // Calculate urgency fee - UPDATED WITH NEW PRICING
+        function calculateUrgencyFee(deliveryTimeframe) {
+            // Base price adjustments
+            const adjustments = {
+                'asap': 0,       // No adjustment for ASAP
+                '1_hour': 1.00,  // +$1.00 for 1 hour
+                '2_hours': 0.80, // +$0.80 for 2 hours
+                '4_hours': 0.50, // +$0.50 for 4 hours
+                'today': 0.25,   // +$0.25 for today
+                'specific': 0    // Specific time handled separately
+            };
+            return adjustments[deliveryTimeframe] || 0;
+        }
+
+        // Calculate specific time adjustment
+        function calculateSpecificTimeFee() {
+            const deliveryTimeframe = document.getElementById('delivery_timeframe').value;
+            if (deliveryTimeframe === 'specific') {
+                return calculateSpecificTimeAdjustment();
+            }
+            return 0;
+        }
+
+        // Calculate recurring delivery discount
+        function calculateRecurringDiscount(recurringDelivery) {
+            const discounts = {
+                'no': 0.00,
+                'daily': 15.00,
+                'weekly': 10.00,
+                'monthly': 5.00,
+                'custom': 3.00
+            };
+            return discounts[recurringDelivery] || 0.00;
+        }
+
+        // Update estimated fee - UPDATED WITH BASE PRICE AND NEW CALCULATIONS
+        function updateEstimatedFee() {
+            const fuelType = document.getElementById('fuel_type').value;
+            const quantity = document.getElementById('quantity').value || 0;
+            const containerType = document.getElementById('container_type').value;
+            const safetyEquipment = document.getElementById('safety_equipment').value;
+            const deliveryTimeframe = document.getElementById('delivery_timeframe').value;
+            const recurringDelivery = document.getElementById('recurring_delivery').value;
+
+            // Calculate all fees
+            const baseFee = BASE_PRICE;
+            const fuelTypeFee = calculateFuelTypeFee(fuelType);
+            const quantityFee = calculateQuantityFee(quantity);
+            const containerFee = calculateContainerFee(containerType);
+            const safetyDiscount = calculateSafetyDiscount(safetyEquipment);
+            const urgencyAdjustment = calculateUrgencyFee(deliveryTimeframe);
+            const specificTimeAdjustment = calculateSpecificTimeFee();
+            const recurringDiscount = calculateRecurringDiscount(recurringDelivery);
+
+            // Total fee calculation with base price
+            const totalFee = Math.min(Math.max(
+                baseFee + fuelTypeFee + quantityFee + containerFee - safetyDiscount +
+                urgencyAdjustment + specificTimeAdjustment - recurringDiscount,
+                5.00
+            ), 100.00);
+
+            // Update FIXED BAR display
+            document.getElementById('estimated_fee').textContent = '$' + totalFee.toFixed(2);
+
+            // Visual feedback on the fixed bar
+            const feeElement = document.getElementById('estimated_fee');
+            feeElement.style.transform = 'scale(1.1)';
+            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+        }
+
+        // Haptic feedback simulation
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation
+        document.getElementById('gasDeliveryForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent actual submission for demo
+
+            // Validate required fields
+            const fuelType = document.getElementById('fuel_type').value.trim();
+            const quantity = document.getElementById('quantity').value.trim();
+            const unit = document.getElementById('unit').value.trim();
+            const specificSupplier = document.getElementById('specific_supplier').value.trim();
+            const supplierLocation = document.getElementById('supplier_location').value.trim();
+            const deliveryAddress = document.getElementById('delivery_address').value.trim();
+            const containerType = document.getElementById('container_type').value.trim();
+            const emergencyContact = document.getElementById('emergency_contact').value.trim();
+            const paymentMethod = document.getElementById('payment_method').value.trim();
+            const deliveryTimeframe = document.getElementById('delivery_timeframe').value.trim();
+            const specificTime = document.getElementById('specific_time').value.trim();
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const phoneNumber = document.getElementById('phone_number').value.trim();
+
+            // Check for "other" field validations
+            if (fuelType === 'other') {
+                const otherFuelSpecify = document.getElementById('other_fuel_specify').value.trim();
+                if (!otherFuelSpecify) {
+                    vibrate();
+                    showError('Please specify the fuel type in the "Other (Specify below)" field.');
+                    document.getElementById('other_fuel_specify').focus();
+                    return false;
+                }
+            }
+
+            if (unit === 'other') {
+                const otherUnitSpecify = document.getElementById('other_unit_specify').value.trim();
+                if (!otherUnitSpecify) {
+                    vibrate();
+                    showError('Please specify the unit of measurement in the "Other (Specify below)" field.');
+                    document.getElementById('other_unit_specify').focus();
+                    return false;
+                }
+            }
+
+            if (containerType === 'other_container') {
+                const otherContainerSpecify = document.getElementById('other_container_specify').value.trim();
+                if (!otherContainerSpecify) {
+                    vibrate();
+                    showError('Please specify the container type in the "Other Container (Specify below)" field.');
+                    document.getElementById('other_container_specify').focus();
+                    return false;
+                }
+            }
+
+            // Check if specific supplier location is required
+            if (specificSupplier === 'yes' && !supplierLocation) {
+                vibrate();
+                showError('Please enter the supplier/location address since you selected "Yes" for specific supplier.');
+                document.getElementById('supplier_location').focus();
+                return false;
+            }
+
+            // Check if specific time is required
+            if (deliveryTimeframe === 'specific' && !specificTime) {
+                vibrate();
+                showError('Please enter a specific time for delivery.');
+                document.getElementById('specific_time').focus();
+                return false;
+            }
+
+            // Validate specific time format if provided
+            if (specificTime) {
+                const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM|am|pm)?$/i;
+                const time24Regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
+                if (!timeRegex.test(specificTime) && !time24Regex.test(specificTime)) {
+                    vibrate();
+                    showError('Please enter a valid time format (e.g., 2:30 PM or 14:30).');
+                    document.getElementById('specific_time').focus();
+                    return false;
+                }
+            }
+
+            // Check other required fields
+            if (!fuelType || !quantity || !unit || !specificSupplier || !deliveryAddress ||
+                !containerType || !emergencyContact || !paymentMethod || !deliveryTimeframe ||
+                !servicePrice || !phoneNumber) {
+                vibrate();
+                showError('Please fill in all required fields.');
+                return false;
+            }
+
+            // Validate quantity
+            if (parseFloat(quantity) <= 0) {
+                vibrate();
+                showError('Please enter a valid quantity (greater than 0).');
+                document.getElementById('quantity').focus();
+                return false;
+            }
+
+            // Validate service price
+            if (parseFloat(servicePrice) < 0.50) {
+                vibrate();
+                showError('Service price must be at least $0.50.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            // Show success summary
+            const estimatedFee = document.getElementById('estimated_fee').textContent;
+            const quantityDisplay = document.getElementById('quantity_display').textContent;
+            const unitDisplay = document.getElementById('unit_display').textContent;
+            const finalFuelType = fuelType === 'other' ? document.getElementById('other_fuel_specify').value : fuelType;
+            const finalContainerType = containerType === 'other_container' ? document.getElementById('other_container_specify').value : containerType;
+
+            let summary = `
+✅ Gas delivery errand created!
+
+⛽ Fuel Type: ${finalFuelType}
+📏 Quantity: ${quantityDisplay} ${unitDisplay}
+📍 Delivery: ${deliveryAddress}
+📦 Container: ${finalContainerType}
+⏰ Timeframe: ${deliveryTimeframe}${deliveryTimeframe === 'specific' ? ` (${specificTime})` : ''}
+`;
+
+            if (specificSupplier === 'yes' && supplierLocation) {
+                summary += `🏪 Supplier Location: ${supplierLocation}\n`;
+            }
+
+            summary += `
+💰 Estimated Fee: ${estimatedFee}
+💵 Your Service Price: $${parseFloat(servicePrice).toFixed(2)}
+📱 Phone: ${phoneNumber}
+
+Our certified fuel delivery personnel will contact you shortly.
+
+Thank you for using ErrandConnect!
+            `;
+
+            alert(summary);
+            vibrate();
+
+            // In a real mobile app, you would submit the form here
+            // this.submit();
+            return true;
+        });
+
+        function showError(message) {
+            // Add shake animation to form
+            const form = document.getElementById('gasDeliveryForm');
+            form.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                form.style.animation = '';
+            }, 500);
+
+            alert(message);
+        }
+
+        // Shake animation for form validation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

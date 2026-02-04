@@ -1,0 +1,1216 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="wallet-page" class="page">
+    <!-- Header -->
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h1>My Wallet</h1>
+            </div>
+            <!-- Back button -->
+            <a href="{{ url_for('home_page') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Balance Section - Professional Green-Grey Card -->
+        <section class="balance-section">
+            <div class="balance-card">
+                <div class="balance-content">
+                    <div class="balance-label">Available Balance</div>
+                    <div class="balance-amount-wrapper">
+                        <span class="dollar-sign">$</span>
+                        <h2 class="balance-amount">{{ "%.2f"|format(user.balance) if user.balance else '0.00' }}</h2>
+                    </div>
+                    <div class="balance-note">Funds available for errands</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions - Two Buttons -->
+        <section class="quick-actions">
+            <div class="actions-grid">
+                <!-- Add Funds Button -->
+                <button class="action-btn primary-btn" onclick="showDepositModal()">
+                    <div class="action-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="action-text">
+                        <span class="action-title">Add Funds</span>
+                        <span class="action-desc">Deposit money to wallet</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+
+                <!-- Make Payment Button -->
+                <button class="action-btn secondary-btn" onclick="showPaymentModal()">
+                    <div class="action-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="action-text">
+                        <span class="action-title">Make Payment</span>
+                        <span class="action-desc">Pay for errands</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Transaction History -->
+        <section class="history-section">
+            <div class="section-header">
+                <h3>Recent Transactions</h3>
+            </div>
+
+            <div class="transactions-list">
+                {% if transactions %}
+                    {% for transaction in transactions[:5] %}
+                    <div class="transaction-item">
+                        <div class="transaction-icon {% if transaction.type == 'deposit' %}deposit{% else %}withdrawal{% endif %}">
+                            <i class="fas fa-{% if transaction.type == 'deposit' %}arrow-down{% else %}arrow-up{% endif %}"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-info">
+                                <span class="transaction-title">{{ transaction.description }}</span>
+                                <span class="transaction-time">{{ transaction.time }}</span>
+                            </div>
+                            <div class="transaction-amount {% if transaction.type == 'deposit' %}positive{% else %}negative{% endif %}">
+                                {{ transaction.amount }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <p>No transactions yet</p>
+                        <small>Your transaction history will appear here</small>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Deposit Modal -->
+    <div class="modal-overlay" id="depositModal" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Add Funds</h3>
+                <button class="modal-close" onclick="closeDepositModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="amount-section">
+                    <label>Amount to Deposit</label>
+                    <div class="amount-input">
+                        <span class="currency">$</span>
+                        <input type="number" id="depositAmount" placeholder="0.00" min="1" max="1000" step="0.01">
+                    </div>
+                    <div class="amount-range">
+                        <span>Min: $1.00</span>
+                        <span>Max: $1,000.00</span>
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+                    <label>Payment Method</label>
+                    <div class="methods-grid">
+                        <!-- Only three methods: EcoCash, Mukuru, InnBucks -->
+                        <div class="method-card active" data-method="ecocash">
+                            <div class="method-icon ecocash">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <span class="method-name">EcoCash</span>
+                        </div>
+                        <div class="method-card" data-method="mukuru">
+                            <div class="method-icon mukuru">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <span class="method-name">Mukuru</span>
+                        </div>
+                        <div class="method-card" data-method="innbucks">
+                            <div class="method-icon innbucks">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <span class="method-name">InnBucks</span>
+                        </div>
+                        <!-- Bank button removed -->
+                    </div>
+                </div>
+
+                <!-- EcoCash Details -->
+                <div class="payment-details" id="ecocashDetails">
+                    <label>EcoCash Number</label>
+                    <div class="phone-input">
+                        <span class="prefix">+263</span>
+                        <input type="tel" id="ecocashNumber" placeholder="771234567" maxlength="9">
+                    </div>
+                    <small class="help-text">You'll receive a USSD prompt to authorize payment</small>
+                </div>
+
+                <!-- Mukuru Details -->
+                <div class="payment-details" id="mukuruDetails" style="display: none;">
+                    <label>Mukuru Number</label>
+                    <div class="phone-input">
+                        <span class="prefix">+263</span>
+                        <input type="tel" id="mukuruNumber" placeholder="772345678" maxlength="9">
+                    </div>
+                    <small class="help-text">Use reference: <strong>ERGO-<span id="mukuruRef"></span></strong></small>
+                </div>
+
+                <!-- InnBucks Details -->
+                <div class="payment-details" id="innbucksDetails" style="display: none;">
+                    <label>InnBucks Number</label>
+                    <div class="phone-input">
+                        <span class="prefix">+263</span>
+                        <input type="tel" id="innbucksNumber" placeholder="773456789" maxlength="9">
+                    </div>
+                    <small class="help-text">Instant transfer from your InnBucks wallet</small>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDepositModal()">Cancel</button>
+                <button class="btn-primary" onclick="processDeposit()">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Make Payment</h3>
+                <button class="modal-close" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="amount-section">
+                    <label>Amount to Pay</label>
+                    <div class="amount-input">
+                        <span class="currency">$</span>
+                        <input type="number" id="paymentAmount" placeholder="0.00" min="1" max="1000" step="0.01">
+                    </div>
+                </div>
+
+                <div class="payment-options">
+                    <label>Pay Using</label>
+                    <div class="options-grid">
+                        <div class="option-card active" data-option="wallet">
+                            <div class="option-icon wallet">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <span class="option-name">Wallet Balance</span>
+                            <span class="option-balance">${{ "%.2f"|format(user.balance) if user.balance else '0.00' }}</span>
+                        </div>
+                        <div class="option-card" data-option="ecocash">
+                            <div class="option-icon ecocash">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <span class="option-name">EcoCash</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wallet Payment Note -->
+                <div class="payment-note" id="walletNote">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Payment will be deducted from your wallet balance</span>
+                </div>
+
+                <!-- EcoCash Payment Details -->
+                <div class="payment-details" id="ecocashPaymentDetails" style="display: none;">
+                    <label>EcoCash Number</label>
+                    <div class="phone-input">
+                        <span class="prefix">+263</span>
+                        <input type="tel" id="ecocashPaymentNumber" placeholder="771234567" maxlength="9">
+                    </div>
+                    <small class="help-text">You'll receive a USSD prompt to authorize payment</small>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closePaymentModal()">Cancel</button>
+                <button class="btn-primary" onclick="processPayment()">Make Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --success: #4CAF50;
+    --warning: #FF9800;
+    --error: #F44336;
+}
+
+#wallet-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 80px;
+}
+
+/* Header */
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+/* Main Content */
+.mobile-main {
+    padding: 20px;
+}
+
+/* Balance Section - Professional Green-Grey Card */
+.balance-section {
+    margin-bottom: 32px;
+}
+
+.balance-card {
+    background: linear-gradient(135deg, #4CAF50, #5D7B5D); /* Green-grey gradient */
+    border-radius: 20px;
+    padding: 25px;
+    color: white;
+    box-shadow: var(--shadow-hover);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.balance-card::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -20%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+.balance-card::after {
+    content: '';
+    position: absolute;
+    bottom: -15%;
+    left: -15%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+}
+
+.balance-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.balance-label {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.balance-amount-wrapper {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    margin: 10px 0;
+}
+
+.dollar-sign {
+    font-size: 24px;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.balance-amount {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+}
+
+.balance-note {
+    font-size: 12px;
+    opacity: 0.7;
+    font-weight: 400;
+    margin-top: 12px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    margin-bottom: 32px;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.action-btn {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.action-btn:active {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary-light);
+}
+
+.action-btn.primary-btn {
+    border-color: var(--primary-color);
+    background: var(--primary-50);
+}
+
+.action-btn.secondary-btn {
+    border-color: #2196F3;
+    background: #E3F2FD;
+}
+
+.action-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.action-btn .action-icon {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.primary-btn .action-icon {
+    background: var(--primary-color);
+    color: white;
+}
+
+.secondary-btn .action-icon {
+    background: #2196F3;
+    color: white;
+}
+
+.action-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.action-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.action-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.action-btn i.fa-chevron-right {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+/* History Section */
+.history-section {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--background);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.transaction-item:active {
+    background: var(--primary-50);
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.transaction-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.transaction-icon.deposit {
+    background: #E8F5E8;
+    color: var(--primary-color);
+}
+
+.transaction-icon.withdrawal {
+    background: #FFEBEE;
+    color: #F44336;
+}
+
+.transaction-details {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.transaction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.transaction-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.transaction-time {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.transaction-amount {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.transaction-amount.positive {
+    color: var(--primary-color);
+}
+
+.transaction-amount.negative {
+    color: #F44336;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.empty-state small {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-container {
+    background: var(--surface);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    color: var(--text-light);
+    padding: 8px;
+    border-radius: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.modal-close:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.amount-section {
+    margin-bottom: 24px;
+}
+
+.amount-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.amount-input {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.amount-input:focus-within {
+    border-color: var(--primary-color);
+}
+
+.currency {
+    padding: 16px 20px;
+    background: var(--background);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.amount-input input {
+    flex: 1;
+    border: none;
+    padding: 16px;
+    font-size: 24px;
+    font-weight: 600;
+    outline: none;
+    color: var(--text-primary);
+}
+
+.amount-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.payment-methods, .payment-options {
+    margin-bottom: 24px;
+}
+
+.payment-methods label, .payment-options label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.methods-grid, .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.method-card, .option-card {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.method-card.active, .option-card.active {
+    border-color: var(--primary-color);
+    background: var(--primary-50);
+}
+
+.method-card:active, .option-card:active {
+    transform: scale(0.98);
+}
+
+.method-icon, .option-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.method-icon.ecocash, .option-icon.ecocash { background: #4CAF50; }
+.method-icon.mukuru { background: #FF9800; }
+.method-icon.innbucks { background: #2196F3; }
+.option-icon.wallet { background: #9C27B0; }
+
+.method-name, .option-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.option-balance {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.payment-details {
+    margin-top: 20px;
+}
+
+.payment-details label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.phone-input {
+    display: flex;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.phone-input:focus-within {
+    border-color: var(--primary-color);
+}
+
+.prefix {
+    padding: 16px;
+    background: var(--background);
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 80px;
+    text-align: center;
+}
+
+.phone-input input {
+    flex: 1;
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    outline: none;
+    color: var(--text-primary);
+}
+
+.help-text {
+    display: block;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 8px;
+}
+
+.payment-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--primary-50);
+    border-radius: 10px;
+    border: 1px solid var(--primary-100);
+    margin-top: 20px;
+}
+
+.payment-note i {
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.payment-note span {
+    font-size: 13px;
+    color: var(--primary-dark);
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 24px;
+    border-top: 1px solid var(--border-light);
+}
+
+.btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.btn-primary:active {
+    background: var(--primary-dark);
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 2px solid var(--border);
+}
+
+.btn-secondary:active {
+    background: var(--background);
+    border-color: var(--text-light);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .balance-amount {
+        font-size: 36px;
+    }
+
+    .dollar-sign {
+        font-size: 22px;
+    }
+
+    .methods-grid, .options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 360px) {
+    .balance-card {
+        padding: 20px;
+    }
+
+    .balance-amount {
+        font-size: 32px;
+    }
+
+    .action-btn {
+        padding: 16px;
+    }
+}
+</style>
+
+<script>
+// Deposit Modal Functions
+function showDepositModal() {
+    document.getElementById('depositModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    resetDepositPaymentMethod();
+}
+
+function closeDepositModal() {
+    document.getElementById('depositModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Payment Modal Functions
+function showPaymentModal() {
+    document.getElementById('paymentModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    resetPaymentOption();
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Deposit Payment method selection
+function resetDepositPaymentMethod() {
+    // Set EcoCash as default
+    const methods = document.querySelectorAll('#depositModal .method-card');
+    methods.forEach(method => method.classList.remove('active'));
+    methods[0].classList.add('active');
+
+    // Show EcoCash details
+    document.querySelectorAll('#depositModal .payment-details').forEach(detail => {
+        detail.style.display = 'none';
+    });
+    document.getElementById('ecocashDetails').style.display = 'block';
+
+    // Generate Mukuru reference
+    document.getElementById('mukuruRef').textContent = Date.now().toString().slice(-6);
+}
+
+// Payment option selection
+function resetPaymentOption() {
+    // Set Wallet as default
+    const options = document.querySelectorAll('#paymentModal .option-card');
+    options.forEach(option => option.classList.remove('active'));
+    options[0].classList.add('active');
+
+    // Show/hide details
+    document.getElementById('walletNote').style.display = 'flex';
+    document.getElementById('ecocashPaymentDetails').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Deposit payment method click handlers
+    const depositMethodCards = document.querySelectorAll('#depositModal .method-card');
+    depositMethodCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove active class from all cards
+            depositMethodCards.forEach(c => c.classList.remove('active'));
+            // Add active class to clicked card
+            this.classList.add('active');
+
+            // Show corresponding payment details
+            const method = this.dataset.method;
+            document.querySelectorAll('#depositModal .payment-details').forEach(detail => {
+                detail.style.display = 'none';
+            });
+
+            const detailsId = method + 'Details';
+            const detailsElement = document.getElementById(detailsId);
+            if (detailsElement) {
+                detailsElement.style.display = 'block';
+            }
+        });
+    });
+
+    // Payment option click handlers
+    const paymentOptions = document.querySelectorAll('#paymentModal .option-card');
+    paymentOptions.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove active class from all cards
+            paymentOptions.forEach(c => c.classList.remove('active'));
+            // Add active class to clicked card
+            this.classList.add('active');
+
+            const option = this.dataset.option;
+
+            // Show/hide details based on option
+            if (option === 'wallet') {
+                document.getElementById('walletNote').style.display = 'flex';
+                document.getElementById('ecocashPaymentDetails').style.display = 'none';
+            } else if (option === 'ecocash') {
+                document.getElementById('walletNote').style.display = 'none';
+                document.getElementById('ecocashPaymentDetails').style.display = 'block';
+            }
+        });
+    });
+
+    // Close modals when clicking outside
+    const modals = ['depositModal', 'paymentModal'];
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    if (modalId === 'depositModal') {
+                        closeDepositModal();
+                    } else if (modalId === 'paymentModal') {
+                        closePaymentModal();
+                    }
+                }
+            });
+        }
+    });
+
+    // Prevent modal body clicks from closing modal
+    document.querySelectorAll('.modal-container').forEach(container => {
+        container.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+});
+
+// Process deposit
+function processDeposit() {
+    const amount = document.getElementById('depositAmount').value;
+
+    if (!amount || parseFloat(amount) < 1 || parseFloat(amount) > 1000) {
+        alert('Please enter a valid amount between $1.00 and $1,000.00');
+        return;
+    }
+
+    // Get selected payment method
+    const selectedMethod = document.querySelector('#depositModal .method-card.active').dataset.method;
+
+    // Validate phone number
+    let phoneInput, phoneNumber;
+
+    switch(selectedMethod) {
+        case 'ecocash':
+            phoneInput = document.getElementById('ecocashNumber');
+            phoneNumber = phoneInput.value;
+            break;
+        case 'mukuru':
+            phoneInput = document.getElementById('mukuruNumber');
+            phoneNumber = phoneInput.value;
+            break;
+        case 'innbucks':
+            phoneInput = document.getElementById('innbucksNumber');
+            phoneNumber = phoneInput.value;
+            break;
+    }
+
+    if (!phoneNumber || phoneNumber.length !== 9 || !/^\d+$/.test(phoneNumber)) {
+        if (phoneInput) phoneInput.focus();
+        alert(`Please enter a valid 9-digit ${selectedMethod} number`);
+        return;
+    }
+
+    // Show processing state
+    const proceedBtn = document.querySelector('#depositModal .btn-primary');
+    const originalText = proceedBtn.textContent;
+    proceedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    proceedBtn.disabled = true;
+
+    // Simulate API call
+    setTimeout(() => {
+        // Reset button
+        proceedBtn.textContent = originalText;
+        proceedBtn.disabled = false;
+
+        // Close modal
+        closeDepositModal();
+
+        // Show success message
+        alert(`Successfully deposited $${parseFloat(amount).toFixed(2)} via ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}!`);
+
+        // In a real app, you would update the balance here
+        // window.location.reload();
+    }, 1500);
+}
+
+// Process payment
+function processPayment() {
+    const amount = document.getElementById('paymentAmount').value;
+
+    if (!amount || parseFloat(amount) < 1) {
+        alert('Please enter a valid payment amount');
+        return;
+    }
+
+    // Get selected payment option
+    const selectedOption = document.querySelector('#paymentModal .option-card.active').dataset.option;
+
+    // Validate EcoCash number if selected
+    if (selectedOption === 'ecocash') {
+        const ecocashNumber = document.getElementById('ecocashPaymentNumber').value;
+        if (!ecocashNumber || ecocashNumber.length !== 9 || !/^\d+$/.test(ecocashNumber)) {
+            alert('Please enter a valid 9-digit EcoCash number');
+            document.getElementById('ecocashPaymentNumber').focus();
+            return;
+        }
+    }
+
+    // Check wallet balance if paying with wallet
+    if (selectedOption === 'wallet') {
+        const userBalance = parseFloat('{{ user.balance if user.balance else 0 }}');
+        const paymentAmount = parseFloat(amount);
+
+        if (paymentAmount > userBalance) {
+            alert(`Insufficient balance. Your wallet balance is $${userBalance.toFixed(2)}`);
+            return;
+        }
+    }
+
+    // Show processing state
+    const payBtn = document.querySelector('#paymentModal .btn-primary');
+    const originalText = payBtn.textContent;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    payBtn.disabled = true;
+
+    // Simulate API call
+    setTimeout(() => {
+        // Reset button
+        payBtn.textContent = originalText;
+        payBtn.disabled = false;
+
+        // Close modal
+        closePaymentModal();
+
+        // Show success message
+        const method = selectedOption === 'wallet' ? 'Wallet Balance' : 'EcoCash';
+        alert(`Payment of $${parseFloat(amount).toFixed(2)} successful via ${method}!`);
+
+        // In a real app, you would update the balance here
+        // window.location.reload();
+    }, 1500);
+}
+
+// Add touch feedback to all interactive elements
+document.querySelectorAll('.action-btn, .transaction-item, .method-card, .option-card, .btn-primary, .btn-secondary, .modal-close').forEach(element => {
+    element.addEventListener('touchstart', function() {
+        this.style.opacity = '0.8';
+    });
+
+    element.addEventListener('touchend', function() {
+        this.style.opacity = '1';
+    });
+
+    element.addEventListener('touchcancel', function() {
+        this.style.opacity = '1';
+    });
+});
+</script>
+{% endblock %}

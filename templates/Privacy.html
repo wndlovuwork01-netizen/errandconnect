@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="privacy-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Privacy & Security</h1>
+            </div>
+            <a href="{{ url_for('settings') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Introduction -->
+        <section class="privacy-section">
+            <div class="privacy-card">
+                <div class="privacy-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Your Security Matters</h3>
+                <p>We protect your data with industry-standard security measures to ensure your information stays safe.</p>
+            </div>
+        </section>
+
+        <!-- Data Protection -->
+        <section class="privacy-section">
+            <h3 class="section-title">🔒 Data Protection</h3>
+            <div class="info-card">
+                <div class="info-item">
+                    <i class="fas fa-lock info-icon"></i>
+                    <div class="info-content">
+                        <h4>Encrypted Data</h4>
+                        <p>All your personal and payment information is encrypted using 256-bit SSL encryption.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user-shield info-icon"></i>
+                    <div class="info-content">
+                        <h4>Secure Payments</h4>
+                        <p>Payment transactions are processed through secure PCI-compliant systems.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-database info-icon"></i>
+                    <div class="info-content">
+                        <h4>Data Storage</h4>
+                        <p>Your data is stored on secure servers with regular backups and monitoring.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Privacy Features -->
+        <section class="privacy-section">
+            <h3 class="section-title">👁️ Privacy Features</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-eye-slash"></i>
+                    </div>
+                    <h4>Location Privacy</h4>
+                    <p>Your exact location is only shared with assigned runners during active deliveries.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell-slash"></i>
+                    </div>
+                    <h4>Notification Control</h4>
+                    <p>You decide what notifications to receive and when.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h4>Data Retention</h4>
+                    <p>We only keep necessary data for as long as required by law.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h4>Data Access</h4>
+                    <p>Request your data or delete your account anytime.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Tips -->
+        <section class="privacy-section">
+            <h3 class="section-title">💡 Security Tips</h3>
+            <div class="tips-list">
+                <div class="tip-item">
+                    <span class="tip-number">1</span>
+                    <div class="tip-content">
+                        <h4>Use Strong Passwords</h4>
+                        <p>Create unique passwords with letters, numbers, and symbols.</p>
+                    </div>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-number">2</span>
+                    <div class="tip-content">
+                        <h4>Enable 2FA</h4>
+                        <p>Add an extra layer of security with two-factor authentication.</p>
+                    </div>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-number">3</span>
+                    <div class="tip-content">
+                        <h4>Log Out</h4>
+                        <p>Always log out from shared devices.</p>
+                    </div>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-number">4</span>
+                    <div class="tip-content">
+                        <h4>Update Regularly</h4>
+                        <p>Keep the app updated for the latest security patches.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact & Help -->
+        <section class="privacy-section">
+            <div class="help-card">
+                <h3>Need Help?</h3>
+                <p>If you have security concerns or questions about your privacy:</p>
+                <div class="help-actions">
+                    <button class="btn-secondary" onclick="location.href='mailto:security@errandconnect.com'">
+                        <i class="fas fa-envelope"></i>
+                        Contact Security Team
+                    </button>
+                    <button class="btn-outline" onclick="location.href='{{ url_for('terms') }}'">
+                        <i class="fas fa-file-contract"></i>
+                        View Full Privacy Policy
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+}
+
+#privacy-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 20px;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.mobile-main {
+    padding: 20px;
+}
+
+.privacy-section {
+    margin-bottom: 32px;
+}
+
+.privacy-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.privacy-icon {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+}
+
+.privacy-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.privacy-card p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-left: 8px;
+}
+
+.info-card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-icon {
+    font-size: 20px;
+    color: var(--primary-color);
+    width: 24px;
+    text-align: center;
+    padding-top: 2px;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.info-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.feature-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.feature-icon {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+.feature-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.feature-card p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+.tips-list {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.tip-item:last-child {
+    border-bottom: none;
+}
+
+.tip-number {
+    width: 28px;
+    height: 28px;
+    background: var(--primary-50);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.tip-content {
+    flex: 1;
+}
+
+.tip-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.tip-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.help-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+}
+
+.help-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.help-card p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.help-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+    background: var(--primary-dark);
+}
+
+.btn-outline {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    color: var(--primary-color);
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-outline:active {
+    transform: scale(0.98);
+    background: var(--primary-50);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .logo h1 {
+        font-size: 16px;
+    }
+    
+    .privacy-card {
+        padding: 20px;
+    }
+}
+</style>
+{% endblock %}

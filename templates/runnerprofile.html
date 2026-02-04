@@ -1,0 +1,47 @@
+@app.route("/runner_profile")
+def runner_profile():
+    """Runner Profile page"""
+    user = current_user()
+    if not user:
+        return redirect(url_for("signin"))
+
+    if user.user_type != "runner":
+        flash("This page is for runners only", "warning")
+        return redirect(url_for("home_page"))
+
+    # Get runner profile
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    
+    # Get runner statistics
+    completed_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").all()
+    active_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="ongoing").all()
+    
+    completed_count = len(completed_errands)
+    active_count = len(active_errands)
+    
+    # Calculate total earnings
+    total_earnings = 0.0
+    for active_errand in completed_errands:
+        negotiation = Negotiation.query.filter_by(
+            errand_id=active_errand.errand_id,
+            runner_id=user.id,
+            status="accepted"
+        ).first()
+        if negotiation:
+            total_earnings += negotiation.offer_price
+        else:
+            total_earnings += active_errand.errand.price_estimate
+
+    # Get average rating
+    ratings = Rating.query.filter_by(to_user_id=user.id).all()
+    avg_rating = sum(r.rating for r in ratings) / len(ratings) if ratings else 0
+
+    return render_template(
+        "runner_profile.html",
+        user=user,
+        runner_profile=runner_profile,
+        completed_count=completed_count,
+        active_count=active_count,
+        total_earnings=total_earnings,
+        avg_rating=avg_rating
+    )

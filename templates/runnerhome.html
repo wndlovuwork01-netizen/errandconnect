@@ -1,0 +1,1083 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="home-page" class="page">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>ErrandConnect</h1>
+            </div>
+            <div class="user-menu">
+                <span class="welcome-text">Welcome, {{ user.username }}! 👋</span>
+                <div class="user-actions">
+                    <a href="{{ url_for('runnerprofile') }}" class="btn-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h2>Ready to Get Things Done? 🚀</h2>
+                    <p>Your personal assistant for all errands and deliveries. Fast, reliable, and always there when you need us.</p>
+
+                    <!-- Runner Stats -->
+                    <div class="hero-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon client">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Active Tasks</h3>
+                                <p>{{ pending_count or 0 }}</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon completed">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Completed</h3>
+                                <p>{{ completed_count or 0 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <!-- Removed floating cards for mobile -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions-section">
+            <div class="actions-header">
+                <h3>Quick Actions</h3>
+                <a href="{{ url_for('dashboardrunner') }}" class="view-all-btn">
+                    <i class="fas fa-th-large"></i>
+                    View All
+                </a>
+            </div>
+            <p class="actions-subtitle">Everything you need, one tap away</p>
+
+            <div class="actions-grid">
+                <!-- Runner Quick Actions -->
+                <div class="action-card" onclick="window.location.href='{{ url_for('runnercompleted') }}'">
+                    <div class="action-icon completed">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="action-content">
+                        <h4>Completed Errands</h4>
+                        <div class="action-stats">
+                            <div class="stat-badge">
+                                <span class="stat-number">{{ completed_count or 0 }}</span>
+                                <span class="stat-label">Total</span>
+                            </div>
+                            <div class="rating-badge">
+                                <i class="fas fa-star"></i>
+                                <span class="rating-number">4.8</span>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('runnercompleted') }}" class="action-link">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="window.location.href='{{ url_for('runneravailable_errands') }}'">
+                    <div class="action-icon active">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <div class="action-content">
+                        <h4>Available Errands</h4>
+                        <p class="service-note">Browse available errands to accept</p>
+                        <div class="action-stats">
+                            <div class="stat-badge large">
+                                <span class="stat-number">{{ available_errands|length if available_errands else 0 }}</span>
+                                <span class="stat-label">Available</span>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('runneravailable_errands') }}" class="action-link">
+                            Browse Errands <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="window.location.href='{{ url_for('runnerhistory') }}'">
+                    <div class="action-icon history">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="action-content">
+                        <h4>History</h4>
+                        <p>Review your completed errands and performance history</p>
+                        <a href="{{ url_for('runnerhistory') }}" class="action-link">
+                            View History <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="window.location.href='{{ url_for('runnerwallet') }}'">
+                    <div class="action-icon wallet">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="action-content">
+                        <h4>Wallet</h4>
+                        <div class="action-stats">
+                            <div class="stat-badge large">
+                                <span class="stat-number">${{ "%.2f"|format(total_earnings) if total_earnings else '0.00' }}</span>
+                                <span class="stat-label">Total earned</span>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('runnerwallet') }}" class="action-link">
+                            Manage Funds <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="recent-activity">
+            <div class="section-header">
+                <h3>Recent Activity</h3>
+                <a href="{{ url_for('runnerhistory') }}" class="view-all">View All</a>
+            </div>
+
+            <div class="activity-list">
+                {% if notifications %}
+                    {% for notification in notifications %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>{{ notification.message }}</p>
+                            <span class="activity-time">{{ notification.created_at|timesince if notification.created_at else 'Recently' }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No recent activity yet</p>
+                        <small>Your notifications will appear here</small>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('home_page') }}" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('dashboardrunner') }}" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('runneravailable_errands') }}" class="nav-item">
+            <i class="fas fa-list"></i>
+            <span>Errands</span>
+        </a>
+        <a href="{{ url_for('runnerprofile') }}" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+</div>
+
+<style>
+/* Mobile-First Responsive Design */
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+    --shadow-hover: 0 8px 25px rgba(76, 175, 80, 0.15);
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: auto;
+}
+
+#home-page {
+    min-height: 100vh;
+    background: var(--background);
+    position: relative;
+    overflow-y: auto;
+    padding-bottom: 80px;
+}
+
+/* Header - Mobile Optimized */
+.main-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding-top: calc(16px + var(--safe-area-inset-top));
+    padding-left: calc(20px + var(--safe-area-inset-left));
+    padding-right: calc(20px + var(--safe-area-inset-right));
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 8px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.welcome-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--primary-50);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-icon:active {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(0.95);
+}
+
+/* Main Content - Mobile Optimized */
+.main-content {
+    padding: 16px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+    padding-bottom: 20px;
+    min-height: calc(100vh - 140px);
+}
+
+/* Hero Section - Mobile Optimized */
+.hero-section {
+    margin-bottom: 24px;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.hero-text h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.3;
+}
+
+.hero-text p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* Hero Stats - Mobile Optimized */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.stat-card:active {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.stat-icon.client { background: #F3E5F5; color: #7B1FA2; }
+.stat-icon.completed { background: #E8F5E8; color: var(--primary-color); }
+
+.stat-info {
+    min-width: 0;
+}
+
+.stat-info h3 {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-info p {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Hero Image - Hidden on mobile */
+.hero-image {
+    display: none;
+}
+
+/* Quick Actions Section - Mobile Optimized with 2x2 Grid */
+.quick-actions-section {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.actions-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.actions-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.view-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--primary-50);
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid var(--primary-100);
+    width: 100%;
+}
+
+.actions-subtitle {
+    color: var(--text-light);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* 2x2 Grid for Quick Actions */
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columns on mobile */
+    gap: 12px;
+}
+
+.action-card {
+    background: var(--background);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+}
+
+.action-card:active {
+    transform: scale(0.98);
+}
+
+.action-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+}
+
+.action-icon.completed { background: #E8F5E8; color: var(--primary-color); }
+.action-icon.active { background: #FFF3E0; color: #EF6C00; }
+.action-icon.history { background: #F3E5F5; color: #7B1FA2; }
+.action-icon.wallet { background: #FFF3E0; color: #FF9800; }
+
+.action-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.action-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.service-note, .action-content p {
+    color: var(--text-light);
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.action-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.stat-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--primary-50);
+    border-radius: 8px;
+    width: 100%;
+}
+
+.stat-badge.large {
+    width: 100%;
+}
+
+.stat-number {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.rating-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: #FFF3E0;
+    border-radius: 8px;
+    color: #FF9800;
+    font-weight: 600;
+    width: 100%;
+}
+
+.rating-badge i {
+    font-size: 14px;
+}
+
+.rating-number {
+    font-size: 14px;
+}
+
+.action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 2;
+    font-size: 14px;
+    margin-top: auto;
+}
+
+/* Recent Activity - Mobile Optimized */
+.recent-activity {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.section-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.view-all {
+    color: var(--primary-color);
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    background: var(--background);
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--primary-50);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-content p {
+    margin-bottom: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.activity-time {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-light);
+}
+
+.empty-state i {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.empty-state small {
+    font-size: 13px;
+}
+
+/* Bottom Navigation - Mobile Optimized */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 16px;
+    z-index: 1000;
+    padding-bottom: calc(12px + var(--safe-area-inset-bottom));
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--text-light);
+    font-size: 11px;
+    transition: all 0.2s ease;
+    padding: 6px 10px;
+    border-radius: 10px;
+    flex: 1;
+    max-width: 80px;
+    min-width: 60px;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+    background: var(--primary-50);
+}
+
+.nav-item i {
+    font-size: 18px;
+}
+
+/* Responsive Design for Tablets */
+@media (min-width: 481px) {
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .welcome-text {
+        font-size: 14px;
+        max-width: 200px;
+    }
+
+    .btn-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .hero-text h2 {
+        font-size: 1.75rem;
+    }
+
+    .hero-text p {
+        font-size: 1rem;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .actions-grid {
+        gap: 16px;
+    }
+
+    .action-stats {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .stat-badge {
+        width: auto;
+        min-width: 70px;
+    }
+
+    .rating-badge {
+        width: auto;
+        min-width: 80px;
+    }
+}
+
+@media (min-width: 768px) {
+    .header-content {
+        flex-wrap: nowrap;
+    }
+
+    .hero-content {
+        flex-direction: row;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .hero-text {
+        flex: 1;
+    }
+
+    .actions-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .actions-header h3 {
+        text-align: left;
+    }
+
+    .view-all-btn {
+        width: auto;
+    }
+
+    .actions-subtitle {
+        text-align: left;
+    }
+
+    .actions-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .bottom-nav {
+        padding: 12px 20px;
+    }
+
+    .nav-item {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .nav-item i {
+        font-size: 20px;
+    }
+
+    .main-content {
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    .actions-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .action-card {
+        padding: 20px;
+    }
+
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    .action-content h4 {
+        font-size: 18px;
+    }
+}
+
+/* Very Small Phones */
+@media (max-width: 360px) {
+    .logo h1 {
+        font-size: 16px;
+    }
+
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .welcome-text {
+        font-size: 12px;
+        max-width: 120px;
+    }
+
+    .hero-text h2 {
+        font-size: 1.3rem;
+    }
+
+    .hero-text p {
+        font-size: 0.9rem;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .action-card {
+        padding: 14px;
+        min-height: 170px;
+    }
+
+    .action-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+
+    .nav-item {
+        font-size: 10px;
+        padding: 6px 8px;
+    }
+
+    .nav-item i {
+        font-size: 16px;
+    }
+}
+
+/* Fix scrolling issues */
+#home-page {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+}
+
+.main-content {
+    overflow-y: visible;
+    height: auto;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fix scrolling issues - ensure everything is scrollable
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.body.style.minHeight = '100vh';
+
+    // Ensure page container is scrollable
+    const homePage = document.getElementById('home-page');
+    if (homePage) {
+        homePage.style.overflowY = 'auto';
+        homePage.style.height = 'auto';
+    }
+
+    // Mobile touch optimization
+    const actionCards = document.querySelectorAll('.action-card');
+    actionCards.forEach(card => {
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        card.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            this.style.transform = 'scale(0.98)';
+        }, { passive: true });
+
+        card.addEventListener('touchmove', function(e) {
+            touchEndY = e.touches[0].clientY;
+            // If user is scrolling vertically, don't trigger click
+            if (Math.abs(touchEndY - touchStartY) > 10) {
+                this.style.transform = '';
+            }
+        }, { passive: true });
+
+        card.addEventListener('touchend', function(e) {
+            if (Math.abs(touchEndY - touchStartY) < 10) {
+                // It's a tap, not a scroll
+                const link = this.querySelector('.action-link');
+                if (link && link.href) {
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 150);
+                }
+            }
+            this.style.transform = '';
+        });
+
+        card.addEventListener('touchcancel', function() {
+            this.style.transform = '';
+        });
+    });
+
+    // Prevent accidental double-clicks on mobile
+    let lastClickTime = 0;
+    document.addEventListener('click', function(e) {
+        const currentTime = new Date().getTime();
+        if (currentTime - lastClickTime < 300) {
+            e.preventDefault();
+        }
+        lastClickTime = currentTime;
+    }, true);
+
+    // Handle keyboard navigation for accessibility
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && document.activeElement.classList.contains('action-card')) {
+            const link = document.activeElement.querySelector('.action-link');
+            if (link && link.href) {
+                window.location.href = link.href;
+            }
+        }
+    });
+
+    // Add loading animation to action links
+    const actionLinks = document.querySelectorAll('.action-link');
+    actionLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            this.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.style.pointerEvents = 'auto';
+            }, 1500);
+        });
+    });
+
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+        // Force a small delay for orientation to complete
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 100);
+    });
+
+    // Add safe area support for modern phones
+    const style = document.createElement('style');
+    style.textContent = `
+        @supports (padding: max(0px)) {
+            .main-header {
+                padding-top: max(16px, env(safe-area-inset-top));
+            }
+            .bottom-nav {
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize the page
+    console.log('Runner mobile homepage initialized');
+});
+</script>
+{% endblock %}

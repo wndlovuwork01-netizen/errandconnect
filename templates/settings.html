@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="settings-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Settings</h1>
+            </div>
+            <!-- FIXED: Changed back button to use direct URL -->
+            <a href="/home" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Profile Section - Now clickable -->
+        <a href="{{ url_for('profile') }}" class="profile-link">
+            <section class="profile-section" style="cursor: pointer;">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <div class="avatar-circle">
+                            {{ user.username[0]|upper if user.username else 'U' }}
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h3 class="profile-name">{{ user.username if user.username else 'User' }}</h3>
+                        <p class="profile-email">{{ user.email if user.email else 'No email provided' }}</p>
+                    </div>
+                </div>
+            </section>
+        </a>
+
+        <!-- Account Settings -->
+        <section class="settings-section">
+            <h3 class="section-title">🔐 Account Settings</h3>
+            <div class="settings-list">
+                <!-- Profile item that links to personal_info.html -->
+                <a href="{{ url_for('personal_info') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-user-circle setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Personal Information</span>
+                                <span class="setting-desc">Update your profile details</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <!-- CHANGED: Updated to use Flask route privacy_security -->
+                <a href="{{ url_for('privacy_security') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-shield-alt setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Privacy & Security</span>
+                                <span class="setting-desc">Manage your privacy settings</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-bell setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Notifications</span>
+                            <span class="setting-desc">Customize your alerts</span>
+                        </div>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="notifications" checked>
+                        <label for="notifications" class="toggle-slider"></label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- App Preferences -->
+        <section class="settings-section">
+            <h3 class="section-title">⚙️ App Preferences</h3>
+            <div class="settings-list">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-language setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Language</span>
+                            <span class="setting-desc">English</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right setting-arrow"></i>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-palette setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Theme</span>
+                            <span class="setting-desc">Green (Default)</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right setting-arrow"></i>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-map-marker-alt setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Location Services</span>
+                            <span class="setting-desc">Enable for better service</span>
+                        </div>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="location" checked>
+                        <label for="location" class="toggle-slider"></label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support -->
+        <section class="settings-section">
+            <h3 class="section-title">💚 Support</h3>
+            <div class="settings-list">
+                <!-- CHANGED: Updated to use Flask route help_support -->
+                <a href="{{ url_for('help_support') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-question-circle setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Help & Support</span>
+                                <span class="setting-desc">Get help with the app</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <!-- Terms & Conditions that routes to terms.html -->
+                <a href="{{ url_for('terms') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-file-contract setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Terms & Conditions</span>
+                                <span class="setting-desc">Read our terms of service</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <!-- CHANGED: Updated to use Flask route rate_app and text changed to ErrandGo -->
+                <a href="{{ url_for('rate_app') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-star setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Rate ErrandGo</span>
+                                <span class="setting-desc">Share your experience</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-info-circle setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">About</span>
+                            <span class="setting-desc">Version 1.0.0</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right setting-arrow"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="settings-actions">
+            <!-- FIXED: Changed logout button to use direct URL -->
+            <button class="btn-secondary" onclick="location.href='/logout'">
+                <i class="fas fa-sign-out-alt"></i>
+                Sign Out
+            </button>
+        </section>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --primary-200: #A5D6A7;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+}
+
+#settings-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 20px;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.mobile-main {
+    padding: 20px;
+}
+
+/* Profile Link */
+.profile-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Profile Section Styles */
+.profile-section {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+}
+
+.profile-section:active {
+    background: var(--primary-50);
+    transform: scale(0.99);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar {
+    position: relative;
+}
+
+.avatar-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.profile-email {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Settings Sections */
+.settings-section {
+    margin-bottom: 32px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-left: 8px;
+}
+
+.settings-list {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Setting Item Links */
+.setting-item-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.setting-item:active,
+.setting-item-link:active .setting-item {
+    background: var(--primary-50);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.setting-icon {
+    font-size: 20px;
+    color: var(--primary-color);
+    width: 24px;
+    text-align: center;
+}
+
+.setting-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.setting-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.setting-desc {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.setting-arrow {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.settings-actions {
+    margin-top: 32px;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: #F44336;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+    background: #FFEBEE;
+}
+</style>
+{% endblock %}

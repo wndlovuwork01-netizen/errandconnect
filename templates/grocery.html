@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ErrandConnect - Grocery Shopping</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --success: #8BC34A;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* AUTO-SCROLLING TEXT LIKE SLIDESHOW - FIXED */
+        /* Make all text inputs handle long text */
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="password"],
+        input[type="search"],
+        input[type="url"],
+        textarea {
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: text;
+        }
+
+        /* Text sliding animation container */
+        .text-slider-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Auto-sliding text animation */
+        @keyframes slideText {
+            0% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-100% + 100%));
+            }
+        }
+
+        @keyframes slideTextLeft {
+            0% {
+                transform: translateX(0);
+            }
+            10% {
+                transform: translateX(0);
+            }
+            90% {
+                transform: translateX(calc(-100% + 100px));
+            }
+            100% {
+                transform: translateX(calc(-100% + 100px));
+            }
+        }
+
+        /* For inputs with long text - auto slide show */
+        .input-with-icon input.sliding-text,
+        .input-with-icon textarea.sliding-text {
+            animation: slideTextLeft 15s linear infinite;
+            animation-play-state: running;
+            padding-right: 40px;
+        }
+
+        /* Pause animation on hover/focus */
+        .input-with-icon input.sliding-text:hover,
+        .input-with-icon textarea.sliding-text:hover,
+        .input-with-icon input.sliding-text:focus,
+        .input-with-icon textarea.sliding-text:focus {
+            animation-play-state: paused;
+        }
+
+        /* For textarea specifically (multi-line) */
+        textarea {
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            overflow-y: auto;
+            min-height: 60px;
+            max-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            white-space: pre-wrap;
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar for textarea */
+        textarea::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 2px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* END AUTO-SCROLLING FIX */
+
+        /* Grid layouts for mobile */
+        .preference-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .preference-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Collection row for side-by-side inputs */
+        .collection-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Grocery Items */
+        .grocery-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        .grocery-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .grocery-row .input-with-icon {
+            flex: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .remove-item {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .add-item {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .add-item:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Budget and Weight row */
+        .budget-weight-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        /* Delivery row */
+        .delivery-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* File Upload - Normal size like textbox */
+        .file-upload-wrapper {
+            position: relative;
+        }
+
+        .file-upload-input {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            cursor: pointer;
+        }
+
+        .file-upload-input:hover {
+            border-color: var(--primary);
+        }
+
+        .file-upload-input i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .file-upload-text {
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        .file-size-note {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            display: block;
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--primary-dark);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        /* View Map Button */
+        .view-map-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* Delivery Method Indicator */
+        .delivery-method-indicator {
+            background: var(--light);
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .delivery-method-icon {
+            font-size: 20px;
+            color: var(--primary);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .delivery-method-text h4 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        .delivery-method-text p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* Expanding Inputs */
+        .expanding-input {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        /* Map Modal - Mobile Optimized */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(10px, env(safe-area-inset-top));
+                height = calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .preference-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .collection-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .delivery-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .budget-weight-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grocery-item {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .grocery-row {
+                flex: 1;
+            }
+
+            .item-actions {
+                margin-top: 0;
+                margin-left: 10px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Adjust collection-row for very small screens */
+            .collection-row {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <div class="service-text">
+                <h3>Grocery Shopping</h3>
+                <p>Fresh groceries delivered</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Estimated:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Delivery Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-route"></i>
+                <h3>Route Preview</h3>
+                <p>Map showing route from store to delivery</p>
+                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
+                    <p><strong>Store:</strong> <span id="mapStoreLocation">Not specified</span></p>
+                    <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapDeliveryMethod">-</div>
+                    <div class="info-label">Delivery Method</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Grocery Shopping</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <form method="post" action="{{ url_for('create_grocery_errand') }}" id="groceryForm">
+                    <!-- Store Information -->
+                    <h2><i class="fas fa-store"></i> Store Information</h2>
+
+                    <div class="form-group">
+                        <label for="store_preference">Preferred Supermarket</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-store-alt"></i>
+                            <select id="store_preference" name="store_preference" required onchange="toggleOtherStoreInput()">
+                                <option value="">Select a store</option>
+                                <option value="walmart">Walmart</option>
+                                <option value="kroger">Kroger</option>
+                                <option value="target">Target</option>
+                                <option value="whole_foods">Whole Foods</option>
+                                <option value="local">Local Grocery Store</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div id="other_store_input" class="expanding-input">
+                            <div class="input-with-icon" style="margin-top: 8px;">
+                                <i class="fas fa-edit"></i>
+                                <input type="text" id="other_store_name" name="other_store_name" placeholder="Store name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="store_location">Store Address/Location</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="store_location" name="store_location" placeholder="Enter store address">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bagging_preference">Bagging Preference</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                            <select id="bagging_preference" name="bagging_preference">
+                                <option value="no_preference">No preference</option>
+                                <option value="plastic">Plastic bags</option>
+                                <option value="paper">Paper bags</option>
+                                <option value="reusable">Reusable bags</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Shopping List -->
+                    <h2><i class="fas fa-list-alt"></i> Shopping List</h2>
+
+                    <div class="form-group">
+                        <label>Shopping Items</label>
+                        <div class="info-tip">
+                            <i class="fas fa-info-circle"></i> Add each item with quantity
+                        </div>
+                        <div id="items-container">
+                            <div class="grocery-item">
+                                <div class="grocery-row">
+                                    <div class="input-with-icon" style="flex: 2;">
+                                        <i class="fas fa-apple-alt"></i>
+                                        <input type="text" name="items[]" placeholder="Item name" required>
+                                    </div>
+                                    <div class="input-with-icon" style="flex: 1;">
+                                        <i class="fas fa-sort-amount-up"></i>
+                                        <input type="text" name="quantities[]" placeholder="Qty" required>
+                                    </div>
+                                </div>
+                                <div class="grocery-row">
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-tag"></i>
+                                        <input type="text" name="brands[]" placeholder="Brand (optional)">
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-item" onclick="addItem()">
+                            <i class="fas fa-plus"></i> Add Another Item
+                        </button>
+
+                        <div class="budget-weight-row">
+                            <div class="input-with-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" id="budget_limit" name="budget_limit" placeholder="Max budget ($)" step="0.01" min="0" inputmode="decimal">
+                            </div>
+                            <div class="input-with-icon">
+                                <i class="fas fa-weight-hanging"></i>
+                                <input type="number" id="estimated_weight" name="estimated_weight" placeholder="Est. weight (kg)" step="0.1" min="0" inputmode="decimal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload for Shopping List - Normal size -->
+                    <div class="form-group">
+                        <label>Upload Shopping List (Optional)</label>
+                        <div class="file-upload-wrapper">
+                            <div class="file-upload-input" onclick="document.getElementById('file_input').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span class="file-upload-text">Upload shopping list or photos</span>
+                                <div id="file_name" class="file-name"></div>
+                            </div>
+                            <input type="file" id="file_input" class="file-input" accept="image/*,.pdf" onchange="displayFileName(this)">
+                            <span class="file-size-note">Max file size: 10MB</span>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Preferences -->
+                    <h2><i class="fas fa-sliders-h"></i> Preferences</h2>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="allow_substitutions">Allow Substitutions</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                                <select id="allow_substitutions" name="allow_substitutions">
+                                    <option value="yes">Yes, if unavailable</option>
+                                    <option value="no">No, exact items only</option>
+                                    <option value="contact">Contact me first</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="produce_preferences">Produce Preferences</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-leaf"></i>
+                                <select id="produce_preferences" name="produce_preferences">
+                                    <option value="any">Any ripeness</option>
+                                    <option value="ripe">Ripe and ready</option>
+                                    <option value="unripe">Slightly unripe</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="receipt_required">Receipt Required?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-receipt"></i>
+                                <select id="receipt_required" name="receipt_required">
+                                    <option value="yes">Yes, include receipt</option>
+                                    <option value="no">No receipt needed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="payment_method">Payment Method</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-credit-card"></i>
+                                <select id="payment_method" name="payment_method">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Credit/Debit Card</option>
+                                    <option value="mobile">Mobile Payment</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-heart"></i>
+                            <input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="Dietary restrictions or allergies">
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Delivery Information -->
+                    <h2><i class="fas fa-truck"></i> Delivery Information</h2>
+
+                    <div class="delivery-row">
+                        <div class="input-with-icon">
+                            <i class="fas fa-home"></i>
+                            <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required>
+                        </div>
+                        <div class="input-with-icon">
+                            <i class="fas fa-clock"></i>
+                            <select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()">
+                                <option value="asap">As soon as possible</option>
+                                <option value="morning">Morning (8AM-12PM)</option>
+                                <option value="afternoon">Afternoon (12PM-5PM)</option>
+                                <option value="evening">Evening (5PM-9PM)</option>
+                                <option value="specific">Specific time</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="specific_time_input" class="expanding-input">
+                        <div class="input-with-icon">
+                            <i class="fas fa-clock"></i>
+                            <input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)">
+                        </div>
+                    </div>
+
+                    <button type="button" class="view-map-btn" onclick="showMap()">
+                        <i class="fas fa-map-marked-alt"></i> View Route Map
+                    </button>
+
+                    <!-- Delivery Method Indicator -->
+                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
+                        <div class="delivery-method-icon">
+                            <i id="deliveryMethodIcon" class="fas fa-walking"></i>
+                        </div>
+                        <div class="delivery-method-text">
+                            <h4 id="deliveryMethodTitle">Delivery Method</h4>
+                            <p id="deliveryMethodDescription">Calculating based on distance and weight...</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                            <textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Additional Instructions -->
+                    <h2><i class="fas fa-sticky-note"></i> Additional Instructions</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-comment-alt"></i>
+                            <textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any other special instructions..."></textarea>
+                        </div>
+                    </div>
+
+                     <div class="section-divider"></div>
+
+                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+
+                    <!-- Service Price and Phone Number in one row -->
+                    <div class="collection-row">
+                        <div style="margin-bottom: 0;">
+                            <label>Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price"
+                                       placeholder="Your service price"
+                                       step="0.01" min="0.75"
+                                       inputmode="decimal" required>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 0;">
+                            <label>Your Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="contact_number" name="contact_number" placeholder="Your phone number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Create Grocery Errand
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Prevent form submission on Enter key in inputs
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && this.type !== 'textarea' && this.type !== 'submit') {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+
+            // Initialize auto-sliding text for ALL inputs
+            initializeAutoSlidingText();
+
+            // Set up observer for dynamically added grocery items
+            setupGroceryItemsObserver();
+        });
+
+        function initializeAutoSlidingText() {
+            // Function to check if text needs sliding
+            const checkAndApplySliding = (input) => {
+                if (!input) return;
+
+                // Remove any existing sliding class first
+                input.classList.remove('sliding-text');
+
+                // Check if text is longer than input width
+                if (input.scrollWidth > input.clientWidth && input.value.trim() !== '') {
+                    // Add sliding animation class
+                    input.classList.add('sliding-text');
+
+                    // Calculate animation duration based on text length
+                    const textLength = input.value.length;
+                    const duration = Math.max(10, textLength / 2); // Minimum 10s, longer for longer text
+                    input.style.animationDuration = `${duration}s`;
+                }
+            };
+
+            // Apply to all existing text inputs
+            const textInputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+            textInputs.forEach(input => {
+                // Check on input change
+                input.addEventListener('input', function() {
+                    setTimeout(() => checkAndApplySliding(this), 100);
+                });
+
+                // Check on focus/blur
+                input.addEventListener('focus', function() {
+                    this.style.animationPlayState = 'paused';
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.classList.contains('sliding-text')) {
+                        this.style.animationPlayState = 'running';
+                    }
+                });
+
+                // Initial check
+                setTimeout(() => checkAndApplySliding(input), 300);
+            });
+
+            // Also check when window resizes
+            window.addEventListener('resize', () => {
+                textInputs.forEach(input => {
+                    setTimeout(() => checkAndApplySliding(input), 100);
+                });
+            });
+        }
+
+        function setupGroceryItemsObserver() {
+            // Observer to check for new grocery items being added
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1 && node.classList.contains('grocery-item')) {
+                                // New grocery item added, set up its inputs for sliding
+                                const inputs = node.querySelectorAll('input[type="text"], input[type="number"]');
+                                inputs.forEach(input => {
+                                    // Check on input change
+                                    input.addEventListener('input', function() {
+                                        setTimeout(() => {
+                                            if (this.scrollWidth > this.clientWidth && this.value.trim() !== '') {
+                                                this.classList.add('sliding-text');
+                                                const textLength = this.value.length;
+                                                const duration = Math.max(10, textLength / 2);
+                                                this.style.animationDuration = `${duration}s`;
+                                            } else {
+                                                this.classList.remove('sliding-text');
+                                            }
+                                        }, 100);
+                                    });
+
+                                    // Check on focus/blur
+                                    input.addEventListener('focus', function() {
+                                        this.style.animationPlayState = 'paused';
+                                    });
+
+                                    input.addEventListener('blur', function() {
+                                        if (this.classList.contains('sliding-text')) {
+                                            this.style.animationPlayState = 'running';
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Start observing the items container
+            const itemsContainer = document.getElementById('items-container');
+            if (itemsContainer) {
+                observer.observe(itemsContainer, { childList: true, subtree: false });
+            }
+        }
+
+        function initializeForm() {
+            // Update fee when inputs change
+            const feeInputs = ['store_location', 'delivery_address', 'delivery_time', 'specific_time', 'estimated_weight'];
+            feeInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateEstimatedFee);
+                    element.addEventListener('change', updateEstimatedFee);
+                }
+            });
+
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Initial calculations
+            updateEstimatedFee();
+        }
+
+        // Distance calculation (more realistic simulation)
+        function calculateDistance() {
+            const storeLocation = document.getElementById('store_location').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+
+            if (storeLocation && deliveryAddress) {
+                // Simulate distance based on input lengths (more realistic)
+                const storeLength = storeLocation.length;
+                const deliveryLength = deliveryAddress.length;
+
+                // Generate distance between 0.05km (50m) and 20km
+                const baseDistance = 0.05 + (Math.abs(storeLength - deliveryLength) / 100);
+                const randomFactor = 0.5 + (Math.random() * 1.5);
+                return Math.min(baseDistance * randomFactor, 20).toFixed(2);
+            }
+            return 0;
+        }
+
+        // NEW: Calculate distance fee based on your pricing structure
+        function calculateDistanceFee(distance) {
+            if (distance <= 0) return 0;
+
+            // Convert to kilometers if needed
+            const distanceKm = parseFloat(distance);
+
+            // Grocery shopping pricing structure:
+            // 0-0.1km (0-100m): $0.75 (grocery is heavier)
+            // 0.101-1.5km: $1.25
+            // 1.51-4.99km: $2.25
+            // 5-15km: $2.75
+            // 15.1km+: $3.25
+
+            if (distanceKm <= 0.1) {
+                return 0.75;
+            } else if (distanceKm <= 1.5) {
+                return 1.25;
+            } else if (distanceKm <= 4.99) {
+                return 2.25;
+            } else if (distanceKm <= 15) {
+                return 2.75;
+            } else {
+                return 3.25;
+            }
+        }
+
+        // NEW: Determine delivery method based on distance and weight
+        function getDeliveryMethod(distance, weight) {
+            const distanceKm = parseFloat(distance);
+            const weightKg = parseFloat(weight) || 0;
+
+            if (distanceKm <= 1.5 && weightKg <= 5) {
+                return {
+                    method: 'foot',
+                    title: 'Runner on Foot',
+                    description: 'Can be delivered by runners walking',
+                    icon: 'fas fa-walking',
+                    color: '#4CAF50'
+                };
+            } else if (distanceKm <= 8 && weightKg <= 20) {
+                return {
+                    method: 'bike',
+                    title: 'Bike Delivery',
+                    description: 'Requires bike delivery',
+                    icon: 'fas fa-bicycle',
+                    color: '#FF9800'
+                };
+            } else {
+                return {
+                    method: 'vehicle',
+                    title: 'Car Required',
+                    description: 'Requires car delivery (heavy/bulky)',
+                    icon: 'fas fa-car',
+                    color: '#f44336'
+                };
+            }
+        }
+
+        // Update delivery method display
+        function updateDeliveryMethod(distance) {
+            const indicator = document.getElementById('deliveryMethodIndicator');
+            const weight = document.getElementById('estimated_weight').value || 0;
+            const method = getDeliveryMethod(distance, weight);
+
+            if (distance > 0) {
+                indicator.style.display = 'flex';
+                document.getElementById('deliveryMethodIcon').className = method.icon;
+                document.getElementById('deliveryMethodTitle').textContent = method.title;
+                document.getElementById('deliveryMethodDescription').textContent = method.description;
+                indicator.style.borderLeft = `3px solid ${method.color}`;
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // Parse time
+        function parseTime(timeStr) {
+            if (!timeStr) return null;
+
+            const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+            if (timeMatch) {
+                let hours = parseInt(timeMatch[1]);
+                const minutes = parseInt(timeMatch[2]);
+                const period = timeMatch[3] ? timeMatch[3].toUpperCase() : '';
+
+                if (period === 'PM' && hours < 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+
+                return { hours, minutes };
+            }
+            return null;
+        }
+
+        // Calculate time fee for grocery delivery
+        function calculateTimeFee() {
+            const deliveryTime = document.getElementById('delivery_time').value;
+            const specificTime = document.getElementById('specific_time').value;
+
+            // Base fees for grocery delivery
+            if (deliveryTime === 'asap') return 2.50; // Higher fee for ASAP
+            if (deliveryTime === 'morning') return 2.00;
+            if (deliveryTime === 'afternoon') return 1.50;
+
+            if (deliveryTime === 'evening' || deliveryTime === 'specific') {
+                if (specificTime) {
+                    const parsedTime = parseTime(specificTime);
+                    if (parsedTime) {
+                        const { hours, minutes } = parsedTime;
+                        // Check if after 7:15 PM
+                        if (hours > 19 || (hours === 19 && minutes > 15)) {
+                            return 3.00; // Evening premium
+                        }
+                        return 2.50; // Evening before 7:15 PM
+                    }
+                }
+                return deliveryTime === 'evening' ? 2.50 : 0;
+            }
+
+            return 0;
+        }
+
+        // Calculate weight fee for grocery
+        function calculateWeightFee() {
+            const weight = parseFloat(document.getElementById('estimated_weight').value) || 0;
+
+            if (weight <= 0) return 0;
+
+            // Weight fee structure for grocery
+            if (weight <= 5) return 0.50; // 0-5kg: $0.50
+            if (weight <= 10) return 1.00; // 5.1-10kg: $1.00
+            if (weight <= 20) return 2.00; // 10.1-20kg: $2.00
+            return 3.00; // 20.1kg+: $3.00
+        }
+
+        // Update estimated fee
+        function updateEstimatedFee() {
+            const distance = calculateDistance();
+            const distanceFee = calculateDistanceFee(distance);
+            const timeFee = calculateTimeFee();
+            const weightFee = calculateWeightFee();
+
+            // Total fee for grocery delivery
+            const totalFee = Math.max(distanceFee + timeFee + weightFee, 0.75); // Minimum $0.75
+
+            // Update display
+            const feeElement = document.getElementById('estimated_fee');
+            feeElement.textContent = '$' + totalFee.toFixed(2);
+
+            // Update delivery method indicator
+            updateDeliveryMethod(distance);
+
+            // Update map if open
+            if (document.getElementById('mapModal').style.display === 'flex') {
+                updateMapDetails(distance);
+            }
+
+            // Visual feedback
+            feeElement.style.transform = 'scale(1.1)';
+            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+        }
+
+        // Toggle inputs
+        function toggleOtherStoreInput() {
+            const otherInput = document.getElementById('other_store_input');
+            if (document.getElementById('store_preference').value === 'other') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('other_store_name')?.focus(), 300);
+            } else {
+                otherInput.classList.remove('expanded');
+            }
+        }
+
+        function toggleSpecificTimeInput() {
+            const specificInput = document.getElementById('specific_time_input');
+            if (document.getElementById('delivery_time').value === 'specific') {
+                specificInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('specific_time')?.focus(), 300);
+            } else {
+                specificInput.classList.remove('expanded');
+            }
+            updateEstimatedFee();
+        }
+
+        // Map functions
+        function showMap() {
+            const storeLocation = document.getElementById('store_location').value || 'Not specified';
+            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
+
+            if (!storeLocation || !deliveryAddress || storeLocation === 'Not specified' || deliveryAddress === 'Not specified') {
+                alert('Please enter both store location and delivery address.');
+                return;
+            }
+
+            document.getElementById('mapStoreLocation').textContent = storeLocation;
+            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
+
+            const distance = calculateDistance();
+            const estimatedTime = Math.round(distance * 5); // 5 minutes per km for grocery (shopping takes time)
+            const weight = document.getElementById('estimated_weight').value || 0;
+            const deliveryMethod = getDeliveryMethod(distance, weight);
+
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
+
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateMapDetails(distance) {
+            const estimatedTime = Math.round(distance * 5);
+            const weight = document.getElementById('estimated_weight').value || 0;
+            const deliveryMethod = getDeliveryMethod(distance, weight);
+
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
+        }
+
+        // File upload
+        function displayFileName(input) {
+            const fileNameDisplay = document.getElementById('file_name');
+            if (input.files.length > 0) {
+                fileNameDisplay.textContent = input.files[0].name;
+                fileNameDisplay.style.transform = 'scale(1.05)';
+                setTimeout(() => fileNameDisplay.style.transform = 'scale(1)', 300);
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        }
+
+        // Grocery items
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'grocery-item';
+            newItem.innerHTML = `
+                <div class="grocery-row">
+                    <div class="input-with-icon" style="flex: 2;">
+                        <i class="fas fa-apple-alt"></i>
+                        <input type="text" name="items[]" placeholder="Item name" required>
+                    </div>
+                    <div class="input-with-icon" style="flex: 1;">
+                        <i class="fas fa-sort-amount-up"></i>
+                        <input type="text" name="quantities[]" placeholder="Qty" required>
+                    </div>
+                </div>
+                <div class="grocery-row">
+                    <div class="input-with-icon">
+                        <i class="fas fa-tag"></i>
+                        <input type="text" name="brands[]" placeholder="Brand (optional)">
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+
+            // Animate
+            newItem.style.opacity = '0';
+            newItem.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                newItem.style.transition = 'all 0.3s ease';
+                newItem.style.opacity = '1';
+                newItem.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Focus on new item
+            setTimeout(() => {
+                newItem.querySelector('input[name="items[]"]').focus();
+            }, 300);
+        }
+
+        function removeItem(button) {
+            const item = button.closest('.grocery-item');
+            item.style.transition = 'all 0.3s ease';
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(-10px)';
+            setTimeout(() => item.remove(), 300);
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden' && input.type !== 'file') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation
+        document.getElementById('groceryForm').addEventListener('submit', function(e) {
+
+            const storePreference = document.getElementById('store_preference').value.trim();
+            const deliveryAddress = document.getElementById('delivery_address').value.trim();
+            const items = document.querySelectorAll('input[name="items[]"]');
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const contactNumber = document.getElementById('contact_number').value.trim();
+
+            // Validate required fields
+            if (!storePreference) {
+                showError('Please select a store preference.');
+                document.getElementById('store_preference').focus();
+                return false;
+            }
+
+            if (storePreference === 'other') {
+                const otherStoreName = document.getElementById('other_store_name').value.trim();
+                if (!otherStoreName) {
+                    showError('Please specify the store name.');
+                    document.getElementById('other_store_name').focus();
+                    return false;
+                }
+            }
+
+            if (!deliveryAddress) {
+                showError('Please enter a delivery address.');
+                document.getElementById('delivery_address').focus();
+                return false;
+            }
+
+            let hasItems = false;
+            items.forEach(item => {
+                if (item.value.trim()) hasItems = true;
+            });
+
+            if (!hasItems) {
+                showError('Please add at least one grocery item.');
+                document.querySelector('input[name="items[]"]').focus();
+                return false;
+            }
+
+            const deliveryTime = document.getElementById('delivery_time').value;
+            if (deliveryTime === 'specific') {
+                const specificTime = document.getElementById('specific_time').value.trim();
+                if (!specificTime) {
+                    showError('Please enter a specific delivery time.');
+                    document.getElementById('specific_time').focus();
+                    return false;
+                }
+            }
+
+            // Validate service price
+            if (!servicePrice) {
+                showError('Please enter a service price.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            const servicePriceNum = parseFloat(servicePrice);
+            if (servicePriceNum < 0.75) {
+                showError('Service price must be at least $0.75.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            // Validate phone number
+            if (!contactNumber) {
+                showError('Please enter your phone number.');
+                document.getElementById('contact_number').focus();
+                return false;
+            }
+
+            // Show summary with delivery method
+            const distance = calculateDistance();
+            const weight = document.getElementById('estimated_weight').value || 0;
+            const deliveryMethod = getDeliveryMethod(distance, weight);
+            const estimatedFee = document.getElementById('estimated_fee').textContent;
+
+            alert(`Grocery shopping errand created successfully!\n\nDistance: ${distance} km\nWeight: ${weight} kg\nDelivery Method: ${deliveryMethod.title}\nEstimated Cost: ${estimatedFee}\nYour Service Price: $${servicePriceNum.toFixed(2)}\nPhone Number: ${contactNumber}`);
+
+            // In a real app, you would submit the form here
+            // this.submit();
+        });
+
+        function showError(message) {
+            alert(message);
+        }
+    </script>
+</body>
+</html>

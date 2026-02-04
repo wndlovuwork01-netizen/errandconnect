@@ -1,0 +1,1480 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Add Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Add Flag Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@6.6.6/css/flag-icons.min.css">
+
+<div id="signup-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>ErrandGo</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2>Create Account 🚀</h2>
+                <p>Join ErrandGo today</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="post" action="{{ url_for('signup') }}" class="auth-form" id="signupForm">
+                <!-- First Name -->
+                <div class="form-group">
+                    <label class="form-label">First Names *</label>
+                    <input type="text" name="first_name" id="first_name" class="form-input" placeholder="Enter your first names"
+                           value="{{ request.form.first_name if request.form else '' }}" required
+                           pattern="[A-Za-z\s\-']+"
+                           title="Only letters, spaces, hyphens, and apostrophes are allowed">
+                    <div id="first_name_error" class="error-message"></div>
+                </div>
+
+                <!-- Last Name -->
+                <div class="form-group">
+                    <label class="form-label">Last Name *</label>
+                    <input type="text" name="last_name" id="last_name" class="form-input" placeholder="Enter your last name"
+                           value="{{ request.form.last_name if request.form else '' }}" required
+                           pattern="[A-Za-z\s\-']+"
+                           title="Only letters, spaces, hyphens, and apostrophes are allowed">
+                    <div id="last_name_error" class="error-message"></div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" name="email" id="email" class="form-input" placeholder="Enter your email"
+                               value="{{ request.form.email if request.form else '' }}" required>
+                        <div id="email_error" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Phone Number with Country Code -->
+                <div class="form-group">
+                    <label class="form-label">Phone Number *</label>
+                    <div class="phone-input-container">
+                        <!-- Country Code Dropdown -->
+                        <div class="country-code-selector" id="countryCodeSelector">
+                            <button type="button" class="country-code-display" id="countryCodeDisplay">
+                                <span class="country-flag fi fi-zw" id="selectedFlag"></span>
+                                <span class="country-code" id="selectedCode">+263</span>
+                                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                            </button>
+                            <div class="country-dropdown" id="countryDropdown">
+                                <div class="country-search">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="countrySearch" placeholder="Search country or code" class="search-input">
+                                </div>
+                                <div class="country-list" id="countryList">
+                                    <!-- Countries will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number Input -->
+                        <div class="input-with-icon phone-number-input">
+                            <i class="fas fa-phone input-icon"></i>
+                            <input type="tel" name="phone_number" id="phone_number" class="form-input"
+                                   placeholder="Enter a Valid number"
+                                   value="{{ request.form.phone_number if request.form else '' }}"
+                                   required>
+                            <div id="phone_error" class="error-message"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="country_code" id="countryCodeInput" value="+263">
+                    <!-- UPDATED HELP TEXT -->
+                    <small class="form-help">Enter a valid phone number</small>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="form-group">
+                    <label class="form-label">Date of Birth *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-calendar-alt input-icon"></i>
+                        <input type="date" name="date_of_birth" id="date_of_birth" class="form-input"
+                               value="{{ request.form.date_of_birth if request.form else '' }}" required>
+                        <div id="dob_error" class="error-message"></div>
+                    </div>
+                    <small class="form-help">You must be at least 16 years old</small>
+                </div>
+
+                <!-- Username -->
+                <div class="form-group">
+                    <label class="form-label">Username *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" name="username" id="username" class="form-input" placeholder="Choose a username"
+                               value="{{ request.form.username if request.form else '' }}" required>
+                        <div id="username_error" class="error-message"></div>
+                    </div>
+                    <small class="form-help">You will use this username to sign in</small>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <div class="password-input-container">
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="password" id="password" class="form-input" placeholder="Create a password" required>
+                            <button type="button" class="password-toggle" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <div id="password_error" class="error-message"></div>
+                        </div>
+                        <small class="form-help">Must be at least 6 characters long</small>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label class="form-label">Confirm Password *</label>
+                    <div class="password-input-container">
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="confirm_password" id="confirm_password" class="form-input" placeholder="Confirm your password" required>
+                            <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="passwordMatchMessage" class="validation-message"></div>
+                    </div>
+                    <div>
+                     <small class="form-help">Always remember your password</small>
+                    </div>
+                </div>
+
+                <!-- USER TYPE SELECTION -->
+                <div class="form-group">
+                    <label class="form-label">I want to join as: *</label>
+                    <div class="user-type-selection">
+                        <label class="user-type-option">
+                            <input type="radio" name="user_type" value="client"
+                                   {% if request.form %} {% if request.form.user_type == 'client' %}checked{% endif %}
+                                   {% else %}checked{% endif %} required>
+                            <div class="option-card">
+                                <div class="option-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h3>Client</h3>
+                                    <p>I need errands and deliveries done</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="user-type-option">
+                            <input type="radio" name="user_type" value="runner"
+                                   {% if request.form and request.form.user_type == 'runner' %}checked{% endif %} required>
+                            <div class="option-card">
+                                <div class="option-icon runner">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h3>Errand Runner</h3>
+                                    <p>I want to complete errands</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- TERMS AND CONDITIONS CHECKBOX (Only for Clients) -->
+                <div id="termsContainer" class="form-group terms-group">
+                    <div class="terms-checkbox">
+                        <input type="checkbox" name="terms_agreed" id="terms_agreed"
+                               {% if request.form and request.form.user_type == 'client' and request.form.terms_agreed %}checked{% endif %}>
+                        <label for="terms_agreed" class="terms-label">
+                            <span class="terms-text">
+                                I agree to the
+                                <a href="{{ url_for('terms') }}" class="terms-link" target="_blank">Terms of Service</a>
+                                and
+                                <a href="{{ url_for('privacy') }}" class="terms-link" target="_blank">Privacy Policy</a>
+                                *
+                            </span>
+                        </label>
+                    </div>
+                    <div id="termsErrorMessage" class="validation-message error-message"></div>
+                </div>
+
+                <!-- RUNNER TERMS NOTE (Only for Runners) -->
+                <div id="runnerTermsNote" class="form-group" style="display: none;">
+                    <div class="info-note">
+                        <i class="fas fa-info-circle"></i>
+                        <p>As an Errand Runner, you will sign the Runner Agreement during your registration process.</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary full-width">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account?
+                    <a href="{{ url_for('signin') }}" class="auth-link">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --primary-200: #A5D6A7;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+    --success-color: #4CAF50;
+    --error-color: #f44336;
+    --info-color: #2196F3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+#signup-page {
+    min-height: 100vh;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.logo h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mobile-main {
+    padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-light);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.auth-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.auth-header p {
+    color: var(--text-light);
+    font-size: 16px;
+}
+
+.flash-messages {
+    margin-bottom: 24px;
+}
+
+.flash-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.flash-message.success {
+    background: var(--primary-50);
+    color: var(--primary-dark);
+    border: 1px solid var(--primary-100);
+}
+
+.flash-message.danger {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #FFCDD2;
+}
+
+.flash-message.warning {
+    background: #FFF3E0;
+    color: #EF6C00;
+    border: 1px solid #FFE0B2;
+}
+
+.auth-form {
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+/* Phone Input Container */
+.phone-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Country Code Selector */
+.country-code-selector {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.country-code-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    height: 56px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--background);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.country-code-display:hover {
+    background: var(--primary-50);
+    border-color: var(--primary-light);
+}
+
+.country-code-display.active {
+    background: var(--primary-50);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.country-flag {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.country-code {
+    font-weight: 600;
+}
+
+.dropdown-arrow {
+    color: var(--text-light);
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.country-code-display.active .dropdown-arrow {
+    transform: rotate(180deg);
+    color: var(--primary-color);
+}
+
+/* Country Dropdown */
+.country-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    max-height: 400px;
+    overflow: hidden;
+    display: none;
+    margin-top: 4px;
+}
+
+.country-dropdown.show {
+    display: block;
+}
+
+.country-search {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--primary-50);
+}
+
+.country-search .fa-search {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--text-primary);
+    padding: 8px 0;
+}
+
+.search-input::placeholder {
+    color: var(--text-light);
+}
+
+.country-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.country-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.country-item:last-child {
+    border-bottom: none;
+}
+
+.country-item:hover {
+    background: var(--primary-50);
+}
+
+.country-item.active {
+    background: var(--primary-50);
+    border-left: 3px solid var(--primary-color);
+}
+
+.country-item-flag {
+    width: 24px;
+    height: 18px;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.country-item-name {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-primary);
+    min-width: 0;
+}
+
+.country-item-code {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+/* Phone number input */
+.phone-number-input {
+    flex: 1;
+}
+
+.phone-number-input .form-input {
+    padding-left: 48px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Input with icon styling */
+.input-with-icon {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 16px;
+    z-index: 1;
+}
+
+.form-input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 16px;
+    background: var(--background);
+    transition: all 0.2s ease;
+    height: 56px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.form-input:focus + .input-icon {
+    color: var(--primary-color);
+}
+
+/* Password input specific */
+.password-input-container {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 8px;
+    font-size: 16px;
+    z-index: 2;
+    outline: none;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+}
+
+/* Validation message styling */
+.validation-message {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.validation-message.success {
+    color: var(--success-color);
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.validation-message.error {
+    color: var(--error-color);
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* Error message styling for specific fields */
+.error-message {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--error-color);
+    font-weight: 500;
+    padding-left: 4px;
+    display: none;
+}
+
+.form-input.error {
+    border-color: var(--error-color);
+    background-color: rgba(244, 67, 54, 0.05);
+}
+
+.form-input.success {
+    border-color: var(--success-color);
+    background-color: rgba(76, 175, 80, 0.05);
+}
+
+/* Info note styling */
+.info-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #E3F2FD;
+    border-radius: 12px;
+    border: 1px solid #BBDEFB;
+    color: #0D47A1;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.info-note i {
+    color: #1976D2;
+    font-size: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.form-help {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.user-type-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.user-type-option {
+    display: block;
+    cursor: pointer;
+}
+
+.user-type-option input[type="radio"] {
+    display: none;
+}
+
+.option-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--background);
+    transition: all 0.2s ease;
+    gap: 12px;
+}
+
+.option-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--primary-50);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s ease;
+}
+
+.option-icon.runner {
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.option-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.option-content p {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.user-type-option input[type="radio"]:checked + .option-card {
+    border-color: var(--primary-color);
+    background: var(--primary-50);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.user-type-option input[type="radio"]:checked + .option-card .option-icon {
+    background: var(--primary-color);
+    color: white;
+}
+
+.user-type-option input[type="radio"]:checked + .option-card .option-icon.runner {
+    background: #1976D2;
+    color: white;
+}
+
+.user-type-option:hover .option-card {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+/* Terms and Conditions Checkbox */
+.terms-group {
+    margin-top: 8px;
+    margin-bottom: 24px;
+}
+
+.terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.terms-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.terms-checkbox input[type="checkbox"]:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.terms-label {
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.terms-text {
+    display: block;
+}
+
+.terms-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.terms-link:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    background: var(--primary-dark);
+}
+
+.full-width {
+    width: 100%;
+}
+
+.auth-footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-light);
+}
+
+.auth-footer p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.auth-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .country-dropdown {
+        width: 300px;
+        left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-main {
+        padding: 20px;
+    }
+    .auth-container {
+        padding: 24px;
+    }
+    .auth-header h2 {
+        font-size: 24px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .option-card {
+        padding: 12px;
+    }
+    .option-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    .form-input {
+        padding: 14px 14px 14px 44px;
+        height: 52px;
+    }
+    .input-icon {
+        left: 14px;
+    }
+    .country-code-display {
+        height: 52px;
+        padding: 0 10px;
+        min-width: 90px;
+        gap: 8px;
+    }
+    .country-flag {
+        width: 18px;
+        height: 13px;
+    }
+    .country-dropdown {
+        width: calc(100vw - 40px);
+        left: 0;
+    }
+    .country-item-flag {
+        width: 22px;
+        height: 16px;
+    }
+    .terms-checkbox {
+        gap: 10px;
+    }
+    .terms-label {
+        font-size: 13px;
+    }
+    .info-note {
+        padding: 12px;
+        font-size: 13px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Country data with proper flag icon classes
+    const countries = [
+        { code: "+263", flag: "fi fi-zw", name: "Zimbabwe" },
+        { code: "+27", flag: "fi fi-za", name: "South Africa" },
+        { code: "+267", flag: "fi fi-bw", name: "Botswana" },
+    ];
+
+    // Sort alphabetically
+    countries.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Country code selector elements
+    const countryCodeSelector = document.getElementById('countryCodeSelector');
+    const countryCodeDisplay = document.getElementById('countryCodeDisplay');
+    const selectedFlag = document.getElementById('selectedFlag');
+    const selectedCode = document.getElementById('selectedCode');
+    const countryDropdown = document.getElementById('countryDropdown');
+    const countryList = document.getElementById('countryList');
+    const countrySearch = document.getElementById('countrySearch');
+    const countryCodeInput = document.getElementById('countryCodeInput');
+
+    // Terms and conditions elements
+    const termsContainer = document.getElementById('termsContainer');
+    const runnerTermsNote = document.getElementById('runnerTermsNote');
+    const termsCheckbox = document.getElementById('terms_agreed');
+    const termsErrorMessage = document.getElementById('termsErrorMessage');
+
+    // User type radio buttons
+    const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
+
+    // Form inputs
+    const firstNameInput = document.getElementById('first_name');
+    const lastNameInput = document.getElementById('last_name');
+    const phoneInput = document.getElementById('phone_number');
+    const emailInput = document.getElementById('email');
+    const dobInput = document.getElementById('date_of_birth');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+
+    // Error message elements
+    const firstNameError = document.getElementById('first_name_error');
+    const lastNameError = document.getElementById('last_name_error');
+    const phoneError = document.getElementById('phone_error');
+    const emailError = document.getElementById('email_error');
+    const dobError = document.getElementById('dob_error');
+    const usernameError = document.getElementById('username_error');
+    const passwordError = document.getElementById('password_error');
+    const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+
+    // ============== VALIDATION FUNCTIONS ==============
+
+    // Clear all error states
+    function clearAllErrors() {
+        const inputs = [firstNameInput, lastNameInput, phoneInput, emailInput, dobInput, usernameInput, passwordInput, confirmPasswordInput];
+        inputs.forEach(input => {
+            if (input) {
+                input.classList.remove('error');
+                input.classList.remove('success');
+            }
+        });
+
+        const errorElements = [firstNameError, lastNameError, phoneError, emailError, dobError, usernameError, passwordError];
+        errorElements.forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+
+        termsErrorMessage.style.display = 'none';
+    }
+
+    // Show error for a specific field
+    function showError(inputElement, errorElement, message) {
+        inputElement.classList.add('error');
+        inputElement.classList.remove('success');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        return false;
+    }
+
+    // Show success for a specific field
+    function showSuccess(inputElement) {
+        inputElement.classList.remove('error');
+        inputElement.classList.add('success');
+        return true;
+    }
+
+    // Validate first name (letters only)
+    function validateFirstName() {
+        const value = firstNameInput.value.trim();
+        const namePattern = /^[A-Za-z\s\-']+$/;
+
+        if (!value) {
+            return showError(firstNameInput, firstNameError, 'First name is required');
+        }
+
+        if (!namePattern.test(value)) {
+            return showError(firstNameInput, firstNameError, 'Only letters, spaces, hyphens (-), and apostrophes (\') are allowed');
+        }
+
+        firstNameError.style.display = 'none';
+        return showSuccess(firstNameInput);
+    }
+
+    // Validate last name (letters only)
+    function validateLastName() {
+        const value = lastNameInput.value.trim();
+        const namePattern = /^[A-Za-z\s\-']+$/;
+
+        if (!value) {
+            return showError(lastNameInput, lastNameError, 'Last name is required');
+        }
+
+        if (!namePattern.test(value)) {
+            return showError(lastNameInput, lastNameError, 'Only letters, spaces, hyphens (-), and apostrophes (\') are allowed');
+        }
+
+        lastNameError.style.display = 'none';
+        return showSuccess(lastNameInput);
+    }
+
+    // UPDATED: Validate phone number for Zimbabwe specifically
+    function validatePhoneNumber() {
+        const phoneValue = phoneInput.value.trim().replace(/\D/g, '');
+
+        if (!phoneValue) {
+            return showError(phoneInput, phoneError, 'Phone number is required');
+        }
+
+        if (phoneValue.length !== 9) {
+            return showError(phoneInput, phoneError, 'Zimbabwe mobile numbers must be 9 digits (e.g., 771234567)');
+        }
+
+        // Check valid Zimbabwe mobile prefixes
+        const validPrefixes = ['71', '73', '77', '78'];
+        const prefix = phoneValue.substring(0, 2);
+
+        if (!validPrefixes.includes(prefix)) {
+            return showError(phoneInput, phoneError, 'Invalid Zimbabwe mobile number. Must start with: 71, 73, 77, or 78');
+        }
+
+        if (!/^\d+$/.test(phoneValue)) {
+            return showError(phoneInput, phoneError, 'Phone number must contain only digits');
+        }
+
+        phoneError.style.display = 'none';
+        return showSuccess(phoneInput);
+    }
+
+    // Validate email
+    function validateEmail() {
+        const emailValue = emailInput.value.trim();
+
+        if (!emailValue) {
+            return showError(emailInput, emailError, 'Email is required');
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+            return showError(emailInput, emailError, 'Please enter a valid email address');
+        }
+
+        emailError.style.display = 'none';
+        return showSuccess(emailInput);
+    }
+
+    // Validate date of birth
+    function validateDateOfBirth() {
+        const dobValue = dobInput.value;
+
+        if (!dobValue) {
+            return showError(dobInput, dobError, 'Date of birth is required');
+        }
+
+        const selectedDate = new Date(dobValue);
+        const today = new Date();
+        const sixteenYearsAgo = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+
+        if (selectedDate > sixteenYearsAgo) {
+            return showError(dobInput, dobError, 'You must be at least 16 years old');
+        }
+
+        dobError.style.display = 'none';
+        return showSuccess(dobInput);
+    }
+
+    // Validate username
+    function validateUsername() {
+        const usernameValue = usernameInput.value.trim();
+
+        if (!usernameValue) {
+            return showError(usernameInput, usernameError, 'Username is required');
+        }
+
+        usernameError.style.display = 'none';
+        return showSuccess(usernameInput);
+    }
+
+    // Validate password
+    function validatePassword() {
+        const passwordValue = passwordInput.value;
+
+        if (!passwordValue) {
+            return showError(passwordInput, passwordError, 'Password is required');
+        }
+
+        if (passwordValue.length < 6) {
+            return showError(passwordInput, passwordError, 'Password must be at least 6 characters long');
+        }
+
+        passwordError.style.display = 'none';
+        return showSuccess(passwordInput);
+    }
+
+    // Validate terms (for clients only)
+    function validateTerms() {
+        const selectedUserType = document.querySelector('input[name="user_type"]:checked').value;
+
+        if (selectedUserType === 'client' && !termsCheckbox.checked) {
+            termsErrorMessage.textContent = 'You must agree to the Terms of Service and Privacy Policy';
+            termsErrorMessage.style.display = 'block';
+            return false;
+        }
+
+        termsErrorMessage.style.display = 'none';
+        return true;
+    }
+
+    // ============== REAL-TIME VALIDATION ==============
+
+    // First name validation on input
+    firstNameInput.addEventListener('input', function() {
+        // Restrict input to only allowed characters
+        this.value = this.value.replace(/[^A-Za-z\s\-']/g, '');
+        validateFirstName();
+    });
+
+    // Last name validation on input
+    lastNameInput.addEventListener('input', function() {
+        // Restrict input to only allowed characters
+        this.value = this.value.replace(/[^A-Za-z\s\-']/g, '');
+        validateLastName();
+    });
+
+    // Phone number validation on input
+    phoneInput.addEventListener('input', function() {
+        // Remove any non-digit characters
+        this.value = this.value.replace(/\D/g, '');
+
+        // Limit to 9 digits
+        if (this.value.length > 9) {
+            this.value = this.value.slice(0, 9);
+        }
+
+        validatePhoneNumber();
+    });
+
+    // Email validation on blur
+    emailInput.addEventListener('blur', validateEmail);
+
+    // Date of birth validation on change
+    dobInput.addEventListener('change', validateDateOfBirth);
+
+    // Username validation on blur
+    usernameInput.addEventListener('blur', validateUsername);
+
+    // Password validation on input
+    passwordInput.addEventListener('input', function() {
+        validatePassword();
+        checkPasswordMatch();
+    });
+
+    // Terms validation on change
+    termsCheckbox.addEventListener('change', validateTerms);
+
+    // ============== PASSWORD MATCH VALIDATION ==============
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (confirmPassword === '') {
+            passwordMatchMessage.textContent = '';
+            passwordMatchMessage.className = 'validation-message';
+            return;
+        }
+
+        if (password === confirmPassword) {
+            passwordMatchMessage.textContent = '✓ Passwords match';
+            passwordMatchMessage.className = 'validation-message success';
+            confirmPasswordInput.classList.remove('error');
+            confirmPasswordInput.classList.add('success');
+        } else {
+            passwordMatchMessage.textContent = '✗ Passwords do not match';
+            passwordMatchMessage.className = 'validation-message error';
+            confirmPasswordInput.classList.add('error');
+            confirmPasswordInput.classList.remove('success');
+        }
+    }
+
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+    // ============== POPULATE COUNTRY LIST ==============
+    function populateCountryList(filter = '') {
+        countryList.innerHTML = '';
+
+        const filteredCountries = countries.filter(country =>
+            country.name.toLowerCase().includes(filter.toLowerCase()) ||
+            country.code.includes(filter)
+        );
+
+        filteredCountries.forEach(country => {
+            const countryItem = document.createElement('div');
+            countryItem.className = 'country-item';
+
+            const isSelected = country.code === selectedCode.textContent;
+            if (isSelected) {
+                countryItem.classList.add('active');
+            }
+
+            countryItem.innerHTML = `
+                <span class="country-item-flag ${country.flag}"></span>
+                <span class="country-item-name">${country.name}</span>
+                <span class="country-item-code">${country.code}</span>
+            `;
+
+            countryItem.addEventListener('click', () => {
+                selectCountry(country);
+                countryDropdown.classList.remove('show');
+                countryCodeDisplay.classList.remove('active');
+            });
+
+            countryList.appendChild(countryItem);
+        });
+    }
+
+    function selectCountry(country) {
+        selectedFlag.className = 'country-flag ' + country.flag;
+        selectedCode.textContent = country.code;
+        countryCodeInput.value = country.code;
+        populateCountryList(countrySearch.value);
+    }
+
+    populateCountryList();
+
+    // Toggle dropdown
+    countryCodeDisplay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isActive = countryDropdown.classList.contains('show');
+
+        document.querySelectorAll('.country-dropdown.show').forEach(dropdown => {
+            if (dropdown !== countryDropdown) {
+                dropdown.classList.remove('show');
+                dropdown.previousElementSibling?.classList.remove('active');
+            }
+        });
+
+        countryDropdown.classList.toggle('show');
+        countryCodeDisplay.classList.toggle('active', !isActive);
+
+        if (!isActive) {
+            setTimeout(() => countrySearch.focus(), 100);
+        }
+    });
+
+    // Search functionality
+    countrySearch.addEventListener('input', (e) => {
+        populateCountryList(e.target.value);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!countryCodeSelector.contains(e.target)) {
+            countryDropdown.classList.remove('show');
+            countryCodeDisplay.classList.remove('active');
+        }
+    });
+
+    // ============== USER TYPE CHANGE HANDLER ==============
+    function handleUserTypeChange() {
+        const selectedValue = document.querySelector('input[name="user_type"]:checked').value;
+
+        if (selectedValue === 'client') {
+            termsContainer.style.display = 'block';
+            runnerTermsNote.style.display = 'none';
+            termsCheckbox.required = true;
+        } else if (selectedValue === 'runner') {
+            termsContainer.style.display = 'none';
+            runnerTermsNote.style.display = 'block';
+            termsCheckbox.checked = false;
+            termsCheckbox.required = false;
+        }
+
+        validateTerms();
+    }
+
+    userTypeRadios.forEach(radio => {
+        radio.addEventListener('change', handleUserTypeChange);
+    });
+
+    handleUserTypeChange();
+
+    // ============== PASSWORD VISIBILITY TOGGLE ==============
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
+
+    if (togglePasswordBtn) {
+        const eyeIcon = togglePasswordBtn.querySelector('i');
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            eyeIcon.classList.toggle('fa-eye');
+            eyeIcon.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    if (toggleConfirmPasswordBtn) {
+        const confirmEyeIcon = toggleConfirmPasswordBtn.querySelector('i');
+        toggleConfirmPasswordBtn.addEventListener('click', function() {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            confirmEyeIcon.classList.toggle('fa-eye');
+            confirmEyeIcon.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // Set date of birth to minimum age (16 years old from today)
+    if (dobInput) {
+        const today = new Date();
+        const sixteenYearsAgo = new Date(
+            today.getFullYear() - 16,
+            today.getMonth(),
+            today.getDate()
+        );
+        const sixteenYearsAgoString = sixteenYearsAgo.toISOString().split('T')[0];
+        dobInput.max = sixteenYearsAgoString;
+
+        const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+        const minDateString = minDate.toISOString().split('T')[0];
+        dobInput.min = minDateString;
+
+        if (!dobInput.value) {
+            dobInput.value = sixteenYearsAgoString;
+        }
+    }
+
+    // ============== FORM SUBMISSION HANDLER ==============
+    const form = document.getElementById('signupForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const selectedUserType = document.querySelector('input[name="user_type"]:checked').value;
+
+        // Clear previous errors
+        clearAllErrors();
+
+        // Validate all fields (BOTH Client and Runner must fill all fields)
+        const validations = [
+            validateFirstName(),
+            validateLastName(),
+            validateEmail(),
+            validatePhoneNumber(),
+            validateDateOfBirth(),
+            validateUsername(),
+            validatePassword()
+        ];
+
+        // For Client ONLY: Also validate terms
+        if (selectedUserType === 'client') {
+            validations.push(validateTerms());
+        }
+
+        // Check password match (for both Client and Runner)
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        if (password !== confirmPassword) {
+            showError(confirmPasswordInput, passwordMatchMessage, 'Passwords do not match');
+            passwordMatchMessage.style.display = 'block';
+            validations.push(false);
+        } else {
+            passwordMatchMessage.style.display = 'none';
+        }
+
+        // Check if all validations passed
+        const allValid = validations.every(v => v === true);
+
+        if (!allValid) {
+            // Find first field with error and focus it
+            const errorFields = [
+                {input: firstNameInput, isValid: validations[0]},
+                {input: lastNameInput, isValid: validations[1]},
+                {input: emailInput, isValid: validations[2]},
+                {input: phoneInput, isValid: validations[3]},
+                {input: dobInput, isValid: validations[4]},
+                {input: usernameInput, isValid: validations[5]},
+                {input: passwordInput, isValid: validations[6]}
+            ];
+
+            const firstError = errorFields.find(field => !field.isValid);
+            if (firstError && firstError.input) {
+                firstError.input.focus();
+                if (firstError.input.scrollIntoView) {
+                    firstError.input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            return false;
+        }
+
+        // ========== ALL VALIDATIONS PASSED ==========
+
+        // Show loading state for both Client and Runner
+        const submitBtn = this.querySelector('.btn-primary');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        submitBtn.disabled = true;
+
+        // Submit the form - Flask will handle the redirect based on user_type
+        // For Client: Will submit normally and redirect to home_page
+        // For Runner: Will submit, create user, and redirect to runner_signup route
+        this.submit();
+    });
+});
+</script>
+{% endblock %}

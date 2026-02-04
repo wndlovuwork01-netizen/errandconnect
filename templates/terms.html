@@ -1,0 +1,2581 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Add Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div id="terms-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <a href="{{ url_for('signup') }}" class="back-button">
+            </a>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>ErrandGo</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <div class="terms-container">
+            <!-- Header -->
+            <div class="terms-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-file-contract"></i> Client Terms & Conditions</h1>
+                    <div class="last-updated">
+                        <i class="fas fa-calendar-alt"></i>
+                        Last Updated: <span id="lastUpdated">{{ current_date.strftime('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+                <div class="acceptance-badge">
+                    <i class="fas fa-user-check"></i>
+                    These terms apply specifically to Clients using ErrandGo
+                </div>
+            </div>
+
+            <!-- Quick Summary -->
+            <div class="quick-summary">
+                <h3><i class="fas fa-bolt"></i> Quick Summary</h3>
+                <div class="summary-points">
+                    <div class="summary-point">
+                        <i class="fas fa-handshake"></i>
+                        <span>ErrandGo connects you with independent runners</span>
+                    </div>
+                    <div class="summary-point">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>You pay runners directly, we take 10% platform fee</span>
+                    </div>
+                    <div class="summary-point">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>You're responsible for accurate task descriptions</span>
+                    </div>
+                    <div class="summary-point">
+                        <i class="fas fa-user-clock"></i>
+                        <span>Minimum age requirement is 16 years</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="toc-container">
+                <div class="toc-header">
+                    <h3><i class="fas fa-list"></i> Table of Contents</h3>
+                    <button class="toc-toggle" id="tocToggle">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <nav class="toc-content" id="tocContent">
+                    <ol>
+                        <li><a href="#introduction">1. Introduction</a></li>
+                        <li><a href="#definitions">2. Key Definitions</a></li>
+                        <li><a href="#eligibility">3. Client Eligibility</a></li>
+                        <li><a href="#account">4. Your Account</a></li>
+                        <li><a href="#posting-errands">5. Posting Errands</a></li>
+                        <li><a href="#payments">6. Payments & Fees</a></li>
+                        <li><a href="#cancellation">7. Cancellation Policy</a></li>
+                        <li><a href="#disputes">8. Dispute Resolution</a></li>
+                        <li><a href="#liability">9. Liability & Insurance</a></li>
+                        <li><a href="#conduct">10. Client Conduct</a></li>
+                        <li><a href="#privacy">11. Privacy & Data</a></li>
+                        <li><a href="#termination">12. Termination</a></li>
+                        <li><a href="#changes">13. Changes to Terms</a></li>
+                        <li><a href="#contact">14. Contact Us</a></li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="terms-content">
+                <!-- Section 1 -->
+                <section id="introduction" class="term-section">
+                    <h2><span class="section-number">1.</span> Introduction</h2>
+                    <div class="section-content">
+                        <p>Welcome to ErrandGo! These Terms and Conditions ("Terms") govern your use of the ErrandGo platform as a Client. By creating an account and using our services, you agree to be bound by these Terms.</p>
+
+                        <div class="important-note client-note">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                <h4>For Clients Only</h4>
+                                <p>These terms apply specifically to users who create errand requests (Clients). If you want to become a Runner (someone who completes errands), different terms apply.</p>
+                            </div>
+                        </div>
+
+                        <div class="platform-overview">
+                            <h3><i class="fas fa-info-circle"></i> What is ErrandGo?</h3>
+                            <p>ErrandGo is a technology platform that connects:</p>
+                            <div class="connection-flow">
+                                <div class="connection-item">
+                                    <div class="connection-icon client">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <h4>Clients</h4>
+                                    <p>People who need tasks done</p>
+                                </div>
+                                <div class="connection-arrow">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div class="connection-item">
+                                    <div class="connection-icon platform">
+                                        <i class="fas fa-running"></i>
+                                    </div>
+                                    <h4>ErrandGo</h4>
+                                    <p>Our matching platform</p>
+                                </div>
+                                <div class="connection-arrow">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div class="connection-item">
+                                    <div class="connection-icon runner">
+                                        <i class="fas fa-biking"></i>
+                                    </div>
+                                    <h4>Runners</h4>
+                                    <p>Independent task completers</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2 -->
+                <section id="definitions" class="term-section">
+                    <h2><span class="section-number">2.</span> Key Definitions</h2>
+                    <div class="section-content">
+                        <div class="definition-grid">
+                            <div class="definition-card">
+                                <div class="definition-header">
+                                    <i class="fas fa-user"></i>
+                                    <h4>Client</h4>
+                                </div>
+                                <p>You! A registered user who requests and pays for errand services through the Platform.</p>
+                            </div>
+                            <div class="definition-card">
+                                <div class="definition-header">
+                                    <i class="fas fa-running"></i>
+                                    <h4>Runner</h4>
+                                </div>
+                                <p>An independent contractor registered on ErrandGo who completes errands for Clients.</p>
+                            </div>
+                            <div class="definition-card">
+                                <div class="definition-header">
+                                    <i class="fas fa-tasks"></i>
+                                    <h4>Errand</h4>
+                                </div>
+                                <p>A task, chore, or delivery requested by a Client and completed by a Runner.</p>
+                            </div>
+                            <div class="definition-card">
+                                <div class="definition-header">
+                                    <i class="fas fa-handshake"></i>
+                                    <h4>Service Agreement</h4>
+                                </div>
+                                <p>The agreement between you and a Runner for a specific errand.</p>
+                            </div>
+                            <div class="definition-card">
+                                <div class="definition-header">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <h4>Platform Fee</h4>
+                                </div>
+                                <p>Our service charge for providing the matching platform. Free for clients</p>
+                            </div>
+                            <div class="definition-card">
+                                <div class="definition-header">
+                                    <i class="fas fa-star"></i>
+                                    <h4>Rating System</h4>
+                                </div>
+                                <p>Our 1-5 star rating system for Clients and Runners to rate each other.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3 -->
+                <section id="eligibility" class="term-section">
+                    <h2><span class="section-number">3.</span> Client Eligibility</h2>
+                    <div class="section-content">
+                        <div class="eligibility-requirements">
+                            <div class="requirement-card">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-birthday-cake"></i>
+                                </div>
+                                <div class="requirement-content">
+                                    <h4>Age Requirement</h4>
+                                    <p>You must be <strong>at least 16 years old</strong> to use ErrandGo as a Client.</p>
+                                    <div class="requirement-note">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>By registering, you confirm you meet this age requirement</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="requirement-card">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                                <div class="requirement-content">
+                                    <h4>Identity Verification</h4>
+                                    <p>You must provide accurate personal information during registration.</p>
+                                    <div class="requirement-note">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>Fake accounts will be immediately suspended or investigated</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="requirement-card">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="requirement-content">
+                                    <h4>Location</h4>
+                                    <p>You must be in a location where ErrandGo services are available.</p>
+                                    <div class="requirement-note">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Currently available in major cities across Zimbabwe</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="requirement-card">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-ban"></i>
+                                </div>
+                                <div class="requirement-content">
+                                    <h4>No Suspensions</h4>
+                                    <p>You must not have been previously suspended from ErrandGo.</p>
+                                    <div class="requirement-note">
+                                        <i class="fas fa-gavel"></i>
+                                        <span>One account per person - no multiple accounts allowed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4 -->
+                <section id="account" class="term-section">
+                    <h2><span class="section-number">4.</span> Your Account</h2>
+                    <div class="section-content">
+                        <div class="account-responsibilities">
+                            <h3><i class="fas fa-user-shield"></i> Your Responsibilities</h3>
+                            <div class="responsibility-list">
+                                <div class="responsibility-item">
+                                    <div class="check-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Keep Information Updated</h4>
+                                        <p>Ensure your contact information, location, and preferences are always current.</p>
+                                    </div>
+                                </div>
+                                <div class="responsibility-item">
+                                    <div class="check-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Password Security</h4>
+                                        <p>Keep your password secure. Never share it with anyone.</p>
+                                    </div>
+                                </div>
+                                <div class="responsibility-item">
+                                    <div class="check-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Account Activity</h4>
+                                        <p>You're responsible for all activity under your account.</p>
+                                    </div>
+                                </div>
+                                <div class="responsibility-item">
+                                    <div class="check-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Report Suspicious Activity</h4>
+                                        <p>Immediately report any unauthorized access to your account.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="warning-box">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <h4>Security Alert</h4>
+                                <p>ErrandGo will never ask for your password. If someone contacts you claiming to be from ErrandGo and asks for your password, it's a scam.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5 -->
+                <section id="posting-errands" class="term-section">
+                    <h2><span class="section-number">5.</span> Posting Errands</h2>
+                    <div class="section-content">
+                        <div class="errand-guidelines">
+                            <h3><i class="fas fa-clipboard-list"></i> How to Post an Errand</h3>
+                            <div class="guideline-steps">
+                                <div class="step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h4>Clear Description</h4>
+                                        <p>Describe exactly what you need done. Be specific about requirements, quantities, and preferences.</p>
+                                    </div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h4>Set Budget</h4>
+                                        <p>Specify how much you're willing to pay. You can also mark it as "Negotiable."</p>
+                                    </div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h4>Location Details</h4>
+                                        <p>Provide accurate pickup and delivery addresses with any special instructions.</p>
+                                    </div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <h4>Timeline</h4>
+                                        <p>Specify when you need the errand completed (ASAP, specific time, or deadline).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prohibited-errands">
+                            <h3><i class="fas fa-ban"></i> What You CANNOT Request</h3>
+                            <div class="prohibited-list">
+                                <div class="prohibited-item">
+                                    <i class="fas fa-gavel"></i>
+                                    <span>Illegal activities or items</span>
+                                </div>
+                                <div class="prohibited-item">
+                                    <i class="fas fa-prescription-bottle"></i>
+                                    <span>Prescription drugs or medications</span>
+                                </div>
+                                <div class="prohibited-item">
+                                    <i class="fas fa-wine-bottle"></i>
+                                    <span>Alcohol for minors</span>
+                                </div>
+                                <div class="prohibited-item">
+                                    <i class="fas fa-user-secret"></i>
+                                    <span>Surveillance or spying</span>
+                                </div>
+                                <div class="prohibited-item">
+                                    <i class="fas fa-fist-raised"></i>
+                                    <span>Violent or dangerous tasks</span>
+                                </div>
+                                <div class="prohibited-item">
+                                    <i class="fas fa-heart-broken"></i>
+                                    <span>Relationship-related tasks (like spying on partners)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="success-tips">
+                            <h3><i class="fas fa-lightbulb"></i> Tips for Successful Errands</h3>
+                            <div class="tips-grid">
+                                <div class="tip">
+                                    <i class="fas fa-camera"></i>
+                                    <h4>Use Photos</h4>
+                                    <p>Add photos to show exactly what you need</p>
+                                </div>
+                                <div class="tip">
+                                    <i class="fas fa-clock"></i>
+                                    <h4>Be Realistic</h4>
+                                    <p>Give reasonable deadlines</p>
+                                </div>
+                                <div class="tip">
+                                    <i class="fas fa-comments"></i>
+                                    <h4>Communicate</h4>
+                                    <p>Respond promptly to Runner questions</p>
+                                </div>
+                                <div class="tip">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <h4>Fair Payment</h4>
+                                    <p>Offer competitive rates for good service</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 6 -->
+                <section id="payments" class="term-section">
+                    <h2><span class="section-number">6.</span> Payments & Fees</h2>
+                    <div class="section-content">
+                        <div class="payment-explanation">
+                            <h3><i class="fas fa-money-check-alt"></i> How Payments Work</h3>
+                            <div class="payment-flow">
+                                <div class="flow-step">
+                                    <div class="flow-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="flow-content">
+                                        <h4>You Pay Runner</h4>
+                                        <p>Pay the Runner directly when they complete your errand</p>
+                                        <div class="amount-display">
+                                            <span class="amount-label">You pay:</span>
+                                            <span class="amount">100%</span>
+                                            <span class="amount-note">of agreed price</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-arrow">
+                                    <i class="fas fa-long-arrow-alt-down"></i>
+                                </div>
+
+                                <div class="flow-step">
+                                    <div class="flow-icon">
+                                        <i class="fas fa-running"></i>
+                                    </div>
+                                    <div class="flow-content">
+                                        <h4>Runner Pays Us</h4>
+                                        <p>Runner pays ErrandGo platform fees weekly</p>
+                                        <div class="amount-display">
+                                            <span class="amount-label">Runner pays:</span>
+                                            <span class="amount fee">10%</span>
+                                            <span class="amount-note">platform fee</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-arrow">
+                                    <i class="fas fa-long-arrow-alt-down"></i>
+                                </div>
+
+                                <div class="flow-step">
+                                    <div class="flow-icon">
+                                        <i class="fas fa-wallet"></i>
+                                    </div>
+                                    <div class="flow-content">
+                                        <h4>Runner Keeps</h4>
+                                        <p>Runner keeps the remaining amount</p>
+                                        <div class="amount-display">
+                                            <span class="amount-label">Runner keeps:</span>
+                                            <span class="amount runner">90%</span>
+                                            <span class="amount-note">of earnings</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-notes">
+                            <div class="note">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <div>
+                                    <h4>Payment Methods</h4>
+                                    <p>You can pay Runners using cash, mobile money, or bank transfer as agreed between you and the Runner.</p>
+                                </div>
+                            </div>
+                            <div class="note">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div>
+                                    <h4>Payment Disputes</h4>
+                                    <p>If there's a payment dispute, contact ErrandGo support immediately. Do not pay if the service was not rendered as agreed.</p>
+                                </div>
+                            </div>
+                            <div class="note">
+                                <i class="fas fa-receipt"></i>
+                                <div>
+                                    <h4>Receipts</h4>
+                                    <p>Always get a receipt when paying. You can use the in-app receipt feature or ask for a handwritten one.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 7 -->
+                <section id="cancellation" class="term-section">
+                    <h2><span class="section-number">7.</span> Cancellation Policy</h2>
+                    <div class="section-content">
+                        <div class="cancellation-rules">
+                            <h3><i class="fas fa-calendar-times"></i> Cancellation Rules</h3>
+                            <div class="rule-grid">
+                                <div class="rule free-cancellation">
+                                    <div class="rule-header">
+                                        <i class="fas fa-check-circle"></i>
+                                        <h4>Free Cancellation</h4>
+                                    </div>
+                                    <p>You can cancel for free before a Runner accepts your errand.</p>
+                                    <div class="rule-timing">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Before acceptance</span>
+                                    </div>
+                                </div>
+
+                                <div class="rule late-cancellation">
+                                    <div class="rule-header">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <h4>Late Cancellation</h4>
+                                    </div>
+                                    <p>Cancelling after acceptance may incur a small fee and affect your rating.</p>
+                                    <div class="rule-timing">
+                                        <i class="fas fa-clock"></i>
+                                        <span>After acceptance</span>
+                                    </div>
+                                </div>
+
+                                <div class="rule runner-cancels">
+                                    <div class="rule-header">
+                                        <i class="fas fa-user-times"></i>
+                                        <h4>If Runner Cancels</h4>
+                                    </div>
+                                    <p>If a Runner cancels after accepting, you'll be notified immediately and can repost your errand.</p>
+                                    <div class="rule-timing">
+                                        <i class="fas fa-sync-alt"></i>
+                                        <span>Automatic reposting available</span>
+                                    </div>
+                                </div>
+
+                                <div class="rule emergency">
+                                    <div class="rule-header">
+                                        <i class="fas fa-ambulance"></i>
+                                        <h4>Emergency Cancellation</h4>
+                                    </div>
+                                    <p>In case of emergencies, contact support immediately for free cancellation.</p>
+                                    <div class="rule-timing">
+                                        <i class="fas fa-phone-alt"></i>
+                                        <span>Contact support</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="refund-policy">
+                            <h3><i class="fas fa-undo-alt"></i> Refund Policy</h3>
+                            <div class="refund-details">
+                                <div class="refund-scenario">
+                                    <h4>Service Not Rendered</h4>
+                                    <p>Full refund if Runner doesn't complete the service</p>
+                                    <span class="refund-amount">100% refund</span>
+                                </div>
+                                <div class="refund-scenario">
+                                    <h4>Poor Service</h4>
+                                    <p>Partial refund based on service quality assessment</p>
+                                    <span class="refund-amount">Partial refund</span>
+                                </div>
+                                <div class="refund-scenario">
+                                    <h4>Wrong Item</h4>
+                                    <p>Refund or replacement for incorrect items delivered</p>
+                                    <span class="refund-amount">Item-specific</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 8 -->
+                <section id="disputes" class="term-section">
+                    <h2><span class="section-number">8.</span> Dispute Resolution</h2>
+                    <div class="section-content">
+                        <div class="dispute-process">
+                            <h3><i class="fas fa-handshake"></i> Resolving Issues</h3>
+                            <div class="process-steps">
+                                <div class="process-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-comment-alt"></i>
+                                    </div>
+                                    <div class="step-details">
+                                        <h4>Step 1: Talk to Runner</h4>
+                                        <p>First, try to resolve the issue directly with the Runner through our chat system.</p>
+                                        <div class="step-time">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Within 24 hours of service</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="process-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-headset"></i>
+                                    </div>
+                                    <div class="step-details">
+                                        <h4>Step 2: Contact Support</h4>
+                                        <p>If direct resolution fails, contact ErrandGo support with evidence (photos, messages).</p>
+                                        <div class="step-time">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Within 48 hours of service</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="process-step">
+                                    <div class="step-icon">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <div class="step-details">
+                                        <h4>Step 3: Formal Resolution</h4>
+                                        <p>ErrandGo will mediate and make a fair decision based on evidence from both sides.</p>
+                                        <div class="step-time">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Within 5 business days</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="evidence-tips">
+                            <h3><i class="fas fa-camera"></i> What Evidence Helps</h3>
+                            <div class="evidence-grid">
+                                <div class="evidence-item">
+                                    <i class="fas fa-comment"></i>
+                                    <h4>Chat History</h4>
+                                    <p>Save all chat messages with the Runner</p>
+                                </div>
+                                <div class="evidence-item">
+                                    <i class="fas fa-image"></i>
+                                    <h4>Photos</h4>
+                                    <p>Take photos of items before and after</p>
+                                </div>
+                                <div class="evidence-item">
+                                    <i class="fas fa-receipt"></i>
+                                    <h4>Receipts</h4>
+                                    <p>Keep all payment receipts</p>
+                                </div>
+                                <div class="evidence-item">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    <h4>Location</h4>
+                                    <p>Share location details if relevant</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 9 -->
+                <section id="liability" class="term-section">
+                    <h2><span class="section-number">9.</span> Liability & Insurance</h2>
+                    <div class="section-content">
+                        <div class="liability-disclaimer">
+                            <div class="disclaimer-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Important Liability Information</h3>
+                            </div>
+                            <div class="disclaimer-content">
+                                <p>ErrandGo is a platform that connects you with independent Runners. We are not responsible for:</p>
+                                <div class="liability-list">
+                                    <div class="liability-item">
+                                        <i class="fas fa-times"></i>
+                                        <span>Quality of service provided by Runners</span>
+                                    </div>
+                                    <div class="liability-item">
+                                        <i class="fas fa-times"></i>
+                                        <span>Damaged, lost, or incorrect items</span>
+                                    </div>
+                                    <div class="liability-item">
+                                        <i class="fas fa-times"></i>
+                                        <span>Personal injuries or accidents</span>
+                                    </div>
+                                    <div class="liability-item">
+                                        <i class="fas fa-times"></i>
+                                        <span>Delays in service completion</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="insurance-info">
+                            <h3><i class="fas fa-shield-alt"></i> Insurance Coverage</h3>
+                            <div class="insurance-details">
+                                <div class="coverage-item">
+                                    <h4>Valuables</h4>
+                                    <p>For valuable items, consider purchasing additional insurance. Runners are independent contractors and may not have insurance coverage for high-value items.</p>
+                                </div>
+                                <div class="coverage-item">
+                                    <h4>Your Responsibilities</h4>
+                                    <ul>
+                                        <li>Clearly state item values when posting errands</li>
+                                        <li>Consider insurance for items over $100</li>
+                                        <li>Keep receipts for valuable items</li>
+                                        <li>Take photos of items before handing them to Runners</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="safety-tips">
+                            <h3><i class="fas fa-user-shield"></i> Safety First</h3>
+                            <div class="safety-grid">
+                                <div class="safety-tip">
+                                    <i class="fas fa-home"></i>
+                                    <h4>Meet Safely</h4>
+                                    <p>Meet in public places or your doorway, not inside your home</p>
+                                </div>
+                                <div class="safety-tip">
+                                    <i class="fas fa-eye"></i>
+                                    <h4>Verify Identity</h4>
+                                    <p>Check the Runner's profile photo matches the person</p>
+                                </div>
+                                <div class="safety-tip">
+                                    <i class="fas fa-phone-alt"></i>
+                                    <h4>Use In-App Communication</h4>
+                                    <p>Keep all communication in the app for safety records</p>
+                                </div>
+                                <div class="safety-tip">
+                                    <i class="fas fa-star"></i>
+                                    <h4>Check Ratings</h4>
+                                    <p>Only use Runners with good ratings and reviews</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 10 -->
+                <section id="conduct" class="term-section">
+                    <h2><span class="section-number">10.</span> Client Conduct</h2>
+                    <div class="section-content">
+                        <div class="conduct-rules">
+                            <h3><i class="fas fa-user-check"></i> Expected Behavior</h3>
+                            <div class="rules-grid">
+                                <div class="rule-card positive">
+                                    <div class="rule-icon">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </div>
+                                    <div class="rule-content">
+                                        <h4>Be Respectful</h4>
+                                        <p>Treat Runners with respect and courtesy</p>
+                                    </div>
+                                </div>
+                                <div class="rule-card positive">
+                                    <div class="rule-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="rule-content">
+                                        <h4>Be Punctual</h4>
+                                        <p>Be available when Runners arrive</p>
+                                    </div>
+                                </div>
+                                <div class="rule-card positive">
+                                    <div class="rule-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="rule-content">
+                                        <h4>Communicate Clearly</h4>
+                                        <p>Provide clear instructions and respond promptly</p>
+                                    </div>
+                                </div>
+                                <div class="rule-card positive">
+                                    <div class="rule-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="rule-content">
+                                        <h4>Pay Promptly</h4>
+                                        <p>Pay immediately when service is completed</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prohibited-conduct">
+                            <h3><i class="fas fa-user-slash"></i> Prohibited Behavior</h3>
+                            <div class="prohibited-grid">
+                                <div class="prohibited-card">
+                                    <div class="prohibited-icon">
+                                        <i class="fas fa-ban"></i>
+                                    </div>
+                                    <div class="prohibited-content">
+                                        <h4>No Harassment</h4>
+                                        <p>Never harass, threaten, or abuse Runners</p>
+                                    </div>
+                                </div>
+                                <div class="prohibited-card">
+                                    <div class="prohibited-icon">
+                                        <i class="fas fa-ban"></i>
+                                    </div>
+                                    <div class="prohibited-content">
+                                        <h4>No Discrimination</h4>
+                                        <p>Don't discriminate based on race, gender, etc.</p>
+                                    </div>
+                                </div>
+                                <div class="prohibited-card">
+                                    <div class="prohibited-icon">
+                                        <i class="fas fa-ban"></i>
+                                    </div>
+                                    <div class="prohibited-content">
+                                        <h4>No False Reports</h4>
+                                        <p>Don't make false complaints against Runners</p>
+                                    </div>
+                                </div>
+                                <div class="prohibited-card">
+                                    <div class="prohibited-icon">
+                                        <i class="fas fa-ban"></i>
+                                    </div>
+                                    <div class="prohibited-content">
+                                        <h4>No Off-Platform Payments</h4>
+                                        <p>Don't try to pay Runners outside the platform</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="consequences">
+                            <h3><i class="fas fa-gavel"></i> Consequences for Bad Behavior</h3>
+                            <div class="consequences-list">
+                                <div class="consequence-item">
+                                    <div class="severity low">
+                                        <span>Warning</span>
+                                    </div>
+                                    <p>First minor offense - you'll receive a warning</p>
+                                </div>
+                                <div class="consequence-item">
+                                    <div class="severity medium">
+                                        <span>Suspension</span>
+                                    </div>
+                                    <p>Repeated offenses - temporary account suspension</p>
+                                </div>
+                                <div class="consequence-item">
+                                    <div class="severity high">
+                                        <span>Ban</span>
+                                    </div>
+                                    <p>Serious offenses - permanent ban from platform</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 11 -->
+                <section id="privacy" class="term-section">
+                    <h2><span class="section-number">11.</span> Privacy & Data</h2>
+                    <div class="section-content">
+                        <div class="privacy-overview">
+                            <h3><i class="fas fa-lock"></i> How We Protect Your Privacy</h3>
+                            <p>We take your privacy seriously. Here's what you need to know:</p>
+
+                            <div class="privacy-points">
+                                <div class="privacy-point">
+                                    <i class="fas fa-eye"></i>
+                                    <div>
+                                        <h4>What We See</h4>
+                                        <p>We can see your messages with Runners for safety monitoring</p>
+                                    </div>
+                                </div>
+                                <div class="privacy-point">
+                                    <i class="fas fa-eye-slash"></i>
+                                    <div>
+                                        <h4>What We Don't See</h4>
+                                        <p>We don't see your payment details when you pay Runners directly</p>
+                                    </div>
+                                </div>
+                                <div class="privacy-point">
+                                    <i class="fas fa-share-alt"></i>
+                                    <div>
+                                        <h4>Information Sharing</h4>
+                                        <p>We share your contact info with Runners only after they accept your errand</p>
+                                    </div>
+                                </div>
+                                <div class="privacy-point">
+                                    <i class="fas fa-trash-alt"></i>
+                                    <div>
+                                        <h4>Data Deletion</h4>
+                                        <p>You can request account deletion anytime, but some data may be retained for legal purposes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data-rights">
+                            <h3><i class="fas fa-user-cog"></i> Your Data Rights</h3>
+                            <div class="rights-grid">
+                                <div class="right">
+                                    <i class="fas fa-download"></i>
+                                    <h4>Access Data</h4>
+                                    <p>Request a copy of all your data</p>
+                                </div>
+                                <div class="right">
+                                    <i class="fas fa-edit"></i>
+                                    <h4>Correct Data</h4>
+                                    <p>Update incorrect information</p>
+                                </div>
+                                <div class="right">
+                                    <i class="fas fa-trash"></i>
+                                    <h4>Delete Data</h4>
+                                    <p>Request data deletion</p>
+                                </div>
+                                <div class="right">
+                                    <i class="fas fa-ban"></i>
+                                    <h4>Opt-Out</h4>
+                                    <p>Opt out of marketing emails</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 12 -->
+                <section id="termination" class="term-section">
+                    <h2><span class="section-number">12.</span> Termination</h2>
+                    <div class="section-content">
+                        <div class="termination-options">
+                            <div class="option-card">
+                                <div class="option-header">
+                                    <i class="fas fa-user-times"></i>
+                                    <h4>You Can Leave Anytime</h4>
+                                </div>
+                                <div class="option-content">
+                                    <p>You can delete your account anytime through account settings.</p>
+                                    <div class="option-note">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Outstanding payments must be settled first</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="option-card">
+                                <div class="option-header">
+                                    <i class="fas fa-ban"></i>
+                                    <h4>We Can Suspend Accounts</h4>
+                                </div>
+                                <div class="option-content">
+                                    <p>We may suspend or terminate accounts for violations of these terms.</p>
+                                    <div class="option-note">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>No refunds for platform fees if terminated for cause</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="after-termination">
+                            <h3><i class="fas fa-history"></i> After Termination</h3>
+                            <div class="after-list">
+                                <div class="after-item">
+                                    <i class="fas fa-comment-slash"></i>
+                                    <div>
+                                        <h4>No More Errands</h4>
+                                        <p>You cannot post new errands</p>
+                                    </div>
+                                </div>
+                                <div class="after-item">
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <div>
+                                        <h4>Ratings Remain</h4>
+                                        <p>Your ratings and reviews stay visible</p>
+                                    </div>
+                                </div>
+                                <div class="after-item">
+                                    <i class="fas fa-file-contract"></i>
+                                    <div>
+                                        <h4>Legal Obligations</h4>
+                                        <p>You're still responsible for completed services</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 13 -->
+                <section id="changes" class="term-section">
+                    <h2><span class="section-number">13.</span> Changes to Terms</h2>
+                    <div class="section-content">
+                        <div class="changes-process">
+                            <h3><i class="fas fa-sync-alt"></i> How We Update Terms</h3>
+                            <div class="update-steps">
+                                <div class="update-step">
+                                    <div class="update-number">1</div>
+                                    <div class="update-content">
+                                        <h4>We Update Terms</h4>
+                                        <p>We may update these terms to improve our services or comply with laws</p>
+                                    </div>
+                                </div>
+                                <div class="update-step">
+                                    <div class="update-number">2</div>
+                                    <div class="update-content">
+                                        <h4>We Notify You</h4>
+                                        <p>We'll notify you by email and in-app notification at least 30 days before changes take effect</p>
+                                    </div>
+                                </div>
+                                <div class="update-step">
+                                    <div class="update-number">3</div>
+                                    <div class="update-content">
+                                        <h4>You Choose</h4>
+                                        <p>Continue using ErrandGo to accept changes, or stop using our services if you don't agree</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-preferences">
+                            <h3><i class="fas fa-bell"></i> Stay Informed</h3>
+                            <div class="preferences-grid">
+                                <div class="preference">
+                                    <i class="fas fa-envelope"></i>
+                                    <h4>Email Updates</h4>
+                                    <p>Ensure your email is current to receive updates</p>
+                                </div>
+                                <div class="preference">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <h4>App Updates</h4>
+                                    <p>Keep your app updated for latest notifications</p>
+                                </div>
+                                <div class="preference">
+                                    <i class="fas fa-question-circle"></i>
+                                    <h4>Check Back</h4>
+                                    <p>Review terms periodically for changes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 14 -->
+                <section id="contact" class="term-section">
+                    <h2><span class="section-number">14.</span> Contact Us</h2>
+                    <div class="section-content">
+                        <div class="contact-methods">
+                            <h3><i class="fas fa-headset"></i> Need Help?</h3>
+                            <div class="method-grid">
+                                <div class="method-card">
+                                    <div class="method-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h4>Email Support</h4>
+                                        <a href="mailto:support@errandgo.com">support@errandgo.com</a>
+                                        <p>Response within 24 hours</p>
+                                    </div>
+                                </div>
+
+                                <div class="method-card">
+                                    <div class="method-icon">
+                                        <i class="fas fa-phone-alt"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h4>Phone Support</h4>
+                                        <a href="tel:+263779103900">+263 779 103 900</a>
+                                        <p>Mon-Fri, 8AM-6PM</p>
+                                    </div>
+                                </div>
+
+                                <div class="method-card">
+                                    <div class="method-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h4>In-App Chat</h4>
+                                        <p>Go to Help section in app</p>
+                                        <p>24/7 automated support</p>
+                                    </div>
+                                </div>
+
+                                <div class="method-card">
+                                    <div class="method-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="method-content">
+                                        <h4>Visit Us</h4>
+                                        <p>Btwn 9th & 8th Ave along Joshua Nkomo </p>
+                                        <p>Bulawayo, Zimbabwe</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="emergency-contact">
+                            <h3><i class="fas fa-ambulance"></i> Emergency Contacts</h3>
+                            <div class="emergency-grid">
+                                <div class="emergency-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <div>
+                                        <h4>Police Emergency</h4>
+                                        <p>999 (Zimbabwe)</p>
+                                    </div>
+                                </div>
+                                <div class="emergency-item">
+                                    <i class="fas fa-first-aid"></i>
+                                    <div>
+                                        <h4>Medical Emergency</h4>
+                                        <p>994 (Zimbabwe)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Acceptance Footer -->
+                <div class="acceptance-footer">
+                    <div class="acceptance-content">
+                        <i class="fas fa-file-signature"></i>
+                        <div>
+                            <h3>Your Agreement</h3>
+                            <p>By using ErrandGo as a Client, you agree to these Terms and Conditions.</p>
+                            <p class="effective-date">Effective Date: <span id="effectiveDate">{{ current_date.strftime('%B %d, %Y') }}</span></p>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('signup') }}" class="btn-back">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Back to Sign Up
+                                </a>
+                                <button class="btn-print" id="printTerms">
+                                    <i class="fas fa-print"></i>
+                                    Print Terms
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Top Button -->
+            <button class="back-to-top" id="backToTop">
+                <i class="fas fa-arrow-up"></i>
+                Back to Top
+            </button>
+        </div>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --primary-200: #A5D6A7;
+    --client-color: #4CAF50;  /* Changed from blue to green */
+    --client-light: #66BB6A;  /* Changed from blue to green */
+    --client-dark: #388E3C;   /* Changed from blue to green */
+    --runner-color: #FF9800;
+    --runner-light: #FFB74D;
+    --runner-dark: #F57C00;
+    --error-color: #f44336;
+    --warning-color: #FF9800;
+    --success-color: #4CAF50;
+    --info-color: #4CAF50;    /* Changed from blue to green */
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+    --shadow-light: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+#terms-page {
+    min-height: 100vh;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.back-button {
+    background: var(--primary-50);
+    color: var(--primary-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.back-button:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateX(-2px);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.logo h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mobile-main {
+    padding: 30px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.terms-container {
+    width: 100%;
+    max-width: 1000px;
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-light);
+    position: relative;
+}
+
+/* Header Styles */
+.terms-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--border-light);
+}
+
+.terms-header .header-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--client-color);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.terms-header .header-content h1 i {
+    color: var(--client-color);
+    font-size: 28px;
+}
+
+.last-updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary-50);
+    color: var(--primary-dark);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.acceptance-badge {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--client-color), var(--client-light));
+    color: white;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+}
+
+/* Quick Summary */
+.quick-summary {
+    background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 30px;
+    border: 1px solid var(--primary-200);
+}
+
+.quick-summary h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.quick-summary h3 i {
+    color: var(--primary-color);
+}
+
+.summary-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.summary-point {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.summary-point i {
+    color: var(--client-color);
+    font-size: 16px;
+}
+
+.summary-point span {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Table of Contents */
+.toc-container {
+    background: var(--client-color);
+    border-radius: 12px;
+    margin-bottom: 40px;
+    overflow: hidden;
+    color: white;
+}
+
+.toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    cursor: pointer;
+}
+
+.toc-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toc-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toc-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.toc-content {
+    padding: 0 24px;
+    max-height: 400px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toc-content.collapsed {
+    max-height: 0;
+    padding: 0 24px;
+    overflow: hidden;
+}
+
+.toc-content ol {
+    list-style: none;
+    counter-reset: item;
+    padding: 24px 0;
+}
+
+.toc-content li {
+    counter-increment: item;
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 32px;
+}
+
+.toc-content li:before {
+    content: counter(item) ".";
+    position: absolute;
+    left: 0;
+    font-weight: 600;
+    color: white;
+}
+
+.toc-content a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: block;
+    padding: 4px 0;
+}
+
+.toc-content a:hover {
+    color: var(--primary-200);
+    padding-left: 4px;
+}
+
+/* Terms Content */
+.terms-content {
+    margin-bottom: 60px;
+}
+
+.term-section {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.term-section:last-of-type {
+    border-bottom: none;
+}
+
+.term-section h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-number {
+    color: var(--client-color);
+    font-weight: 800;
+}
+
+.section-content {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.section-content p {
+    margin-bottom: 20px;
+}
+
+/* Important Notes */
+.client-note {
+    background: var(--primary-50);
+    border: 1px solid var(--primary-100);
+    border-left: 4px solid var(--client-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 24px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.client-note i {
+    color: var(--client-color);
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.client-note h4 {
+    color: var(--client-color);
+    margin-bottom: 8px;
+}
+
+.client-note p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.warning-box {
+    background: #FFF3E0;
+    border: 1px solid #FFE0B2;
+    border-left: 4px solid #FF9800;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 24px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.warning-box i {
+    color: #FF9800;
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.warning-box h4 {
+    color: #EF6C00;
+    margin-bottom: 8px;
+}
+
+.warning-box p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+/* Connection Flow */
+.connection-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 24px 0;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.connection-item {
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+}
+
+.connection-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 24px;
+    color: white;
+}
+
+.connection-icon.client {
+    background: var(--client-color);
+}
+
+.connection-icon.platform {
+    background: var(--primary-color);
+}
+
+.connection-icon.runner {
+    background: var(--runner-color);
+}
+
+.connection-arrow {
+    color: var(--text-light);
+    font-size: 20px;
+}
+
+/* Definition Grid */
+.definition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.definition-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.definition-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+    border-color: var(--client-color);
+}
+
+.definition-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.definition-header i {
+    color: var(--client-color);
+    font-size: 20px;
+}
+
+.definition-header h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.definition-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Eligibility Requirements */
+.eligibility-requirements {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.requirement-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    transition: all 0.2s ease;
+}
+
+.requirement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+.requirement-icon {
+    color: var(--client-color);
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.requirement-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.requirement-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.requirement-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.requirement-note i {
+    font-size: 14px;
+}
+
+/* Steps and Processes */
+.guideline-steps,
+.process-steps,
+.update-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.step,
+.process-step,
+.update-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+}
+
+.step-number,
+.update-number {
+    width: 40px;
+    height: 40px;
+    background: var(--client-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--client-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.step-content h4,
+.process-step h4,
+.update-step h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.step-content p,
+.process-step p,
+.update-step p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.step-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* Payment Flow */
+.payment-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.flow-step {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.flow-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--client-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.flow-content {
+    flex: 1;
+}
+
+.flow-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.flow-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.amount-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.amount-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--client-color);
+}
+
+.amount.fee {
+    color: var(--error-color);
+}
+
+.amount.runner {
+    color: var(--runner-color);
+}
+
+.amount-note {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: normal;
+}
+
+.flow-arrow {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 20px;
+}
+
+/* Grid Layouts */
+.prohibited-list,
+.liability-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.prohibited-item,
+.liability-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.prohibited-item i,
+.liability-item i {
+    color: var(--error-color);
+    font-size: 16px;
+}
+
+.prohibited-item span,
+.liability-item span {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.tips-grid,
+.evidence-grid,
+.safety-grid,
+.rights-grid,
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.tip,
+.evidence-item,
+.safety-tip,
+.right,
+.preference {
+    text-align: center;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.tip:hover,
+.evidence-item:hover,
+.safety-tip:hover,
+.right:hover,
+.preference:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+    border-color: var(--client-color);
+}
+
+.tip i,
+.evidence-item i,
+.safety-tip i,
+.right i,
+.preference i {
+    font-size: 32px;
+    color: var(--client-color);
+    margin-bottom: 12px;
+}
+
+.tip h4,
+.evidence-item h4,
+.safety-tip h4,
+.right h4,
+.preference h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.tip p,
+.evidence-item p,
+.safety-tip p,
+.right p,
+.preference p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Rule Grids */
+.rule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.rule {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.rule.free-cancellation {
+    border-top: 4px solid var(--success-color);
+}
+
+.rule.late-cancellation {
+    border-top: 4px solid var(--warning-color);
+}
+
+.rule.runner-cancels {
+    border-top: 4px solid var(--info-color);
+}
+
+.rule.emergency {
+    border-top: 4px solid var(--error-color);
+}
+
+.rule-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.rule-header i {
+    font-size: 20px;
+}
+
+.rule.free-cancellation .rule-header i {
+    color: var(--success-color);
+}
+
+.rule.late-cancellation .rule-header i {
+    color: var(--warning-color);
+}
+
+.rule.runner-cancels .rule-header i {
+    color: var(--info-color);
+}
+
+.rule.emergency .rule-header i {
+    color: var(--error-color);
+}
+
+.rule-header h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.rule p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.rule-timing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* Consequences */
+.consequences-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.consequence-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.severity {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+}
+
+.severity.low {
+    background: var(--success-color);
+}
+
+.severity.medium {
+    background: var(--warning-color);
+}
+
+.severity.high {
+    background: var(--error-color);
+}
+
+.consequence-item p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Method Grids */
+.method-grid,
+.emergency-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.method-card,
+.emergency-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.method-card:hover,
+.emergency-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+    border-color: var(--client-color);
+}
+
+.method-card {
+    text-align: center;
+}
+
+.method-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--client-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 24px;
+}
+
+.method-content h4,
+.emergency-item h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.method-content a {
+    color: var(--client-color);
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.method-content a:hover {
+    text-decoration: underline;
+}
+
+.method-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 4px 0;
+}
+
+.emergency-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.emergency-item i {
+    color: var(--error-color);
+    font-size: 24px;
+}
+
+.emergency-item h4 {
+    margin: 0 0 4px 0;
+}
+
+.emergency-item p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Acceptance Footer */
+.acceptance-footer {
+    background: linear-gradient(135deg, var(--client-color), var(--client-dark));
+    border-radius: 12px;
+    padding: 40px;
+    margin-top: 48px;
+    text-align: center;
+    color: white;
+}
+
+.acceptance-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.acceptance-content i {
+    font-size: 48px;
+}
+
+.acceptance-content h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.acceptance-content p {
+    font-size: 16px;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto 16px;
+}
+
+.effective-date {
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 24px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-back,
+.btn-print {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-print {
+    background: white;
+    color: var(--client-color);
+    border: none;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-print:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--client-color);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    z-index: 1000;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: var(--client-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);  /* Changed from blue to green */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .mobile-main {
+        padding: 20px;
+    }
+
+    .terms-container {
+        padding: 24px;
+    }
+
+    .terms-header .header-content h1 {
+        font-size: 24px;
+    }
+
+    .summary-points {
+        grid-template-columns: 1fr;
+    }
+
+    .connection-flow {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .connection-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+
+    .definition-grid,
+    .eligibility-requirements,
+    .rule-grid,
+    .method-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tips-grid,
+    .evidence-grid,
+    .safety-grid,
+    .rights-grid,
+    .preferences-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .payment-flow {
+        gap: 10px;
+    }
+
+    .flow-step {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .flow-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .terms-container {
+        padding: 16px;
+    }
+
+    .terms-header .header-content h1 {
+        font-size: 20px;
+    }
+
+    .term-section {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+    }
+
+    .tips-grid,
+    .evidence-grid,
+    .safety-grid,
+    .rights-grid,
+    .preferences-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .client-note,
+    .warning-box {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn-back,
+    .btn-print {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .back-to-top {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .back-button,
+    .back-to-top,
+    .btn-print,
+    .toc-toggle {
+        display: none !important;
+    }
+
+    .terms-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .acceptance-footer {
+        page-break-inside: avoid;
+    }
+
+    .term-section {
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Table of Contents Toggle
+    const tocToggle = document.getElementById('tocToggle');
+    const tocContent = document.getElementById('tocContent');
+
+    if (tocToggle && tocContent) {
+        tocToggle.addEventListener('click', function() {
+            tocContent.classList.toggle('collapsed');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        });
+    }
+
+    // Back to Top Button
+    const backToTop = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    });
+
+    if (backToTop) {
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // Smooth scrolling for table of contents links
+    document.querySelectorAll('.toc-content a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+
+            if (targetElement) {
+                // Close TOC on mobile
+                if (window.innerWidth < 768) {
+                    tocContent.classList.add('collapsed');
+                    const icon = tocToggle.querySelector('i');
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+
+                // Smooth scroll to target
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // Print functionality
+    const printBtn = document.getElementById('printTerms');
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            window.print();
+        });
+    }
+
+    // Highlight current section in TOC while scrolling
+    const sections = document.querySelectorAll('.term-section');
+    const navLinks = document.querySelectorAll('.toc-content a');
+
+    function highlightCurrentSection() {
+        let currentSection = '';
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+
+            if (window.pageYOffset >= (sectionTop - 150)) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${currentSection}`) {
+                link.classList.add('active');
+                link.style.fontWeight = '600';
+                link.style.color = '#E8F5E8';  /* Changed to green */
+            }
+        });
+    }
+
+    window.addEventListener('scroll', highlightCurrentSection);
+
+    // Remove JavaScript date setting since we're using server-side dates
+    // The dates are already set by Flask/Jinja2 in the template
+
+    // Add animation to cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all cards and sections
+    document.querySelectorAll('.definition-card, .requirement-card, .rule, .tip, .method-card').forEach(card => {
+        observer.observe(card);
+    });
+
+    // Add copy functionality for contact information
+    document.querySelectorAll('.method-content a[href^="mailto:"], .method-content a[href^="tel:"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Allow default behavior for mailto and tel links
+            return true;
+        });
+    });
+
+    // Add a simple animation for sections
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        sectionObserver.observe(section);
+    });
+});
+</script>
+{% endblock %}

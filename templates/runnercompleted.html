@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ErrandConnect - Completed Errands</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-light: #81C784;
+            --primary-dark: #388E3C;
+            --primary-50: #E8F5E9;
+            --primary-100: #C8E6C9;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --text-light: #9E9E9E;
+            --border: #E0E0E0;
+            --border-light: #EEEEEE;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-inset-left: env(safe-area-inset-left, 0px);
+            --safe-area-inset-right: env(safe-area-inset-right, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overscroll-behavior-y: none;
+        }
+
+        #completed-errands-page {
+            min-height: 100vh;
+            background: var(--background);
+            position: relative;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        /* Header Styles - Mobile Optimized */
+        .main-header {
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding-top: calc(12px + var(--safe-area-inset-top));
+            padding-left: calc(16px + var(--safe-area-inset-left));
+            padding-right: calc(16px + var(--safe-area-inset-right));
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            white-space: nowrap;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            min-width: 0;
+        }
+
+        .welcome-text {
+            font-weight: 500;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+            color: var(--text-secondary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--primary-50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            border: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .btn-icon:active {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        /* Page Header - Mobile Optimized */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            padding-left: calc(16px + var(--safe-area-inset-left));
+            padding-right: calc(16px + var(--safe-area-inset-right));
+        }
+
+        .page-header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .page-header p {
+            opacity: 0.9;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            min-width: 0;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* Quick Actions - Mobile Optimized */
+        .quick-actions-bar {
+            background: var(--surface);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 12px;
+            padding-left: calc(16px + var(--safe-area-inset-left));
+            padding-right: calc(16px + var(--safe-area-inset-right));
+        }
+
+        .actions-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 10px 12px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-align: center;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+            border: none;
+        }
+
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .action-btn.outline {
+            border-color: var(--text-light);
+            color: var(--text-light);
+        }
+
+        .action-btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+        }
+
+        /* Main Content - Mobile Optimized */
+        .completions-section {
+            padding: 0 16px;
+            padding-left: calc(16px + var(--safe-area-inset-left));
+            padding-right: calc(16px + var(--safe-area-inset-right));
+            padding-bottom: 20px;
+            min-height: calc(100vh - 280px);
+        }
+
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .section-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .sort-options select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            width: 100%;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .completions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Completion Card Styles - Mobile Optimized - SINGLE COLUMN LAYOUT */
+        .completion-card {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid #000000;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+            width: 100%;
+        }
+
+        .completion-card:active {
+            transform: scale(0.99);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Compact View - Mobile Optimized - SINGLE COLUMN */
+        .compact-view {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .card-main {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .service-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: var(--primary-50);
+            color: var(--primary-color);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .service-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-details h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .meta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .order-id {
+            color: var(--text-light);
+            font-size: 0.7rem;
+            background: var(--background);
+            padding: 2px 5px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .completion-date {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-light);
+            font-size: 0.7rem;
+        }
+
+        /* Quick Stats - SINGLE ROW ON MOBILE - HORIZONTAL LAYOUT */
+        .quick-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+            width: 100%;
+        }
+
+        .earnings, .rating {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .amount {
+            display: block;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .stars {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 4px;
+            justify-content: center;
+        }
+
+        .stars i {
+            font-size: 0.8rem;
+            color: #FFD700;
+        }
+
+        .stars i:not(.active) {
+            color: #E0E0E0;
+        }
+
+        .rating.pending {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #EF6C00;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .view-details-btn {
+            background: var(--primary-50);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-100);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            width: 100%;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+            border: none;
+            margin-top: 8px;
+        }
+
+        .view-details-btn:active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Expanded View - Mobile Optimized */
+        .expanded-view {
+            padding: 0 14px 14px 14px;
+            border-top: 1px solid #000000;
+            position: relative;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 16px 0;
+            padding-top: 12px;
+        }
+
+        .detail-column h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            padding-bottom: 5px;
+            border-bottom: 1px solid #000000;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .detail-item i {
+            width: 14px;
+            color: var(--primary-color);
+            margin-top: 2px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .detail-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .detail-content strong {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .detail-content span {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rating-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+
+        .feedback {
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-size: 0.8rem;
+        }
+
+        .errand-description {
+            margin: 12px 0;
+            padding: 10px;
+            background: var(--background);
+            border-radius: 6px;
+            border: 1px solid #000000;
+        }
+
+        .errand-description h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .errand-description p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .btn-primary, .btn-outline {
+            padding: 10px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            border: none;
+            width: 100%;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-primary:active, .btn-outline:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hide-details-btn {
+            background: var(--background);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            border: none;
+            width: 100%;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .hide-details-btn:active {
+            background: var(--border-light);
+        }
+
+        /* Empty State - Mobile Optimized */
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--text-light);
+            background: var(--surface);
+            border-radius: 10px;
+            border: 1px solid #000000;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            opacity: 0.5;
+            color: var(--primary-color);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        .empty-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* Bottom Navigation - Mobile Optimized */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            padding: 10px 16px;
+            z-index: 1000;
+            padding-bottom: calc(10px + var(--safe-area-inset-bottom));
+            padding-left: calc(16px + var(--safe-area-inset-left));
+            padding-right: calc(16px + var(--safe-area-inset-right));
+            border-top: 1px solid #000000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--text-light);
+            padding: 6px 10px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            background: var(--primary-50);
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        /* Fix scrolling issues */
+        #completed-errands-page {
+            overflow-y: auto;
+            height: auto;
+            min-height: 100vh;
+        }
+
+        /* Responsive Design for Tablets */
+        @media (min-width: 481px) {
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .welcome-text {
+                font-size: 14px;
+                max-width: 200px;
+            }
+
+            .btn-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .page-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .stat-number {
+                font-size: 1.6rem;
+            }
+
+            .actions-container {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+
+            .section-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .section-header h2 {
+                text-align: left;
+            }
+
+            .sort-options select {
+                width: auto;
+                min-width: 160px;
+            }
+
+            .compact-view {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .card-main {
+                flex-direction: row;
+                align-items: center;
+                flex: 1;
+                gap: 16px;
+            }
+
+            .service-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .meta-info {
+                flex-direction: row;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .quick-stats {
+                display: flex;
+                gap: 20px;
+                margin-top: 0;
+                padding-top: 0;
+                border-top: none;
+                width: auto;
+                flex-shrink: 0;
+            }
+
+            .view-details-btn {
+                width: auto;
+                min-width: 120px;
+                margin-top: 0;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 25px;
+            }
+
+            .action-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .btn-primary, .btn-outline {
+                width: auto;
+                min-width: 150px;
+                flex: 1;
+            }
+
+            .empty-actions {
+                flex-direction: row;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .header-content {
+                padding: 16px 0;
+            }
+
+            .page-header {
+                padding: 20px 24px;
+            }
+
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header-stats {
+                gap: 20px;
+            }
+
+            .stat-item {
+                min-width: 100px;
+                padding: 12px 15px;
+            }
+
+            .stat-number {
+                font-size: 1.8rem;
+            }
+
+            .quick-actions-bar {
+                padding: 15px 24px;
+            }
+
+            .completions-section {
+                padding: 0 24px;
+            }
+
+            .completions-list {
+                gap: 15px;
+            }
+
+            .compact-view {
+                padding: 16px;
+            }
+
+            .service-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .service-details h3 {
+                font-size: 1rem;
+            }
+
+            .amount {
+                font-size: 1.1rem;
+            }
+
+            .nav-item {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
+
+            .nav-item i {
+                font-size: 20px;
+            }
+        }
+
+        /* Very Small Phones */
+        @media (max-width: 360px) {
+            .logo h1 {
+                font-size: 16px;
+            }
+
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .welcome-text {
+                font-size: 12px;
+                max-width: 120px;
+            }
+
+            .btn-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .page-header h1 {
+                font-size: 1.2rem;
+            }
+
+            .page-header p {
+                font-size: 0.85rem;
+            }
+
+            .stat-number {
+                font-size: 1.2rem;
+            }
+
+            .stat-item {
+                padding: 8px 6px;
+            }
+
+            .actions-container {
+                grid-template-columns: 1fr;
+            }
+
+            .compact-view {
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .service-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .service-details h3 {
+                font-size: 0.9rem;
+            }
+
+            .quick-stats {
+                gap: 4px;
+                padding-top: 10px;
+            }
+
+            .amount {
+                font-size: 0.9rem;
+            }
+
+            .label {
+                font-size: 0.65rem;
+            }
+
+            .nav-item {
+                font-size: 0.7rem;
+                padding: 6px 8px;
+            }
+
+            .nav-item i {
+                font-size: 16px;
+            }
+        }
+
+        /* Landscape mode */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .main-header {
+                padding-top: 8px;
+            }
+
+            .page-header {
+                padding: 12px 16px;
+            }
+
+            .page-header h1 {
+                font-size: 1.2rem;
+            }
+
+            .completions-section {
+                min-height: calc(100vh - 200px);
+            }
+        }
+
+        /* Prevent text selection on mobile */
+        .action-btn,
+        .btn-icon,
+        .nav-item,
+        .completion-card,
+        .view-details-btn,
+        .hide-details-btn,
+        .btn-primary,
+        .btn-outline {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Improve scrolling performance */
+        .completions-section {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Optimize animations for mobile */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="completed-errands-page">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <h1>ErrandConnect</h1>
+                </div>
+                <div class="user-menu">
+                    <span class="welcome-text">Welcome, Runner! 👋</span>
+                    <div class="user-actions">
+                        <button class="btn-icon">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <button class="btn-icon">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <section class="page-header">
+                <div class="header-content">
+                    <h1>Completed Errands</h1>
+                    <p>Your recently completed deliveries and performance metrics</p>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">15</span>
+                            <span class="stat-label">Total Completed</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">$142.75</span>
+                            <span class="stat-label">Total Earnings</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">4.7/5</span>
+                            <span class="stat-label">Avg Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="quick-actions-bar">
+                <div class="actions-container">
+                    <button class="action-btn primary" onclick="exportCompleted()">
+                        <i class="fas fa-download"></i>
+                        Export Report
+                    </button>
+                    <button class="action-btn" onclick="filterByRating('high')">
+                        <i class="fas fa-star"></i>
+                        High Ratings
+                    </button>
+                    <button class="action-btn" onclick="filterByRating('low')">
+                        <i class="fas fa-star-half-alt"></i>
+                        Low Ratings
+                    </button>
+                    <button class="action-btn outline">
+                        <i class="fas fa-history"></i>
+                        View Full History
+                    </button>
+                </div>
+            </section>
+
+            <!-- Completed Errands List -->
+            <section class="completions-section">
+                <div class="section-header">
+                    <h2>Completed Errands</h2>
+                    <div class="sort-options">
+                        <select id="sortSelect" onchange="sortCompletions(this.value)">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="high_rating">High Rating First</option>
+                            <option value="low_rating">Low Rating First</option>
+                            <option value="high_earnings">High Earnings First</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="completions-list">
+                    <!-- Example Completed Errand 1 -->
+                    <div class="completion-card" data-rating="5" data-date="2023-10-15" data-earnings="18.50">
+                        <!-- Compact View -->
+                        <div class="compact-view">
+                            <div class="card-main">
+                                <div class="service-info">
+                                    <div class="service-icon">
+                                        <i class="fas fa-shopping-bag"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h3>Grocery Delivery</h3>
+                                        <div class="meta-info">
+                                            <span class="order-id">#EC-7842</span>
+                                            <span class="completion-date">
+                                                <i class="fas fa-calendar-check"></i>
+                                                Oct 15, 2023
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="quick-stats">
+                                    <div class="earnings">
+                                        <span class="amount">$18.50</span>
+                                        <span class="label">Earnings</span>
+                                    </div>
+                                    <div class="rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                        </div>
+                                        <span class="label">Rating</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="view-details-btn" onclick="toggleDetails(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Expanded View -->
+                        <div class="expanded-view" style="display: none;">
+                            <div class="details-grid">
+                                <div class="detail-column">
+                                    <h4>Delivery Information</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <div class="detail-content">
+                                            <strong>Pickup:</strong>
+                                            <span>Fresh Market, 123 Main St</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker"></i>
+                                        <div class="detail-content">
+                                            <strong>Delivery:</strong>
+                                            <span>456 Oak Avenue, Apt 3B</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-user"></i>
+                                        <div class="detail-content">
+                                            <strong>Client:</strong>
+                                            <span>Sarah Johnson</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-column">
+                                    <h4>Performance Metrics</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-coins"></i>
+                                        <div class="detail-content">
+                                            <strong>Earnings:</strong>
+                                            <span>$18.50</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <div class="detail-content">
+                                            <strong>Completed:</strong>
+                                            <span>Oct 15, 2023 at 3:45 PM</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-star"></i>
+                                        <div class="detail-content">
+                                            <strong>Client Rating:</strong>
+                                            <div class="rating-display">
+                                                <span class="stars">
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                </span>
+                                                <span class="rating-text">5/5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-comment"></i>
+                                        <div class="detail-content">
+                                            <strong>Client Feedback:</strong>
+                                            <span class="feedback">"Very prompt and careful with my groceries. Will definitely request again!"</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="errand-description">
+                                <h4>Errand Details</h4>
+                                <p>Grocery delivery from Fresh Market including fresh produce, dairy, and pantry items. Special handling requested for eggs and bread.</p>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn-primary" onclick="rateClient('EC-7842')">
+                                    <i class="fas fa-star"></i>
+                                    Rate Client
+                                </button>
+                                <button class="btn-outline" onclick="contactClient('SJ-4587')">
+                                    <i class="fas fa-comment"></i>
+                                    Contact Client
+                                </button>
+                                <button class="btn-outline" onclick="viewReceipt('EC-7842')">
+                                    <i class="fas fa-receipt"></i>
+                                    View Receipt
+                                </button>
+                                <button class="btn-outline" onclick="viewSimilarErrands('Grocery Delivery')">
+                                    <i class="fas fa-search"></i>
+                                    Find Similar
+                                </button>
+                            </div>
+
+                            <button class="hide-details-btn" onclick="toggleDetails(this)">
+                                <i class="fas fa-chevron-up"></i>
+                                Hide Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Example Completed Errand 2 -->
+                    <div class="completion-card" data-rating="4" data-date="2023-10-12" data-earnings="12.00">
+                        <!-- Compact View -->
+                        <div class="compact-view">
+                            <div class="card-main">
+                                <div class="service-info">
+                                    <div class="service-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <h3>Document Delivery</h3>
+                                        <div class="meta-info">
+                                            <span class="order-id">#EC-7791</span>
+                                            <span class="completion-date">
+                                                <i class="fas fa-calendar-check"></i>
+                                                Oct 12, 2023
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="quick-stats">
+                                    <div class="earnings">
+                                        <span class="amount">$12.00</span>
+                                        <span class="label">Earnings</span>
+                                    </div>
+                                    <div class="rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star active"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <span class="label">Rating</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="view-details-btn" onclick="toggleDetails(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Expanded View -->
+                        <div class="expanded-view" style="display: none;">
+                            <div class="details-grid">
+                                <div class="detail-column">
+                                    <h4>Delivery Information</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <div class="detail-content">
+                                            <strong>Pickup:</strong>
+                                            <span>Law Offices, 789 Business Blvd</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker"></i>
+                                        <div class="detail-content">
+                                            <strong>Delivery:</strong>
+                                            <span>Courthouse, 101 Justice Ave</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-user"></i>
+                                        <div class="detail-content">
+                                            <strong>Client:</strong>
+                                            <span>Thompson Legal Services</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-column">
+                                    <h4>Performance Metrics</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-coins"></i>
+                                        <div class="detail-content">
+                                            <strong>Earnings:</strong>
+                                            <span>$12.00</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <div class="detail-content">
+                                            <strong>Completed:</strong>
+                                            <span>Oct 12, 2023 at 10:30 AM</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-star"></i>
+                                        <div class="detail-content">
+                                            <strong>Client Rating:</strong>
+                                            <div class="rating-display">
+                                                <span class="stars">
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star active"></i>
+                                                    <i class="fas fa-star"></i>
+                                                </span>
+                                                <span class="rating-text">4/5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-comment"></i>
+                                        <div class="detail-content">
+                                            <strong>Client Feedback:</strong>
+                                            <span class="feedback">"Documents arrived on time and in perfect condition."</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="errand-description">
+                                <h4>Errand Details</h4>
+                                <p>Urgent delivery of legal documents from Thompson Legal Services to the county courthouse. Time-sensitive materials requiring signature upon delivery.</p>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn-primary" onclick="rateClient('EC-7791')">
+                                    <i class="fas fa-star"></i>
+                                    Rate Client
+                                </button>
+                                <button class="btn-outline" onclick="contactClient('TLS-3392')">
+                                    <i class="fas fa-comment"></i>
+                                    Contact Client
+                                </button>
+                                <button class="btn-outline" onclick="viewReceipt('EC-7791')">
+                                    <i class="fas fa-receipt"></i>
+                                    View Receipt
+                                </button>
+                                <button class="btn-outline" onclick="viewSimilarErrands('Document Delivery')">
+                                    <i class="fas fa-search"></i>
+                                    Find Similar
+                                </button>
+                            </div>
+
+                            <button class="hide-details-btn" onclick="toggleDetails(this)">
+                                <i class="fas fa-chevron-up"></i>
+                                Hide Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="{{ url_for('runnerhome') }}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('runnercompleted') }}" class="nav-item active">
+                <i class="fas fa-check-circle"></i>
+                <span>Completed</span>
+            </a>
+            <a href="{{ url_for('runnerhistory') }}" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </a>
+            <a href="{{ url_for('runnerprofile') }}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Mobile optimization code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix scrolling issues
+            document.body.style.overflow = 'auto';
+            document.body.style.height = 'auto';
+            document.body.style.minHeight = '100vh';
+
+            // Ensure page container is scrollable
+            const page = document.getElementById('completed-errands-page');
+            if (page) {
+                page.style.overflowY = 'auto';
+                page.style.height = 'auto';
+            }
+
+            // Prevent accidental double-clicks on mobile
+            let lastClickTime = 0;
+            document.addEventListener('click', function(e) {
+                const currentTime = new Date().getTime();
+                if (currentTime - lastClickTime < 300) {
+                    e.preventDefault();
+                }
+                lastClickTime = currentTime;
+            }, true);
+
+            // Handle orientation changes
+            window.addEventListener('orientationchange', function() {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                }, 100);
+            });
+
+            // Add safe area support
+            const style = document.createElement('style');
+            style.textContent = `
+                @supports (padding: max(0px)) {
+                    .main-header {
+                        padding-top: max(12px, env(safe-area-inset-top));
+                    }
+                    .bottom-nav {
+                        padding-bottom: max(10px, env(safe-area-inset-bottom));
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize all hide buttons to be hidden
+            const hideButtons = document.querySelectorAll('.hide-details-btn');
+            hideButtons.forEach(btn => {
+                btn.style.display = 'none';
+            });
+
+            console.log('Mobile app initialized');
+        });
+
+        function toggleDetails(button) {
+            const card = button.closest('.completion-card');
+            const expandedView = card.querySelector('.expanded-view');
+            const viewDetailsBtn = card.querySelector('.view-details-btn');
+            const hideDetailsBtn = card.querySelector('.hide-details-btn');
+
+            if (expandedView.style.display === 'none') {
+                // Show details
+                expandedView.style.display = 'block';
+                viewDetailsBtn.style.display = 'none';
+                hideDetailsBtn.style.display = 'flex';
+                // Scroll to show the expanded view
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 50);
+            } else {
+                // Hide details
+                expandedView.style.display = 'none';
+                viewDetailsBtn.style.display = 'flex';
+                hideDetailsBtn.style.display = 'none';
+            }
+        }
+
+        function exportCompleted() {
+            alert('Export feature would generate a PDF/CSV report of your completed errands.');
+        }
+
+        function filterByRating(type) {
+            const cards = document.querySelectorAll('.completion-card');
+            cards.forEach(card => {
+                const rating = parseFloat(card.getAttribute('data-rating'));
+                if (type === 'high' && rating >= 4) {
+                    card.style.display = 'block';
+                } else if (type === 'low' && rating < 4 && rating > 0) {
+                    card.style.display = 'block';
+                } else if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function sortCompletions(sortBy) {
+            const container = document.querySelector('.completions-list');
+            const cards = Array.from(container.querySelectorAll('.completion-card'));
+
+            cards.sort((a, b) => {
+                const aDate = new Date(a.getAttribute('data-date'));
+                const bDate = new Date(b.getAttribute('data-date'));
+                const aRating = parseFloat(a.getAttribute('data-rating'));
+                const bRating = parseFloat(b.getAttribute('data-rating'));
+                const aEarnings = parseFloat(a.getAttribute('data-earnings'));
+                const bEarnings = parseFloat(b.getAttribute('data-earnings'));
+
+                switch(sortBy) {
+                    case 'newest':
+                        return bDate - aDate;
+                    case 'oldest':
+                        return aDate - bDate;
+                    case 'high_rating':
+                        return bRating - aRating;
+                    case 'low_rating':
+                        return aRating - bRating;
+                    case 'high_earnings':
+                        return bEarnings - aEarnings;
+                    default:
+                        return 0;
+                }
+            });
+
+            // Re-append cards in sorted order
+            cards.forEach(card => container.appendChild(card));
+        }
+
+        function rateClient(errandId) {
+            alert(`Rating modal would open for errand #${errandId}`);
+        }
+
+        function contactClient(clientId) {
+            alert(`Contact feature would open for client ${clientId}`);
+        }
+
+        function viewReceipt(errandId) {
+            alert(`Receipt would be displayed for errand #${errandId}`);
+        }
+
+        function viewSimilarErrands(errandType) {
+            alert(`Searching for similar ${errandType} errands...`);
+        }
+    </script>
+</body>
+</html>

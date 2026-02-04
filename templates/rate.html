@@ -1,0 +1,895 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="rate-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Rate ErrandConnect</h1>
+            </div>
+            <a href="{{ url_for('settings') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Rating Header -->
+        <section class="rating-header">
+            <div class="rating-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <h2>Share Your Experience</h2>
+            <p>Your feedback helps us improve ErrandGo for everyone.</p>
+        </section>
+
+        <!-- Star Rating -->
+        <section class="rating-section">
+            <h3 class="section-title">How would you rate your experience?</h3>
+            <div class="star-rating">
+                <div class="stars">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+                <div class="rating-text">
+                    <span id="rating-text">Tap to rate</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feedback Form -->
+        <section class="rating-section">
+            <h3 class="section-title">Tell us more</h3>
+            <form id="feedback-form" class="feedback-form">
+                <div class="form-group">
+                    <label for="feedback-type">What would you like to share?</label>
+                    <select id="feedback-type" class="form-select">
+                        <option value="">Select feedback type</option>
+                        <option value="general">General feedback</option>
+                        <option value="bug">Bug report</option>
+                        <option value="suggestion">Feature suggestion</option>
+                        <option value="service">Service experience</option>
+                        <option value="app">App experience</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="feedback">Your feedback <span class="required">*</span></label>
+                    <textarea 
+                        id="feedback" 
+                        class="form-textarea" 
+                        placeholder="What did you like? What can we improve?..." 
+                        rows="5"
+                        required
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="char-count">0</span>/500 characters
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="suggestions">Suggestions for improvement</label>
+                    <textarea 
+                        id="suggestions" 
+                        class="form-textarea" 
+                        placeholder="Any specific features or improvements you'd like to see?..." 
+                        rows="3"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="suggestions-count">0</span>/300 characters
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="contact-permission">
+                        <span class="checkmark"></span>
+                        You may contact me about this feedback
+                    </label>
+                </div>
+
+                <!-- Hidden rating input -->
+                <input type="hidden" id="rating-value" name="rating" value="0">
+            </form>
+        </section>
+
+        <!-- Rating Statistics -->
+        <section class="rating-section">
+            <h3 class="section-title">Community Ratings</h3>
+            <div class="stats-card">
+                <div class="overall-rating">
+                    <div class="rating-number">4.8</div>
+                    <div class="rating-stars">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <div class="rating-count">Based on 1,234 reviews</div>
+                </div>
+                <div class="rating-bars">
+                    <div class="rating-bar">
+                        <span class="bar-label">5 stars</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 75%"></div>
+                        </div>
+                        <span class="bar-percent">75%</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span class="bar-label">4 stars</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 15%"></div>
+                        </div>
+                        <span class="bar-percent">15%</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span class="bar-label">3 stars</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 5%"></div>
+                        </div>
+                        <span class="bar-percent">5%</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span class="bar-label">2 stars</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 3%"></div>
+                        </div>
+                        <span class="bar-percent">3%</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span class="bar-label">1 star</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 2%"></div>
+                        </div>
+                        <span class="bar-percent">2%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Share Options -->
+        <section class="rating-section">
+            <h3 class="section-title">Share with others</h3>
+            <div class="share-options">
+                <button class="share-btn" onclick="shareOnStore('appstore')">
+                    <div class="share-icon">
+                        <i class="fab fa-app-store-ios"></i>
+                    </div>
+                    <span>Rate on App Store</span>
+                </button>
+                <button class="share-btn" onclick="shareOnStore('playstore')">
+                    <div class="share-icon">
+                        <i class="fab fa-google-play"></i>
+                    </div>
+                    <span>Rate on Play Store</span>
+                </button>
+                <button class="share-btn" onclick="shareWithFriends()">
+                    <div class="share-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <span>Share with Friends</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Submit Section -->
+        <section class="submit-section">
+            <div class="submit-actions">
+                <button class="btn-outline" onclick="location.href='{{ url_for('settings') }}'">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button class="btn-primary" id="submit-rating" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Review
+                </button>
+            </div>
+            <p class="submit-note">Your feedback will be anonymous unless you choose to be contacted.</p>
+        </section>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Thank You! 🎉</h3>
+            <p>Your feedback has been submitted successfully. We appreciate you helping us improve ErrandConnect.</p>
+            <button class="btn-primary modal-close" onclick="closeModal()">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+    --star-inactive: #E0E0E0;
+    --star-active: #FFC107;
+}
+
+#rate-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 20px;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.mobile-main {
+    padding: 20px;
+}
+
+.rating-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.rating-icon {
+    font-size: 64px;
+    color: var(--star-active);
+    margin-bottom: 16px;
+}
+
+.rating-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.rating-header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.rating-section {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.star-rating {
+    text-align: center;
+}
+
+.stars {
+    font-size: 48px;
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+.star {
+    color: var(--star-inactive);
+    margin: 0 4px;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.star:hover,
+.star.active {
+    color: var(--star-active);
+    transform: scale(1.1);
+}
+
+.rating-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-height: 27px;
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.required {
+    color: #F44336;
+}
+
+.form-select {
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 16px;
+    color: var(--text-primary);
+    background: var(--surface);
+    transition: all 0.2s ease;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-textarea {
+    padding: 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 16px;
+    color: var(--text-primary);
+    background: var(--surface);
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.2s ease;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.char-count {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.checkbox-label input {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.checkbox-label input:checked + .checkmark {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox-label input:checked + .checkmark::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+}
+
+.stats-card {
+    padding: 20px;
+    background: var(--background);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+}
+
+.overall-rating {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.rating-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.rating-stars {
+    font-size: 24px;
+    color: var(--star-active);
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.rating-count {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.rating-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rating-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bar-label {
+    width: 50px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.bar-container {
+    flex: 1;
+    height: 8px;
+    background: var(--border-light);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: var(--star-active);
+    border-radius: 4px;
+}
+
+.bar-percent {
+    width: 35px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.share-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.share-btn:active {
+    transform: scale(0.98);
+    background: var(--primary-50);
+    border-color: var(--primary-color);
+}
+
+.share-icon {
+    font-size: 24px;
+    width: 24px;
+}
+
+.share-btn:nth-child(1) .share-icon {
+    color: #007AFF;
+}
+
+.share-btn:nth-child(2) .share-icon {
+    color: #0F9D58;
+}
+
+.share-btn:nth-child(3) .share-icon {
+    color: var(--primary-color);
+}
+
+.submit-section {
+    text-align: center;
+}
+
+.submit-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn-outline {
+    flex: 1;
+    padding: 16px;
+    background: transparent;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-outline:active {
+    transform: scale(0.98);
+    background: var(--background);
+}
+
+.btn-primary {
+    flex: 1;
+    padding: 16px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+    background: var(--primary-dark);
+}
+
+.btn-primary:disabled {
+    background: var(--border);
+    color: var(--text-light);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.submit-note {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    animation: modalSlide 0.3s ease;
+}
+
+@keyframes modalSlide {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-icon {
+    font-size: 64px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.modal-content h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.modal-content p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.modal-close {
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .logo h1 {
+        font-size: 16px;
+    }
+    
+    .rating-section {
+        padding: 20px;
+    }
+    
+    .stars {
+        font-size: 40px;
+    }
+    
+    .rating-number {
+        font-size: 36px;
+    }
+}
+
+@media (min-width: 768px) {
+    .share-options {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentRating = 0;
+    const stars = document.querySelectorAll('.star');
+    const ratingText = document.getElementById('rating-text');
+    const ratingValue = document.getElementById('rating-value');
+    const feedbackTextarea = document.getElementById('feedback');
+    const suggestionsTextarea = document.getElementById('suggestions');
+    const charCount = document.getElementById('char-count');
+    const suggestionsCount = document.getElementById('suggestions-count');
+    const submitBtn = document.getElementById('submit-rating');
+    const successModal = document.getElementById('success-modal');
+    
+    // Star rating functionality
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const value = parseInt(this.getAttribute('data-value'));
+            currentRating = value;
+            ratingValue.value = value;
+            
+            // Update star display
+            stars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= value) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Update rating text
+            updateRatingText(value);
+            validateForm();
+        });
+        
+        star.addEventListener('mouseover', function() {
+            const value = parseInt(this.getAttribute('data-value'));
+            
+            stars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= value) {
+                    s.classList.add('hover');
+                } else {
+                    s.classList.remove('hover');
+                }
+            });
+        });
+        
+        star.addEventListener('mouseout', function() {
+            stars.forEach(s => {
+                s.classList.remove('hover');
+                
+                // Restore active state based on current rating
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= currentRating) {
+                    s.classList.add('active');
+                }
+            });
+        });
+    });
+    
+    // Update rating text based on value
+    function updateRatingText(rating) {
+        const texts = {
+            1: "Poor - We'll do better",
+            2: "Fair - Needs improvement",
+            3: "Good - Satisfied",
+            4: "Great - Very happy",
+            5: "Excellent - Amazing experience!"
+        };
+        ratingText.textContent = texts[rating] || "Tap to rate";
+    }
+    
+    // Character counters
+    feedbackTextarea.addEventListener('input', function() {
+        const length = this.value.length;
+        charCount.textContent = length;
+        validateForm();
+    });
+    
+    suggestionsTextarea.addEventListener('input', function() {
+        const length = this.value.length;
+        suggestionsCount.textContent = length;
+    });
+    
+    // Form validation
+    function validateForm() {
+        const hasRating = currentRating > 0;
+        const hasFeedback = feedbackTextarea.value.trim().length > 10; // At least 10 chars
+        
+        submitBtn.disabled = !(hasRating && hasFeedback);
+        
+        // Update textarea border based on validation
+        if (feedbackTextarea.value.length > 0) {
+            if (feedbackTextarea.value.length < 10) {
+                feedbackTextarea.style.borderColor = '#F44336';
+            } else {
+                feedbackTextarea.style.borderColor = 'var(--primary-color)';
+            }
+        } else {
+            feedbackTextarea.style.borderColor = 'var(--border)';
+        }
+    }
+    
+    // Submit rating
+    submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (submitBtn.disabled) return;
+        
+        // Get form data
+        const formData = {
+            rating: currentRating,
+            feedbackType: document.getElementById('feedback-type').value,
+            feedback: feedbackTextarea.value.trim(),
+            suggestions: suggestionsTextarea.value.trim(),
+            contactPermission: document.getElementById('contact-permission').checked
+        };
+        
+        // In a real app, you would send this to your server
+        console.log('Submitting rating:', formData);
+        
+        // Show success modal after a short delay
+        setTimeout(() => {
+            successModal.style.display = 'flex';
+        }, 500);
+    });
+    
+    // Close modal
+    window.closeModal = function() {
+        successModal.style.display = 'none';
+        // Redirect back to settings after successful submission
+        setTimeout(() => {
+            window.location.href = "{{ url_for('settings') }}";
+        }, 300);
+    };
+    
+    // Share functions
+    window.shareOnStore = function(store) {
+        const urls = {
+            appstore: 'https://apps.apple.com/app/errandconnect',
+            playstore: 'https://play.google.com/store/apps/details?id=com.errandconnect'
+        };
+        
+        window.open(urls[store], '_blank');
+    };
+    
+    window.shareWithFriends = function() {
+        const shareText = `Check out ErrandConnect! An amazing app for all your errands and deliveries. I just rated it ${currentRating} stars!`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'ErrandConnect',
+                text: shareText,
+                url: 'https://errandconnect.com'
+            });
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(shareText + ' https://errandconnect.com')
+                .then(() => alert('Share text copied to clipboard!'));
+        }
+    };
+    
+    // Close modal if clicked outside
+    successModal.addEventListener('click', function(e) {
+        if (e.target === successModal) {
+            closeModal();
+        }
+    });
+    
+    // Initialize validation
+    validateForm();
+});
+</script>
+{% endblock %}

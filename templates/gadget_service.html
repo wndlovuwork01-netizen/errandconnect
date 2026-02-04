@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ErrandConnect - Gadget Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --success: #8BC34A;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* AUTO-SLIDING TEXT FOR MOBILE */
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: text;
+        }
+
+        /* Auto-sliding text animation */
+        @keyframes slideTextLeft {
+            0% {
+                transform: translateX(0);
+            }
+            10% {
+                transform: translateX(0);
+            }
+            90% {
+                transform: translateX(calc(-100% + 100px));
+            }
+            100% {
+                transform: translateX(calc(-100% + 100px));
+            }
+        }
+
+        /* For inputs with long text - auto slide show */
+        .input-with-icon input.sliding-text {
+            animation: slideTextLeft 15s linear infinite;
+            animation-play-state: running;
+            padding-right: 40px;
+        }
+
+        /* Pause animation on hover/focus */
+        .input-with-icon input.sliding-text:focus {
+            animation-play-state: paused;
+        }
+
+        /* For textarea specifically (multi-line) */
+        textarea {
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            overflow-y: auto;
+            min-height: 60px;
+            max-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            white-space: pre-wrap;
+            overflow-x: hidden;
+        }
+
+        /* NEW: Service Price and Phone Number Row */
+        .service-phone-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .service-phone-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 0;
+        }
+
+        /* VIEW MAP BUTTON */
+        .view-map-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .view-map-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* Device Grid - Mobile Optimized */
+        .device-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .device-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Service Type Indicator */
+        .service-type-indicator {
+            background: var(--light);
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .service-type-icon {
+            font-size: 20px;
+            color: var(--primary);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .service-type-text h4 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        .service-type-text p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        /* Budget Range Fix - Dollar Sign */
+        .budget-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .budget-option::before {
+            content: "$";
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Urgency Badge */
+        .urgency-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .urgency-low { background: #e8f5e8; color: var(--primary-dark); }
+        .urgency-medium { background: #fff3cd; color: #856404; }
+        .urgency-high { background: #f8d7da; color: #721c24; }
+        .urgency-urgent { background: #f5c6cb; color: #721c24; }
+
+        /* Expanding Input for Other Option */
+        .expanding-input {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        /* Pickup Location Fields */
+        .pickup-location-fields {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        /* MAP MODAL - Mobile Optimized */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(10px, env(safe-area-inset-top));
+                height: calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+
+            .map-modal {
+                padding: max(15px, env(safe-area-inset-left));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .device-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Service Phone Row for larger screens */
+            .service-phone-row {
+                gap: 15px;
+            }
+
+            .pickup-location-fields {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            /* Service Phone Row for very small screens */
+            .service-phone-row {
+                gap: 8px;
+            }
+
+            .service-phone-row .input-with-icon i {
+                font-size: 12px;
+                left: 8px;
+            }
+
+            .service-phone-row input {
+                padding-left: 32px;
+                padding-right: 8px;
+                font-size: 13px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-laptop"></i>
+            </div>
+            <div class="service-text">
+                <h3>Gadget Services</h3>
+                <p>Expert repair & assistance</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Estimated:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Service Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-route"></i>
+                <h3>Route Preview</h3>
+                <p>Map showing route for gadget service</p>
+                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
+                    <p><strong>Service Location:</strong> <span id="mapServiceLocation">Not specified</span></p>
+                    <p><strong>Pickup Location:</strong> <span id="mapPickupLocation">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapServiceType">-</div>
+                    <div class="info-label">Service Type</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Gadget Services</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <form method="post" action="{{ url_for('create_gadget_service_errand') }}" id="gadgetServiceForm">
+                    <h2><i class="fas fa-mobile-alt"></i> Device Information</h2>
+
+                    <div class="device-grid">
+                        <div class="device-item">
+                            <label for="device_type">Device Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-laptop"></i>
+                                <select id="device_type" name="device_type" required onchange="updateEstimatedFee()">
+                                    <option value="">Select device type</option>
+                                    <option value="smartphone">Smartphone</option>
+                                    <option value="laptop">Laptop</option>
+                                    <option value="tablet">Tablet</option>
+                                    <option value="desktop">Desktop Computer</option>
+                                    <option value="printer">Printer</option>
+                                    <option value="camera">Camera</option>
+                                    <option value="gaming_console">Gaming Console</option>
+                                    <option value="smart_watch">Smart Watch</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div id="other_device_input" class="expanding-input">
+                                <div class="input-with-icon" style="margin-top: 8px;">
+                                    <i class="fas fa-edit"></i>
+                                    <input type="text" id="other_device_type" name="other_device_type" placeholder="Specify device type">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="device-item">
+                            <label for="device_age">Device Age</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                                <select id="device_age" name="device_age" onchange="updateEstimatedFee()">
+                                    <option value="less_than_1">Less than 1 year</option>
+                                    <option value="1_2_years">1-2 years</option>
+                                    <option value="2_3_years">2-3 years</option>
+                                    <option value="3_plus_years">3+ years</option>
+                                    <option value="unknown">Unknown</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-tag"></i>
+                            <input type="text" id="brand" name="brand" placeholder="Brand (e.g., Apple, Samsung, Dell)" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-cube"></i>
+                            <input type="text" id="model" name="model" placeholder="Model (e.g., iPhone 14, Galaxy S23)" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-tools"></i> Service Required</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-cogs"></i>
+                            <select id="service_type" name="service_type" required onchange="toggleSpecificRepair(); updateEstimatedFee()">
+                                <option value="">Select service type</option>
+                                <option value="repair">Repair</option>
+                                <option value="diagnostic">Diagnostic Only</option>
+                                <option value="purchase_assistance">Purchase Assistance</option>
+                                <option value="setup">Setup/Installation</option>
+                                <option value="data_transfer">Data Transfer</option>
+                                <option value="software_issue">Software Issue</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div id="other_service_input" class="expanding-input">
+                            <div class="input-with-icon" style="margin-top: 8px;">
+                                <i class="fas fa-edit"></i>
+                                <input type="text" id="other_service_type" name="other_service_type" placeholder="Specify service type">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="specific_repair_section">
+                        <div class="form-group">
+                            <div class="input-with-icon">
+                                <i class="fas fa-wrench"></i>
+                                <select id="specific_repair" name="specific_repair" onchange="updateEstimatedFee()">
+                                    <option value="">Select repair type</option>
+                                    <option value="screen_replacement">Screen Replacement</option>
+                                    <option value="battery_replacement">Battery Replacement</option>
+                                    <option value="charging_port">Charging Port Repair</option>
+                                    <option value="camera_repair">Camera Repair</option>
+                                    <option value="software_update">Software Update</option>
+                                    <option value="virus_removal">Virus/Malware Removal</option>
+                                    <option value="data_recovery">Data Recovery</option>
+                                    <option value="water_damage">Water Damage Repair</option>
+                                    <option value="other_repair">Other Repair</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <textarea id="issue_description" name="issue_description" rows="3" placeholder="Describe the problem..." required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-file-contract"></i> Warranty & Budget</h2>
+
+                    <div class="device-grid">
+                        <div class="device-item">
+                            <label for="warranty_status">Warranty Status</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-file-signature"></i>
+                                <select id="warranty_status" name="warranty_status" required onchange="updateEstimatedFee()">
+                                    <option value="in_warranty">In Warranty</option>
+                                    <option value="out_of_warranty">Out of Warranty</option>
+                                    <option value="extended_warranty">Extended Warranty</option>
+                                    <option value="unknown">Unknown</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="device-item">
+                            <label for="diagnostic_fee">Diagnostic Fee</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-search-dollar"></i>
+                                <select id="diagnostic_fee" name="diagnostic_fee" onchange="updateEstimatedFee()">
+                                    <option value="yes">Willing to pay</option>
+                                    <option value="no">Not willing</option>
+                                    <option value="depends">Depends on amount</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budget_range">Budget Range</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <select id="budget_range" name="budget_range" onchange="updateEstimatedFee()">
+                                <option value="under_50">Under $50</option>
+                                <option value="50_100">$50 - $100</option>
+                                <option value="100_200">$100 - $200</option>
+                                <option value="200_500">$200 - $500</option>
+                                <option value="500_plus">$500+</option>
+                                <option value="flexible">Flexible</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="serviceTypeIndicator" class="service-type-indicator" style="display: none;">
+                        <div class="service-type-icon">
+                            <i id="serviceTypeIcon" class="fas fa-tools"></i>
+                        </div>
+                        <div class="service-type-text">
+                            <h4 id="serviceTypeTitle">Service Type</h4>
+                            <p id="serviceTypeDescription">Based on your selection</p>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-database"></i> Data & Backup</h2>
+
+                    <div class="device-grid">
+                        <div class="device-item">
+                            <label for="data_backup">Data Backup</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-save"></i>
+                                <select id="data_backup" name="data_backup" onchange="updateEstimatedFee()">
+                                    <option value="no">No backup needed</option>
+                                    <option value="yes">Yes, backup my data</option>
+                                    <option value="already_backed_up">Already backed up</option>
+                                    <option value="unsure">Unsure</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="device-item">
+                            <label for="remote_access">Remote Access</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-desktop"></i>
+                                <select id="remote_access" name="remote_access">
+                                    <option value="no">No remote access</option>
+                                    <option value="yes">Allow remote access</option>
+                                    <option value="supervised_only">Supervised only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-shopping-cart"></i> Purchase Assistance</h2>
+                    <div class="info-tip">
+                        <i class="fas fa-info-circle"></i> Fill this section only if you need help purchasing a new device
+                    </div>
+
+                    <div class="device-grid">
+                        <div class="device-item">
+                            <label for="purchase_budget">Purchase Budget</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" id="purchase_budget" name="purchase_budget" placeholder="Budget for new device" step="0.01" min="0" oninput="updateEstimatedFee()">
+                            </div>
+                        </div>
+
+                        <div class="device-item">
+                            <label for="urgency">Urgency Level</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <select id="urgency" name="urgency" required onchange="updateUrgencyBadge(); updateEstimatedFee()">
+                                    <option value="low">Low - Flexible timing</option>
+                                    <option value="medium">Medium - Within a week</option>
+                                    <option value="high">High - Within 2-3 days</option>
+                                    <option value="urgent">Urgent - As soon as possible</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-star"></i>
+                            <textarea id="preferred_features" name="preferred_features" rows="2" placeholder="Important features (e.g., battery, camera, storage)"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-map-marker-alt"></i> Service Location & Timing</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-location-arrow"></i>
+                            <input type="text" id="service_location" name="service_location" placeholder="Where should service be performed?" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-store"></i>
+                            <input type="text" id="preferred_repair_shop" name="preferred_repair_shop" placeholder="Preferred repair shop (optional)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-truck"></i>
+                            <select id="pickup_dropoff" name="pickup_dropoff" onchange="togglePickupLocationFields(); updateEstimatedFee()">
+                                <option value="pickup">Pickup from my location</option>
+                                <option value="dropoff">I will drop off</option>
+                                <option value="both">Both pickup and drop-off</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Expanding pickup location fields -->
+                    <div id="pickup_location_fields" class="expanding-input">
+                        <div class="pickup-location-fields">
+                            <div class="input-with-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <input type="text" id="pickup_location" name="pickup_location" placeholder="Pickup location address" oninput="updateEstimatedFee()">
+                            </div>
+
+                            <!-- Show dropoff location only when "both" is selected -->
+                            <div id="dropoff_location_field" class="expanding-input">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-home"></i>
+                                    <input type="text" id="dropoff_location" name="dropoff_location" placeholder="Drop-off location address" oninput="updateEstimatedFee()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW MAP BUTTON - Added after pickup/dropoff fields -->
+                    <button type="button" class="view-map-btn" onclick="showMap()">
+                        <i class="fas fa-map-marked-alt"></i> View Route Map
+                    </button>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-sticky-note"></i>
+                            <textarea id="special_instructions" name="special_instructions" rows="2" placeholder="Any other special instructions..."></textarea>
+                        </div>
+                    </div>
+
+                     <div class="section-divider"></div>
+
+                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+
+                    <!-- NEW: Service Price and Phone Number Row -->
+                    <div class="service-phone-row">
+                        <!-- Service Price -->
+                        <div class="form-group">
+                            <label for="service_price">Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price"
+                                       placeholder="Your price"
+                                       step="0.01" min="0.50"
+                                       inputmode="decimal" required>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone_number" name="phone_number"
+                                       placeholder="Phone number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Create Gadget Service Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Prevent form submission on Enter key in inputs
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && this.type !== 'textarea' && this.type !== 'submit') {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Initialize auto-sliding text
+            initializeAutoSlidingText();
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+        });
+
+        function initializeAutoSlidingText() {
+            // Function to check if text needs sliding
+            const checkAndApplySliding = (input) => {
+                if (!input) return;
+
+                // Remove any existing sliding class first
+                input.classList.remove('sliding-text');
+
+                // Check if text is longer than input width
+                if (input.scrollWidth > input.clientWidth && input.value.trim() !== '') {
+                    // Calculate how much extra text there is
+                    const overflowAmount = input.scrollWidth - input.clientWidth;
+                    if (overflowAmount > 20) {
+                        // Add sliding animation class
+                        input.classList.add('sliding-text');
+
+                        // Calculate animation duration based on text length
+                        const textLength = input.value.length;
+                        const duration = Math.max(15, textLength / 3);
+                        input.style.animationDuration = `${duration}s`;
+                    }
+                }
+            };
+
+            // Apply to all existing text inputs
+            const textInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+            textInputs.forEach(input => {
+                // Check on input change
+                input.addEventListener('input', function() {
+                    setTimeout(() => checkAndApplySliding(this), 100);
+                });
+
+                // Check on focus/blur
+                input.addEventListener('focus', function() {
+                    if (this.classList.contains('sliding-text')) {
+                        this.style.animationPlayState = 'paused';
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.classList.contains('sliding-text')) {
+                        this.style.animationPlayState = 'running';
+                    }
+                });
+
+                // Initial check
+                setTimeout(() => checkAndApplySliding(input), 300);
+            });
+        }
+
+        function initializeForm() {
+            // Update fee when inputs change
+            const feeInputs = ['device_type', 'device_age', 'brand', 'model', 'service_type', 'specific_repair', 'warranty_status', 'diagnostic_fee', 'budget_range', 'data_backup', 'purchase_budget', 'urgency', 'service_location', 'pickup_dropoff', 'pickup_location', 'dropoff_location'];
+            feeInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateEstimatedFee);
+                    element.addEventListener('change', updateEstimatedFee);
+                }
+            });
+
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Set up other option toggles
+            setupOtherOptions();
+
+            // Initial calculations
+            updateEstimatedFee();
+            updateUrgencyBadge();
+
+            // Initial pickup/dropoff field state
+            togglePickupLocationFields();
+        }
+
+        function setupOtherOptions() {
+            // Device type other option
+            document.getElementById('device_type').addEventListener('change', function() {
+                const otherInput = document.getElementById('other_device_input');
+                if (this.value === 'other') {
+                    otherInput.classList.add('expanded');
+                    setTimeout(() => document.getElementById('other_device_type')?.focus(), 300);
+                } else {
+                    otherInput.classList.remove('expanded');
+                }
+            });
+
+            // Service type other option
+            document.getElementById('service_type').addEventListener('change', function() {
+                const otherInput = document.getElementById('other_service_input');
+                if (this.value === 'other') {
+                    otherInput.classList.add('expanded');
+                    setTimeout(() => document.getElementById('other_service_type')?.focus(), 300);
+                } else {
+                    otherInput.classList.remove('expanded');
+                }
+            });
+        }
+
+        function toggleSpecificRepair() {
+            const serviceType = document.getElementById('service_type').value;
+            const specificRepairSection = document.getElementById('specific_repair_section');
+
+            if (serviceType === 'repair') {
+                specificRepairSection.style.display = 'block';
+            } else {
+                specificRepairSection.style.display = 'none';
+            }
+        }
+
+        // NEW: Toggle pickup location fields based on selection
+        function togglePickupLocationFields() {
+            const pickupDropoff = document.getElementById('pickup_dropoff').value;
+            const pickupLocationFields = document.getElementById('pickup_location_fields');
+            const dropoffLocationField = document.getElementById('dropoff_location_field');
+
+            if (pickupDropoff === 'pickup' || pickupDropoff === 'both') {
+                pickupLocationFields.classList.add('expanded');
+
+                if (pickupDropoff === 'both') {
+                    dropoffLocationField.classList.add('expanded');
+                } else {
+                    dropoffLocationField.classList.remove('expanded');
+                }
+
+                // Focus on pickup location field
+                setTimeout(() => document.getElementById('pickup_location')?.focus(), 300);
+            } else {
+                pickupLocationFields.classList.remove('expanded');
+                dropoffLocationField.classList.remove('expanded');
+            }
+        }
+
+        function updateUrgencyBadge() {
+            const urgencySelect = document.getElementById('urgency');
+            const urgency = urgencySelect.value;
+            let badgeClass = '';
+            let badgeText = '';
+            let badgeIcon = '';
+
+            switch(urgency) {
+                case 'low':
+                    badgeClass = 'urgency-low';
+                    badgeText = 'Low Priority';
+                    badgeIcon = '🟢';
+                    break;
+                case 'medium':
+                    badgeClass = 'urgency-medium';
+                    badgeText = 'Medium Priority';
+                    badgeIcon = '🟡';
+                    break;
+                case 'high':
+                    badgeClass = 'urgency-high';
+                    badgeText = 'High Priority';
+                    badgeIcon = '🔴';
+                    break;
+                case 'urgent':
+                    badgeClass = 'urgency-urgent';
+                    badgeText = 'Urgent';
+                    badgeIcon = '🚨';
+                    break;
+            }
+
+            // Update or create badge
+            let badge = document.querySelector('.urgency-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = `urgency-badge`;
+                urgencySelect.parentNode.appendChild(badge);
+            }
+
+            badge.className = `urgency-badge ${badgeClass}`;
+            badge.innerHTML = `${badgeIcon} ${badgeText}`;
+        }
+
+        function getServiceComplexity(deviceType, serviceType, specificRepair) {
+            // Simple complexity scoring
+            let complexity = 1; // Base complexity
+
+            // Device type complexity
+            if (deviceType === 'smartphone' || deviceType === 'tablet') complexity += 1;
+            if (deviceType === 'laptop' || deviceType === 'desktop') complexity += 2;
+            if (deviceType === 'gaming_console' || deviceType === 'camera') complexity += 1.5;
+
+            // Service type complexity
+            if (serviceType === 'diagnostic') complexity += 0.5;
+            if (serviceType === 'repair') complexity += 2;
+            if (serviceType === 'data_recovery' || serviceType === 'data_transfer') complexity += 1.5;
+            if (serviceType === 'software_issue') complexity += 1;
+
+            // Specific repair complexity
+            if (specificRepair === 'screen_replacement') complexity += 2;
+            if (specificRepair === 'water_damage') complexity += 3;
+            if (specificRepair === 'data_recovery') complexity += 2.5;
+
+            return Math.min(complexity, 5); // Cap at 5
+        }
+
+        // NEW: Calculate distance between service location and pickup location
+        function calculateDistance() {
+            const serviceLocation = document.getElementById('service_location').value;
+            const pickupLocation = document.getElementById('pickup_location').value || '';
+            const pickupDropoff = document.getElementById('pickup_dropoff').value;
+
+            // For dropoff only, no distance calculation needed
+            if (pickupDropoff === 'dropoff') return 0;
+
+            // For pickup or both, calculate distance from pickup to service location
+            if (serviceLocation && pickupLocation) {
+                // Simulate distance based on input lengths
+                const serviceLength = serviceLocation.length;
+                const pickupLength = pickupLocation.length;
+
+                // Generate distance between 0.05km and 20km
+                const baseDistance = 0.05 + (Math.abs(serviceLength - pickupLength) / 100);
+                const randomFactor = 0.5 + (Math.random() * 1.5);
+                return Math.min(baseDistance * randomFactor, 20).toFixed(2);
+            }
+            return 0;
+        }
+
+        // NEW: Calculate distance fee for gadget services
+        function calculateDistanceFee(distance) {
+            if (distance <= 0) return 0;
+
+            const distanceKm = parseFloat(distance);
+            const pickupDropoff = document.getElementById('pickup_dropoff').value;
+
+            // Different pricing for pickup vs both
+            if (pickupDropoff === 'pickup') {
+                // Pickup only pricing
+                if (distanceKm <= 1) {
+                    return 2.00;
+                } else if (distanceKm <= 5) {
+                    return 5.00;
+                } else if (distanceKm <= 10) {
+                    return 8.00;
+                } else if (distanceKm <= 20) {
+                    return 12.00;
+                } else {
+                    return 15.00;
+                }
+            } else if (pickupDropoff === 'both') {
+                // Both pickup and dropoff pricing (higher)
+                if (distanceKm <= 1) {
+                    return 4.00;
+                } else if (distanceKm <= 5) {
+                    return 8.00;
+                } else if (distanceKm <= 10) {
+                    return 12.00;
+                } else if (distanceKm <= 20) {
+                    return 18.00;
+                } else {
+                    return 25.00;
+                }
+            }
+            return 0; // Dropoff only has no distance fee
+        }
+
+        function calculateEstimatedFee() {
+            const deviceType = document.getElementById('device_type').value;
+            const deviceAge = document.getElementById('device_age').value;
+            const serviceType = document.getElementById('service_type').value;
+            const specificRepair = document.getElementById('specific_repair').value;
+            const warrantyStatus = document.getElementById('warranty_status').value;
+            const diagnosticFee = document.getElementById('diagnostic_fee').value;
+            const budgetRange = document.getElementById('budget_range').value;
+            const dataBackup = document.getElementById('data_backup').value;
+            const purchaseBudget = parseFloat(document.getElementById('purchase_budget').value) || 0;
+            const urgency = document.getElementById('urgency').value;
+            const pickupDropoff = document.getElementById('pickup_dropoff').value;
+
+            let fee = 0;
+
+            // Base diagnostic fee
+            if (diagnosticFee === 'yes') {
+                fee += 25.00;
+            }
+
+            // Service complexity fee
+            const complexity = getServiceComplexity(deviceType, serviceType, specificRepair);
+            fee += complexity * 15.00;
+
+            // Device age adjustment (older devices may need more work)
+            if (deviceAge === '3_plus_years') fee += 10.00;
+            if (deviceAge === 'unknown') fee += 5.00;
+
+            // Out of warranty fee
+            if (warrantyStatus === 'out_of_warranty') fee += 20.00;
+
+            // Data backup fee
+            if (dataBackup === 'yes') fee += 15.00;
+            if (dataBackup === 'unsure') fee += 10.00;
+
+            // Purchase assistance fee (percentage of budget)
+            if (serviceType === 'purchase_assistance' && purchaseBudget > 0) {
+                fee += purchaseBudget * 0.05; // 5% of purchase budget
+            }
+
+            // Urgency premium
+            if (urgency === 'high') fee += 15.00;
+            if (urgency === 'urgent') fee += 25.00;
+
+            // NEW: Distance fee calculation
+            const distance = calculateDistance();
+            const distanceFee = calculateDistanceFee(distance);
+            fee += distanceFee;
+
+            // Minimum fee
+            fee = Math.max(fee, 15.00);
+
+            // Apply budget range cap (if specified)
+            const budgetCaps = {
+                'under_50': 50.00,
+                '50_100': 100.00,
+                '100_200': 200.00,
+                '200_500': 500.00
+            };
+
+            if (budgetRange in budgetCaps) {
+                fee = Math.min(fee, budgetCaps[budgetRange]);
+            }
+
+            return fee;
+        }
+
+        function updateServiceTypeIndicator() {
+            const serviceType = document.getElementById('service_type').value;
+            const indicator = document.getElementById('serviceTypeIndicator');
+
+            if (serviceType) {
+                indicator.style.display = 'flex';
+
+                let title = '';
+                let description = '';
+                let icon = 'fas fa-tools';
+
+                switch(serviceType) {
+                    case 'repair':
+                        title = 'Device Repair';
+                        description = 'Expert repair service';
+                        icon = 'fas fa-wrench';
+                        break;
+                    case 'diagnostic':
+                        title = 'Diagnostic Service';
+                        description = 'Problem identification';
+                        icon = 'fas fa-search';
+                        break;
+                    case 'purchase_assistance':
+                        title = 'Purchase Assistance';
+                        description = 'Help buying new device';
+                        icon = 'fas fa-shopping-cart';
+                        break;
+                    case 'setup':
+                        title = 'Setup Service';
+                        description = 'Device setup & installation';
+                        icon = 'fas fa-cogs';
+                        break;
+                    case 'data_transfer':
+                        title = 'Data Transfer';
+                        description = 'Secure data migration';
+                        icon = 'fas fa-database';
+                        break;
+                    case 'software_issue':
+                        title = 'Software Fix';
+                        description = 'Software troubleshooting';
+                        icon = 'fas fa-code';
+                        break;
+                    default:
+                        title = 'Custom Service';
+                        description = 'Tailored to your needs';
+                }
+
+                document.getElementById('serviceTypeTitle').textContent = title;
+                document.getElementById('serviceTypeDescription').textContent = description;
+                document.getElementById('serviceTypeIcon').className = icon;
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // MAP FUNCTIONS
+        function showMap() {
+            const serviceLocation = document.getElementById('service_location').value || 'Not specified';
+            const pickupDropoff = document.getElementById('pickup_dropoff').value;
+            let pickupLocation = 'Not specified';
+            let dropoffLocation = 'Not specified';
+
+            if (pickupDropoff === 'pickup' || pickupDropoff === 'both') {
+                pickupLocation = document.getElementById('pickup_location').value || 'Not specified';
+                if (!pickupLocation || pickupLocation === 'Not specified') {
+                    alert('Please enter a pickup location address.');
+                    return;
+                }
+            }
+
+            if (pickupDropoff === 'both') {
+                dropoffLocation = document.getElementById('dropoff_location').value || 'Not specified';
+            }
+
+            if (!serviceLocation || serviceLocation === 'Not specified') {
+                alert('Please enter a service location.');
+                return;
+            }
+
+            document.getElementById('mapServiceLocation').textContent = serviceLocation;
+
+            if (pickupDropoff === 'pickup' || pickupDropoff === 'both') {
+                document.getElementById('mapPickupLocation').textContent = pickupLocation;
+            } else {
+                document.getElementById('mapPickupLocation').textContent = 'Customer will drop off';
+            }
+
+            const distance = calculateDistance();
+            const estimatedTime = Math.round(distance * 4); // 4 minutes per km for gadget services
+            const serviceType = document.getElementById('service_type').value;
+            let serviceTypeText = 'Gadget Service';
+
+            switch(serviceType) {
+                case 'repair': serviceTypeText = 'Device Repair'; break;
+                case 'diagnostic': serviceTypeText = 'Diagnostic'; break;
+                case 'purchase_assistance': serviceTypeText = 'Purchase Help'; break;
+                case 'setup': serviceTypeText = 'Setup Service'; break;
+                default: serviceTypeText = 'Gadget Service';
+            }
+
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapServiceType').textContent = serviceTypeText;
+
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Update estimated fee
+        function updateEstimatedFee() {
+            const fee = calculateEstimatedFee();
+            const feeElement = document.getElementById('estimated_fee');
+            feeElement.textContent = '$' + fee.toFixed(2);
+
+            // Update service type indicator
+            updateServiceTypeIndicator();
+
+            // Visual feedback
+            feeElement.style.transform = 'scale(1.1)';
+            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden' && input.type !== 'file') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation
+        document.getElementById('gadgetServiceForm').addEventListener('submit', function(e) {
+
+            const deviceType = document.getElementById('device_type').value.trim();
+            const brand = document.getElementById('brand').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const serviceType = document.getElementById('service_type').value.trim();
+            const issueDescription = document.getElementById('issue_description').value.trim();
+            const serviceLocation = document.getElementById('service_location').value.trim();
+            const pickupDropoff = document.getElementById('pickup_dropoff').value;
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const phoneNumber = document.getElementById('phone_number').value.trim();
+
+            // Validate required fields
+            if (!deviceType) {
+                alert('Please select a device type.');
+                document.getElementById('device_type').focus();
+                return false;
+            }
+
+            if (deviceType === 'other') {
+                const otherDeviceType = document.getElementById('other_device_type').value.trim();
+                if (!otherDeviceType) {
+                    alert('Please specify the device type.');
+                    document.getElementById('other_device_type').focus();
+                    return false;
+                }
+            }
+
+            if (!brand) {
+                alert('Please enter the device brand.');
+                document.getElementById('brand').focus();
+                return false;
+            }
+
+            if (!model) {
+                alert('Please enter the device model.');
+                document.getElementById('model').focus();
+                return false;
+            }
+
+            if (!serviceType) {
+                alert('Please select a service type.');
+                document.getElementById('service_type').focus();
+                return false;
+            }
+
+            if (serviceType === 'other') {
+                const otherServiceType = document.getElementById('other_service_type').value.trim();
+                if (!otherServiceType) {
+                    alert('Please specify the service type.');
+                    document.getElementById('other_service_type').focus();
+                    return false;
+                }
+            }
+
+            if (!issueDescription) {
+                alert('Please describe the issue or service needed.');
+                document.getElementById('issue_description').focus();
+                return false;
+            }
+
+            if (!serviceLocation) {
+                alert('Please enter the service location.');
+                document.getElementById('service_location').focus();
+                return false;
+            }
+
+            // Validate pickup/dropoff location based on selection
+            if (pickupDropoff === 'pickup' || pickupDropoff === 'both') {
+                const pickupLocation = document.getElementById('pickup_location').value.trim();
+                if (!pickupLocation) {
+                    alert('Please enter a pickup location address.');
+                    document.getElementById('pickup_location').focus();
+                    return false;
+                }
+            }
+
+            if (pickupDropoff === 'both') {
+                const dropoffLocation = document.getElementById('dropoff_location').value.trim();
+                if (!dropoffLocation) {
+                    alert('Please enter a drop-off location address.');
+                    document.getElementById('dropoff_location').focus();
+                    return false;
+                }
+            }
+
+            // Validate service price
+            if (!servicePrice) {
+                alert('Please enter a service price.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            const servicePriceNum = parseFloat(servicePrice);
+            if (servicePriceNum < 0.50) {
+                alert('Service price must be at least $0.50.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            // Validate phone number
+            if (!phoneNumber) {
+                alert('Please enter your phone number.');
+                document.getElementById('phone_number').focus();
+                return false;
+            }
+
+            // Show summary with estimated fee
+            const estimatedFee = document.getElementById('estimated_fee').textContent;
+            const serviceTypeText = document.getElementById('serviceTypeTitle').textContent;
+            const urgency = document.getElementById('urgency').options[document.getElementById('urgency').selectedIndex].text;
+            const distance = calculateDistance();
+
+            let pickupInfo = '';
+            if (pickupDropoff === 'pickup') {
+                pickupInfo = `\nPickup from: ${document.getElementById('pickup_location').value}`;
+            } else if (pickupDropoff === 'both') {
+                pickupInfo = `\nPickup from: ${document.getElementById('pickup_location').value}\nDrop-off to: ${document.getElementById('dropoff_location').value}`;
+            } else {
+                pickupInfo = '\nCustomer will drop off device';
+            }
+
+            alert(`Gadget service order created successfully!\n\nService Type: ${serviceTypeText}\nDistance: ${distance} km${pickupInfo}\nUrgency: ${urgency}\nEstimated Fee: ${estimatedFee}\nYour Service Price: $${servicePriceNum.toFixed(2)}\nPhone: ${phoneNumber}`);
+
+            // In a real app, you would submit the form here
+            // this.submit();
+        });
+    </script>
+</body>
+</html>

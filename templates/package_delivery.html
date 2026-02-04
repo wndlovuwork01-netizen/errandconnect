@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ErrandConnect - Package Delivery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --success: #8BC34A;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* AUTO-SLIDING TEXT FOR MOBILE */
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: text;
+        }
+
+        /* Auto-sliding text animation */
+        @keyframes slideTextLeft {
+            0% {
+                transform: translateX(0);
+            }
+            10% {
+                transform: translateX(0);
+            }
+            90% {
+                transform: translateX(calc(-100% + 100px));
+            }
+            100% {
+                transform: translateX(calc(-100% + 100px));
+            }
+        }
+
+        /* For inputs with long text - auto slide show */
+        .input-with-icon input.sliding-text {
+            animation: slideTextLeft 15s linear infinite;
+            animation-play-state: running;
+            padding-right: 40px;
+        }
+
+        /* Pause animation on hover/focus */
+        .input-with-icon input.sliding-text:focus {
+            animation-play-state: paused;
+        }
+
+        /* For textarea specifically (multi-line) */
+        textarea {
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            overflow-y: auto;
+            min-height: 60px;
+            max-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            white-space: pre-wrap;
+            overflow-x: hidden;
+        }
+
+        /* NEW: Service Price and Phone Number Row */
+        .service-phone-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .service-phone-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 0;
+        }
+
+        /* VIEW MAP BUTTON */
+        .view-map-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .view-map-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* Dimension Grid - Mobile Optimized */
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .dimension-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .dimension-item label {
+            font-size: 12px;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        .dimension-item input {
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            background: white;
+        }
+
+        /* Value Display */
+        .value-display {
+            background: var(--gradient);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .value-label {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .value-amount {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* Preference Grid - Mobile Optimized */
+        .preference-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .preference-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Delivery Method Indicator */
+        .delivery-method-indicator {
+            background: var(--light);
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .delivery-method-icon {
+            font-size: 20px;
+            color: var(--primary);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .delivery-method-text h4 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        .delivery-method-text p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        /* Insurance Badge */
+        .insurance-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        /* MAP MODAL - Mobile Optimized */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(10px, env(safe-area-inset-top));
+                height: calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+
+            .map-modal {
+                padding: max(15px, env(safe-area-inset-left));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .preference-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .dimension-grid {
+                gap: 15px;
+            }
+
+            /* Service Phone Row for larger screens */
+            .service-phone-row {
+                gap: 15px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            .dimension-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .value-label {
+                font-size: 14px;
+            }
+
+            .value-amount {
+                font-size: 18px;
+            }
+
+            /* Service Phone Row for very small screens */
+            .service-phone-row {
+                gap: 8px;
+            }
+
+            .service-phone-row .input-with-icon i {
+                font-size: 12px;
+                left: 8px;
+            }
+
+            .service-phone-row input {
+                padding-left: 32px;
+                padding-right: 8px;
+                font-size: 13px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="service-text">
+                <h3>Package Delivery</h3>
+                <p>Safe and reliable delivery</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Estimated:</span>
+            <span id="estimated_fee" class="fee-amount">$1.50</span>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Delivery Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-route"></i>
+                <h3>Route Preview</h3>
+                <p>Map showing route from pickup to delivery</p>
+                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
+                    <p><strong>Pickup:</strong> <span id="mapPickupAddress">Not specified</span></p>
+                    <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapDeliveryMethod">-</div>
+                    <div class="info-label">Delivery Method</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Package Delivery Service</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <form method="post" action="{{ url_for('create_package_delivery_errand') }}" id="packageDeliveryForm">
+                    <h2><i class="fas fa-box-open"></i> Package Information</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-tag"></i>
+                            <input type="text" id="package_description" name="package_description" placeholder="What are you sending?" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Package Dimensions (cm)</label>
+                        <div class="info-tip">
+                            <i class="fas fa-info-circle"></i> Accurate dimensions help calculate delivery options
+                        </div>
+                        <div class="dimension-grid">
+                            <div class="dimension-item">
+                                <label>Length</label>
+                                <input type="number" name="length" placeholder="0" step="0.1" min="0" oninput="updateEstimatedFee()">
+                            </div>
+                            <div class="dimension-item">
+                                <label>Width</label>
+                                <input type="number" name="width" placeholder="0" step="0.1" min="0" oninput="updateEstimatedFee()">
+                            </div>
+                            <div class="dimension-item">
+                                <label>Height</label>
+                                <input type="number" name="height" placeholder="0" step="0.1" min="0" oninput="updateEstimatedFee()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-weight-hanging"></i>
+                            <input type="number" id="weight" name="weight" placeholder="Weight (kg)" step="0.1" min="0" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                            <textarea id="contents_description" name="contents_description" rows="2" placeholder="Detailed description of contents..." required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-shield-alt"></i> Package Safety & Value</h2>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="fragile_items">Fragile Items?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-glass-cheers"></i>
+                                <select id="fragile_items" name="fragile_items" required onchange="updateEstimatedFee()">
+                                    <option value="no">No fragile items</option>
+                                    <option value="yes">Contains fragile items</option>
+                                    <option value="very_fragile">Very fragile</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="insurance_required">Insurance</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-shield-alt"></i>
+                                <select id="insurance_required" name="insurance_required" onchange="updateEstimatedFee()">
+                                    <option value="no">No insurance</option>
+                                    <option value="basic">Basic insurance</option>
+                                    <option value="full">Full value insurance</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="value-display">
+                        <div class="value-label">Declared Value:</div>
+                        <div class="value-amount">$<span id="value_display">0.00</span></div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input type="number" id="estimated_value" name="estimated_value" placeholder="Package value for insurance" step="0.01" min="0" oninput="updateValueDisplay(); updateEstimatedFee();">
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-route"></i> Delivery Information</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="pickup_address" name="pickup_address" placeholder="Pickup address" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-home"></i>
+                            <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required oninput="updateEstimatedFee()">
+                        </div>
+                    </div>
+
+                    <!-- VIEW MAP BUTTON - Now below Delivery Address field -->
+                    <button type="button" class="view-map-btn" onclick="showMap()">
+                        <i class="fas fa-map-marked-alt"></i> View Route Map
+                    </button>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="delivery_timeframe">Delivery Speed</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <select id="delivery_timeframe" name="delivery_timeframe" required onchange="updateEstimatedFee()">
+                                    <option value="express">Express (same day)</option>
+                                    <option value="next_day">Next day</option>
+                                    <option value="2_day">2-day delivery</option>
+                                    <option value="standard">Standard (3-5 days)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="packaging_requirements">Packaging</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-box"></i>
+                                <select id="packaging_requirements" name="packaging_requirements" onchange="updateEstimatedFee()">
+                                    <option value="standard">Standard packaging</option>
+                                    <option value="bubble_wrap">Bubble wrap</option>
+                                    <option value="double_box">Double boxing</option>
+                                    <option value="waterproof">Waterproof</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
+                        <div class="delivery-method-icon">
+                            <i id="deliveryMethodIcon" class="fas fa-bicycle"></i>
+                        </div>
+                        <div class="delivery-method-text">
+                            <h4 id="deliveryMethodTitle">Delivery Method</h4>
+                            <p id="deliveryMethodDescription">Calculating based on size and distance...</p>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-clipboard-check"></i> Delivery Requirements</h2>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="signature_required">Signature Required</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-signature"></i>
+                                <select id="signature_required" name="signature_required" required onchange="updateEstimatedFee()">
+                                    <option value="no">No signature</option>
+                                    <option value="yes">Signature required</option>
+                                    <option value="adult_signature">Adult signature</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="proof_of_delivery">Proof of Delivery</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-camera"></i>
+                                <select id="proof_of_delivery" name="proof_of_delivery" onchange="updateEstimatedFee()">
+                                    <option value="none">No proof needed</option>
+                                    <option value="photo">Photo proof</option>
+                                    <option value="signature">Signature proof</option>
+                                    <option value="both">Photo & signature</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-hands-helping"></i>
+                            <textarea id="special_handling" name="special_handling" rows="2" placeholder="Special handling instructions..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-comment-alt"></i>
+                            <textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Specific delivery instructions..."></textarea>
+                        </div>
+                    </div>
+
+                     <div class="section-divider"></div>
+
+                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+
+                    <!-- NEW: Service Price and Phone Number Row -->
+                    <div class="service-phone-row">
+                        <!-- Service Price -->
+                        <div class="form-group">
+                            <label for="service_price">Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price"
+                                       placeholder="Your price"
+                                       step="0.01" min="0.50"
+                                       inputmode="decimal" required>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone_number" name="phone_number"
+                                       placeholder="Phone number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Create Package Delivery
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Prevent form submission on Enter key in inputs
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && this.type !== 'textarea' && this.type !== 'submit') {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Initialize auto-sliding text
+            initializeAutoSlidingText();
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+        });
+
+        function initializeAutoSlidingText() {
+            // Function to check if text needs sliding
+            const checkAndApplySliding = (input) => {
+                if (!input) return;
+
+                // Remove any existing sliding class first
+                input.classList.remove('sliding-text');
+
+                // Check if text is longer than input width
+                if (input.scrollWidth > input.clientWidth && input.value.trim() !== '') {
+                    // Calculate how much extra text there is
+                    const overflowAmount = input.scrollWidth - input.clientWidth;
+                    if (overflowAmount > 20) {
+                        // Add sliding animation class
+                        input.classList.add('sliding-text');
+
+                        // Calculate animation duration based on text length
+                        const textLength = input.value.length;
+                        const duration = Math.max(15, textLength / 3);
+                        input.style.animationDuration = `${duration}s`;
+                    }
+                }
+            };
+
+            // Apply to all existing text inputs
+            const textInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+            textInputs.forEach(input => {
+                // Check on input change
+                input.addEventListener('input', function() {
+                    setTimeout(() => checkAndApplySliding(this), 100);
+                });
+
+                // Check on focus/blur
+                input.addEventListener('focus', function() {
+                    if (this.classList.contains('sliding-text')) {
+                        this.style.animationPlayState = 'paused';
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.classList.contains('sliding-text')) {
+                        this.style.animationPlayState = 'running';
+                    }
+                });
+
+                // Initial check
+                setTimeout(() => checkAndApplySliding(input), 300);
+            });
+        }
+
+        function initializeForm() {
+            // Update fee when inputs change
+            const feeInputs = ['package_description', 'length', 'width', 'height', 'weight', 'fragile_items', 'insurance_required', 'estimated_value', 'pickup_address', 'delivery_address', 'delivery_timeframe', 'packaging_requirements', 'signature_required', 'proof_of_delivery'];
+            feeInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateEstimatedFee);
+                    element.addEventListener('change', updateEstimatedFee);
+                }
+            });
+
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Initial calculations
+            updateEstimatedFee();
+            updateValueDisplay();
+        }
+
+        // Calculate distance between pickup and delivery
+        function calculateDistance() {
+            const pickupAddress = document.getElementById('pickup_address').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+
+            if (pickupAddress && deliveryAddress) {
+                // Simulate distance based on input lengths
+                const pickupLength = pickupAddress.length;
+                const deliveryLength = deliveryAddress.length;
+
+                // Generate distance between 0.05km and 50km
+                const baseDistance = 0.05 + (Math.abs(pickupLength - deliveryLength) / 100);
+                const randomFactor = 0.5 + (Math.random() * 2);
+                return Math.min(baseDistance * randomFactor, 50).toFixed(2);
+            }
+            return 0;
+        }
+
+        // Calculate package volume
+        function calculateVolume() {
+            const length = parseFloat(document.querySelector('input[name="length"]').value) || 0;
+            const width = parseFloat(document.querySelector('input[name="width"]').value) || 0;
+            const height = parseFloat(document.querySelector('input[name="height"]').value) || 0;
+
+            return (length * width * height) / 1000000; // Convert to cubic meters
+        }
+
+        // Get delivery method based on package size and distance
+        function getDeliveryMethod(volume, weight, distance) {
+            if (volume <= 0.1 && weight <= 5 && distance <= 5) {
+                return {
+                    method: 'foot',
+                    title: 'Runner on Foot',
+                    description: 'Can be delivered by runner',
+                    icon: 'fas fa-walking',
+                    color: '#4CAF50'
+                };
+            } else if (volume <= 0.5 && weight <= 20 && distance <= 20) {
+                return {
+                    method: 'bike',
+                    title: 'Bike Delivery',
+                    description: 'Requires bike delivery',
+                    icon: 'fas fa-bicycle',
+                    color: '#FF9800'
+                };
+            } else {
+                return {
+                    method: 'vehicle',
+                    title: 'Vehicle Required',
+                    description: 'Requires car or van delivery',
+                    icon: 'fas fa-truck',
+                    color: '#F44336'
+                };
+            }
+        }
+
+        // Calculate size fee
+        function calculateSizeFee() {
+            const volume = calculateVolume();
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+
+            if (volume === 0 || weight === 0) return 0;
+
+            // Size-based pricing
+            if (volume <= 0.01 && weight <= 1) return 2.00; // Small envelope
+            if (volume <= 0.05 && weight <= 5) return 3.50; // Small package
+            if (volume <= 0.2 && weight <= 10) return 5.00; // Medium package
+            if (volume <= 0.5 && weight <= 20) return 7.50; // Large package
+            return 10.00; // Extra large package
+        }
+
+        // Calculate distance fee for package delivery
+        function calculateDistanceFee(distance) {
+            if (distance <= 0) return 0;
+
+            const distanceKm = parseFloat(distance);
+
+            // Package delivery distance pricing (starting from $1.50 base)
+            // Base: $1.50 for up to 0.5km
+            if (distanceKm <= 0.5) {
+                return 0; // Base price already included
+            } else if (distanceKm <= 1) {
+                return 0.50;
+            } else if (distanceKm <= 2) {
+                return 1.00;
+            } else if (distanceKm <= 5) {
+                return 2.50;
+            } else if (distanceKm <= 10) {
+                return 4.00;
+            } else if (distanceKm <= 20) {
+                return 6.00;
+            } else if (distanceKm <= 50) {
+                return 10.00;
+            } else {
+                return 15.00;
+            }
+        }
+
+        // Calculate time fee
+        function calculateTimeFee() {
+            const deliveryTimeframe = document.getElementById('delivery_timeframe').value;
+
+            if (deliveryTimeframe === 'express') return 8.00;
+            if (deliveryTimeframe === 'next_day') return 5.00;
+            if (deliveryTimeframe === '2_day') return 3.00;
+            return 0; // Standard delivery
+        }
+
+        // Calculate additional service fees
+        function calculateAdditionalFees() {
+            let additionalFees = 0;
+
+            // Fragile items fee
+            const fragileItems = document.getElementById('fragile_items').value;
+            if (fragileItems === 'yes') additionalFees += 2.00;
+            if (fragileItems === 'very_fragile') additionalFees += 4.00;
+
+            // Packaging fees
+            const packaging = document.getElementById('packaging_requirements').value;
+            if (packaging === 'bubble_wrap') additionalFees += 1.50;
+            if (packaging === 'double_box') additionalFees += 3.00;
+            if (packaging === 'waterproof') additionalFees += 2.50;
+
+            // Signature and proof fees
+            const signature = document.getElementById('signature_required').value;
+            if (signature === 'yes') additionalFees += 1.00;
+            if (signature === 'adult_signature') additionalFees += 2.00;
+
+            const proof = document.getElementById('proof_of_delivery').value;
+            if (proof === 'photo') additionalFees += 1.00;
+            if (proof === 'signature') additionalFees += 0.50;
+            if (proof === 'both') additionalFees += 1.50;
+
+            // Insurance fee (percentage of declared value)
+            const insurance = document.getElementById('insurance_required').value;
+            const declaredValue = parseFloat(document.getElementById('estimated_value').value) || 0;
+            if (insurance === 'basic' && declaredValue > 0) additionalFees += (declaredValue * 0.02); // 2%
+            if (insurance === 'full' && declaredValue > 0) additionalFees += (declaredValue * 0.05); // 5%
+
+            return additionalFees;
+        }
+
+        // Update value display
+        function updateValueDisplay() {
+            const value = document.getElementById('estimated_value').value || '0.00';
+            document.getElementById('value_display').textContent = parseFloat(value).toFixed(2);
+
+            // Add animation to value display
+            const valueElement = document.querySelector('.value-display');
+            valueElement.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                valueElement.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Update delivery method display
+        function updateDeliveryMethod(volume, weight, distance) {
+            const indicator = document.getElementById('deliveryMethodIndicator');
+            const method = getDeliveryMethod(volume, weight, distance);
+
+            if (volume > 0 && weight > 0 && distance > 0) {
+                indicator.style.display = 'flex';
+                document.getElementById('deliveryMethodIcon').className = method.icon;
+                document.getElementById('deliveryMethodTitle').textContent = method.title;
+                document.getElementById('deliveryMethodDescription').textContent = method.description;
+                indicator.style.borderLeft = `3px solid ${method.color}`;
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // MAP FUNCTIONS
+        function showMap() {
+            const pickupAddress = document.getElementById('pickup_address').value || 'Not specified';
+            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
+
+            if (!pickupAddress || !deliveryAddress || pickupAddress === 'Not specified' || deliveryAddress === 'Not specified') {
+                alert('Please enter both pickup address and delivery address.');
+                return;
+            }
+
+            document.getElementById('mapPickupAddress').textContent = pickupAddress;
+            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
+
+            const distance = calculateDistance();
+            const estimatedTime = Math.round(distance * 3); // 3 minutes per km for package delivery
+            const weight = document.getElementById('weight').value || 0;
+            const volume = calculateVolume();
+            const deliveryMethod = getDeliveryMethod(volume, weight, distance);
+
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
+
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateMapDetails(distance, weight, volume) {
+            const estimatedTime = Math.round(distance * 3);
+            const deliveryMethod = getDeliveryMethod(volume, weight, distance);
+
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
+        }
+
+        // Update estimated fee - STARTING FROM $1.50 BASE PRICE
+        function updateEstimatedFee() {
+            const distance = calculateDistance();
+            const volume = calculateVolume();
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+
+            // BASE PRICE: $1.50
+            const basePrice = 1.50;
+
+            const sizeFee = calculateSizeFee();
+            const distanceFee = calculateDistanceFee(distance);
+            const timeFee = calculateTimeFee();
+            const additionalFees = calculateAdditionalFees();
+
+            // Total fee (starting from $1.50 base)
+            const totalFee = Math.max(basePrice + sizeFee + distanceFee + timeFee + additionalFees, 1.50);
+
+            // Update display
+            const feeElement = document.getElementById('estimated_fee');
+            feeElement.textContent = '$' + totalFee.toFixed(2);
+
+            // Update delivery method indicator
+            updateDeliveryMethod(volume, weight, distance);
+
+            // Visual feedback
+            feeElement.style.transform = 'scale(1.1)';
+            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden' && input.type !== 'file') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation
+        document.getElementById('packageDeliveryForm').addEventListener('submit', function(e) {
+
+            const packageDescription = document.getElementById('package_description').value.trim();
+            const weight = document.getElementById('weight').value.trim();
+            const contents = document.getElementById('contents_description').value.trim();
+            const pickup = document.getElementById('pickup_address').value.trim();
+            const delivery = document.getElementById('delivery_address').value.trim();
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const phoneNumber = document.getElementById('phone_number').value.trim();
+
+            // Validate required fields
+            if (!packageDescription) {
+                alert('Please enter a package description.');
+                document.getElementById('package_description').focus();
+                return false;
+            }
+
+            if (!weight || parseFloat(weight) <= 0) {
+                alert('Please enter a valid package weight.');
+                document.getElementById('weight').focus();
+                return false;
+            }
+
+            if (!contents) {
+                alert('Please describe the package contents.');
+                document.getElementById('contents_description').focus();
+                return false;
+            }
+
+            if (!pickup) {
+                alert('Please enter a pickup address.');
+                document.getElementById('pickup_address').focus();
+                return false;
+            }
+
+            if (!delivery) {
+                alert('Please enter a delivery address.');
+                document.getElementById('delivery_address').focus();
+                return false;
+            }
+
+            // Validate service price
+            if (!servicePrice) {
+                alert('Please enter a service price.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            const servicePriceNum = parseFloat(servicePrice);
+            if (servicePriceNum < 0.50) {
+                alert('Service price must be at least $0.50.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            // Validate phone number
+            if (!phoneNumber) {
+                alert('Please enter your phone number.');
+                document.getElementById('phone_number').focus();
+                return false;
+            }
+
+            // Show summary with delivery method
+            const distance = calculateDistance();
+            const volume = calculateVolume();
+            const weightValue = parseFloat(weight);
+            const deliveryMethod = getDeliveryMethod(volume, weightValue, distance);
+            const estimatedFee = document.getElementById('estimated_fee').textContent;
+            const declaredValue = document.getElementById('value_display').textContent;
+
+            alert(`Package delivery order created successfully!\n\nDistance: ${distance} km\nDelivery Method: ${deliveryMethod.title}\nDeclared Value: $${declaredValue}\nEstimated Fee: ${estimatedFee}\nYour Service Price: $${servicePriceNum.toFixed(2)}\nPhone: ${phoneNumber}`);
+
+            // In a real app, you would submit the form here
+            // this.submit();
+        });
+    </script>
+</body>
+</html>

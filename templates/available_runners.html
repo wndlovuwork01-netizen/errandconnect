@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Improved mobile viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Available Runners - ErrandConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f8fdf8;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* Filters Section - Mobile Optimized with new layout */
+        .filters {
+            padding: 15px;
+            background: #f8fff9;
+            border-bottom: 1px solid #e8f5e8;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 0; /* Allows text truncation */
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2e7d32;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .filter-select {
+            padding: 12px 10px;
+            border: 1px solid #d4edda;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            min-height: 44px; /* Better touch target */
+        }
+
+        .search-box {
+            width: 100%;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #d4edda;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            min-height: 44px; /* Better touch target */
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #28a745;
+            font-size: 1rem;
+        }
+
+        .errand-card {
+            background: #f8fff9;
+            border: 2px solid #d4edda;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+            font-size: 0.95rem;
+        }
+
+        .errand-card strong {
+            color: #2e7d32;
+            font-size: 1rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .runners-list {
+            padding: 0 15px 15px;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: #f8fff9;
+            border-bottom: 1px solid #e8f5e8;
+            font-size: 0.85rem;
+            color: #666;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        /* Runner Strip Layout - Mobile Optimized */
+        .runner-strip {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: 1px solid #e8f5e8;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            touch-action: manipulation;
+        }
+
+        .runner-strip:active {
+            transform: scale(0.99);
+            transition: transform 0.1s ease;
+        }
+
+        .runner-strip-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .runner-avatar {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .runner-profile-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #4CAF50;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .runner-main-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+
+        .runner-name-rating {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .runner-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ff6b00;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .runner-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #666;
+            width: 100%;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            background: #f8fff9;
+            border-radius: 8px;
+        }
+
+        .vehicle-type {
+            background: #e8f5e8;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .distance-indicator {
+            background: #e3f2fd;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1976d2;
+        }
+
+        .runner-price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-top: 10px;
+            border-top: 1px solid #e8f5e8;
+        }
+
+        .runner-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #28a745;
+            text-align: left;
+        }
+
+        .price-label {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: normal;
+            display: block;
+        }
+
+        .runner-actions {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-align: center;
+            width: 100%;
+            min-height: 48px; /* Minimum touch target size */
+        }
+
+        .select-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .select-btn:active {
+            background: #218838;
+            transform: scale(0.98);
+        }
+
+        .select-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .chat-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .chat-btn:active {
+            background: #0056b3;
+            transform: scale(0.98);
+        }
+
+        .pending-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .pending-btn:active {
+            background: #e0a800;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .status-online {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-busy {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* No Runners State */
+        .no-runners-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .no-runners-state i {
+            font-size: 3.5rem;
+            color: #28a745;
+            opacity: 0.5;
+        }
+
+        .no-runners-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .no-runners-state p {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .selected-runner {
+            border: 2px solid #28a745;
+            background: #f8fff9;
+        }
+
+        .navigation {
+            margin-top: 20px;
+            padding: 20px 15px;
+            border-top: 1px solid #e8f5e8;
+            background: white;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn.secondary:active {
+            background: #545b62;
+            transform: scale(0.98);
+        }
+
+        /* Tablet and larger mobile screens */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .runner-details {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .runner-price-section {
+                flex-direction: row;
+            }
+
+            .runner-strip {
+                padding: 18px;
+            }
+
+            .filter-select {
+                font-size: 15px;
+                padding: 12px 15px;
+            }
+        }
+
+        /* Desktop and larger tablets */
+        @media (min-width: 769px) {
+            .container {
+                max-width: 800px;
+                margin: 20px auto;
+                border-radius: 15px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                min-height: auto;
+            }
+
+            .header {
+                border-radius: 15px 15px 0 0;
+                position: relative;
+            }
+
+            .navigation {
+                border-radius: 0 0 15px 15px;
+                position: relative;
+            }
+
+            .runner-strip {
+                flex-direction: row;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .runner-strip-header {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .runner-main-info {
+                text-align: left;
+            }
+
+            .runner-name-rating {
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .runner-details {
+                display: flex;
+                gap: 15px;
+                padding: 0;
+                background: none;
+            }
+
+            .detail-item {
+                background: none;
+                padding: 0;
+            }
+
+            .runner-price-section {
+                flex-direction: column;
+                align-items: flex-end;
+                padding: 0;
+                border: none;
+                min-width: 100px;
+            }
+
+            .runner-actions {
+                min-width: 100px;
+            }
+
+            .filters-row {
+                gap: 15px;
+            }
+
+            .filter-select {
+                font-size: 15px;
+                padding: 12px 15px;
+            }
+        }
+
+        /* Small phones */
+        @media (max-width: 360px) {
+            .header {
+                padding: 15px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .errand-card {
+                margin: 12px;
+                padding: 12px;
+            }
+
+            .runner-details {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+
+            .filters-row {
+                gap: 8px;
+            }
+
+            .filter-group label {
+                font-size: 0.8rem;
+            }
+
+            .filter-select {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+        }
+
+        /* Prevent text selection on interactive elements */
+        .btn, .runner-strip {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* iOS-specific optimizations */
+        @supports (-webkit-touch-callout: none) {
+            .btn {
+                padding: 16px 20px;
+            }
+
+            .runner-strip:active {
+                opacity: 0.9;
+            }
+
+            .filter-select {
+                padding: 14px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Available Runners</h1>
+            <p>Select a runner for your errand</p>
+        </div>
+
+        <div class="errand-card">
+            {% if errand %}
+                <strong>Errand:</strong> {{ errand.type }} — Client's Price: ${{ "%.2f"|format(errand.price_estimate) }}<br>
+                <div>📍 Pickup: {{ errand.pickup_location or 'Not specified' }}</div>
+                <div>📍 Delivery: {{ errand.delivery_location or 'Not specified' }}</div>
+            {% else %}
+                <strong>Errand details not available</strong>
+            {% endif %}
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>Sort by:</label>
+                    <select class="filter-select" onchange="sortRunners(this.value)" id="sortSelect">
+                        <option value="rating">Highest Rating</option>
+                        <option value="completion">Completion Rate</option>
+                        <option value="distance">Distance</option>
+                        <option value="name">Name A-Z</option>
+                        <option value="price">Price</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Status:</label>
+                    <select class="filter-select" onchange="filterByStatus(this.value)" id="statusSelect">
+                        <option value="all">All Runners</option>
+                        <option value="online">Online Only</option>
+                        <option value="available">Available Now</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search runners..." onkeyup="searchRunners(this.value)" id="searchInput">
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <span id="runnerCount">Loading runners...</span>
+        </div>
+
+        <div class="runners-list" id="runnersList">
+            <!-- Runners will be dynamically loaded here -->
+            <div class="no-runners-state" id="noRunnersState" style="display: none;">
+                <i class="fas fa-running"></i>
+                <h3>No Runners Available</h3>
+                <p>There are currently no runners available in your area. Try adjusting your filters or check back later.</p>
+                <button class="btn secondary" onclick="refreshRunners()" style="margin-top: 10px; width: auto; padding: 10px 20px;">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a class="btn secondary" href="/dashboard">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+    // Track selected runner and acceptance status
+    let selectedRunner = null;
+    let runnerAccepted = false;
+    let allRunners = [];
+
+    // Get real runners data passed from Flask
+    const realRunners = {{ runners | tojson | safe }};
+    const currentErrandId = {{ errand.id if errand else 0 }};
+
+    // Transform the data to match the expected format
+    function transformRunnersData() {
+        allRunners = realRunners.map(runner => {
+            const profile = runner.runner_profile;
+            const user = runner.user;
+
+            // Calculate completion rate and rating
+            const completedErrands = runner.completed_errands || 0;
+            const totalErrands = runner.total_errands || 1; // Avoid division by zero
+            const completionRate = Math.round((completedErrands / totalErrands) * 100);
+            const avgRating = runner.avg_rating || 4.5;
+
+            // Determine status (simulated - in real app, this would come from WebSocket/DB)
+            const statuses = ['online', 'online', 'online', 'busy', 'offline'];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+
+            // Generate random price based on errand type and distance
+            const basePrice = {{ errand.price_estimate if errand else 15 }};
+            const priceVariation = (Math.random() * 0.4 + 0.8); // 80% to 120% of base price
+            const runnerPrice = Math.max(5, Math.round((basePrice * priceVariation) / 5) * 5); // Round to nearest $5, min $5
+
+            // Calculate distance from pickup (simulated)
+            const distance = (Math.random() * 15 + 0.5).toFixed(1); // 0.5 to 15.5 km
+
+            // Profile image placeholder (in real app, fetch from profile)
+            const profileImage = profile.profile_image || null;
+            const avatarLetter = user.fullname.charAt(0).toUpperCase();
+
+            return {
+                id: user.id,
+                name: user.fullname,
+                avatar: avatarLetter,
+                profileImage: profileImage,
+                rating: avgRating,
+                vehicle_type: profile.vehicle_type || 'Various',
+                city: profile.city || 'Not specified',
+                completion_rate: completionRate,
+                status: randomStatus,
+                price: runnerPrice,
+                distance: distance,
+                is_online: randomStatus === 'online',
+                profile: profile
+            };
+        });
+
+        // Sort by online status first, then by rating
+        allRunners.sort((a, b) => {
+            if (a.is_online && !b.is_online) return -1;
+            if (!a.is_online && b.is_online) return 1;
+            return b.rating - a.rating;
+        });
+    }
+
+    // Render runners to the page
+    function renderRunners() {
+        const runnersList = document.getElementById('runnersList');
+        const noRunnersState = document.getElementById('noRunnersState');
+
+        runnersList.innerHTML = '';
+
+        if (allRunners.length === 0) {
+            noRunnersState.style.display = 'flex';
+            updateRunnerCount(0);
+            return;
+        }
+
+        noRunnersState.style.display = 'none';
+
+        allRunners.forEach(runner => {
+            const runnerStrip = document.createElement('div');
+            runnerStrip.className = 'runner-strip';
+            runnerStrip.id = `runner-${runner.id}`;
+            runnerStrip.setAttribute('data-rating', runner.rating);
+            runnerStrip.setAttribute('data-completion', runner.completion_rate);
+            runnerStrip.setAttribute('data-status', runner.status);
+            runnerStrip.setAttribute('data-name', runner.name.toLowerCase());
+            runnerStrip.setAttribute('data-distance', runner.distance);
+            runnerStrip.setAttribute('data-price', runner.price);
+
+            const statusClass = `status-${runner.status}`;
+            const statusText = runner.status === 'online' ? 'Online' :
+                              runner.status === 'busy' ? 'Busy' : 'Offline';
+
+            runnerStrip.innerHTML = `
+                <div class="runner-strip-header">
+                    <div class="runner-avatar">
+                        ${runner.profileImage ?
+                            `<img src="${runner.profileImage}" alt="${runner.name}" class="runner-profile-image">` :
+                            runner.avatar
+                        }
+                        ${runner.status === 'online' ? '<div class="online-indicator"></div>' : ''}
+                    </div>
+                    <div class="runner-main-info">
+                        <div class="runner-name-rating">
+                            <div class="runner-name">${runner.name}</div>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>${runner.rating.toFixed(1)}/5
+                            </div>
+                            <span class="status-indicator ${statusClass}">
+                                <i class="fas fa-circle" style="font-size: 6px;"></i>${statusText}
+                            </span>
+                        </div>
+                        <div class="runner-details">
+                            <div class="detail-item">
+                                <i class="fas ${getVehicleIcon(runner.vehicle_type)}"></i>
+                                <span class="vehicle-type">${runner.vehicle_type}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${runner.city}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-road"></i>
+                                <span class="distance-indicator">${runner.distance} km away</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>${runner.completion_rate}% completion</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="runner-price-section">
+                    <div class="runner-price">
+                        $${runner.price}<span class="price-label">runner's price</span>
+                    </div>
+                    <div class="runner-actions">
+                        <button class="btn select-btn" onclick="selectRunner(${runner.id}, '${runner.name}', ${runner.price})" id="btn-${runner.id}">
+                            <i class="fas fa-check"></i> Select
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            runnersList.appendChild(runnerStrip);
+        });
+
+        updateRunnerCount(allRunners.length);
+    }
+
+    function getVehicleIcon(vehicleType) {
+        const icons = {
+            'car': 'fa-car',
+            'motorcycle': 'fa-motorcycle',
+            'bicycle': 'fa-bicycle',
+            'scooter': 'fa-motorcycle',
+            'walking': 'fa-walking',
+            'truck': 'fa-truck',
+            'van': 'fa-truck',
+            'suv': 'fa-truck'
+        };
+        return icons[vehicleType.toLowerCase()] || 'fa-vehicle';
+    }
+
+    function selectRunner(runnerId, runnerName, runnerPrice) {
+        if (selectedRunner && selectedRunner !== runnerId) {
+            resetRunner(selectedRunner);
+        }
+
+        selectedRunner = runnerId;
+
+        // Update UI for selected runner
+        const runnerStrip = document.getElementById(`runner-${runnerId}`);
+        const selectBtn = document.getElementById(`btn-${runnerId}`);
+
+        runnerStrip.classList.add('selected-runner');
+        selectBtn.innerHTML = '<i class="fas fa-clock"></i> Sending request...';
+        selectBtn.className = 'btn pending-btn';
+        selectBtn.disabled = true;
+
+        // Disable other runner buttons
+        disableOtherRunners(runnerId);
+
+        // Send request to backend
+        sendRunnerRequest(runnerId, runnerName, runnerPrice);
+    }
+
+    function resetRunner(runnerId) {
+        const runnerStrip = document.getElementById(`runner-${runnerId}`);
+        const selectBtn = document.getElementById(`btn-${runnerId}`);
+
+        if (runnerStrip) {
+            runnerStrip.classList.remove('selected-runner');
+        }
+        if (selectBtn) {
+            selectBtn.innerHTML = '<i class="fas fa-check"></i> Select';
+            selectBtn.className = 'btn select-btn';
+            selectBtn.disabled = false;
+        }
+    }
+
+    function disableOtherRunners(selectedRunnerId) {
+        allRunners.forEach(runner => {
+            if (runner.id !== selectedRunnerId) {
+                const btn = document.getElementById(`btn-${runner.id}`);
+                if (btn) {
+                    btn.disabled = true;
+                }
+            }
+        });
+    }
+
+    function enableAllRunners() {
+        allRunners.forEach(runner => {
+            const btn = document.getElementById(`btn-${runner.id}`);
+            if (btn) {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function sendRunnerRequest(runnerId, runnerName, runnerPrice) {
+        // Send AJAX request to backend
+        fetch('/negotiate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `errand_id=${currentErrandId}&runner_id=${runnerId}&offer_price=${runnerPrice}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Offer sent') {
+                // Update UI to show request sent
+                const selectBtn = document.getElementById(`btn-${runnerId}`);
+                selectBtn.innerHTML = '<i class="fas fa-clock"></i> Waiting for acceptance...';
+
+                // Show success message
+                showNotification(`Request sent to ${runnerName}! Waiting for acceptance...`);
+
+                // Listen for real-time acceptance (in real app, use WebSocket)
+                listenForAcceptance(runnerId, runnerName);
+            } else {
+                throw new Error(data.error || 'Failed to send request');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Failed to send request. Please try again.');
+            resetRunner(runnerId);
+            enableAllRunners();
+        });
+    }
+
+    function listenForAcceptance(runnerId, runnerName) {
+        // In a real app, this would be a WebSocket listener
+        // For now, we'll simulate it with a timeout and show that we're waiting
+        const selectBtn = document.getElementById(`btn-${runnerId}`);
+        selectBtn.innerHTML = '<i class="fas fa-clock"></i> Waiting...';
+
+        // Show instruction message
+        showNotification(`Request sent! The runner will respond soon. You can check back later.`, 5000);
+    }
+
+    function acceptRunner(runnerId, runnerName) {
+        runnerAccepted = true;
+        const selectBtn = document.getElementById(`btn-${runnerId}`);
+
+        selectBtn.innerHTML = '<i class="fas fa-comments"></i> Chat';
+        selectBtn.className = 'btn chat-btn';
+        selectBtn.disabled = false;
+        selectBtn.onclick = function() {
+            navigateToChat(runnerId, runnerName);
+        };
+
+        // Show success message
+        showNotification(`${runnerName} has accepted your errand! You can now chat to discuss details.`);
+    }
+
+    function navigateToChat(runnerId, runnerName) {
+        // Navigate to chat page with runner information
+        window.location.href = `/Errandfinal.html?runner_id=${runnerId}&runner_name=${encodeURIComponent(runnerName)}&errand_id=${currentErrandId}`;
+    }
+
+    function showNotification(message, duration = 4000) {
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            text-align: center;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, duration);
+    }
+
+    // Add CSS for notification animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    function sortRunners(criteria) {
+        const container = document.getElementById('runnersList');
+        const items = Array.from(container.querySelectorAll('.runner-strip'));
+
+        items.sort((a, b) => {
+            if (criteria === 'name') {
+                return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+            } else if (criteria === 'distance') {
+                const aDist = parseFloat(a.getAttribute('data-distance')) || 999;
+                const bDist = parseFloat(b.getAttribute('data-distance')) || 999;
+                return aDist - bDist; // Ascending (closest first)
+            } else if (criteria === 'price') {
+                const aPrice = parseFloat(a.getAttribute('data-price')) || 999;
+                const bPrice = parseFloat(b.getAttribute('data-price')) || 999;
+                return aPrice - bPrice; // Ascending (cheapest first)
+            } else {
+                const aValue = parseFloat(a.getAttribute(`data-${criteria}`)) || 0;
+                const bValue = parseFloat(b.getAttribute(`data-${criteria}`)) || 0;
+                return bValue - aValue; // Descending for rating and completion
+            }
+        });
+
+        // Re-append in sorted order
+        items.forEach(item => container.appendChild(item));
+    }
+
+    function filterByStatus(status) {
+        const items = document.querySelectorAll('.runner-strip');
+        items.forEach(item => {
+            const itemStatus = item.getAttribute('data-status');
+            if (status === 'all' ||
+                (status === 'online' && itemStatus === 'online') ||
+                (status === 'available' && (itemStatus === 'online' || itemStatus === 'busy'))) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        updateRunnerCount(document.querySelectorAll('.runner-strip[style="display: flex"], .runner-strip:not([style])').length);
+    }
+
+    function searchRunners(query) {
+        const items = document.querySelectorAll('.runner-strip');
+        const lowerQuery = query.toLowerCase();
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const runnerName = item.querySelector('.runner-name').textContent.toLowerCase();
+            const runnerDetails = item.querySelector('.runner-details').textContent.toLowerCase();
+
+            if (runnerName.includes(lowerQuery) || runnerDetails.includes(lowerQuery)) {
+                item.style.display = 'flex';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        updateRunnerCount(visibleCount);
+    }
+
+    function updateRunnerCount(count) {
+        document.getElementById('runnerCount').textContent = `${count} runners available`;
+    }
+
+    function refreshRunners() {
+        window.location.reload();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        transformRunnersData();
+        renderRunners();
+
+        // Add touch feedback for better mobile experience
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+
+            btn.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

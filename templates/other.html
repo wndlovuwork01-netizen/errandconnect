@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Custom Errand - ErrandConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --success: #8BC34A;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ESTIMATED FEE DISPLAY ON FIXED BAR - RIGHT SIDE */
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header - SIMPLIFIED */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* Budget Display - Mobile Optimized */
+        .budget-display {
+            background: var(--gradient);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .budget-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .budget-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* NEW: View Route Button */
+        .view-route-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+            touch-action: manipulation;
+            transition: var(--transition);
+        }
+
+        .view-route-btn:active {
+            transform: scale(0.98);
+            background: var(--primary-dark);
+        }
+
+        .view-route-btn.hidden {
+            display: none;
+        }
+
+        /* NEW: Map Modal */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* Errand Items - SIMPLIFIED (only description and quantity) */
+        .errand-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        .errand-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .errand-input-row .input-with-icon {
+            flex: 1;
+        }
+
+        .remove-item {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .remove-item:active {
+            background: #e68900;
+            transform: scale(0.95);
+        }
+
+        /* Add Item Button */
+        .add-item {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .add-item:active {
+            background: var(--primary-dark);
+            transform: scale(0.98);
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Preference Row - Two items on same row always */
+        .preference-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .preference-item {
+            flex: 1;
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Contact and Pricing Row - ALWAYS side by side */
+        .contact-pricing-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .contact-pricing-item {
+            flex: 1;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            touch-action: manipulation;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(12px, env(safe-area-inset-top));
+                height: calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 600px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .errand-item {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .errand-input-row {
+                flex-direction: row;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 700px;
+            }
+        }
+
+        /* Very small screens - REMOVED stacking for contact-pricing-row */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            .budget-value {
+                font-size: 18px;
+            }
+
+            /* Adjust gap for very small screens but keep side by side */
+            .contact-pricing-row,
+            .preference-row {
+                gap: 8px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Ultra small screens - Still keep side by side but adjust font sizes */
+        @media (max-width: 280px) {
+            .contact-pricing-row,
+            .preference-row {
+                gap: 5px;
+            }
+
+            .preference-item,
+            .contact-pricing-item {
+                padding: 10px 8px;
+            }
+
+            label {
+                font-size: 12px;
+            }
+
+            input, select {
+                font-size: 13px;
+                padding: 10px 10px 10px 32px;
+            }
+
+            .input-with-icon i {
+                left: 8px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animation for form elements */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            animation: fadeInUp 0.3s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile WITH SERVICE INFO AND FEE -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="service-text">
+                <h3>Custom Errand</h3>
+                <p>Describe your errand and we'll handle it for you</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Estimated:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
+    </div>
+
+    <!-- NEW: Map Modal for Route Viewing -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-route"></i> Errand Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3 id="routeTitle">Pickup to Delivery Route</h3>
+                <p id="routeDescription">Route from pickup location to delivery destination</p>
+                <div id="routeDetails" style="margin-top: 15px; text-align: left; font-size: 13px; width: 100%; max-width: 300px;">
+                    <p><strong>Pickup Location:</strong> <span id="mapPickup">Not specified</span></p>
+                    <p><strong>Delivery Destination:</strong> <span id="mapDelivery">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTransport">-</div>
+                    <div class="info-label">Transport Mode</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <!-- Simplified Mobile Header -->
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Custom Errand Service</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <!-- CHANGED: Fixed the form action to point to the correct endpoint -->
+                <form method="post" action="{{ url_for('create_other_service_errand') }}" id="customErrandForm">
+                    <h2><i class="fas fa-edit"></i> Errand Description</h2>
+
+                    <div class="form-group">
+                        <label for="errand_type">Type of Errand</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-tag"></i>
+                            <select id="errand_type" name="errand_type" required onchange="updateEstimatedFee(); updateProgress()">
+                                <option value="">Select errand type</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="delivery">Package Delivery/Pickup</option>
+                                <option value="administrative">Administrative Tasks</option>
+                                <option value="home_services">Home Services</option>
+                                <option value="personal_assistance">Personal Assistance</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="errand_description">Detailed Description</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-align-left"></i>
+                            <textarea id="errand_description" name="errand_details" rows="4" placeholder="Please describe your errand in detail..." required oninput="updateEstimatedFee(); updateProgress()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-map-marker-alt"></i> Locations</h2>
+
+                    <div class="form-group">
+                        <label for="pickup_location">Pickup Location</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-location-arrow"></i>
+                            <input type="text" id="pickup_location" name="pickup_location" placeholder="Where should we start? (Address or location)" oninput="updateEstimatedFee(); updateProgress(); updateViewRouteButton()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="delivery_location">Delivery/Destination Location</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-map-pin"></i>
+                            <input type="text" id="delivery_location" name="delivery_location" placeholder="Where should we deliver? (Address or location)" required oninput="updateEstimatedFee(); updateProgress(); updateViewRouteButton()">
+                        </div>
+
+                        <!-- NEW: View Route Button -->
+                        <button type="button" id="viewRouteBtn" class="view-route-btn hidden" onclick="showRouteMap()">
+                            <i class="fas fa-route"></i> View Pickup to Delivery Route
+                        </button>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-shopping-bag"></i> Items & Requirements</h2>
+
+                    <div class="form-group">
+                        <label>Items to Purchase or Handle</label>
+                        <div class="info-tip">
+                            <i class="fas fa-info-circle"></i> List any specific items, documents, or materials needed for your errand.
+                        </div>
+                        <div id="items-container">
+                            <div class="errand-item">
+                                <div class="errand-input-row">
+                                    <div class="input-with-icon" style="flex: 2;">
+                                        <i class="fas fa-box"></i>
+                                        <input type="text" name="items[]" placeholder="Item or task description" required oninput="updateEstimatedFee(); updateProgress()">
+                                    </div>
+                                    <div class="input-with-icon" style="flex: 1;">
+                                        <i class="fas fa-sort-amount-up"></i>
+                                        <input type="text" name="quantities[]" placeholder="Quantity" oninput="updateEstimatedFee(); updateProgress()">
+                                    </div>
+                                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-item" onclick="addItem()">
+                            <i class="fas fa-plus"></i> Add Another Item
+                        </button>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-sliders-h"></i> Preferences & Budget</h2>
+
+                    <div class="budget-display">
+                        <div class="budget-label">Your Budget:</div>
+                        <div class="budget-value">$<span id="budget_display">0.00</span></div>
+                    </div>
+
+                    <!-- UPDATED: Urgency Level and Payment Method on same row -->
+                    <div class="preference-row">
+                        <div class="preference-item">
+                            <label for="urgency">Urgency Level</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <select id="urgency" name="urgency" onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="standard">Standard (1-2 days)</option>
+                                    <option value="urgent">Urgent (Same day)</option>
+                                    <option value="flexible">Flexible (Within a week)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="payment_method">Payment Method</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-credit-card"></i>
+                                <select id="payment_method" name="payment_method" onchange="updateProgress()">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Credit/Debit Card</option>
+                                    <option value="mobile">Mobile Payment</option>
+                                    <option value="prepaid">Prepaid</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-sticky-note"></i> Additional Instructions</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-comment-alt"></i>
+                            <textarea id="special_instructions" name="special_instructions" rows="4" placeholder="Any other special instructions, requirements, or preferences..." oninput="updateEstimatedFee(); updateProgress()"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- CONTACT AND PRICING SECTION - ALWAYS side by side -->
+                    <div class="section-divider"></div>
+
+                    <h2><i class="fas fa-dollar-sign"></i> Contact and Pricing</h2>
+
+                    <div class="contact-pricing-row">
+                        <div class="contact-pricing-item">
+                            <label for="service_price">Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="text" id="service_price" name="service_price" placeholder="Enter service price" required oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="contact-pricing-item">
+                            <label for="phone">Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone" name="phone" placeholder="Your phone number" required oninput="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Errand Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Prevent pull-to-refresh on mobile
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                if (window.scrollY === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+        });
+
+        // NEW: Update View Route Button Visibility
+        function updateViewRouteButton() {
+            const viewRouteBtn = document.getElementById('viewRouteBtn');
+            const pickupLocation = document.getElementById('pickup_location').value;
+            const deliveryLocation = document.getElementById('delivery_location').value;
+
+            // Show button only if both pickup and delivery locations are entered
+            if (pickupLocation && pickupLocation.trim() !== '' && deliveryLocation && deliveryLocation.trim() !== '') {
+                viewRouteBtn.classList.remove('hidden');
+            } else {
+                viewRouteBtn.classList.add('hidden');
+            }
+        }
+
+        // NEW: Show Route Map
+        function showRouteMap() {
+            const pickupLocation = document.getElementById('pickup_location').value;
+            const deliveryLocation = document.getElementById('delivery_location').value;
+
+            // Validate inputs
+            if (!pickupLocation || pickupLocation.trim() === '') {
+                alert('Please enter the pickup location first.');
+                document.getElementById('pickup_location').focus();
+                return;
+            }
+
+            if (!deliveryLocation || deliveryLocation.trim() === '') {
+                alert('Please enter the delivery location first.');
+                document.getElementById('delivery_location').focus();
+                return;
+            }
+
+            // Update modal content
+            document.getElementById('mapPickup').textContent = pickupLocation || 'Not specified';
+            document.getElementById('mapDelivery').textContent = deliveryLocation;
+
+            // Calculate route details
+            calculateAndDisplayRoute(pickupLocation, deliveryLocation);
+
+            // Show modal
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // NEW: Calculate Route Details
+        function calculateAndDisplayRoute(from, to) {
+            // Simulate distance calculation based on input lengths
+            const fromLength = from.length;
+            const toLength = to.length;
+
+            // Generate realistic distance for errands
+            const baseDistance = 2 + (Math.abs(fromLength - toLength) / 50);
+            const randomFactor = 0.7 + (Math.random() * 1.6);
+            const distance = Math.max(0.5, Math.min(baseDistance * randomFactor, 25)).toFixed(1);
+
+            // Calculate estimated time based on distance
+            let estimatedMinutes;
+            const distanceNum = parseFloat(distance);
+
+            if (distanceNum <= 3) {
+                // Local errand: 8-12 minutes per km
+                estimatedMinutes = Math.round(distanceNum * 10 + Math.random() * 10);
+            } else if (distanceNum <= 10) {
+                // Medium distance: 6-10 minutes per km
+                estimatedMinutes = Math.round(distanceNum * 8 + Math.random() * 15);
+            } else {
+                // Long distance: 4-7 minutes per km (highways)
+                estimatedMinutes = Math.round(distanceNum * 5.5 + Math.random() * 20);
+            }
+
+            // Ensure minimum and maximum reasonable times
+            estimatedMinutes = Math.max(10, Math.min(estimatedMinutes, 120));
+
+            // Determine transport mode based on errand type and items
+            const errandType = document.getElementById('errand_type').value;
+            const itemCount = getItemCount();
+            let transportMode = 'Car';
+
+            if (errandType === 'shopping' || errandType === 'delivery') {
+                transportMode = 'Delivery Vehicle';
+            } else if (distanceNum <= 3 && itemCount <= 2) {
+                transportMode = 'Motorcycle';
+            } else if (distanceNum <= 2 && itemCount === 1) {
+                transportMode = 'Bicycle';
+            } else if (errandType === 'personal_assistance') {
+                transportMode = 'Personal Vehicle';
+            }
+
+            // Update modal display
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedMinutes + ' min';
+            document.getElementById('mapTransport').textContent = transportMode;
+
+            // Update route description
+            const fromShort = from.split(',')[0].substring(0, 30) + (from.split(',')[0].length > 30 ? '...' : '');
+            const toShort = to.split(',')[0].substring(0, 30) + (to.split(',')[0].length > 30 ? '...' : '');
+            document.getElementById('routeDescription').textContent = `Errand route from ${fromShort} to ${toShort}`;
+        }
+
+        // NEW: Close Map
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function initializeForm() {
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Initial calculations
+            updateBudgetDisplay();
+            updateEstimatedFee();
+            updateProgress();
+            updateViewRouteButton();
+        }
+
+        // Add errand item - SIMPLIFIED (only description and quantity)
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'errand-item';
+            newItem.innerHTML = `
+                <div class="errand-input-row">
+                    <div class="input-with-icon" style="flex: 2;">
+                        <i class="fas fa-box"></i>
+                        <input type="text" name="items[]" placeholder="Item or task description" required oninput="updateEstimatedFee(); updateProgress()">
+                    </div>
+                    <div class="input-with-icon" style="flex: 1;">
+                        <i class="fas fa-sort-amount-up"></i>
+                        <input type="text" name="quantities[]" placeholder="Quantity" oninput="updateEstimatedFee(); updateProgress()">
+                    </div>
+                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+
+            // Add animation to new item
+            newItem.style.opacity = '0';
+            newItem.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                newItem.style.transition = 'all 0.3s ease';
+                newItem.style.opacity = '1';
+                newItem.style.transform = 'translateY(0)';
+            }, 10);
+
+            updateEstimatedFee();
+            updateProgress();
+        }
+
+        // Remove item
+        function removeItem(button) {
+            const item = button.closest('.errand-item');
+            item.style.transition = 'all 0.3s ease';
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                item.remove();
+                updateEstimatedFee();
+                updateProgress();
+            }, 300);
+        }
+
+        // Get item count
+        function getItemCount() {
+            const items = document.querySelectorAll('input[name="items[]"]');
+            let totalItems = 0;
+
+            items.forEach(item => {
+                if (item.value.trim()) totalItems++;
+            });
+
+            return totalItems;
+        }
+
+        // Update budget display
+        function updateBudgetDisplay() {
+            // Note: Budget limit field has been removed, so we don't need to update this anymore
+            // Keeping the function for compatibility but it won't do anything
+        }
+
+        // Calculate base fee based on errand type
+        function calculateErrandTypeFee(errandType) {
+            const fees = {
+                'shopping': 15.00,
+                'delivery': 12.00,
+                'administrative': 20.00,
+                'home_services': 25.00,
+                'personal_assistance': 18.00,
+                'other': 15.00
+            };
+            return fees[errandType] || 15.00;
+        }
+
+        // Calculate urgency fee
+        function calculateUrgencyFee(urgency) {
+            const fees = {
+                'standard': 0.00,
+                'urgent': 10.00,
+                'flexible': -5.00
+            };
+            return fees[urgency] || 0.00;
+        }
+
+        // Calculate item count fee
+        function calculateItemCountFee() {
+            return getItemCount() * 2.00; // $2 per additional item
+        }
+
+        // Calculate distance fee (simplified)
+        function calculateDistanceFee(pickup, delivery) {
+            if (!pickup || !delivery) return 0.00;
+            return 5.00; // Base distance fee
+        }
+
+        // Calculate complexity fee based on description length
+        function calculateComplexityFee(description) {
+            const length = description.length;
+            if (length > 500) return 10.00;
+            if (length > 250) return 5.00;
+            return 0.00;
+        }
+
+        // Update estimated fee - UPDATES THE FIXED BAR ONLY
+        function updateEstimatedFee() {
+            const errandType = document.getElementById('errand_type').value;
+            const description = document.getElementById('errand_description').value;
+            const pickupLocation = document.getElementById('pickup_location').value;
+            const deliveryLocation = document.getElementById('delivery_location').value;
+            const urgency = document.getElementById('urgency').value;
+
+            // Calculate all fees
+            const baseFee = calculateErrandTypeFee(errandType);
+            const urgencyFee = calculateUrgencyFee(urgency);
+            const itemCountFee = calculateItemCountFee();
+            const distanceFee = calculateDistanceFee(pickupLocation, deliveryLocation);
+            const complexityFee = calculateComplexityFee(description);
+
+            // Total fee calculation
+            let totalFee = baseFee + urgencyFee + itemCountFee + distanceFee + complexityFee;
+
+            // Minimum fee of $10, maximum of $100
+            totalFee = Math.min(Math.max(totalFee, 10.00), 100.00);
+
+            // Update FIXED BAR display
+            document.getElementById('estimated_fee').textContent = '$' + totalFee.toFixed(2);
+
+            // Visual feedback on the fixed bar
+            const feeElement = document.getElementById('estimated_fee');
+            feeElement.style.transform = 'scale(1.1)';
+            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+        }
+
+        // Haptic feedback simulation
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation - CHANGED: Removed e.preventDefault() to allow form submission
+        document.getElementById('customErrandForm').addEventListener('submit', function(e) {
+            // Validate required fields
+            const errandType = document.getElementById('errand_type').value.trim();
+            const description = document.getElementById('errand_description').value.trim();
+            const deliveryLocation = document.getElementById('delivery_location').value.trim();
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const items = document.querySelectorAll('input[name="items[]"]');
+
+            let hasItems = false;
+            items.forEach(item => {
+                if (item.value.trim()) hasItems = true;
+            });
+
+            if (!errandType || !description || !deliveryLocation || !servicePrice || !phone || !hasItems) {
+                vibrate();
+                showError('Please fill in all required fields.');
+                e.preventDefault(); // Prevent submission
+                return false;
+            }
+
+            // Validate service price is a valid number
+            const servicePriceNum = parseFloat(servicePrice.replace('$', ''));
+            if (isNaN(servicePriceNum) || servicePriceNum <= 0) {
+                vibrate();
+                showError('Please enter a valid service price.');
+                e.preventDefault(); // Prevent submission
+                return false;
+            }
+
+            // If validation passes, let the form submit normally
+            // The form will submit to create_other_service_errand route
+            // Which will redirect to available_runners.html
+            return true;
+        });
+
+        function showError(message) {
+            // Add shake animation to form
+            const form = document.getElementById('customErrandForm');
+            form.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                form.style.animation = '';
+            }, 500);
+
+            alert(message);
+        }
+
+        // Shake animation for form validation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

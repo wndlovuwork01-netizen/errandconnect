@@ -1,0 +1,646 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="help-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Help & Support</h1>
+            </div>
+            <a href="{{ url_for('settings') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Quick Help -->
+        <section class="help-section">
+            <div class="help-card">
+                <div class="help-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>How can we help you?</h3>
+                <p>Find answers to common questions or contact our support team.</p>
+            </div>
+        </section>
+
+        <!-- FAQs -->
+        <section class="help-section">
+            <h3 class="section-title">❓ Frequently Asked Questions</h3>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h4>How do I place an order?</h4>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Go to Dashboard → Choose Errand/service → Add details → Create errand → Choose runner of your choice → Discuss/negotiate with the runner → Track errand.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h4>How do payments work?</h4>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Add funds to Wallet → Pay for services → You can pay with cash upon delivery.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h4>Can I cancel an order?</h4>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, go to Active Tasks → Select order → Cancel. Cancellation fees may apply, if done too late.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h4>How do I become a runner?</h4>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Go to Settings → Sign Out → Sign Up as a Runner→ Complete registration → Sign In.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Options -->
+        <section class="help-section">
+            <h3 class="section-title">📞 Contact Support</h3>
+            <div class="contact-grid">
+                <button class="contact-card" onclick="location.href='mailto:support@errandgo.com'">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4>Email</h4>
+                    <p>support@errandgo.com</p>
+                    <span class="contact-time">Response: 24 hours</span>
+                </button>
+                
+                <button class="contact-card" onclick="window.open('tel:+1234567890')">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h4>Phone</h4>
+                    <p>+263 779-103-900</p>
+                    <span class="contact-time">Mon-Fri, 8.30AM-4.30PM</span>
+                </button>
+                
+                <button class="contact-card" onclick="window.open('https://chat.errandconnect.com', '_blank')">
+                    <div class="contact-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <h4>Live Chat</h4>
+                    <p>Instant help</p>
+                    <span class="contact-time">Online now</span>
+                </button>
+                
+                <button class="contact-card" onclick="window.open('https://help.errandconnect.com', '_blank')">
+                    <div class="contact-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h4>Help Center</h4>
+                    <p>Guides & tutorials</p>
+                    <span class="contact-time">24/7 access</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Common Issues -->
+        <section class="help-section">
+            <h3 class="section-title">🔧 Quick Fixes</h3>
+            <div class="quick-fixes">
+                <div class="fix-card">
+                    <div class="fix-icon">📱</div>
+                    <div class="fix-content">
+                        <h4>App Not Working?</h4>
+                        <p>Try: 1) Restart app 2) Check internet 3) Update to latest version</p>
+                    </div>
+                </div>
+                
+                <div class="fix-card">
+                    <div class="fix-icon">💳</div>
+                    <div class="fix-content">
+                        <h4>Payment Issues?</h4>
+                        <p>Check: 1) Wallet balance 2) Card details 3) Contact your bank</p>
+                    </div>
+                </div>
+                
+                <div class="fix-card">
+                    <div class="fix-icon">📍</div>
+                    <div class="fix-content">
+                        <h4>Location Problems?</h4>
+                        <p>Enable: 1) GPS 2) Location permissions 3) Restart device</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Report Issues -->
+        <section class="help-section">
+            <div class="report-card">
+                <h3>Report an Issue</h3>
+                <p>Found a bug or have a suggestion? We'd love to hear from you.</p>
+                
+                <div class="report-actions">
+                    <button class="btn-primary" onclick="location.href='mailto:feedback@errandconnect.com?subject=App Feedback'">
+                        <i class="fas fa-bug"></i>
+                        Report Bug
+                    </button>
+                    <button class="btn-outline" onclick="location.href='mailto:suggestions@errandconnect.com?subject=App Suggestion'">
+                        <i class="fas fa-lightbulb"></i>
+                        Suggest Feature
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency -->
+        <section class="help-section">
+            <div class="emergency-card">
+                <div class="emergency-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>⚠️ Emergency Contact</h3>
+                <p>For urgent safety concerns during an active delivery:</p>
+                <button class="emergency-btn" onclick="window.open('tel:911')">
+                    <i class="fas fa-phone"></i>
+                    Call Emergency Services: 999
+                </button>
+                <small>Only use for genuine emergencies</small>
+            </div>
+        </section>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+}
+
+#help-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 20px;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.mobile-main {
+    padding: 20px;
+}
+
+.help-section {
+    margin-bottom: 32px;
+}
+
+.help-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.help-icon {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+}
+
+.help-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.help-card p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-left: 8px;
+}
+
+.faq-list {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.faq-item {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+}
+
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.faq-question:active {
+    background: var(--primary-50);
+}
+
+.faq-question h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    margin: 0;
+}
+
+.faq-question i {
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.faq-answer {
+    padding: 0 20px 20px 20px;
+    display: none;
+}
+
+.faq-answer p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.faq-item.active .faq-answer {
+    display: block;
+}
+
+.faq-item.active .faq-question i {
+    transform: rotate(180deg);
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.contact-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.contact-card:active {
+    transform: scale(0.98);
+    background: var(--primary-50);
+    border-color: var(--primary-color);
+}
+
+.contact-icon {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+.contact-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.contact-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.contact-time {
+    font-size: 12px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.quick-fixes {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+.fix-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.fix-card:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.fix-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.fix-content {
+    flex: 1;
+}
+
+.fix-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.fix-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.report-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+}
+
+.report-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.report-card p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.report-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+    background: var(--primary-dark);
+}
+
+.btn-outline {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    color: var(--primary-color);
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-outline:active {
+    transform: scale(0.98);
+    background: var(--primary-50);
+}
+
+.emergency-card {
+    background: #FFF3E0;
+    border: 2px solid #FF9800;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+}
+
+.emergency-icon {
+    font-size: 48px;
+    color: #FF9800;
+    margin-bottom: 16px;
+}
+
+.emergency-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #E65100;
+    margin-bottom: 12px;
+}
+
+.emergency-card p {
+    color: #666666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.emergency-btn {
+    width: 100%;
+    padding: 16px;
+    background: #FF9800;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.emergency-btn:active {
+    transform: scale(0.98);
+    background: #F57C00;
+}
+
+.emergency-card small {
+    font-size: 12px;
+    color: #666666;
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .logo h1 {
+        font-size: 16px;
+    }
+    
+    .help-card, .report-card {
+        padding: 20px;
+    }
+}
+
+/* FAQ JavaScript */
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAQ toggle functionality
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', function() {
+            // Toggle active class on the faq item
+            item.classList.toggle('active');
+            
+            // Close other FAQ items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item && otherItem.classList.contains('active')) {
+                    otherItem.classList.remove('active');
+                }
+            });
+        });
+    });
+    
+    // Contact card feedback
+    const contactCards = document.querySelectorAll('.contact-card');
+    contactCards.forEach(card => {
+        card.addEventListener('touchstart', function() {
+            this.style.opacity = '0.9';
+        });
+        
+        card.addEventListener('touchend', function() {
+            this.style.opacity = '1';
+        });
+    });
+    
+    // Emergency button confirmation
+    const emergencyBtn = document.querySelector('.emergency-btn');
+    if (emergencyBtn) {
+        emergencyBtn.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to call emergency services? Only use for genuine emergencies.')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

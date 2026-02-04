@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero">
+    <h1>Welcome to ErrandGo</h1>
+    <p>Your trusted errand solution. Sign in or create an account to get started.</p>
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('signin') }}">Sign In</a>
+      <a class="btn outline" href="{{ url_for('signup') }}">Create Account</a>
+    </div>
+  </section>
+{% endblock %}

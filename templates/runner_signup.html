@@ -1,0 +1,2850 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div id="runner-registration-page" class="page">
+    <!-- Clean Header -->
+    <header class="app-header">
+        <div class="header-nav">
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-title">
+                <h1>Runner Registration</h1>
+                <p class="step-indicator">Step <span id="currentStep">1</span> of 4</p>
+            </div>
+            <div class="header-logo">
+                <a href="{{ url_for('logout') }}" style="color: #6c5ce7; font-size: 1.2rem;" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+            </div>
+            <p class="progress-text"><span id="progressPercent">25</span>% Complete</p>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <!-- Flash Messages -->
+        <div class="alerts-container" id="flashMessagesContainer"></div>
+
+        <form method="post" action="{{ url_for('runner_signup') }}" enctype="multipart/form-data" class="profile-form" id="runnerRegistrationForm">
+            <!-- Slide Container -->
+            <div class="slides-container">
+                <!-- ===== SLIDE 1: PERSONAL INFORMATION ===== -->
+                <div class="slide active" id="slide1">
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div>
+                                <h3>Personal Information</h3>
+                                <p class="section-subtitle">Tell us about yourself</p>
+                            </div>
+                            <span class="required-tag">All fields required</span>
+                        </div>
+
+                        <div class="form-fields">
+                            <!-- Date of Birth -->
+                            <div class="form-field">
+                                <label for="dob" class="field-label">
+                                    <span>Date of Birth</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-calendar-alt input-icon"></i>
+                                    <input type="date" name="dob" id="dob" class="form-control" required>
+                                </div>
+                                <div class="field-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Must be 18 years or older
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="form-field">
+                                <label for="address" class="field-label">
+                                    <span>Full Address</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                    <input type="text" name="address" id="address" class="form-control" placeholder="Street, City, State" required>
+                                </div>
+                            </div>
+
+                            <!-- City -->
+                            <div class="form-field">
+                                <label for="city" class="field-label">
+                                    <span>City</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-city input-icon"></i>
+                                    <input type="text" name="city" id="city" class="form-control" placeholder="Enter your city" required>
+                                </div>
+                            </div>
+
+                            <!-- National ID Number -->
+                            <div class="form-field">
+                                <label for="id_number" class="field-label">
+                                    <span>National ID Number</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-id-card input-icon"></i>
+                                    <input type="text" name="id_number" id="id_number" class="form-control" placeholder="Enter ID number" required>
+                                </div>
+                            </div>
+
+                            <!-- License ID Number -->
+                            <div class="form-field">
+                                <label for="license_number" class="field-label">
+                                    <span>Driver's License Number</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-id-badge input-icon"></i>
+                                    <input type="text" name="license_number" id="license_number" class="form-control" placeholder="Enter license number" required>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Slide Navigation -->
+                    <div class="slide-navigation">
+                        <button type="button" class="next-slide-btn" onclick="validateAndGoToSlide(2)">
+                            <span>Continue to ID Upload</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== SLIDE 2: ID & LICENSE UPLOAD ===== -->
+                <div class="slide" id="slide2">
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <h3>Identity Verification</h3>
+                                <p class="section-subtitle">Upload your identification documents</p>
+                            </div>
+                            <span class="required-tag">All documents required</span>
+                        </div>
+
+                        <div class="verification-grid">
+                            <!-- Government ID -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <div class="document-icon">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <div class="document-info">
+                                        <h4>Government ID</h4>
+                                        <p>National ID or Passport</p>
+                                    </div>
+                                    <span class="document-badge required">Required</span>
+                                </div>
+
+                                <div class="upload-area" id="idUploadArea">
+                                    <input type="file" name="id_photo" id="id_photo" accept="image/*" class="file-input" required>
+                                    <label for="id_photo" class="upload-label" id="idUploadLabel">
+                                        <div class="upload-content">
+                                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                            <div class="upload-text">
+                                                <p>Upload ID Photo</p>
+                                                <small>JPG, PNG, GIF • Max 5MB</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <div class="file-info" id="idFileInfo"></div>
+                                </div>
+
+                                <div class="document-preview" id="idPreview"></div>
+                            </div>
+
+                            <!-- Driver's License -->
+                            <div class="document-card">
+                                <div class="document-header">
+                                    <div class="document-icon">
+                                        <i class="fas fa-id-badge"></i>
+                                    </div>
+                                    <div class="document-info">
+                                        <h4>Driver's License</h4>
+                                        <p>Valid driving license</p>
+                                    </div>
+                                    <span class="document-badge required">Required</span>
+                                </div>
+
+                                <div class="upload-area" id="licenseUploadArea">
+                                    <input type="file" name="license_photo" id="license_photo" accept="image/*" class="file-input" required>
+                                    <label for="license_photo" class="upload-label" id="licenseUploadLabel">
+                                        <div class="upload-content">
+                                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                            <div class="upload-text">
+                                                <p>Upload License</p>
+                                                <small>JPG, PNG, GIF • Max 5MB</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <div class="file-info" id="licenseFileInfo"></div>
+                                </div>
+
+                                <div class="document-preview" id="licensePreview"></div>
+                            </div>
+                        </div>
+
+                        <div class="verification-note">
+                            <i class="fas fa-info-circle"></i>
+                            <p>All documents must be clear, readable, and less than 5MB. Your information is securely encrypted.</p>
+                        </div>
+                    </section>
+
+                    <!-- Slide Navigation -->
+                    <div class="slide-navigation">
+                        <button type="button" class="prev-slide-btn" onclick="goToSlide(1)">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Personal Info</span>
+                        </button>
+                        <button type="button" class="next-slide-btn" onclick="validateAndGoToSlide(3)">
+                            <span>Continue to Vehicle Info</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== SLIDE 3: VEHICLE INFORMATION ===== -->
+                <div class="slide" id="slide3">
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div>
+                                <h3>Vehicle Information</h3>
+                                <p class="section-subtitle">Tell us about your vehicle</p>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Type Selection -->
+                        <div class="form-field">
+                            <label class="field-label">
+                                <span>Vehicle Type</span>
+                                <span class="required-star">*</span>
+                            </label>
+                            <div class="vehicle-type-grid">
+                                <!-- Row 1 -->
+                                <div class="vehicle-type-option">
+                                    <input type="radio" name="vehicle_type" id="vehicle_car" value="car" class="vehicle-type-radio" required>
+                                    <label for="vehicle_car" class="vehicle-type-card">
+                                        <div class="vehicle-type-icon">
+                                            <i class="fas fa-car"></i>
+                                        </div>
+                                        <div class="vehicle-type-details">
+                                            <h4>Car</h4>
+                                            <p>All-purpose vehicle</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div class="vehicle-type-option">
+                                    <input type="radio" name="vehicle_type" id="vehicle_motorcycle" value="motorcycle" class="vehicle-type-radio">
+                                    <label for="vehicle_motorcycle" class="vehicle-type-card">
+                                        <div class="vehicle-type-icon">
+                                            <i class="fas fa-motorcycle"></i>
+                                        </div>
+                                        <div class="vehicle-type-details">
+                                            <h4>Motorcycle</h4>
+                                            <p>Fast & agile</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- Row 2 -->
+                                <div class="vehicle-type-option">
+                                    <input type="radio" name="vehicle_type" id="vehicle_bicycle" value="bicycle" class="vehicle-type-radio">
+                                    <label for="vehicle_bicycle" class="vehicle-type-card">
+                                        <div class="vehicle-type-icon">
+                                            <i class="fas fa-bicycle"></i>
+                                        </div>
+                                        <div class="vehicle-type-details">
+                                            <h4>Bicycle</h4>
+                                            <p>Eco-friendly</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div class="vehicle-type-option">
+                                    <input type="radio" name="vehicle_type" id="vehicle_walking" value="walking" class="vehicle-type-radio">
+                                    <label for="vehicle_walking" class="vehicle-type-card">
+                                        <div class="vehicle-type-icon">
+                                            <i class="fas fa-walking"></i>
+                                        </div>
+                                        <div class="vehicle-type-details">
+                                            <h4>Walking</h4>
+                                            <p>Local deliveries</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Details (Conditional) -->
+                        <div id="vehicleDetails" class="vehicle-details-section" style="display: none;">
+                            <div class="form-fields vehicle-fields-grid">
+                                <div class="form-field">
+                                    <label for="vehicle_make" class="field-label">
+                                        <span>Vehicle Make</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-cog input-icon"></i>
+                                        <input type="text" name="vehicle_make" id="vehicle_make" class="form-control" placeholder="e.g., Toyota, Honda">
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="vehicle_model" class="field-label">
+                                        <span>Vehicle Model</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-car input-icon"></i>
+                                        <input type="text" name="vehicle_model" id="vehicle_model" class="form-control" placeholder="e.g., Corolla, Civic">
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="vehicle_year" class="field-label">
+                                        <span>Vehicle Year</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-calendar input-icon"></i>
+                                        <input type="number" name="vehicle_year" id="vehicle_year" class="form-control" placeholder="2023" min="1990" max="2024">
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label for="vehicle_color" class="field-label">
+                                        <span>Vehicle Color</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-palette input-icon"></i>
+                                        <input type="text" name="vehicle_color" id="vehicle_color" class="form-control" placeholder="e.g., Red, Blue, Black">
+                                    </div>
+                                </div>
+
+                                <!-- NEW: Vehicle Registration Number -->
+                                <div class="form-field">
+                                    <label for="registration_number" class="field-label">
+                                        <span>Vehicle Registration Number</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-car input-icon"></i>
+                                        <input type="text" name="registration_number" id="registration_number" class="form-control" placeholder="Enter registration number">
+                                    </div>
+                                </div>
+
+                                <!-- NEW: Ownership Type -->
+                                <div class="form-field">
+                                    <label for="ownership_type" class="field-label">
+                                        <span>Ownership Type</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-home input-icon"></i>
+                                        <select name="ownership_type" id="ownership_type" class="form-control" required onchange="toggleOtherOwnershipInput()">
+                                            <option value="">Select ownership type</option>
+                                            <option value="personal">Personal Vehicle</option>
+                                            <option value="company">Company Vehicle</option>
+                                            <option value="rental">Rental Vehicle</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Other Ownership Type Input -->
+                            <div id="other_ownership_container" class="expanding-input">
+                                <div class="form-field">
+                                    <label for="other_ownership_type" class="field-label">
+                                        <span>Specify Other Ownership Type</span>
+                                        <span class="required-star">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <i class="fas fa-edit input-icon"></i>
+                                        <input type="text" name="other_ownership_type" id="other_ownership_type"
+                                               class="form-control" placeholder="Please specify...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferred Routes -->
+                        <div class="form-field">
+                            <label for="preferred_routes" class="field-label">
+                                <i class="fas fa-route"></i>
+                                Preferred Service Areas (Optional)
+                            </label>
+                            <div class="input-group">
+                                <i class="fas fa-map input-icon"></i>
+                                <textarea name="preferred_routes" id="preferred_routes" class="form-control textarea" placeholder="Enter preferred areas separated by commas (e.g., Downtown, Westgate, Central Park)" rows="3"></textarea>
+                            </div>
+                            <div class="field-hint">
+                                <i class="fas fa-lightbulb"></i>
+                                You'll receive more errands in these areas
+                            </div>
+                        </div>
+
+                        <!-- UPDATED: Company/Association Selection -->
+                        <div class="form-field">
+                            <label for="company_association" class="field-label">
+                                <i class="fas fa-building"></i>
+                                Company/Association (Optional)
+                            </label>
+                            <div class="input-group">
+                                <i class="fas fa-briefcase input-icon"></i>
+                                <select name="company_association" id="company_association" class="form-control">
+                                    <option value="">Select if applicable</option>
+                                    <option value="independent">Independent Runner</option>
+                                    <option value="company_employee">Company Employee</option>
+                                    <option value="association_member">Association Member</option>
+                                    <option value="courier_service">Courier Service Partner</option>
+                                    <option value="individual_employer">Working for Individual Employer</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="field-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Select if you're affiliated with a company, association, or individual
+                            </div>
+                        </div>
+
+                        <!-- NEW: Conditional Company/Organization Name Field -->
+                        <div id="companyNameSection" class="expanding-input">
+                            <div class="form-field">
+                                <label for="company_name" class="field-label">
+                                    <i class="fas fa-building"></i>
+                                    <span id="companyNameLabel">Organization Name</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-signature input-icon"></i>
+                                    <input type="text" name="company_name" id="company_name" class="form-control" placeholder="Enter organization name">
+                                </div>
+                                <div class="field-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span id="companyNameHint">Enter the name of your organization</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Other Company/Association Type Input -->
+                        <div id="other_company_container" class="expanding-input">
+                            <div class="form-field">
+                                <label for="other_company_type" class="field-label">
+                                    <span>Specify Other Type</span>
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-edit input-icon"></i>
+                                    <input type="text" name="other_company_type" id="other_company_type"
+                                           class="form-control" placeholder="Please specify...">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Slide Navigation -->
+                    <div class="slide-navigation">
+                        <button type="button" class="prev-slide-btn" onclick="goToSlide(2)">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to ID Upload</span>
+                        </button>
+                        <button type="button" class="next-slide-btn" onclick="validateAndGoToSlide(4)">
+                            <span>Continue to Vehicle Photos</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== SLIDE 4: VEHICLE PHOTOS UPLOAD (Conditional) ===== -->
+                <div class="slide" id="slide4">
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div>
+                                <h3 id="vehiclePhotosTitle">Vehicle Photos & Documents</h3>
+                                <p class="section-subtitle" id="vehiclePhotosSubtitle">Upload photos of your vehicle and registration</p>
+                            </div>
+                            <span class="required-tag" id="vehiclePhotosRequiredTag">All photos required</span>
+                        </div>
+
+                        <!-- Vehicle Selection Required Message -->
+                        <div class="selection-required-message" id="vehicleSelectionRequired" style="display: none;">
+                            <div class="message-content">
+                                <i class="fas fa-car"></i>
+                                <div>
+                                    <h4>Vehicle Selection Required</h4>
+                                    <p>Please select your vehicle type on the previous page to proceed with document uploads.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Photos Section (Only for Car/Motorcycle) -->
+                        <div id="vehiclePhotosSection" style="display: none;">
+                            <div class="verification-grid">
+                                <!-- Vehicle Registration -->
+                                <div class="document-card">
+                                    <div class="document-header">
+                                        <div class="document-icon">
+                                            <i class="fas fa-file-contract"></i>
+                                        </div>
+                                        <div class="document-info">
+                                            <h4>Vehicle Registration</h4>
+                                            <p>Registration document</p>
+                                        </div>
+                                        <span class="document-badge required">Required</span>
+                                    </div>
+
+                                    <div class="upload-area" id="carRegistrationUploadArea">
+                                        <input type="file" name="car_registration" id="car_registration" accept="image/*" class="file-input">
+                                        <label for="car_registration" class="upload-label" id="carRegistrationUploadLabel">
+                                            <div class="upload-content">
+                                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                                <div class="upload-text">
+                                                    <p>Upload Registration</p>
+                                                    <small>JPG, PNG, GIF • Max 5MB</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <div class="file-info" id="carRegistrationFileInfo"></div>
+                                    </div>
+
+                                    <div class="document-preview" id="carRegistrationPreview"></div>
+                                </div>
+
+                                <!-- Vehicle Photo -->
+                                <div class="document-card">
+                                    <div class="document-header">
+                                        <div class="document-icon">
+                                            <i class="fas fa-car-side"></i>
+                                        </div>
+                                        <div class="document-info">
+                                            <h4>Vehicle Photo</h4>
+                                            <p>Clear photo of your vehicle</p>
+                                        </div>
+                                        <span class="document-badge required">Required</span>
+                                    </div>
+
+                                    <div class="upload-area" id="vehiclePhotoUploadArea">
+                                        <input type="file" name="vehicle_photo" id="vehicle_photo" accept="image/*" class="file-input">
+                                        <label for="vehicle_photo" class="upload-label" id="vehiclePhotoUploadLabel">
+                                            <div class="upload-content">
+                                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                                <div class="upload-text">
+                                                    <p>Upload Vehicle Photo</p>
+                                                    <small>JPG, PNG, GIF • Max 5MB</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <div class="file-info" id="vehiclePhotoFileInfo"></div>
+                                    </div>
+
+                                    <div class="document-preview" id="vehiclePhotoPreview"></div>
+                                </div>
+                            </div>
+
+                            <div class="verification-note">
+                                <i class="fas fa-info-circle"></i>
+                                <p>All documents must be clear, readable, and less than 5MB. Your information is securely encrypted.</p>
+                            </div>
+                        </div>
+
+                        <!-- Not Required Message (For Bicycle/Walking) -->
+                        <div class="not-required-message" id="vehicleNotRequiredMessage" style="display: none;">
+                            <div class="message-content">
+                                <i class="fas fa-check-circle"></i>
+                                <div>
+                                    <h4>Vehicle Documents Not Required</h4>
+                                    <p>Since you selected <span id="selectedVehicleType"></span>, vehicle photos and registration documents are not required. You may proceed to the next step.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms & Conditions -->
+                        <div class="terms-section">
+                            <div class="terms-agreement">
+                                <input type="checkbox" name="terms" id="terms" class="terms-checkbox" required>
+                                <label for="terms" class="terms-label">
+                                    <span class="checkmark"></span>
+                                    <span class="terms-text">
+                                        I agree to the <a href="#" class="terms-link">Terms of Service</a>,
+                                        <a href="#" class="terms-link">Privacy Policy</a>, and
+                                        <a href="#" class="terms-link">Runner Agreement</a>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="security-notice">
+                                <i class="fas fa-lock"></i>
+                                <p>Your personal information is protected with bank-level security</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Final Slide Navigation -->
+                    <div class="slide-navigation">
+                        <button type="button" class="prev-slide-btn" onclick="goToSlide(3)">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Vehicle Info</span>
+                        </button>
+                        <button type="submit" class="submit-final-btn" id="submitBtn">
+                            <span>Complete Registration</span>
+                            <i class="fas fa-check-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide Indicators (Dots) -->
+            <div class="slide-indicators">
+                <span class="slide-dot active" data-slide="1"></span>
+                <span class="slide-dot" data-slide="2"></span>
+                <span class="slide-dot" data-slide="3"></span>
+                <span class="slide-dot" data-slide="4"></span>
+            </div>
+        </form>
+    </main>
+
+    <!-- Processing Modal -->
+    <div class="processing-modal" id="processingModal">
+        <div class="modal-content">
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <i class="fas fa-check success-icon"></i>
+            </div>
+            <h3>Processing Your Registration</h3>
+            <p>Please wait while we set up your account...</p>
+            <div class="progress-steps">
+                <div class="step active">
+                    <span>Validating Information</span>
+                </div>
+                <div class="step">
+                    <span>Uploading Documents</span>
+                </div>
+                <div class="step">
+                    <span>Creating Account</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+    /* Primary Green Theme */
+    --primary-50: #f0fdf4;
+    --primary-100: #dcfce7;
+    --primary-200: #bbf7d0;
+    --primary-300: #86efac;
+    --primary-400: #4ade80;
+    --primary-500: #22c55e;
+    --primary-600: #16a34a;
+    --primary-700: #15803d;
+    --primary-800: #166534;
+    --primary-900: #14532d;
+
+    /* Neutral Colors */
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    /* Semantic Colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== BASE STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--primary-50) 0%, var(--white) 100%);
+    color: var(--gray-900);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+#runner-registration-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--gray-100);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.back-btn:hover {
+    background: var(--gray-200);
+}
+
+.header-title {
+    flex: 1;
+}
+
+.header-title h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.step-indicator {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+.header-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.125rem;
+}
+
+.progress-container {
+    padding: 0 1.25rem 1rem;
+}
+
+.progress-track {
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-400), var(--primary-600));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal);
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    color: var(--primary-600);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* ===== MAIN CONTENT ===== */
+.app-main {
+    flex: 1;
+    padding: 1.25rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Slides Container */
+.slides-container {
+    position: relative;
+    width: 400%; /* 4 slides = 400% */
+    display: flex;
+    transition: transform var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide {
+    width: 25%; /* Each slide takes 25% of container */
+    flex-shrink: 0;
+    padding: 0 0.5rem;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.slide.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Form Sections */
+.form-section {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 1.5rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--primary-100);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-600);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.section-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.section-subtitle {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+}
+
+.required-tag {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--error);
+    background: #fef2f2;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+/* Form Fields */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-field {
+    margin-bottom: 1rem;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.required-star {
+    color: var(--error);
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 1.125rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3.25rem;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--white);
+    transition: all var(--transition-normal);
+    color: var(--gray-900);
+}
+
+.form-control:hover {
+    border-color: var(--gray-400);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.field-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+    margin-top: 0.5rem;
+}
+
+.textarea {
+    min-height: 100px;
+    resize: vertical;
+    padding: 1rem 1rem 1rem 3.25rem;
+    line-height: 1.5;
+}
+
+select.form-control {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+    padding-right: 3.5rem;
+}
+
+/* Expanding Inputs */
+.expanding-input {
+    transition: all 0.3s ease;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-top: 0;
+    border-radius: var(--radius-lg);
+}
+
+.expanding-input.expanded {
+    max-height: 120px;
+    opacity: 1;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+}
+
+/* Vehicle Type Grid - 2x2 grid */
+.vehicle-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.vehicle-type-option {
+    position: relative;
+}
+
+.vehicle-type-radio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.vehicle-type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: var(--gray-50);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-align: center;
+    height: 100%;
+}
+
+.vehicle-type-card:hover {
+    border-color: var(--primary-400);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.vehicle-type-radio:checked + .vehicle-type-card {
+    background: var(--primary-50);
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.vehicle-type-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--primary-500);
+    font-size: 1.5rem;
+}
+
+.vehicle-type-radio:checked + .vehicle-type-card .vehicle-type-icon {
+    background: var(--primary-500);
+    color: var(--white);
+}
+
+.vehicle-type-details h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.vehicle-type-details p {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+}
+
+.vehicle-details-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Vehicle Fields Grid - 2 columns */
+.vehicle-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* Verification Grid */
+.verification-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.document-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+}
+
+.document-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.document-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-500);
+    font-size: 1.125rem;
+}
+
+.document-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.125rem;
+}
+
+.document-info p {
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+}
+
+.document-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.document-badge.required {
+    background: #fef2f2;
+    color: var(--error);
+}
+
+.upload-area {
+    position: relative;
+    transition: all var(--transition-normal);
+}
+
+.file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.upload-label {
+    display: block;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--white);
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+    text-align: center;
+}
+
+.upload-label:hover .upload-content {
+    border-color: var(--primary-500);
+    background: var(--primary-50);
+}
+
+.upload-icon {
+    font-size: 2rem;
+    color: var(--gray-400);
+    margin-bottom: 0.75rem;
+    transition: all var(--transition-normal);
+}
+
+.upload-text p {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.125rem;
+}
+
+.upload-text small {
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+}
+
+/* File Info Display */
+.file-info {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: var(--white);
+    border: 1px solid var(--primary-200);
+    border-radius: var(--radius-lg);
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+}
+
+.file-info.active {
+    display: flex;
+}
+
+.file-info-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-100);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-500);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.file-info-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-info-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    margin-bottom: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-info-size {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.file-info-remove {
+    background: none;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.file-info-remove:hover {
+    color: var(--error);
+    background: var(--gray-100);
+}
+
+/* Upload States */
+.upload-area.uploading .upload-content {
+    background: var(--primary-50);
+    border-color: var(--primary-500);
+}
+
+.upload-area.uploading .upload-icon {
+    color: var(--primary-500);
+    animation: pulse 1.5s infinite;
+}
+
+.upload-area.success .upload-content {
+    background: #f0fdf4;
+    border-color: var(--success);
+}
+
+.upload-area.success .upload-icon {
+    color: var(--success);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.document-preview {
+    margin-top: 1rem;
+    display: none;
+}
+
+.document-preview.active {
+    display: block;
+}
+
+.preview-content {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    border: 1px solid var(--gray-200);
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.preview-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.preview-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-100);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-500);
+    font-size: 1rem;
+}
+
+.preview-details h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.125rem;
+}
+
+.preview-details p {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.preview-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.875rem;
+}
+
+.preview-btn.view {
+    background: var(--primary-500);
+    color: var(--white);
+}
+
+.preview-btn.remove {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.preview-image {
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--gray-100);
+}
+
+.preview-image img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.verification-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--primary-50);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--primary-500);
+}
+
+.verification-note i {
+    color: var(--primary-500);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.verification-note p {
+    font-size: 0.875rem;
+    color: var(--primary-800);
+    line-height: 1.5;
+}
+
+/* Message Boxes */
+.selection-required-message,
+.not-required-message {
+    padding: 1.5rem;
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 1.5rem;
+}
+
+.message-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.message-content i {
+    font-size: 1.5rem;
+    color: var(--warning);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.message-content i.fa-check-circle {
+    color: var(--success);
+}
+
+.message-content i.fa-car {
+    color: var(--primary-500);
+}
+
+.message-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.5rem;
+}
+
+.message-content p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    line-height: 1.5;
+}
+
+#selectedVehicleType {
+    font-weight: 600;
+    color: var(--primary-600);
+}
+
+/* Terms Section */
+.terms-section {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    margin-top: 1.5rem;
+}
+
+.terms-agreement {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.terms-checkbox {
+    display: none;
+}
+
+.terms-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.checkmark::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 10px;
+    height: 10px;
+    background: var(--primary-500);
+    border-radius: 2px;
+    transition: transform var(--transition-fast);
+}
+
+.terms-checkbox:checked + .terms-label .checkmark {
+    border-color: var(--primary-500);
+    background: var(--primary-500);
+}
+
+.terms-checkbox:checked + .terms-label .checkmark::after {
+    background: var(--white);
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.terms-text {
+    flex: 1;
+}
+
+.terms-link {
+    color: var(--primary-600);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.security-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--primary-500);
+}
+
+.security-notice i {
+    color: var(--primary-500);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.security-notice p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    flex: 1;
+}
+
+/* Slide Navigation */
+.slide-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.prev-slide-btn, .next-slide-btn, .submit-final-btn {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border: none;
+}
+
+.prev-slide-btn {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.prev-slide-btn:hover {
+    background: var(--gray-200);
+    transform: translateX(-2px);
+}
+
+.next-slide-btn {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+    color: var(--white);
+    margin-left: auto;
+}
+
+.next-slide-btn:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.submit-final-btn {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: var(--white);
+    margin-left: auto;
+}
+
+.submit-final-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Slide Indicators */
+.slide-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.slide-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: var(--gray-300);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.slide-dot.active {
+    background: var(--primary-500);
+    transform: scale(1.2);
+}
+
+.slide-dot:hover {
+    background: var(--primary-400);
+}
+
+/* Processing Modal */
+.processing-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    padding: 1.25rem;
+}
+
+.processing-modal.active {
+    display: flex;
+}
+
+.modal-content {
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    background: var(--white);
+    border-radius: var(--radius-2xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-xl);
+}
+
+.spinner-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+}
+
+.spinner {
+    width: 100%;
+    height: 100%;
+    border: 4px solid var(--gray-200);
+    border-top-color: var(--primary-500);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.success-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: var(--primary-500);
+    opacity: 0;
+}
+
+.modal-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.5rem;
+}
+
+.modal-content p {
+    font-size: 0.9375rem;
+    color: var(--gray-600);
+    margin-bottom: 1.5rem;
+}
+
+.progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--gray-100);
+    border-radius: var(--radius-lg);
+    opacity: 0.5;
+    transition: all var(--transition-normal);
+}
+
+.step.active {
+    opacity: 1;
+    background: var(--primary-50);
+    border-left: 4px solid var(--primary-500);
+}
+
+.step span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .app-main {
+        padding: 1rem;
+    }
+
+    .form-section {
+        padding: 1.25rem;
+    }
+
+    .verification-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Vehicle type grid stays 2x2 on mobile */
+    .vehicle-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    /* Vehicle details grid: 2 columns on mobile */
+    .vehicle-fields-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    /* Make vehicle fields grid 1 column on very small screens */
+    @media (max-width: 480px) {
+        .vehicle-fields-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .slide-navigation {
+        flex-direction: column;
+    }
+
+    .prev-slide-btn, .next-slide-btn, .submit-final-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-nav {
+        padding: 0.75rem 1rem;
+    }
+
+    .progress-container {
+        padding: 0 1rem 1rem;
+    }
+
+    .form-control {
+        padding: 0.75rem 0.75rem 0.75rem 3rem;
+        font-size: 0.9375rem;
+    }
+
+    .input-icon {
+        left: 0.75rem;
+    }
+
+    .vehicle-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize
+    initDatePicker();
+    initFileUploads();
+    initVehicleSelection();
+    initCompanyAssociation();
+    initOtherOwnershipInput();
+    initFormValidation();
+
+    // Set current slide
+    currentSlide = 1;
+    updateSlidePosition();
+});
+
+let currentSlide = 1;
+const totalSlides = 4;
+let selectedVehicleType = null;
+
+function goToSlide(slideNumber) {
+    if (slideNumber < 1 || slideNumber > totalSlides) return;
+
+    // Update current slide
+    currentSlide = slideNumber;
+
+    // Update UI
+    updateSlidePosition();
+    updateProgress();
+    updateStepIndicator();
+    updateSlideIndicators();
+
+    // Special handling for slide 4 (vehicle photos)
+    if (slideNumber === 4) {
+        updateVehiclePhotosSection();
+    }
+}
+
+function validateAndGoToSlide(slideNumber) {
+    // Validate current slide before moving
+    if (!validateCurrentSlide()) {
+        return;
+    }
+
+    goToSlide(slideNumber);
+}
+
+function updateSlidePosition() {
+    const slidesContainer = document.querySelector('.slides-container');
+    const slideWidth = 100 / totalSlides; // 25% per slide
+    const translateX = -(currentSlide - 1) * slideWidth;
+
+    slidesContainer.style.transform = `translateX(${translateX}%)`;
+
+    // Update active slide class
+    document.querySelectorAll('.slide').forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlide - 1) {
+            slide.classList.add('active');
+        }
+    });
+}
+
+function updateProgress() {
+    const progressPercent = (currentSlide / totalSlides) * 100;
+    const progressFill = document.getElementById('progressFill');
+    const progressPercentText = document.getElementById('progressPercent');
+
+    progressFill.style.width = `${progressPercent}%`;
+    progressPercentText.textContent = Math.round(progressPercent);
+}
+
+function updateStepIndicator() {
+    document.getElementById('currentStep').textContent = currentSlide;
+}
+
+function updateSlideIndicators() {
+    document.querySelectorAll('.slide-dot').forEach((dot, index) => {
+        dot.classList.remove('active');
+        if (index === currentSlide - 1) {
+            dot.classList.add('active');
+        }
+
+        // Make dots clickable
+        dot.onclick = () => {
+            if (index + 1 < currentSlide) {
+                // Can always go back
+                goToSlide(index + 1);
+            } else if (index + 1 === currentSlide + 1) {
+                // Need to validate to go forward
+                validateAndGoToSlide(index + 1);
+            }
+        };
+    });
+}
+
+function validateCurrentSlide() {
+    let isValid = true;
+
+    switch(currentSlide) {
+        case 1:
+            // Validate personal information
+            const personalFields = ['dob', 'address', 'city', 'id_number', 'license_number'];
+            personalFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && !field.value.trim() && field.hasAttribute('required')) {
+                    showFieldError(field, 'This field is required');
+                    isValid = false;
+                } else if (field && field.value.trim()) {
+                    clearFieldError(field);
+
+                    // Additional validation for date
+                    if (fieldId === 'dob') {
+                        const selectedDate = new Date(field.value);
+                        const ageLimit = new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate());
+                        if (selectedDate > ageLimit) {
+                            showFieldError(field, 'Must be 18 years or older');
+                            isValid = false;
+                        }
+                    }
+                }
+            });
+            break;
+
+        case 2:
+            // Validate file uploads
+            const fileInputs = ['id_photo', 'license_photo'];
+            for (const fileId of fileInputs) {
+                const input = document.getElementById(fileId);
+                if (input && !input.files[0] && input.hasAttribute('required')) {
+                    const docName = getDocumentName(fileId);
+                    showAlert('Document Required', `Please upload ${docName}`, 'error');
+                    isValid = false;
+                    break;
+                }
+            }
+            break;
+
+        case 3:
+            // Validate vehicle selection
+            const vehicleSelected = document.querySelector('.vehicle-type-radio:checked');
+            if (!vehicleSelected) {
+                showAlert('Selection Required', 'Please select your vehicle type', 'error');
+                isValid = false;
+            } else {
+                selectedVehicleType = vehicleSelected.value;
+                // If car or motorcycle, validate details
+                if (selectedVehicleType === 'car' || selectedVehicleType === 'motorcycle') {
+                    const vehicleFields = ['vehicle_make', 'vehicle_model', 'vehicle_year', 'vehicle_color', 'registration_number', 'ownership_type'];
+                    vehicleFields.forEach(fieldId => {
+                        const field = document.getElementById(fieldId);
+                        if (field && !field.value.trim() && field.hasAttribute('required')) {
+                            showFieldError(field, 'This field is required');
+                            isValid = false;
+                        } else if (field) {
+                            clearFieldError(field);
+                        }
+                    });
+
+                    // Validate ownership type if "other" is selected
+                    const ownershipType = document.getElementById('ownership_type').value;
+                    if (ownershipType === 'other') {
+                        const otherOwnership = document.getElementById('other_ownership_type');
+                        if (!otherOwnership || !otherOwnership.value.trim()) {
+                            showFieldError(otherOwnership, 'Please specify ownership type');
+                            isValid = false;
+                        }
+                    }
+                }
+            }
+
+            // Validate company/organization name if applicable
+            const companyAssociation = document.getElementById('company_association');
+            const companyNameField = document.getElementById('company_name');
+            const otherCompanyTypeField = document.getElementById('other_company_type');
+
+            if (companyAssociation && companyAssociation.value) {
+                if (companyAssociation.value === 'other') {
+                    // Validate "Other" company type
+                    if (!otherCompanyTypeField || !otherCompanyTypeField.value.trim()) {
+                        showFieldError(otherCompanyTypeField, 'Please specify other type');
+                        isValid = false;
+                    }
+                } else if (companyAssociation.value !== 'independent') {
+                    // Validate regular company name for non-independent selections
+                    if (!companyNameField || !companyNameField.value.trim()) {
+                        showFieldError(companyNameField, 'This field is required');
+                        isValid = false;
+                    } else {
+                        clearFieldError(companyNameField);
+                    }
+                }
+            }
+            break;
+    }
+
+    if (!isValid) {
+        // Scroll to first error
+        const firstError = document.querySelector('.field-error');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    return isValid;
+}
+
+function updateVehiclePhotosSection() {
+    const vehiclePhotosSection = document.getElementById('vehiclePhotosSection');
+    const vehicleNotRequiredMessage = document.getElementById('vehicleNotRequiredMessage');
+    const vehicleSelectionRequired = document.getElementById('vehicleSelectionRequired');
+    const vehiclePhotosTitle = document.getElementById('vehiclePhotosTitle');
+    const vehiclePhotosSubtitle = document.getElementById('vehiclePhotosSubtitle');
+    const vehiclePhotosRequiredTag = document.getElementById('vehiclePhotosRequiredTag');
+    const selectedVehicleTypeSpan = document.getElementById('selectedVehicleType');
+
+    if (!selectedVehicleType) {
+        // No vehicle selected yet
+        vehiclePhotosSection.style.display = 'none';
+        vehicleNotRequiredMessage.style.display = 'none';
+        vehicleSelectionRequired.style.display = 'block';
+        vehiclePhotosRequiredTag.style.display = 'none';
+    } else if (selectedVehicleType === 'car' || selectedVehicleType === 'motorcycle') {
+        // Car or motorcycle - show upload section
+        vehiclePhotosSection.style.display = 'block';
+        vehicleNotRequiredMessage.style.display = 'none';
+        vehicleSelectionRequired.style.display = 'none';
+        vehiclePhotosRequiredTag.style.display = 'block';
+
+        // Update titles based on vehicle type
+        const vehicleName = selectedVehicleType === 'car' ? 'Car' : 'Motorcycle';
+        vehiclePhotosTitle.textContent = `${vehicleName} Photos & Documents`;
+        vehiclePhotosSubtitle.textContent = `Upload photos of your ${vehicleName.toLowerCase()} and registration`;
+
+        // Make file inputs required
+        const carRegInput = document.getElementById('car_registration');
+        const vehiclePhotoInput = document.getElementById('vehicle_photo');
+        if (carRegInput) carRegInput.required = true;
+        if (vehiclePhotoInput) vehiclePhotoInput.required = true;
+    } else {
+        // Bicycle or walking - show not required message
+        vehiclePhotosSection.style.display = 'none';
+        vehicleSelectionRequired.style.display = 'none';
+        vehicleNotRequiredMessage.style.display = 'block';
+        vehiclePhotosRequiredTag.style.display = 'none';
+
+        // Update message with selected vehicle type
+        const vehicleName = selectedVehicleType === 'bicycle' ? 'Bicycle' : 'Walking';
+        selectedVehicleTypeSpan.textContent = vehicleName.toLowerCase();
+
+        // Make file inputs not required
+        const carRegInput = document.getElementById('car_registration');
+        const vehiclePhotoInput = document.getElementById('vehicle_photo');
+        if (carRegInput) carRegInput.required = false;
+        if (vehiclePhotoInput) vehiclePhotoInput.required = false;
+    }
+}
+
+function initDatePicker() {
+    const dobInput = document.getElementById('dob');
+    if (!dobInput) return;
+
+    const today = new Date();
+    const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    dobInput.max = eighteenYearsAgo.toISOString().split('T')[0];
+
+    // Set default to 25 years ago
+    const twentyFiveYearsAgo = new Date(today.getFullYear() - 25, today.getMonth(), today.getDate());
+    dobInput.value = twentyFiveYearsAgo.toISOString().split('T')[0];
+}
+
+function initVehicleSelection() {
+    const vehicleRadios = document.querySelectorAll('.vehicle-type-radio');
+    const vehicleDetails = document.getElementById('vehicleDetails');
+
+    vehicleRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            selectedVehicleType = this.value;
+
+            if (this.value === 'car' || this.value === 'motorcycle') {
+                vehicleDetails.style.display = 'block';
+
+                // Make fields required
+                const fields = vehicleDetails.querySelectorAll('input, select');
+                fields.forEach(field => field.required = true);
+
+                // Trigger ownership type validation
+                setTimeout(() => {
+                    const ownershipType = document.getElementById('ownership_type');
+                    if (ownershipType) {
+                        toggleOtherOwnershipInput();
+                    }
+                }, 100);
+            } else {
+                // For bicycle, walking, hide and make fields not required
+                vehicleDetails.style.display = 'none';
+
+                const fields = vehicleDetails.querySelectorAll('input, select');
+                fields.forEach(field => {
+                    field.required = false;
+                    field.value = ''; // Clear values
+                });
+
+                // Hide other ownership input
+                const otherOwnershipContainer = document.getElementById('other_ownership_container');
+                if (otherOwnershipContainer) {
+                    otherOwnershipContainer.classList.remove('expanded');
+                    setTimeout(() => {
+                        otherOwnershipContainer.style.opacity = '0';
+                    }, 300);
+                }
+            }
+        });
+    });
+}
+
+function initCompanyAssociation() {
+    const companyAssociation = document.getElementById('company_association');
+    const companyNameSection = document.getElementById('companyNameSection');
+    const otherCompanyContainer = document.getElementById('other_company_container');
+    const companyNameField = document.getElementById('company_name');
+    const otherCompanyTypeField = document.getElementById('other_company_type');
+    const companyNameLabel = document.getElementById('companyNameLabel');
+    const companyNameHint = document.getElementById('companyNameHint');
+
+    if (!companyAssociation || !companyNameSection) return;
+
+    companyAssociation.addEventListener('change', function() {
+        const selectedValue = this.value;
+
+        if (selectedValue === 'other') {
+            // Show "Other" input field
+            companyNameSection.classList.remove('expanded');
+            setTimeout(() => {
+                companyNameSection.style.opacity = '0';
+                companyNameSection.style.maxHeight = '0';
+
+                // Show other company container
+                otherCompanyContainer.style.display = 'block';
+                setTimeout(() => {
+                    otherCompanyContainer.classList.add('expanded');
+                    otherCompanyTypeField.focus();
+                }, 10);
+
+                // Clear and disable regular company name
+                if (companyNameField) {
+                    companyNameField.value = '';
+                    companyNameField.required = false;
+                    clearFieldError(companyNameField);
+                }
+            }, 10);
+        } else if (selectedValue && selectedValue !== 'independent') {
+            // Show regular company name field with context-aware labels
+            otherCompanyContainer.classList.remove('expanded');
+            setTimeout(() => {
+                otherCompanyContainer.style.display = 'none';
+
+                // Show company name section
+                companyNameSection.style.display = 'block';
+                setTimeout(() => {
+                    companyNameSection.classList.add('expanded');
+                    companyNameField.focus();
+                }, 10);
+
+                // Make field required
+                companyNameField.required = true;
+
+                // Update labels and hints based on selection
+                switch(selectedValue) {
+                    case 'company_employee':
+                        companyNameLabel.textContent = 'Company Name';
+                        companyNameField.placeholder = 'Enter company name';
+                        companyNameHint.textContent = 'Enter the name of the company you work for';
+                        break;
+                    case 'association_member':
+                        companyNameLabel.textContent = 'Association Name';
+                        companyNameField.placeholder = 'Enter association name';
+                        companyNameHint.textContent = 'Enter the name of the association you belong to';
+                        break;
+                    case 'courier_service':
+                        companyNameLabel.textContent = 'Courier Service Name';
+                        companyNameField.placeholder = 'Enter courier service name';
+                        companyNameHint.textContent = 'Enter the name of the courier service partner';
+                        break;
+                    case 'individual_employer':
+                        companyNameLabel.textContent = 'Individual Employer Name';
+                        companyNameField.placeholder = 'Enter individual employer name';
+                        companyNameHint.textContent = 'Enter the name of the individual you work for';
+                        break;
+                    default:
+                        companyNameLabel.textContent = 'Organization Name';
+                        companyNameField.placeholder = 'Enter organization name';
+                        companyNameHint.textContent = 'Enter the name of your organization';
+                }
+            }, 300);
+        } else {
+            // Hide all company/association fields (Independent Runner or empty)
+            companyNameSection.classList.remove('expanded');
+            otherCompanyContainer.classList.remove('expanded');
+
+            setTimeout(() => {
+                companyNameSection.style.display = 'none';
+                otherCompanyContainer.style.display = 'none';
+
+                // Clear values and remove requirements
+                if (companyNameField) {
+                    companyNameField.value = '';
+                    companyNameField.required = false;
+                    clearFieldError(companyNameField);
+                }
+                if (otherCompanyTypeField) {
+                    otherCompanyTypeField.value = '';
+                    otherCompanyTypeField.required = false;
+                    clearFieldError(otherCompanyTypeField);
+                }
+            }, 300);
+        }
+    });
+}
+
+function initOtherOwnershipInput() {
+    const ownershipSelect = document.getElementById('ownership_type');
+    const otherOwnershipContainer = document.getElementById('other_ownership_container');
+    const otherOwnershipField = document.getElementById('other_ownership_type');
+
+    if (!ownershipSelect || !otherOwnershipContainer) return;
+
+    ownershipSelect.addEventListener('change', function() {
+        if (this.value === 'other') {
+            // Show other ownership input
+            otherOwnershipContainer.style.display = 'block';
+            setTimeout(() => {
+                otherOwnershipContainer.classList.add('expanded');
+                otherOwnershipField.focus();
+                otherOwnershipField.required = true;
+            }, 10);
+        } else {
+            // Hide other ownership input
+            otherOwnershipContainer.classList.remove('expanded');
+            setTimeout(() => {
+                otherOwnershipContainer.style.display = 'none';
+                otherOwnershipField.value = '';
+                otherOwnershipField.required = false;
+                clearFieldError(otherOwnershipField);
+            }, 300);
+        }
+    });
+}
+
+// Alias function for toggle
+function toggleOtherOwnershipInput() {
+    initOtherOwnershipInput();
+}
+
+function initFileUploads() {
+    const fileInputs = {
+        id_photo: {
+            input: document.getElementById('id_photo'),
+            uploadArea: document.getElementById('idUploadArea'),
+            uploadLabel: document.getElementById('idUploadLabel'),
+            fileInfo: document.getElementById('idFileInfo')
+        },
+        license_photo: {
+            input: document.getElementById('license_photo'),
+            uploadArea: document.getElementById('licenseUploadArea'),
+            uploadLabel: document.getElementById('licenseUploadLabel'),
+            fileInfo: document.getElementById('licenseFileInfo')
+        },
+        car_registration: {
+            input: document.getElementById('car_registration'),
+            uploadArea: document.getElementById('carRegistrationUploadArea'),
+            uploadLabel: document.getElementById('carRegistrationUploadLabel'),
+            fileInfo: document.getElementById('carRegistrationFileInfo')
+        },
+        vehicle_photo: {
+            input: document.getElementById('vehicle_photo'),
+            uploadArea: document.getElementById('vehiclePhotoUploadArea'),
+            uploadLabel: document.getElementById('vehiclePhotoUploadLabel'),
+            fileInfo: document.getElementById('vehiclePhotoFileInfo')
+        }
+    };
+
+    Object.keys(fileInputs).forEach(inputId => {
+        const config = fileInputs[inputId];
+        if (!config.input) return;
+
+        const previewId = inputId + 'Preview';
+        const preview = document.getElementById(previewId);
+
+        config.input.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (!file) {
+                removeFileInfo(config);
+                removePreview(preview);
+                return;
+            }
+
+            // Validate file
+            if (!validateFile(file)) {
+                this.value = '';
+                removeFileInfo(config);
+                removePreview(preview);
+                return;
+            }
+
+            // Show uploading state
+            showUploadingState(config);
+
+            // Simulate upload delay for better UX
+            setTimeout(() => {
+                // Show file info and preview
+                showFileInfo(file, config);
+                showFilePreview(file, preview, inputId);
+
+                // Show success state
+                showSuccessState(config);
+            }, 500);
+        });
+    });
+}
+
+function validateFile(file) {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showAlert('File Too Large', 'Please select a file smaller than 5MB', 'error');
+        return false;
+    }
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+        showAlert('Invalid File Type', 'Please select JPG, PNG, or GIF image', 'error');
+        return false;
+    }
+
+    return true;
+}
+
+function showUploadingState(config) {
+    if (config.uploadArea) {
+        config.uploadArea.classList.add('uploading');
+    }
+    if (config.uploadLabel) {
+        config.uploadLabel.style.opacity = '0.7';
+        config.uploadLabel.style.pointerEvents = 'none';
+    }
+}
+
+function showSuccessState(config) {
+    if (config.uploadArea) {
+        config.uploadArea.classList.remove('uploading');
+        config.uploadArea.classList.add('success');
+    }
+    if (config.uploadLabel) {
+        config.uploadLabel.style.opacity = '1';
+        config.uploadLabel.style.pointerEvents = 'auto';
+    }
+}
+
+function showFileInfo(file, config) {
+    if (!config.fileInfo) return;
+
+    const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+    const fileIcon = getDocumentIconFromInputId(config.input.id);
+
+    config.fileInfo.innerHTML = `
+        <div class="file-info-icon">
+            <i class="fas fa-${fileIcon}"></i>
+        </div>
+        <div class="file-info-details">
+            <div class="file-info-name">${file.name}</div>
+            <div class="file-info-size">${fileSize} MB</div>
+        </div>
+        <button type="button" class="file-info-remove" onclick="removeFile('${config.input.id}')">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    config.fileInfo.classList.add('active');
+}
+
+function removeFileInfo(config) {
+    if (config.fileInfo) {
+        config.fileInfo.classList.remove('active');
+        config.fileInfo.innerHTML = '';
+    }
+    if (config.uploadArea) {
+        config.uploadArea.classList.remove('uploading', 'success');
+    }
+    if (config.uploadLabel) {
+        config.uploadLabel.style.opacity = '1';
+        config.uploadLabel.style.pointerEvents = 'auto';
+    }
+}
+
+function showFilePreview(file, previewElement, inputId) {
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+        const documentName = getDocumentName(inputId);
+
+        const previewHTML = `
+            <div class="preview-content">
+                <div class="preview-header">
+                    <div class="preview-info">
+                        <div class="preview-icon">
+                            <i class="fas fa-${getDocumentIcon(inputId)}"></i>
+                        </div>
+                        <div class="preview-details">
+                            <h5>${documentName}</h5>
+                            <p>${file.name} • ${fileSize} MB</p>
+                        </div>
+                    </div>
+                    <div class="preview-actions">
+                        <button type="button" class="preview-btn view" onclick="viewFullImage('${e.target.result}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button" class="preview-btn remove" onclick="removeUpload('${inputId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="preview-image">
+                    <img src="${e.target.result}" alt="Preview">
+                </div>
+            </div>
+        `;
+
+        previewElement.innerHTML = previewHTML;
+        previewElement.classList.add('active');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function getDocumentIconFromInputId(inputId) {
+    if (inputId.includes('id_photo')) return 'id-card';
+    if (inputId.includes('license_photo')) return 'id-badge';
+    if (inputId.includes('car_registration')) return 'file-contract';
+    if (inputId.includes('vehicle_photo')) return 'car-side';
+    return 'file';
+}
+
+function getDocumentName(inputId) {
+    const names = {
+        id_photo: 'Government ID',
+        license_photo: "Driver's License",
+        car_registration: 'Vehicle Registration',
+        vehicle_photo: 'Vehicle Photo'
+    };
+    return names[inputId] || 'Document';
+}
+
+function getDocumentIcon(inputId) {
+    const icons = {
+        id_photo: 'id-card',
+        license_photo: 'id-badge',
+        car_registration: 'file-contract',
+        vehicle_photo: 'car-side'
+    };
+    return icons[inputId] || 'file';
+}
+
+function removePreview(previewElement) {
+    if (previewElement) {
+        previewElement.innerHTML = '';
+        previewElement.classList.remove('active');
+    }
+}
+
+// Global functions for inline event handlers
+window.viewFullImage = function(src) {
+    const modal = document.createElement('div');
+    modal.className = 'image-viewer-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="this.parentElement.remove()">
+            <div class="modal-image-container" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="this.closest('.image-viewer-modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <img src="${src}" alt="Full size view">
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+};
+
+window.removeUpload = function(inputId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(inputId + 'Preview');
+
+    // Get the config for this input
+    const configs = {
+        'id_photo': {fileInfo: document.getElementById('idFileInfo'), uploadArea: document.getElementById('idUploadArea'), uploadLabel: document.getElementById('idUploadLabel')},
+        'license_photo': {fileInfo: document.getElementById('licenseFileInfo'), uploadArea: document.getElementById('licenseUploadArea'), uploadLabel: document.getElementById('licenseUploadLabel')},
+        'car_registration': {fileInfo: document.getElementById('carRegistrationFileInfo'), uploadArea: document.getElementById('carRegistrationUploadArea'), uploadLabel: document.getElementById('carRegistrationUploadLabel')},
+        'vehicle_photo': {fileInfo: document.getElementById('vehiclePhotoFileInfo'), uploadArea: document.getElementById('vehiclePhotoUploadArea'), uploadLabel: document.getElementById('vehiclePhotoUploadLabel')}
+    };
+
+    const config = configs[inputId];
+
+    if (input) input.value = '';
+    if (preview) removePreview(preview);
+    if (config) removeFileInfo(config);
+};
+
+window.removeFile = function(inputId) {
+    window.removeUpload(inputId);
+};
+
+function showFieldError(field, message) {
+    clearFieldError(field);
+
+    const error = document.createElement('div');
+    error.className = 'field-error';
+    error.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    error.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--error);
+        margin-top: 4px;
+    `;
+
+    const parent = field.closest('.input-group') || field.parentElement;
+    parent.appendChild(error);
+
+    field.classList.add('border-error');
+    field.classList.add('shake');
+
+    setTimeout(() => {
+        field.classList.remove('shake');
+    }, 500);
+}
+
+function clearFieldError(field) {
+    const parent = field.closest('.input-group') || field.parentElement;
+    const error = parent.querySelector('.field-error');
+    if (error) error.remove();
+
+    field.classList.remove('border-error');
+}
+
+function showAlert(title, message, type = 'info') {
+    // Create alert
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span><strong>${title}:</strong> ${message}</span>
+        <button class="alert-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    // Add to container
+    const container = document.querySelector('.alerts-container');
+    if (container) {
+        container.appendChild(alert);
+
+        // Add close functionality
+        alert.querySelector('.alert-close').addEventListener('click', function() {
+            alert.remove();
+        });
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+}
+
+function initFormValidation() {
+    const form = document.getElementById('runnerRegistrationForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validate all slides
+        let allValid = true;
+        for (let i = 1; i <= totalSlides; i++) {
+            currentSlide = i;
+            if (!validateCurrentSlide()) {
+                allValid = false;
+                goToSlide(i);
+                break;
+            }
+        }
+
+        // Special validation for slide 4 based on vehicle type
+        if (allValid && selectedVehicleType && (selectedVehicleType === 'car' || selectedVehicleType === 'motorcycle')) {
+            const carRegInput = document.getElementById('car_registration');
+            const vehiclePhotoInput = document.getElementById('vehicle_photo');
+
+            if (carRegInput && !carRegInput.files[0]) {
+                showAlert('Document Required', 'Please upload vehicle registration document', 'error');
+                allValid = false;
+                goToSlide(4);
+            }
+            if (vehiclePhotoInput && !vehiclePhotoInput.files[0]) {
+                showAlert('Photo Required', 'Please upload vehicle photo', 'error');
+                allValid = false;
+                goToSlide(4);
+            }
+        }
+
+        // Check terms
+        const termsCheckbox = document.getElementById('terms');
+        if (!termsCheckbox.checked) {
+            showAlert('Terms Required', 'Please agree to the terms and conditions', 'error');
+            allValid = false;
+            goToSlide(4);
+        }
+
+        if (allValid) {
+            // Show processing modal
+            showProcessingModal();
+
+            // Submit form after delay
+            setTimeout(() => {
+                form.submit();
+            }, 2000);
+        }
+    });
+}
+
+function showProcessingModal() {
+    const modal = document.getElementById('processingModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Animate progress steps
+        const steps = modal.querySelectorAll('.step');
+        let currentStep = 0;
+
+        const interval = setInterval(() => {
+            if (currentStep > 0) {
+                steps[currentStep - 1].classList.remove('active');
+            }
+
+            if (currentStep < steps.length) {
+                steps[currentStep].classList.add('active');
+                currentStep++;
+            } else {
+                clearInterval(interval);
+
+                // Show success icon
+                const spinner = modal.querySelector('.spinner');
+                const successIcon = modal.querySelector('.success-icon');
+
+                if (spinner && successIcon) {
+                    spinner.style.display = 'none';
+                    successIcon.style.opacity = '1';
+                    successIcon.style.transform = 'translate(-50%, -50%) scale(1)';
+                }
+            }
+        }, 600);
+    }
+}
+
+// Add error styles
+const errorStyles = document.createElement('style');
+errorStyles.textContent = `
+    .field-error {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--error);
+        margin-top: 4px;
+        animation: slideIn 0.3s ease;
+    }
+
+    .border-error {
+        border-color: var(--error) !important;
+    }
+
+    .border-error:focus {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .shake {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translateX(-1px); }
+        20%, 80% { transform: translateX(2px); }
+        30%, 50%, 70% { transform: translateX(-4px); }
+        40%, 60% { transform: translateX(4px); }
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-success {
+        background: #f0fdf4;
+        color: var(--primary-700);
+        border: 1px solid var(--primary-200);
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: var(--error);
+        border: 1px solid #fecaca;
+    }
+
+    .alert-info {
+        background: #eff6ff;
+        color: var(--info);
+        border: 1px solid #bfdbfe;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.7;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: var(--radius-sm);
+        transition: opacity 0.2s;
+        flex-shrink: 0;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    .image-viewer-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .image-viewer-modal .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        cursor: zoom-out;
+    }
+
+    .image-viewer-modal .modal-image-container {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+        animation: scaleUp 0.3s ease;
+    }
+
+    .image-viewer-modal img {
+        max-width: 100%;
+        max-height: 90vh;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .image-viewer-modal .modal-close {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 36px;
+        height: 36px;
+        background: var(--white);
+        border: none;
+        border-radius: var(--radius-full);
+        color: var(--gray-900);
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-lg);
+        transition: all var(--transition-fast);
+        z-index: 2001;
+    }
+
+    .image-viewer-modal .modal-close:hover {
+        background: var(--gray-100);
+        transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(0.9); }
+        to { transform: scale(1); }
+    }
+`;
+document.head.appendChild(errorStyles);
+</script>
+{% endblock %}

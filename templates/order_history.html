@@ -1,0 +1,1086 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="order-history-page" class="page">
+    <!-- Enhanced Header -->
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Order History</h1>
+                    <p class="header-subtitle">Track your errands journey</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('home_page') }}" class="back-btn" title="Go Back">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="stats-badge">
+                    <span class="stats-count">{{ total_orders }}</span>
+                    <span class="stats-label">Total</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Stats Overview - REORDERED: All → Pending → Completed -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon all">
+                    <i class="fas fa-list-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-count">{{ total_orders }}</span>
+                    <span class="stat-label">All</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pending">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <!-- FIXED: Now uses pending_count from view function -->
+                    <span class="stat-count">{{ pending_count }}</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon completed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <!-- FIXED: Now uses completed_count from view function -->
+                    <span class="stat-count">{{ completed_count }}</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs - UPDATED: Removed Ongoing tab -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="pending">Pending</button>
+            <button class="filter-tab" data-filter="completed">Completed</button>
+        </div>
+
+        <div class="section-title animated-fadein">
+            <h3>Your Errand History 📋</h3>
+            <p>Track and manage all your errands in one place</p>
+        </div>
+
+        <div class="errands-list">
+            {% if orders %}
+                {% for e in orders %}
+                <div class="errand-item animated-slideup" data-status="{{ e.status }}" data-id="{{ e.order_id }}">
+                    <!-- Compact View -->
+                    <div class="errand-compact-view">
+                        <div class="errand-header">
+                            <div class="errand-type">
+                                <div class="service-icon service-{{ e.service_type|lower|replace(' ', '-') }}">
+                                    {% if 'grocery' in e.service_type|lower %}
+                                        <i class="fas fa-shopping-basket"></i>
+                                    {% elif 'food' in e.service_type|lower %}
+                                        <i class="fas fa-utensils"></i>
+                                    {% elif 'bill' in e.service_type|lower %}
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    {% elif 'package' in e.service_type|lower %}
+                                        <i class="fas fa-box"></i>
+                                    {% elif 'gadget' in e.service_type|lower %}
+                                        <i class="fas fa-laptop"></i>
+                                    {% elif 'gas' in e.service_type|lower %}
+                                        <i class="fas fa-gas-pump"></i>
+                                    {% else %}
+                                        <i class="fas fa-running"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="errand-info">
+                                    <strong class="errand-title">{{ e.service_type or "General Errand" }}</strong>
+                                    <span class="errand-id">#{{ e.order_id }}</span>
+                                </div>
+                            </div>
+                            <span class="status-badge status-{{ e.status }}">
+                                <i class="status-icon
+                                    {% if e.status == 'completed' %}fa-check-circle
+                                    {% else %}fa-clock{% endif %}">
+                                </i>
+                                {{ e.status|title }}
+                            </span>
+                        </div>
+
+                        <div class="errand-details">
+                            <div class="detail-row">
+                                <div class="detail">
+                                    <span class="detail-icon">📍</span>
+                                    <span class="detail-text">{{ e.pickup_location or 'Location not specified' }}</span>
+                                </div>
+                                <div class="detail">
+                                    <span class="detail-icon">🎯</span>
+                                    <span class="detail-text">{{ e.delivery_location or 'Destination not specified' }}</span>
+                                </div>
+                            </div>
+
+                            {% if e.details %}
+                            <div class="errand-description">
+                                <span class="detail-icon">📝</span>
+                                <span class="description-text">{{ e.details|truncate(80) }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="errand-footer">
+                            <div class="errand-meta">
+                                <div class="price-tag">
+                                    <span class="price-amount">${{ "%.2f"|format(e.amount) if e.amount else '0.00' }}</span>
+                                    <span class="price-label">Estimated</span>
+                                </div>
+                                <div class="time-info">
+                                    <span class="time-ago">{{ e.date|timesince if e.date else 'Recently' }}</span>
+                                    <span class="time-exact">{{ e.date.strftime('%b %d, %H:%M') if e.date else '' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="errand-actions">
+                                {% if e.status == 'completed' %}
+                                <button class="action-btn rate-btn" data-errand-id="{{ e.order_id }}">
+                                    <i class="fas fa-star"></i>
+                                    Rate
+                                </button>
+                                {% endif %}
+                                <button class="action-btn details-btn" onclick="toggleErrandDetails({{ e.order_id }})">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expanded View (Hidden by default) -->
+                    <div class="errand-expanded-view" id="expanded-{{ e.order_id }}" style="display: none;">
+                        <div class="hide-details-container">
+                            <button class="hide-details-btn" onclick="toggleErrandDetails({{ e.order_id }})">
+                                <i class="fas fa-chevron-up"></i>
+                                Hide Details
+                            </button>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-column">
+                                <h4>Delivery Information</h4>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="detail-content">
+                                        <strong>Pickup Location:</strong>
+                                        <span>{{ e.pickup_location or 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker"></i>
+                                    <div class="detail-content">
+                                        <strong>Delivery Location:</strong>
+                                        <span>{{ e.delivery_location or 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div class="detail-content">
+                                        <strong>Time Created:</strong>
+                                        <span>{{ e.date.strftime('%b %d, %Y at %H:%M') if e.date else 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <div class="detail-content">
+                                        <strong>Delivery Time:</strong>
+                                        <span>{% if e.estimated_delivery_time %}{{ e.estimated_delivery_time }}{% else %}Standard delivery time{% endif %}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-column">
+                                <h4>Errand & Runner Information</h4>
+                                <div class="detail-item">
+                                    <i class="fas fa-tag"></i>
+                                    <div class="detail-content">
+                                        <strong>Service Type:</strong>
+                                        <span>{{ e.service_type or 'General Errand' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <div class="detail-content">
+                                        <strong>Agreed Price:</strong>
+                                        <span>${{ "%.2f"|format(e.final_price or e.amount) if e.final_price or e.amount else '0.00' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-user"></i>
+                                    <div class="detail-content">
+                                        <strong>Runner:</strong>
+                                        <span>
+                                            {% if e.other_user %}
+                                                {{ e.other_user.fullname }}
+                                            {% else %}
+                                                Not assigned yet
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-phone"></i>
+                                    <div class="detail-content">
+                                        <strong>Runner Contact:</strong>
+                                        <span>
+                                            {% if e.other_user and e.other_user.phone %}
+                                                {{ e.other_user.phone }}
+                                            {% else %}
+                                                Not available
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="errand-full-description">
+                            <h4>Errand Description</h4>
+                            <p>{{ e.details or 'No additional details provided' }}</p>
+                        </div>
+
+                        <div class="action-buttons">
+                            {% if e.status == 'completed' %}
+                                {% set can_delete = e.date and (now - e.date).days > 7 %}
+                                <button class="btn-danger" onclick="deleteErrand({{ e.order_id }})" {% if not can_delete %}disabled title="Can only delete after 7 days"{% endif %}>
+                                    <i class="fas fa-trash"></i>
+                                    Delete Errand
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state animated-fadein">
+                    <div class="empty-icon">📝</div>
+                    <h4>No Order History Yet</h4>
+                    <p>Your completed errands will appear here once you start using our services</p>
+                    <div class="empty-actions">
+                        <button class="create-btn primary" onclick="location.href='{{ url_for('create_errand') }}'">
+                            <i class="fas fa-plus"></i>
+                            Create Your First Errand
+                        </button>
+                        <button class="create-btn secondary" onclick="location.href='{{ url_for('dashboard') }}'">
+                            <i class="fas fa-compass"></i>
+                            Explore Services
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --secondary: #2E7D32;
+    --accent: #FF9800;
+    --success: #8BC34A;
+    --warning: #FFC107;
+    --danger: #F44336;
+    --light: #f8fdf8;
+    --dark: #1A331A;
+    --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    --shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
+    --radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* Enhanced Header */
+.mobile-header {
+    background: var(--gradient);
+    color: white;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+}
+
+.header-text h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-btn {
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-2px);
+}
+
+.stats-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 12px;
+    border-radius: 20px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.stats-count {
+    display: block;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.stats-label {
+    font-size: 10px;
+    opacity: 0.9;
+}
+
+/* Stats Overview */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 20px;
+    background: white;
+}
+
+.stat-card {
+    background: var(--light);
+    padding: 15px;
+    border-radius: var(--radius);
+    text-align: center;
+    transition: var(--transition);
+    border: 1px solid #e8f5e9;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 16px;
+}
+
+.stat-icon.all { background: #e3f2fd; color: #1565c0; }
+.stat-icon.pending { background: #fff3cd; color: #856404; }
+.stat-icon.completed { background: #d4edda; color: #155724; }
+
+.stat-count {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--dark);
+    opacity: 0.7;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+    display: flex;
+    background: white;
+    padding: 0 20px;
+    border-bottom: 1px solid #e8f5e9;
+}
+
+.filter-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: none;
+    color: var(--dark);
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: var(--transition);
+}
+
+.filter-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Section Title */
+.section-title {
+    padding: 20px;
+    text-align: center;
+}
+
+.section-title h3 {
+    font-size: 20px;
+    color: var(--dark);
+    margin-bottom: 5px;
+}
+
+.section-title p {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Errand Items */
+.errands-list {
+    padding: 0 20px 20px;
+}
+
+.errand-item {
+    background: white;
+    border-radius: var(--radius);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.errand-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+}
+
+.errand-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.errand-item:hover::before {
+    transform: scaleX(1);
+}
+
+.errand-compact-view {
+    padding: 20px;
+}
+
+.errand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.errand-type {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.service-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.errand-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.errand-title {
+    font-size: 16px;
+    color: var(--dark);
+}
+
+.errand-id {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-completed { background: #d4edda; color: #155724; }
+
+.errand-details {
+    margin-bottom: 15px;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.detail-icon {
+    font-size: 12px;
+}
+
+.errand-description {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--light);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #555;
+}
+
+.errand-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.errand-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.price-tag {
+    text-align: center;
+}
+
+.price-amount {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.price-label {
+    font-size: 11px;
+    color: #666;
+}
+
+.time-info {
+    text-align: center;
+}
+
+.time-ago {
+    display: block;
+    font-size: 12px;
+    color: var(--dark);
+    font-weight: 600;
+}
+
+.time-exact {
+    font-size: 11px;
+    color: #666;
+}
+
+.errand-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: white;
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: var(--light);
+    border-color: var(--primary-light);
+}
+
+.rate-btn { color: #FFC107; }
+.details-btn { color: #666; }
+
+/* Expanded View Styles */
+.errand-expanded-view {
+    padding: 20px;
+    border-top: 1px solid #e8f5e9;
+    background: #f8fdf8;
+    position: relative;
+}
+
+.hide-details-container {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 10;
+}
+
+.hide-details-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    font-size: 12px;
+}
+
+.hide-details-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin: 30px 0 20px;
+}
+
+.detail-column h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--dark);
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-item i {
+    width: 16px;
+    color: var(--primary);
+    margin-top: 3px;
+    font-size: 14px;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+.detail-content strong {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 600;
+}
+
+.detail-content span {
+    font-size: 14px;
+    color: var(--dark);
+    font-weight: 500;
+}
+
+.errand-full-description {
+    margin: 25px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.errand-full-description h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark);
+}
+
+.errand-full-description p {
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 14px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    padding: 10px 16px;
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: var(--danger);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.2);
+}
+
+.btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    font-size: 18px;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.empty-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+.create-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.create-btn.primary {
+    background: var(--gradient);
+    color: white;
+}
+
+.create-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.create-btn.secondary {
+    background: var(--light);
+    color: var(--dark);
+    border: 1px solid #e0e0e0;
+}
+
+.create-btn.secondary:hover {
+    background: #f0f9f0;
+    border-color: var(--primary-light);
+}
+
+/* Animations */
+.animated-fadein {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animated-slideup {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .errand-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .errand-meta {
+        justify-content: space-between;
+    }
+
+    .errand-actions {
+        justify-content: center;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .hide-details-container {
+        top: 8px;
+        right: 15px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn-danger {
+        justify-content: center;
+    }
+
+    .empty-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .errand-compact-view {
+        padding: 15px;
+    }
+
+    .errand-expanded-view {
+        padding: 15px;
+    }
+
+    .details-grid {
+        gap: 15px;
+    }
+
+    .detail-item {
+        gap: 8px;
+    }
+
+    .detail-item i {
+        font-size: 13px;
+    }
+
+    .detail-content strong {
+        font-size: 12px;
+    }
+
+    .detail-content span {
+        font-size: 13px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const errandItems = document.querySelectorAll('.errand-item');
+
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+
+            // Update active tab
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Filter items
+            errandItems.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-status') === filter) {
+                    item.style.display = 'block';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0)';
+                    }, 10);
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    });
+
+    // Rating functionality
+    document.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const errandId = this.getAttribute('data-errand-id');
+            alert(`Rating functionality for errand #${errandId} would open here.`);
+        });
+    });
+
+    // Add hover effects
+    errandItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add loading animation for new items
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    errandItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(item);
+    });
+});
+
+// Toggle errand details view
+function toggleErrandDetails(errandId) {
+    const expandedView = document.getElementById(`expanded-${errandId}`);
+    const errandItem = expandedView.closest('.errand-item');
+
+    if (expandedView.style.display === 'none') {
+        expandedView.style.display = 'block';
+        // Scroll to the expanded view
+        expandedView.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        expandedView.style.display = 'none';
+        // Scroll back to the errand item
+        errandItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// Delete errand function
+function deleteErrand(errandId) {
+    if (confirm('Are you sure you want to delete this errand? This action cannot be undone.')) {
+        // Show loading state
+        const deleteBtn = document.querySelector(`#expanded-${errandId} .btn-danger`);
+        const originalText = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+        deleteBtn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            alert(`Errand #${errandId} has been deleted.`);
+            // In a real app, you would redirect or reload the page
+            // window.location.reload();
+
+            // For now, just revert the button
+            deleteBtn.innerHTML = originalText;
+            deleteBtn.disabled = false;
+        }, 1000);
+    }
+}
+</script>
+{% endblock %}

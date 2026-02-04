@@ -1,0 +1,1605 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #81C784;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E9;
+    --primary-100: #C8E6C9;
+    --background: #f8f9fa;
+    --surface: #ffffff;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --text-light: #9E9E9E;
+    --border: #E0E0E0;
+    --border-light: #EEEEEE;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+}
+
+/* Wallet Page Specific Styles */
+#wallet-page {
+    min-height: 100vh;
+    background: var(--background);
+    position: relative;
+    overflow-y: auto;
+    padding-bottom: 80px;
+}
+
+/* Header Styles - Mobile Optimized */
+.main-header {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding-top: calc(12px + var(--safe-area-inset-top));
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+    border-bottom: 1px solid var(--border-light);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    white-space: nowrap;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.welcome-text {
+    font-weight: 500;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+    color: var(--text-secondary);
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+}
+
+.btn-icon:active {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(0.95);
+}
+
+/* Page Header - Mobile Optimized */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 16px;
+    margin-bottom: 12px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.page-header h1 {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.page-header p {
+    opacity: 0.9;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.header-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    min-width: 0;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* Quick Actions - Mobile Optimized */
+.quick-actions-bar {
+    background: var(--surface);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 12px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.actions-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 10px 12px;
+    border: 2px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 0.85rem;
+    text-align: center;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: none;
+}
+
+.action-btn.primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.action-btn.outline {
+    border-color: var(--text-light);
+    color: var(--text-light);
+}
+
+.action-btn:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+/* Wallet Cards - Mobile Optimized */
+.wallet-cards-section {
+    padding: 0 16px;
+    margin: 0 auto 20px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.wallet-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #000000;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.wallet-card:active {
+    transform: scale(0.99);
+    box-shadow: var(--shadow-hover);
+}
+
+.wallet-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.wallet-card.primary::before { background: var(--primary-color); }
+.wallet-card.success::before { background: #4CAF50; }
+.wallet-card.warning::before { background: #FF9800; }
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.card-header i {
+    font-size: 1.2rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wallet-card.primary .card-header i { background: var(--primary-50); color: var(--primary-color); }
+.wallet-card.success .card-header i { background: #E8F5E9; color: #4CAF50; }
+.wallet-card.warning .card-header i { background: #FFF3E0; color: #FF9800; }
+
+.card-header h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.card-amount {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.trend.positive { color: #4CAF50; }
+.trend.negative { color: #F44336; }
+
+/* Transactions Section - Mobile Optimized */
+.transactions-section, .payment-methods-section {
+    padding: 0 16px;
+    margin: 0 auto 20px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.filter-options select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    padding: 10px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    text-decoration: none;
+    text-align: center;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: 1px solid #000000;
+}
+
+.btn-primary:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.transaction-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #000000;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.transaction-item:active {
+    transform: scale(0.99);
+    box-shadow: var(--shadow-hover);
+}
+
+.transaction-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.transaction-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.transaction-icon.earning { background: var(--primary-50); color: var(--primary-color); }
+.transaction-icon.withdrawal { background: #FFEBEE; color: #F44336; }
+.transaction-icon.bonus { background: #FFF3E0; color: #FF9800; }
+.transaction-icon.refund { background: #E3F2FD; color: #2196F3; }
+
+.transaction-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.transaction-details h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.transaction-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.7rem;
+    color: var(--text-light);
+}
+
+.transaction-amount {
+    text-align: left;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+    width: 100%;
+}
+
+.amount {
+    display: block;
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.transaction-amount.earning .amount { color: var(--primary-color); }
+.transaction-amount.withdrawal .amount { color: #F44336; }
+.transaction-amount.bonus .amount { color: #FF9800; }
+.transaction-amount.refund .amount { color: #2196F3; }
+
+.status {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status.completed { background: var(--primary-50); color: var(--primary-color); border: 1px solid #000000; }
+.status.pending { background: #FFF3E0; color: #FF9800; border: 1px solid #000000; }
+.status.failed { background: #FFEBEE; color: #F44336; border: 1px solid #000000; }
+
+/* Payment Methods - Mobile Optimized */
+.payment-methods-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.payment-method {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #000000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.payment-method:active {
+    transform: scale(0.99);
+    box-shadow: var(--shadow-hover);
+}
+
+.payment-method.primary {
+    border-color: var(--primary-color);
+    background: var(--primary-50);
+}
+
+.method-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.method-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.method-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.method-detail {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.method-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge.primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: none;
+}
+
+.btn-icon:active {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(0.95);
+}
+
+.btn-icon.danger:active {
+    background: #F44336;
+    border-color: #F44336;
+}
+
+/* Empty State - Mobile Optimized */
+.empty-state {
+    text-align: center;
+    padding: 30px 15px;
+    color: var(--text-light);
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid #000000;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+    color: var(--primary-color);
+}
+
+.empty-state h3 {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+/* Modal Styles - Mobile Optimized */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.modal-content {
+    background: var(--surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #000000;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 0;
+    margin-bottom: 16px;
+}
+
+.modal-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+}
+
+.close-btn:active {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 0 20px;
+}
+
+.modal-footer {
+    padding: 16px 20px 20px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-light);
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.input-with-prefix {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #000000;
+}
+
+.prefix {
+    padding: 10px 12px;
+    background: var(--background);
+    color: var(--text-secondary);
+    font-weight: 600;
+    border-right: 1px solid #000000;
+    font-size: 0.9rem;
+}
+
+.input-with-prefix input {
+    border: none;
+    padding: 10px 12px;
+    flex: 1;
+    font-size: 0.9rem;
+    background: var(--surface);
+}
+
+.input-with-prefix input:focus {
+    outline: none;
+}
+
+.balance-info {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #000000;
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 0.9rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.btn-outline {
+    padding: 8px 12px;
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    text-align: center;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: none;
+}
+
+.btn-outline:active {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Bottom Navigation - Mobile Optimized */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    padding: 10px 16px;
+    z-index: 1000;
+    padding-bottom: calc(10px + var(--safe-area-inset-bottom));
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+    border-top: 1px solid #000000;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--text-light);
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+    background: var(--primary-50);
+}
+
+.nav-item:active {
+    transform: scale(0.95);
+}
+
+.nav-item i {
+    font-size: 18px;
+}
+
+/* Fix scrolling issues */
+#wallet-page {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+}
+
+/* Responsive Design for Tablets */
+@media (min-width: 481px) {
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .welcome-text {
+        font-size: 14px;
+        max-width: 200px;
+    }
+
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .page-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .stat-number {
+        font-size: 1.6rem;
+    }
+
+    .actions-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+    }
+
+    .section-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        text-align: left;
+    }
+
+    .filter-options {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .filter-options select {
+        width: auto;
+        min-width: 140px;
+    }
+
+    .transaction-main {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .transaction-amount {
+        text-align: right;
+        padding-top: 0;
+        border-top: none;
+        width: auto;
+        min-width: 120px;
+    }
+
+    .amount {
+        font-size: 1.2rem;
+    }
+
+    .payment-method {
+        flex-direction: row;
+    }
+
+    .method-info {
+        text-align: left;
+    }
+}
+
+@media (min-width: 768px) {
+    .header-content {
+        padding: 16px 0;
+    }
+
+    .page-header {
+        padding: 20px 24px;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .header-stats {
+        gap: 20px;
+    }
+
+    .stat-item {
+        min-width: 100px;
+        padding: 12px 15px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .quick-actions-bar {
+        padding: 15px 24px;
+    }
+
+    .wallet-cards-section,
+    .transactions-section,
+    .payment-methods-section {
+        padding: 0 24px;
+        margin-bottom: 24px;
+    }
+
+    .cards-grid {
+        gap: 16px;
+    }
+
+    .wallet-card {
+        padding: 20px;
+    }
+
+    .card-amount {
+        font-size: 2.2rem;
+    }
+
+    .nav-item {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+
+    .nav-item i {
+        font-size: 20px;
+    }
+}
+
+/* Very Small Phones */
+@media (max-width: 360px) {
+    .logo h1 {
+        font-size: 16px;
+    }
+
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .welcome-text {
+        font-size: 12px;
+        max-width: 120px;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-header p {
+        font-size: 0.85rem;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .stat-item {
+        padding: 8px 6px;
+    }
+
+    .actions-container {
+        grid-template-columns: 1fr;
+    }
+
+    .wallet-card {
+        padding: 12px;
+    }
+
+    .card-amount {
+        font-size: 1.5rem;
+    }
+
+    .nav-item {
+        font-size: 0.7rem;
+        padding: 6px 8px;
+    }
+
+    .nav-item i {
+        font-size: 16px;
+    }
+}
+
+/* Landscape mode */
+@media (max-height: 600px) and (orientation: landscape) {
+    .main-header {
+        padding-top: 8px;
+    }
+
+    .page-header {
+        padding: 12px 16px;
+    }
+
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Prevent text selection on mobile */
+.action-btn,
+.btn-icon,
+.nav-item,
+.wallet-card,
+.transaction-item,
+.payment-method,
+.btn-primary,
+.btn-outline,
+.close-btn {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Improve scrolling performance */
+.wallet-cards-section,
+.transactions-section,
+.payment-methods-section {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize animations for mobile */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+</style>
+
+<div id="wallet-page" class="page">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>ErrandConnect</h1>
+            </div>
+            <div class="user-menu">
+                <span class="welcome-text">Welcome, {{ user.username|default('Runner') }}! 👋</span>
+                <div class="user-actions">
+                    <a href="{{ url_for('profile') }}" class="btn-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="header-content">
+                <h1>My Wallet</h1>
+                <p>Manage your earnings and transactions</p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">${{ "%.2f"|format(total_balance|default(0.00)) }}</span>
+                        <span class="stat-label">Total Balance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${{ "%.2f"|format(available_balance|default(0.00)) }}</span>
+                        <span class="stat-label">Available</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${{ "%.2f"|format(pending_balance|default(0.00)) }}</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions-bar">
+            <div class="actions-container">
+                <button class="action-btn primary" onclick="showWithdrawModal()">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Withdraw Funds
+                </button>
+                <button class="action-btn" onclick="showTransferModal()">
+                    <i class="fas fa-exchange-alt"></i>
+                    Transfer
+                </button>
+                <button class="action-btn" onclick="showDepositModal()">
+                    <i class="fas fa-plus-circle"></i>
+                    Add Funds
+                </button>
+                <button class="action-btn outline" onclick="exportTransactions()">
+                    <i class="fas fa-download"></i>
+                    Export
+                </button>
+            </div>
+        </section>
+
+        <!-- Wallet Cards -->
+        <section class="wallet-cards-section">
+            <div class="cards-grid">
+                <!-- Total Balance Card -->
+                <div class="wallet-card primary">
+                    <div class="card-header">
+                        <i class="fas fa-wallet"></i>
+                        <h3>Total Balance</h3>
+                    </div>
+                    <div class="card-amount">${{ "%.2f"|format(total_balance|default(0.00)) }}</div>
+                    <div class="card-footer">
+                        <span class="trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            12.5% this month
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Available Balance Card -->
+                <div class="wallet-card success">
+                    <div class="card-header">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Available</h3>
+                    </div>
+                    <div class="card-amount">${{ "%.2f"|format(available_balance|default(0.00)) }}</div>
+                    <div class="card-footer">
+                        <span>Ready to withdraw</span>
+                    </div>
+                </div>
+
+                <!-- Pending Balance Card -->
+                <div class="wallet-card warning">
+                    <div class="card-header">
+                        <i class="fas fa-clock"></i>
+                        <h3>Pending</h3>
+                    </div>
+                    <div class="card-amount">${{ "%.2f"|format(pending_balance|default(0.00)) }}</div>
+                    <div class="card-footer">
+                        <span>Clearing in 2-3 days</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transaction History -->
+        <section class="transactions-section">
+            <div class="section-header">
+                <h2>Transaction History</h2>
+                <div class="filter-options">
+                    <select id="transactionFilter" onchange="filterTransactions(this.value)">
+                        <option value="all">All Transactions</option>
+                        <option value="earning">Earnings</option>
+                        <option value="withdrawal">Withdrawals</option>
+                        <option value="bonus">Bonuses</option>
+                        <option value="refund">Refunds</option>
+                    </select>
+                    <select id="timeFilter" onchange="filterByTime(this.value)">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="transactions-list">
+                {% if transactions %}
+                    {% for transaction in transactions %}
+                    <div class="transaction-item" data-type="{{ transaction.type|default('earning') }}" data-date="{{ transaction.date|default('2023-01-01') }}">
+                        <div class="transaction-main">
+                            <div class="transaction-info">
+                                <div class="transaction-icon {{ transaction.type|default('earning') }}">
+                                    <i class="fas fa-{{ get_transaction_icon(transaction.type|default('earning')) if get_transaction_icon is defined else 'money-bill-wave' }}"></i>
+                                </div>
+                                <div class="transaction-details">
+                                    <h4>{{ transaction.description|default('Errand Completion') }}</h4>
+                                    <div class="transaction-meta">
+                                        <span class="date">{{ transaction.date|default('2023-01-01') }}</span>
+                                        <span class="id">#{{ transaction.id|default('TRX-001') }}</span>
+                                        {% if transaction.errand_id %}
+                                        <span class="errand-id">Errand #{{ transaction.errand_id }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="transaction-amount {{ transaction.type|default('earning') }}">
+                                <span class="amount">
+                                    {{ '+' if transaction.type in ['earning', 'bonus', 'refund'] else '-' }}${{ "%.2f"|format(transaction.amount|default(0.00)) }}
+                                </span>
+                                <span class="status {{ transaction.status|default('completed') }}">
+                                    {{ transaction.status|default('completed')|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <h3>No Transactions Yet</h3>
+                        <p>Your transaction history will appear here once you start completing errands.</p>
+                        <a href="{{ url_for('runneravailable_errands') }}" class="btn-primary">
+                            <i class="fas fa-bolt"></i>
+                            Find Errands
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Payment Methods -->
+        <section class="payment-methods-section">
+            <div class="section-header">
+                <h2>Payment Methods</h2>
+                <button class="btn-primary" onclick="showAddPaymentMethod()">
+                    <i class="fas fa-plus"></i>
+                    Add Payment Method
+                </button>
+            </div>
+
+            <div class="payment-methods-list">
+                <div class="payment-method primary">
+                    <div class="method-icon">
+                        <i class="fab fa-paypal"></i>
+                    </div>
+                    <div class="method-info">
+                        <h4>PayPal</h4>
+                        <span class="method-detail">user@example.com</span>
+                    </div>
+                    <div class="method-actions">
+                        <span class="badge primary">Primary</span>
+                        <button class="btn-icon" onclick="editPaymentMethod(1)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="payment-method">
+                    <div class="method-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="method-info">
+                        <h4>Bank Transfer</h4>
+                        <span class="method-detail">**** 1234</span>
+                    </div>
+                    <div class="method-actions">
+                        <button class="btn-icon" onclick="editPaymentMethod(2)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon danger" onclick="removePaymentMethod(2)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('home_page') }}" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('runnercompleted') }}" class="nav-item">
+            <i class="fas fa-check-circle"></i>
+            <span>Completed</span>
+        </a>
+        <a href="{{ url_for('runnerhome') }}" class="nav-item">
+            <i class="fas fa-list"></i>
+            <span>Errands</span>
+        </a>
+        <a href="{{ url_for('runnerwallet') }}" class="nav-item active">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+    </nav>
+</div>
+
+<!-- Withdraw Modal -->
+<div id="withdrawModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Withdraw Funds</h3>
+            <button class="close-btn" onclick="closeWithdrawModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="withdrawAmount">Amount</label>
+                <div class="input-with-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="withdrawAmount" placeholder="0.00" min="1" step="0.01" max="{{ available_balance|default(0.00) }}">
+                </div>
+                <div class="balance-info">
+                    Available: ${{ "%.2f"|format(available_balance|default(0.00)) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="withdrawMethod">Payment Method</label>
+                <select id="withdrawMethod">
+                    <option value="paypal">PayPal</option>
+                    <option value="bank">Bank Transfer</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="closeWithdrawModal()">Cancel</button>
+            <button class="btn-primary" onclick="processWithdrawal()">Withdraw</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mobile optimization code
+document.addEventListener('DOMContentLoaded', function() {
+    // Fix scrolling issues
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.body.style.minHeight = '100vh';
+
+    // Ensure page container is scrollable
+    const page = document.getElementById('wallet-page');
+    if (page) {
+        page.style.overflowY = 'auto';
+        page.style.height = 'auto';
+    }
+
+    // Prevent accidental double-clicks on mobile
+    let lastClickTime = 0;
+    document.addEventListener('click', function(e) {
+        const currentTime = new Date().getTime();
+        if (currentTime - lastClickTime < 300) {
+            e.preventDefault();
+        }
+        lastClickTime = currentTime;
+    }, true);
+
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 100);
+    });
+
+    // Add safe area support
+    const style = document.createElement('style');
+    style.textContent = `
+        @supports (padding: max(0px)) {
+            .main-header {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+            .bottom-nav {
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    console.log('Mobile wallet page initialized');
+});
+
+// Modal Functions
+function showWithdrawModal() {
+    document.getElementById('withdrawModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeWithdrawModal() {
+    document.getElementById('withdrawModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function showTransferModal() {
+    alert('Transfer modal would open here');
+}
+
+function showDepositModal() {
+    alert('Deposit modal would open here');
+}
+
+function showAddPaymentMethod() {
+    alert('Add payment method modal would open here');
+}
+
+// Transaction Functions
+function filterTransactions(type) {
+    const transactions = document.querySelectorAll('.transaction-item');
+    transactions.forEach(transaction => {
+        if (type === 'all' || transaction.getAttribute('data-type') === type) {
+            transaction.style.display = 'flex';
+        } else {
+            transaction.style.display = 'none';
+        }
+    });
+}
+
+function filterByTime(range) {
+    // This would filter transactions by date range in a real app
+    console.log('Filtering by time:', range);
+}
+
+function exportTransactions() {
+    alert('Export feature would generate a CSV report of your transactions');
+}
+
+function processWithdrawal() {
+    const amount = document.getElementById('withdrawAmount').value;
+    const method = document.getElementById('withdrawMethod').value;
+
+    if (!amount || parseFloat(amount) <= 0) {
+        alert('Please enter a valid amount');
+        return;
+    }
+
+    if (parseFloat(amount) > parseFloat('{{ available_balance|default(0.00) }}')) {
+        alert('Insufficient funds');
+        return;
+    }
+
+    // In real app, this would process the withdrawal
+    console.log('Processing withdrawal:', amount, method);
+    alert(`Withdrawal request for $${amount} submitted!`);
+    closeWithdrawModal();
+}
+
+function editPaymentMethod(id) {
+    alert(`Edit payment method ${id}`);
+}
+
+function removePaymentMethod(id) {
+    if (confirm('Are you sure you want to remove this payment method?')) {
+        alert(`Payment method ${id} removed`);
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('withdrawModal');
+    if (event.target === modal) {
+        closeWithdrawModal();
+    }
+}
+
+// Add some sample animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wallet-card, .transaction-item {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .wallet-card:nth-child(1) { animation-delay: 0.1s; }
+        .wallet-card:nth-child(2) { animation-delay: 0.2s; }
+        .wallet-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .transaction-item:nth-child(1) { animation-delay: 0.1s; }
+        .transaction-item:nth-child(2) { animation-delay: 0.2s; }
+        .transaction-item:nth-child(3) { animation-delay: 0.3s; }
+        .transaction-item:nth-child(4) { animation-delay: 0.4s; }
+    `;
+    document.head.appendChild(style);
+
+    // Add hover effects to transaction items
+    const transactions = document.querySelectorAll('.transaction-item');
+    transactions.forEach(transaction => {
+        transaction.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+        });
+
+        transaction.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

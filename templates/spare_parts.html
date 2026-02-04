@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spare Parts - ErrandConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --success: #8BC34A;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile - UPDATED WITH SERVICE INFO */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ESTIMATED FEE DISPLAY ON FIXED BAR - RIGHT SIDE */
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header - SIMPLIFIED (just logo and title) */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* Part Items */
+        .part-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        .part-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .part-row .input-with-icon {
+            flex: 1;
+        }
+
+        .part-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .remove-part {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            touch-action: manipulation;
+        }
+
+        .remove-part:active {
+            transform: scale(0.95);
+        }
+
+        .add-part {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        .add-part:active {
+            background: var(--primary-dark);
+            transform: scale(0.98);
+        }
+
+        /* Budget Display - UPDATED */
+        .budget-display {
+            background: var(--gradient);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .budget-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .budget-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* Device Info Grid - Mobile Optimized */
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .device-info-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Preference Grid - Mobile Optimized */
+        .preference-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .preference-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* NEW: View Route Button */
+        .view-route-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+            touch-action: manipulation;
+            transition: var(--transition);
+        }
+
+        .view-route-btn:active {
+            transform: scale(0.98);
+            background: var(--primary-dark);
+        }
+
+        /* NEW: Expanding Input for Other Device Type */
+        .expanding-input {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        /* NEW: Map Modal */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            touch-action: manipulation;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+            line-height: 1.4;
+        }
+
+        /* Service Phone Row - Added for Pricing and Contact */
+        .service-phone-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .service-phone-row .form-group {
+            margin-bottom: 0;
+        }
+
+        /* Store/Supplier Address Section */
+        .store-address-section {
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .store-address-section h3 {
+            font-size: 14px;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .store-address-section h3 i {
+            color: var(--primary);
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(12px, env(safe-area-inset-top));
+                height: calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .part-item {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .part-row {
+                flex: 1;
+            }
+
+            .part-actions {
+                margin-top: 0;
+                margin-left: 10px;
+            }
+
+            .device-info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .preference-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            /* Stack the two columns on very small screens */
+            .service-phone-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile WITH SERVICE INFO AND FEE -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div class="service-text">
+                <h3>Spare Parts</h3>
+                <p>Find and deliver the parts you need</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Fee:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
+    </div>
+
+    <!-- NEW: Map Modal for Route Viewing -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-route"></i> Delivery Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3 id="routeTitle">Store to Delivery Route</h3>
+                <p id="routeDescription">Route from store/supplier to delivery address</p>
+                <div id="routeDetails" style="margin-top: 15px; text-align: left; font-size: 13px; width: 100%; max-width: 300px;">
+                    <p><strong>Store/Supplier:</strong> <span id="mapSupplier">Not specified</span></p>
+                    <p><strong>Delivery Address:</strong> <span id="mapDelivery">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTransport">-</div>
+                    <div class="info-label">Transport Mode</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <!-- Simplified Mobile Header (just company branding) -->
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Spare Parts Service</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <!-- REMOVED service-indicator from here since it's now on fixed bar -->
+
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <form method="post" action="{{ url_for('create_spare_parts_errand') }}" id="sparePartsForm">
+                    <!-- Vehicle/Device Information -->
+                    <h2><i class="fas fa-car"></i> Vehicle/Device Information</h2>
+
+                    <div class="device-info-grid">
+                        <div class="device-info-item">
+                            <label for="device_type">Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-cog"></i>
+                                <select id="device_type" name="device_type" required onchange="toggleOtherDeviceInput(); updateEstimatedFee(); updateProgress()">
+                                    <option value="">Select type</option>
+                                    <option value="car">Car/Automobile</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                    <option value="bicycle">Bicycle</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="appliance">Home Appliance</option>
+                                    <option value="electronics">Electronics</option>
+                                    <option value="computer">Computer Hardware</option>
+                                    <option value="other">Other (Specify below)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Expanding input for Other device type -->
+                        <div id="other_device_input" class="device-info-item expanding-input">
+                            <label for="other_device_specify">Specify Device/Vehicle</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-edit"></i>
+                                <input type="text" id="other_device_specify" name="other_device_specify" placeholder="e.g., Boat, Agricultural equipment, Industrial machine" oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="device-info-item">
+                            <label for="make">Make/Brand</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-tag"></i>
+                                <input type="text" id="make" name="make" placeholder="e.g., Toyota, Samsung, Dell" required oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="device-info-item">
+                            <label for="model">Model</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-layer-group"></i>
+                                <input type="text" id="model" name="model" placeholder="e.g., Camry, Galaxy S23" required oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="device-info-item">
+                            <label for="year">Year</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                                <input type="number" id="year" name="year" placeholder="e.g., 2020" min="1900" max="2030" oninput="updateProgress()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Parts Required -->
+                    <h2><i class="fas fa-list"></i> Parts Required</h2>
+
+                    <div class="form-group">
+                        <label>Parts Needed</label>
+                        <div class="info-tip">
+                            <i class="fas fa-info-circle"></i> Add each part you need. Include part numbers if available.
+                        </div>
+                        <div id="parts-container">
+                            <div class="part-item">
+                                <div class="part-row">
+                                    <div class="input-with-icon" style="flex: 2;">
+                                        <i class="fas fa-cog"></i>
+                                        <input type="text" name="part_names[]" placeholder="Part name" required oninput="updateEstimatedFee(); updateProgress()">
+                                    </div>
+                                    <div class="input-with-icon" style="flex: 1;">
+                                        <i class="fas fa-sort-amount-up"></i>
+                                        <input type="number" name="quantities[]" placeholder="Qty" min="1" required oninput="updateEstimatedFee(); updateProgress()">
+                                    </div>
+                                </div>
+                                <div class="part-row">
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-hashtag"></i>
+                                        <input type="text" name="part_numbers[]" placeholder="Part number" oninput="updateProgress()">
+                                    </div>
+                                </div>
+                                <div class="part-actions">
+                                    <button type="button" class="remove-part" onclick="removePart(this)">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-part" onclick="addPart()">
+                            <i class="fas fa-plus"></i> Add Another Part
+                        </button>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Part Specifications -->
+                    <h2><i class="fas fa-sliders-h"></i> Part Specifications</h2>
+
+                    <div class="budget-display">
+                        <div class="budget-label">Budget Range:</div>
+                        <div class="budget-value" id="budget_display">Flexible</div>
+                    </div>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="urgency_level">Urgency Level</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <select id="urgency_level" name="urgency_level" required onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="low">Low - Can wait</option>
+                                    <option value="medium">Medium - Within a week</option>
+                                    <option value="high">High - Within 2-3 days</option>
+                                    <option value="urgent">Urgent - Needed today</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="budget_range">Budget Range</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                                <select id="budget_range" name="budget_range" onchange="updateBudgetDisplay(); updateEstimatedFee(); updateProgress()">
+                                    <option value="flexible">Flexible</option>
+                                    <option value="under_50">Under $50</option>
+                                    <option value="50_100">$50 - $100</option>
+                                    <option value="100_200">$100 - $200</option>
+                                    <option value="200_500">$200 - $500</option>
+                                    <option value="500_plus">$500+</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="quality_preference">Quality Preference</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-award"></i>
+                                <select id="quality_preference" name="quality_preference" required onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="oem">OEM (Original Equipment)</option>
+                                    <option value="aftermarket">Aftermarket</option>
+                                    <option value="used">Used/Refurbished</option>
+                                    <option value="no_preference">No preference</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Installation & Service -->
+                    <h2><i class="fas fa-wrench"></i> Installation & Service</h2>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="installation_needed">Installation Needed?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-tools"></i>
+                                <select id="installation_needed" name="installation_needed" onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="no">No, just purchase parts</option>
+                                    <option value="yes">Yes, install the parts</option>
+                                    <option value="maybe">Maybe, depending on complexity</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="warranty_required">Warranty Required?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-shield-alt"></i>
+                                <select id="warranty_required" name="warranty_required" onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="no">No warranty needed</option>
+                                    <option value="yes">Yes, with warranty</option>
+                                    <option value="extended">Extended warranty preferred</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Supplier Preferences - UPDATED WITH STORE ADDRESS -->
+                    <h2><i class="fas fa-store"></i> Store/Supplier Information</h2>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="preferred_supplier">Preferred Store/Supplier Name</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-store-alt"></i>
+                                <input type="text" id="preferred_supplier" name="preferred_supplier" placeholder="e.g., AutoZone, Best Buy, Local Dealer" oninput="updateProgress()">
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <label for="compatibility_verification">Compatibility Check</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-check-circle"></i>
+                                <select id="compatibility_verification" name="compatibility_verification" onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="yes">Yes, verify compatibility</option>
+                                    <option value="no">No, I'm sure about compatibility</option>
+                                    <option value="expert">Let expert verify</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Store/Supplier Address Section -->
+                    <div class="store-address-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Store/Supplier Address (Required for Route)</h3>
+                        <div class="info-tip">
+                            <i class="fas fa-info-circle"></i> This address will be used as the starting point for the delivery route.
+                        </div>
+                        <div class="form-group">
+                            <div class="input-with-icon">
+                                <i class="fas fa-location-dot"></i>
+                                <input type="text" id="store_address" name="store_address" placeholder="Store/supplier full address" required oninput="updateProgress(); updateEstimatedFee()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Delivery Information -->
+                    <h2><i class="fas fa-truck"></i> Delivery Information</h2>
+
+                    <div class="form-group">
+                        <label for="delivery_address">Delivery Address</label>
+                        <div class="info-tip">
+                            <i class="fas fa-info-circle"></i> This is where the parts will be delivered to.
+                        </div>
+                        <div class="input-with-icon">
+                            <i class="fas fa-home"></i>
+                            <input type="text" id="delivery_address" name="delivery_address" placeholder="Where to deliver the parts?" required oninput="updateEstimatedFee(); updateProgress()">
+                        </div>
+
+                        <!-- NEW: View Route Button -->
+                        <button type="button" class="view-route-btn" onclick="showRouteMap()">
+                            <i class="fas fa-route"></i> View Route Map
+                        </button>
+                    </div>
+
+                    <div class="preference-grid">
+                        <div class="preference-item">
+                            <label for="delivery_timeframe">Delivery Timeframe</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-clock"></i>
+                                <select id="delivery_timeframe" name="delivery_timeframe" onchange="updateEstimatedFee(); updateProgress()">
+                                    <option value="asap">As soon as possible</option>
+                                    <option value="today">Today</option>
+                                    <option value="tomorrow">Tomorrow</option>
+                                    <option value="this_week">This week</option>
+                                    <option value="flexible">Flexible</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Additional Information - REMOVED DELIVERY INSTRUCTIONS -->
+                    <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-barcode"></i>
+                            <input type="text" id="vehicle_vin" name="vehicle_vin" placeholder="VIN Number (for vehicles)" oninput="updateProgress()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                            <textarea id="specific_requirements" name="specific_requirements" rows="3" placeholder="Any specific requirements or notes about the parts..." oninput="updateProgress()"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- REMOVED: Delivery or handling instructions box -->
+
+                    <!-- ADDED: Pricing and Contact Section -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+
+                    <div class="service-phone-row">
+                        <!-- Service Price -->
+                        <div class="form-group">
+                            <label for="service_price">Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price"
+                                       placeholder="Your price"
+                                       step="0.01" min="0.50"
+                                       inputmode="decimal" required>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone_number" name="phone_number"
+                                       placeholder="Phone number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Create Spare Parts Errand
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Prevent pull-to-refresh on mobile
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                if (window.scrollY === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+        });
+
+        // NEW: Toggle Other Device Input
+        function toggleOtherDeviceInput() {
+            const otherInput = document.getElementById('other_device_input');
+            if (document.getElementById('device_type').value === 'other') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('other_device_specify')?.focus(), 300);
+            } else {
+                otherInput.classList.remove('expanded');
+            }
+        }
+
+        // NEW: Show Route Map - UPDATED TO USE STORE ADDRESS
+        function showRouteMap() {
+            const storeAddress = document.getElementById('store_address').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+            const supplierName = document.getElementById('preferred_supplier').value;
+
+            // Validate inputs
+            if (!storeAddress || storeAddress.trim() === '') {
+                alert('Please enter the store/supplier address first.');
+                document.getElementById('store_address').focus();
+                return;
+            }
+
+            if (!deliveryAddress || deliveryAddress.trim() === '') {
+                alert('Please enter the delivery address first.');
+                document.getElementById('delivery_address').focus();
+                return;
+            }
+
+            // Create display name for supplier
+            let supplierDisplay = storeAddress;
+            if (supplierName && supplierName.trim() !== '') {
+                supplierDisplay = `${supplierName} - ${storeAddress}`;
+            }
+
+            // Update modal content
+            document.getElementById('mapSupplier').textContent = storeAddress;
+            document.getElementById('mapDelivery').textContent = deliveryAddress;
+
+            // Calculate route details
+            calculateAndDisplayRoute(storeAddress, deliveryAddress);
+
+            // Show modal
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // NEW: Calculate Route Details - IMPROVED
+        function calculateAndDisplayRoute(from, to) {
+            // Always show some route information
+            const fromLength = from.length;
+            const toLength = to.length;
+
+            // Generate realistic distance based on address complexity
+            const baseDistance = 2.5 + (Math.abs(fromLength - toLength) / 100);
+            const randomFactor = 0.7 + (Math.random() * 1.6);
+            const distance = Math.max(0.5, Math.min(baseDistance * randomFactor, 30)).toFixed(1);
+
+            // Calculate estimated time based on distance
+            let estimatedMinutes;
+            const distanceNum = parseFloat(distance);
+
+            // Different time calculations for different distances
+            if (distanceNum <= 2) {
+                // Local delivery: 8-15 minutes per km in urban areas
+                estimatedMinutes = Math.round(distanceNum * 12 + Math.random() * 10);
+            } else if (distanceNum <= 10) {
+                // Medium distance: 6-10 minutes per km
+                estimatedMinutes = Math.round(distanceNum * 8 + Math.random() * 15);
+            } else {
+                // Long distance: 4-7 minutes per km (highways)
+                estimatedMinutes = Math.round(distanceNum * 5.5 + Math.random() * 20);
+            }
+
+            // Ensure minimum and maximum reasonable times
+            estimatedMinutes = Math.max(10, Math.min(estimatedMinutes, 120));
+
+            // Determine transport mode based on parts, distance, and urgency
+            const partsCount = getPartCount();
+            const totalQuantity = getTotalQuantity();
+            const urgencyLevel = document.getElementById('urgency_level').value;
+            let transportMode = 'Car'; // Default to car for spare parts
+
+            // Customize based on requirements
+            if (distanceNum <= 3 && totalQuantity <= 2 && partsCount <= 2) {
+                transportMode = 'Motorcycle';
+            }
+
+            if (distanceNum <= 1 && totalQuantity <= 1 && partsCount === 1) {
+                transportMode = 'Bicycle';
+            }
+
+            // Urgent deliveries always use car
+            if (urgencyLevel === 'urgent') {
+                transportMode = 'Car (Urgent)';
+            }
+
+            // Update modal display
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedMinutes + ' min';
+            document.getElementById('mapTransport').textContent = transportMode;
+
+            // Update route description
+            const fromShort = from.split(',')[0].substring(0, 30) + (from.split(',')[0].length > 30 ? '...' : '');
+            const toShort = to.split(',')[0].substring(0, 30) + (to.split(',')[0].length > 30 ? '...' : '');
+            document.getElementById('routeDescription').textContent = `Route from ${fromShort} to ${toShort}`;
+        }
+
+        // NEW: Close Map
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function initializeForm() {
+            // Update fee when inputs change
+            const feeInputs = ['device_type', 'budget_range', 'urgency_level', 'quality_preference', 'installation_needed', 'store_address', 'delivery_address', 'delivery_timeframe'];
+            feeInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', updateEstimatedFee);
+                    element.addEventListener('input', updateEstimatedFee);
+                }
+            });
+
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Initial calculations
+            updateBudgetDisplay();
+            updateEstimatedFee();
+        }
+
+        // Add part
+        function addPart() {
+            const container = document.getElementById('parts-container');
+            const newPart = document.createElement('div');
+            newPart.className = 'part-item';
+            newPart.innerHTML = `
+                <div class="part-row">
+                    <div class="input-with-icon" style="flex: 2;">
+                        <i class="fas fa-cog"></i>
+                        <input type="text" name="part_names[]" placeholder="Part name" required oninput="updateEstimatedFee(); updateProgress()">
+                    </div>
+                    <div class="input-with-icon" style="flex: 1;">
+                        <i class="fas fa-sort-amount-up"></i>
+                        <input type="number" name="quantities[]" placeholder="Qty" min="1" required oninput="updateEstimatedFee(); updateProgress()">
+                    </div>
+                </div>
+                <div class="part-row">
+                    <div class="input-with-icon">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" name="part_numbers[]" placeholder="Part number" oninput="updateProgress()">
+                    </div>
+                </div>
+                <div class="part-actions">
+                    <button type="button" class="remove-part" onclick="removePart(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newPart);
+
+            // Add animation
+            newPart.style.opacity = '0';
+            newPart.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                newPart.style.transition = 'all 0.3s ease';
+                newPart.style.opacity = '1';
+                newPart.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Focus on new part
+            setTimeout(() => {
+                newPart.querySelector('input[name="part_names[]"]').focus();
+            }, 300);
+        }
+
+        // Remove part
+        function removePart(button) {
+            const part = button.closest('.part-item');
+            part.style.transition = 'all 0.3s ease';
+            part.style.opacity = '0';
+            part.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                part.remove();
+                updateEstimatedFee();
+            }, 300);
+        }
+
+        // Calculate part count
+        function getPartCount() {
+            return document.querySelectorAll('input[name="part_names[]"]').length;
+        }
+
+        // Calculate quantity count
+        function getTotalQuantity() {
+            let total = 0;
+            document.querySelectorAll('input[name="quantities[]"]').forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            return total;
+        }
+
+        // Update budget display
+        function updateBudgetDisplay() {
+            const budgetRange = document.getElementById('budget_range').value;
+            const budgetLabels = {
+                'flexible': 'Flexible',
+                'under_50': 'Under $50',
+                '50_100': '$50 - $100',
+                '100_200': '$100 - $200',
+                '200_500': '$200 - $500',
+                '500_plus': '$500+'
+            };
+
+            document.getElementById('budget_display').textContent = budgetLabels[budgetRange];
+
+            // Add animation
+            const budgetElement = document.querySelector('.budget-display');
+            budgetElement.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                budgetElement.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Calculate base fee based on device type - UPDATED with store address consideration
+        function calculateDeviceTypeFee(deviceType) {
+            const fees = {
+                'car': 15.00,
+                'motorcycle': 10.00,
+                'truck': 20.00,
+                'appliance': 8.00,
+                'electronics': 7.00,
+                'computer': 6.00,
+                'bicycle': 5.00,
+                'other': 12.00  // Higher base fee for custom/other devices
+            };
+            return fees[deviceType] || 8.00;
+        }
+
+        // NEW: Calculate distance-based fee
+        function calculateDistanceFee() {
+            const storeAddress = document.getElementById('store_address').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+
+            if (!storeAddress || !deliveryAddress) {
+                return 0;
+            }
+
+            // Simulate distance calculation for fee
+            const storeLength = storeAddress.length;
+            const deliveryLength = deliveryAddress.length;
+            const baseDistance = Math.abs(storeLength - deliveryLength) / 50;
+
+            // Base fee: $0.50 per km (minimum $2.00, maximum $15.00)
+            const distanceFee = Math.min(Math.max(baseDistance * 0.5, 2.00), 15.00);
+            return distanceFee;
+        }
+
+        // Calculate urgency fee
+        function calculateUrgencyFee(urgencyLevel) {
+            const fees = {
+                'low': 0.00,
+                'medium': 2.00,
+                'high': 5.00,
+                'urgent': 10.00
+            };
+            return fees[urgencyLevel] || 0.00;
+        }
+
+        // Calculate quality premium
+        function calculateQualityPremium(qualityPreference) {
+            const premiums = {
+                'oem': 5.00,
+                'aftermarket': 1.00,
+                'used': 0.00,
+                'no_preference': 0.50
+            };
+            return premiums[qualityPreference] || 0.00;
+        }
+
+        // Calculate installation fee
+        function calculateInstallationFee(installationNeeded) {
+            if (installationNeeded === 'yes') return 15.00;
+            if (installationNeeded === 'maybe') return 5.00;
+            return 0.00;
+        }
+
+        // Calculate warranty fee
+        function calculateWarrantyFee(warrantyRequired) {
+            if (warrantyRequired === 'yes') return 3.00;
+            if (warrantyRequired === 'extended') return 5.00;
+            return 0.00;
+        }
+
+        // Calculate compatibility check fee
+        function calculateCompatibilityFee(compatibilityVerification) {
+            if (compatibilityVerification === 'yes') return 2.00;
+            if (compatibilityVerification === 'expert') return 5.00;
+            return 0.00;
+        }
+
+        // Calculate delivery fee based on timeframe
+        function calculateDeliveryFee(deliveryTimeframe) {
+            const fees = {
+                'asap': 10.00,
+                'today': 8.00,
+                'tomorrow': 5.00,
+                'this_week': 2.00,
+                'flexible': 0.00
+            };
+            return fees[deliveryTimeframe] || 0.00;
+        }
+
+        // Calculate part complexity fee
+        function calculatePartComplexityFee(partCount, totalQuantity) {
+            // Base fee per part
+            const basePartFee = 3.00;
+
+            // Complexity multiplier
+            let complexityMultiplier = 1.0;
+            if (partCount > 3) complexityMultiplier = 1.2;
+            if (partCount > 5) complexityMultiplier = 1.5;
+
+            return (basePartFee * partCount * complexityMultiplier) + (totalQuantity * 0.5);
+        }
+
+        // Update estimated fee - UPDATED with distance fee
+        function updateEstimatedFee() {
+            const deviceType = document.getElementById('device_type').value;
+            const urgencyLevel = document.getElementById('urgency_level').value;
+            const qualityPreference = document.getElementById('quality_preference').value;
+            const installationNeeded = document.getElementById('installation_needed').value;
+            const warrantyRequired = document.getElementById('warranty_required').value;
+            const compatibilityVerification = document.getElementById('compatibility_verification').value;
+            const deliveryTimeframe = document.getElementById('delivery_timeframe').value;
+
+            const partCount = getPartCount();
+            const totalQuantity = getTotalQuantity();
+
+            // Calculate all fees
+            const deviceFee = calculateDeviceTypeFee(deviceType);
+            const urgencyFee = calculateUrgencyFee(urgencyLevel);
+            const qualityFee = calculateQualityPremium(qualityPreference);
+            const installationFee = calculateInstallationFee(installationNeeded);
+            const warrantyFee = calculateWarrantyFee(warrantyRequired);
+            const compatibilityFee = calculateCompatibilityFee(compatibilityVerification);
+            const deliveryFee = calculateDeliveryFee(deliveryTimeframe);
+            const partComplexityFee = calculatePartComplexityFee(partCount, totalQuantity);
+            const distanceFee = calculateDistanceFee();
+
+            // Total fee (minimum $5.00)
+            const totalFee = Math.max(
+                deviceFee + urgencyFee + qualityFee + installationFee +
+                warrantyFee + compatibilityFee + deliveryFee +
+                partComplexityFee + distanceFee,
+                5.00
+            );
+
+            // Update FIXED BAR display
+            document.getElementById('estimated_fee').textContent = '$' + totalFee.toFixed(2);
+
+            // Visual feedback on the fixed bar
+            const feeElement = document.getElementById('estimated_fee');
+            feeElement.style.transform = 'scale(1.1)';
+            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+        }
+
+        // Haptic feedback simulation
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation
+        document.getElementById('sparePartsForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent actual submission for demo
+
+            // Validate required fields
+            const deviceType = document.getElementById('device_type').value.trim();
+            const make = document.getElementById('make').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const storeAddress = document.getElementById('store_address').value.trim();
+            const deliveryAddress = document.getElementById('delivery_address').value.trim();
+            const parts = document.querySelectorAll('input[name="part_names[]"]');
+            const otherDeviceSpecify = document.getElementById('other_device_specify').value.trim();
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const phoneNumber = document.getElementById('phone_number').value.trim();
+
+            // Check for "other" device type specification
+            if (deviceType === 'other' && !otherDeviceSpecify) {
+                vibrate();
+                showError('Please specify your device/vehicle type in the "Other (Specify below)" field.');
+                document.getElementById('other_device_specify').focus();
+                return false;
+            }
+
+            let hasParts = false;
+            parts.forEach(part => {
+                if (part.value.trim()) hasParts = true;
+            });
+
+            // Check required fields
+            if (!deviceType || !make || !model || !storeAddress || !deliveryAddress || !hasParts || !servicePrice || !phoneNumber) {
+                vibrate();
+                showError('Please fill in all required fields: Device type, make, model, store address, delivery address, service price, phone number, and at least one part.');
+                return false;
+            }
+
+            // Validate service price
+            const servicePriceNum = parseFloat(servicePrice);
+            if (servicePriceNum < 0.50) {
+                vibrate();
+                showError('Service price must be at least $0.50.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            // Show success summary
+            const estimatedFee = document.getElementById('estimated_fee').textContent;
+            const partCount = getPartCount();
+            const urgencyLevel = document.getElementById('urgency_level').value;
+            const budgetDisplay = document.getElementById('budget_display').textContent;
+            const supplierName = document.getElementById('preferred_supplier').value || 'No specific store';
+
+            const summary = `
+✅ Spare parts errand created!
+
+⚙️ Device: ${make} ${model} (${deviceType === 'other' ? otherDeviceSpecify : deviceType})
+🏪 Store: ${supplierName}
+📍 Store Address: ${storeAddress}
+🚚 Delivery To: ${deliveryAddress}
+📦 Parts: ${partCount} different parts
+⏰ Urgency: ${urgencyLevel}
+💰 Budget: ${budgetDisplay}
+💸 Estimated Fee: ${estimatedFee}
+💵 Your Price: $${servicePriceNum.toFixed(2)}
+📱 Contact: ${phoneNumber}
+
+Our agent will visit the store at the specified address, purchase the parts, and deliver them to you.
+
+Thank you for using ErrandConnect!
+            `;
+
+            alert(summary);
+            vibrate();
+
+            // In a real mobile app, you would submit the form here
+            // this.submit();
+            return true;
+        });
+
+        function showError(message) {
+            // Add shake animation to form
+            const form = document.getElementById('sparePartsForm');
+            form.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                form.style.animation = '';
+            }, 500);
+
+            alert(message);
+        }
+
+        // Shake animation for form validation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

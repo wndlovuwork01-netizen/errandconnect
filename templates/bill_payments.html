@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ErrandConnect - Bill Payment Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --accent-dark: #F57C00;
+            --success: #8BC34A;
+            --danger: #f44336;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-friendly container */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Service Bar for Mobile */
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 20px;
+            background: var(--gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text {
+            min-width: 0;
+        }
+
+        .service-text h3 {
+            color: var(--primary-dark);
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            color: var(--dark);
+            margin: 0;
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .fee-amount {
+            font-size: 16px;
+            font-weight: 700;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* Main content area */
+        .content-wrapper {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .service-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            backdrop-filter: blur(10px);
+            margin-top: 2px;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 20px 0 15px;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+
+        /* AUTO-SLIDING TEXT FOR MOBILE - ADDED FROM PREVIOUS VERSION */
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="password"],
+        input[type="search"],
+        input[type="url"],
+        textarea {
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: text;
+        }
+
+        /* Auto-sliding text animation */
+        @keyframes slideTextLeft {
+            0% {
+                transform: translateX(0);
+            }
+            10% {
+                transform: translateX(0);
+            }
+            90% {
+                transform: translateX(calc(-100% + 100px));
+            }
+            100% {
+                transform: translateX(calc(-100% + 100px));
+            }
+        }
+
+        .input-with-icon input.sliding-text,
+        .input-with-icon textarea.sliding-text {
+            animation: slideTextLeft 15s linear infinite;
+            animation-play-state: running;
+            padding-right: 40px;
+        }
+
+        .input-with-icon input.sliding-text:hover,
+        .input-with-icon textarea.sliding-text:hover,
+        .input-with-icon input.sliding-text:focus,
+        .input-with-icon textarea.sliding-text:focus {
+            animation-play-state: paused;
+        }
+
+        textarea {
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            overflow-y: auto;
+            min-height: 60px;
+            max-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            white-space: pre-wrap;
+            overflow-x: hidden;
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 2px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        /* END AUTO-SCROLLING FIX */
+
+        /* Collection row for side-by-side inputs */
+        .collection-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Bill Items - IMPROVED FROM PREVIOUS VERSION */
+        .bill-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        .bill-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .bill-row .input-with-icon {
+            flex: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .remove-item {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .add-item {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .add-item:hover {
+            background: var(--primary-dark);
+        }
+
+        /* URGENCY ROW - FROM PREVIOUS VERSION */
+        .urgency-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        /* Payment Timeline Indicator - FROM PREVIOUS VERSION */
+        .payment-timeline {
+            background: var(--light);
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 10px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline-icon {
+            font-size: 18px;
+            color: var(--primary);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .timeline-text h4 {
+            margin: 0;
+            font-size: 13px;
+            color: var(--primary-dark);
+        }
+
+        .timeline-text p {
+            margin: 2px 0 0;
+            font-size: 11px;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        /* Payment Details Grid */
+        .payment-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        /* Delivery row */
+        .delivery-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* File Upload - UPDATED TO MATCH OTHER SERVICES */
+        .file-upload-wrapper {
+            position: relative;
+        }
+
+        .file-upload-input {
+            width: 100%;
+            padding: 14px 14px 14px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: white;
+            cursor: pointer;
+        }
+
+        .file-upload-input:hover {
+            border-color: var(--primary);
+        }
+
+        .file-upload-input i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .file-upload-text {
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        .file-size-note {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            display: block;
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--primary-dark);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        /* View Map Button */
+        .view-map-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* Service Type Indicator */
+        .service-type-indicator {
+            background: var(--light);
+            border: 1px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .service-type-icon {
+            font-size: 20px;
+            color: var(--primary);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .service-type-text h4 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        .service-type-text p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        /* Info Tip */
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+            color: var(--dark);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .info-tip i {
+            color: var(--primary);
+            margin-top: 2px;
+        }
+
+        /* Urgency Badge */
+        .urgency-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        /* Payment Method Selector */
+        .payment-method-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary-light);
+        }
+
+        .payment-method.active {
+            border-color: var(--success);
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .payment-method i {
+            font-size: 20px;
+            color: var(--success);
+            margin-bottom: 5px;
+        }
+
+        /* Bill Type Selector - UPDATED FROM PREVIOUS VERSION */
+        .bill-type-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .bill-type {
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .bill-type:hover {
+            border-color: var(--primary-light);
+        }
+
+        .bill-type.active {
+            border-color: var(--primary);
+            background: rgba(76, 175, 80, 0.05);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+        }
+
+        .bill-type i {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .bill-type span {
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+        }
+
+        /* Biller Suggestions */
+        .biller-suggestions {
+            margin-top: 10px;
+        }
+
+        .biller-suggestion-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .biller-tag {
+            background: var(--light);
+            border: 1px solid var(--primary-light);
+            border-radius: 15px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .biller-tag:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Expanding Inputs */
+        .expanding-input {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .expanding-input.expanded {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        /* Amount Display */
+        .amount-display {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .total-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .total-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Map Modal - Mobile Optimized */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .map-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            background: var(--gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-placeholder {
+            padding: 30px 15px;
+            text-align: center;
+            background: #f5f5f5;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .map-placeholder i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .map-placeholder h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .map-placeholder p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .map-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        /* Total Bill Amount Display - FROM PREVIOUS VERSION */
+        .total-bill-display {
+            background: var(--gradient);
+            color: white;
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .total-bill-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .total-bill-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* iOS Safe Areas */
+        @supports (padding: max(0px)) {
+            .fixed-service-bar {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(10px, env(safe-area-inset-top));
+                height: calc(60px + env(safe-area-inset-top));
+            }
+
+            .content-wrapper {
+                padding-top: calc(70px + env(safe-area-inset-top));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .mobile-header, .form-section {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+            }
+
+            .submit-btn {
+                margin-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                margin: 0 auto;
+            }
+
+            .fixed-service-bar {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .bill-type-selector {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .payment-method-selector {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .delivery-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .collection-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .payment-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .urgency-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .bill-item {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .bill-row {
+                flex: 1;
+            }
+
+            .item-actions {
+                margin-top: 0;
+                margin-left: 10px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 15px;
+            }
+
+            input, select, textarea {
+                font-size: 14px;
+                padding: 12px 12px 12px 36px;
+            }
+
+            .estimated-fee-display {
+                min-width: 90px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            .fee-amount {
+                font-size: 14px;
+            }
+
+            .bill-type-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-method-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Adjust collection-row for very small screens */
+            .collection-row {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Service Bar for Mobile -->
+    <div class="fixed-service-bar">
+        <div class="service-info">
+            <div class="service-icon">
+                <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <div class="service-text">
+                <h3>Bill Payment Service</h3>
+                <p>Secure bill payments</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Service Fee:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-content">
+            <div class="map-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Payment Route</h3>
+                <button class="close-map" onclick="closeMap()">×</button>
+            </div>
+            <div class="map-placeholder">
+                <i class="fas fa-route"></i>
+                <h3>Payment Location Route</h3>
+                <p>Map showing route to payment location</p>
+                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
+                    <p><strong>Pickup:</strong> <span id="mapPickupLocation">Your location</span></p>
+                    <p><strong>Payment Location:</strong> <span id="mapPaymentAddress">Not specified</span></p>
+                </div>
+            </div>
+            <div class="map-info">
+                <div class="info-item">
+                    <div class="info-value" id="mapDistance">0 km</div>
+                    <div class="info-label">Distance</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapTime">0 min</div>
+                    <div class="info-label">Est. Time</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="mapPaymentType">-</div>
+                    <div class="info-label">Payment Type</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Bill Payment Service</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+
+                <form method="post" action="{{ url_for('create_bill_payment_errand') }}" id="billPaymentForm">
+                    <!-- Bill Type Selection - FROM PREVIOUS VERSION -->
+                    <h2><i class="fas fa-tags"></i> Bill Type</h2>
+                    <div class="bill-type-selector">
+                        <div class="bill-type active" onclick="selectBillType('utility', this)">
+                            <i class="fas fa-bolt"></i>
+                            <span>Utilities</span>
+                        </div>
+                        <div class="bill-type" onclick="selectBillType('telecom', this)">
+                            <i class="fas fa-wifi"></i>
+                            <span>Telecom</span>
+                        </div>
+                        <div class="bill-type" onclick="selectBillType('government', this)">
+                            <i class="fas fa-landmark"></i>
+                            <span>Government</span>
+                        </div>
+                        <div class="bill-type" onclick="selectBillType('credit', this)">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Credit Card</span>
+                        </div>
+                        <div class="bill-type" onclick="selectBillType('school', this)">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>School Fees</span>
+                        </div>
+                        <div class="bill-type" onclick="selectBillType('other', this)">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Other Bills</span>
+                        </div>
+                    </div>
+
+                    <!-- Bill Information - FROM PREVIOUS VERSION -->
+                    <h2><i class="fas fa-receipt"></i> Bill Information</h2>
+
+                    <div class="info-tip">
+                        <i class="fas fa-info-circle"></i> Add each bill with account number and amount
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bills to Pay</label>
+                        <div id="bills-container">
+                            <div class="bill-item">
+                                <div class="bill-row">
+                                    <div class="input-with-icon" style="flex: 2;">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <select name="bill_types[]" required onchange="toggleOtherBillInput(this, 0)">
+                                            <option value="">Select bill type</option>
+                                            <option value="electricity">Electricity</option>
+                                            <option value="water">Water</option>
+                                            <option value="internet">Internet</option>
+                                            <option value="phone">Phone/Mobile</option>
+                                            <option value="cable">Cable TV</option>
+                                            <option value="rent">Rent</option>
+                                            <option value="mortgage">Mortgage</option>
+                                            <option value="credit_card">Credit Card</option>
+                                            <option value="loan">Loan Payment</option>
+                                            <option value="insurance">Insurance</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-with-icon" style="flex: 1;">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <input type="number" name="amounts[]" placeholder="Amount" step="0.01" required>
+                                    </div>
+                                </div>
+                                <div class="bill-row">
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-hashtag"></i>
+                                        <input type="text" name="account_numbers[]" placeholder="Account Number" required>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <button type="button" class="remove-item" onclick="removeBill(this)">×</button>
+                                </div>
+                            </div>
+                            <div id="other_bill_input_0" class="expanding-input">
+                                <div class="input-with-icon" style="margin-top: 6px;">
+                                    <i class="fas fa-edit"></i>
+                                    <input type="text" id="other_bill_name_0" name="other_bill_names[]" placeholder="Specify bill type">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-item" onclick="addBill()">
+                            <i class="fas fa-plus"></i> Add Another Bill
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-building"></i>
+                            <input type="text" id="service_provider" name="service_provider" placeholder="Service Provider (e.g., XYZ Electric Company)" oninput="updateMapDetails()">
+                        </div>
+                    </div>
+
+                    <!-- Total Bill Amount Display - FROM PREVIOUS VERSION -->
+                    <div class="total-bill-display">
+                        <div class="total-bill-label">Total Bill Amount:</div>
+                        <div class="total-bill-value">$<span id="total_display">0.00</span></div>
+                    </div>
+
+                    <!-- Urgency Row - FROM PREVIOUS VERSION -->
+                    <div class="urgency-row">
+                        <div class="input-with-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                            <input type="date" id="due_date" name="due_date" required onchange="updatePaymentTimeline()">
+                        </div>
+                        <div class="input-with-icon">
+                            <i class="fas fa-clock"></i>
+                            <select id="payment_urgency" name="payment_urgency" onchange="updatePaymentTimeline(); updateEstimatedFee();">
+                                <option value="normal">Normal (3-5 days)</option>
+                                <option value="urgent">Urgent (24 hours)</option>
+                                <option value="asap">ASAP (Today)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Payment Timeline Indicator - FROM PREVIOUS VERSION -->
+                    <div id="paymentTimelineIndicator" class="payment-timeline" style="display: none;">
+                        <div class="timeline-icon">
+                            <i id="timelineIcon" class="fas fa-clock"></i>
+                        </div>
+                        <div class="timeline-text">
+                            <h4 id="timelineTitle">Payment Timeline</h4>
+                            <p id="timelineDescription">Select payment urgency...</p>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Payment Information - UPDATED WITH PREVIOUS VERSION FIELDS -->
+                    <h2><i class="fas fa-credit-card"></i> Payment Information</h2>
+
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-wallet"></i>
+                            <select id="payment_method" name="payment_method" required onchange="toggleOtherPaymentInput(); updateMapDetails(); updateEstimatedFee();">
+                                <option value="">Select payment method</option>
+                                <option value="cash">Cash</option>
+                                <option value="debit_card">Debit Card</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="check">Check</option>
+                                <option value="mobile">Mobile Payment</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="money_order">Money Order</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div id="other_payment_input" class="expanding-input">
+                            <div class="input-with-icon" style="margin-top: 6px;">
+                                <i class="fas fa-edit"></i>
+                                <input type="text" id="other_payment_method" name="other_payment_method" placeholder="Specify payment method" oninput="updateMapDetails()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Location - FROM PREVIOUS VERSION -->
+                    <h2><i class="fas fa-map-marker-alt"></i> Payment Location</h2>
+
+                    <div class="form-group">
+                        <label for="payment_location">Where to Pay</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-map-pin"></i>
+                            <input type="text" id="payment_location" name="payment_location" placeholder="Address or location of payment center" required oninput="updateMapDetails(); updateEstimatedFee();">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment_instructions">Payment Instructions</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                            <textarea id="payment_instructions" name="payment_instructions" rows="2" placeholder="Specific payment instructions, queue numbers, etc." oninput="updateMapDetails()"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="button" class="view-map-btn" onclick="showMap()">
+                        <i class="fas fa-map-marked-alt"></i> View Payment Route
+                    </button>
+
+                    <!-- Receipt Information - FROM PREVIOUS VERSION -->
+                    <h2><i class="fas fa-file-contract"></i> Receipt & Confirmation</h2>
+
+                    <!-- Urgent Payment Toggle -->
+                    <div class="toggle-switch">
+                        <div class="toggle-label">
+                            <i class="fas fa-exclamation-triangle"></i> Urgent Payment Required
+                            <div style="font-size: 11px; font-weight: normal; opacity: 0.8;">(Late payment or rush service)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="urgent_payment" name="urgent_payment" onchange="toggleUrgencyFee(); updateServiceType();">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Receipt Handling Toggle -->
+                    <div class="toggle-switch">
+                        <div class="toggle-label">
+                            <i class="fas fa-receipt"></i> Receipt Required
+                            <div style="font-size: 11px; font-weight: normal; opacity: 0.8;">(Physical proof of payment)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="receipt_required" name="receipt_required" onchange="toggleReceiptFee()" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmation_delivery">Confirmation Delivery Method</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-paper-plane"></i>
+                            <select id="confirmation_delivery" name="confirmation_delivery" onchange="toggleEmailInput()">
+                                <option value="photo">Send photo of receipt</option>
+                                <option value="physical">Physical receipt delivery</option>
+                                <option value="email">Email confirmation</option>
+                                <option value="none">No confirmation needed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="email_input" class="expanding-input">
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="confirmation_email" name="confirmation_email" placeholder="Email address for confirmation">
+                        </div>
+                    </div>
+
+                    <!-- Total Amount Display -->
+                    <div class="amount-display" id="totalAmountDisplay">
+                        <div class="total-label">TOTAL TO PAY</div>
+                        <div class="total-amount" id="totalAmount">$0.00</div>
+                        <div class="total-label">Service Fee: <span id="serviceFeeAmount">$0.00</span></div>
+                    </div>
+
+                    <!-- Service Type Indicator -->
+                    <div id="serviceTypeIndicator" class="service-type-indicator" style="display: none;">
+                        <div class="service-type-icon">
+                            <i id="serviceTypeIcon" class="fas fa-bolt"></i>
+                        </div>
+                        <div class="service-type-text">
+                            <h4 id="serviceTypeTitle">Service Type</h4>
+                            <p id="serviceTypeDescription">Calculating based on bill type and urgency...</p>
+                        </div>
+                    </div>
+
+                    <!-- File Upload for Bills - FROM PREVIOUS VERSION -->
+                    <div class="form-group">
+                        <label>Upload Bill Documents (Optional)</label>
+                        <div class="file-upload-wrapper">
+                            <div class="file-upload-input" onclick="document.getElementById('file_input').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span class="file-upload-text">Upload bill documents or photos</span>
+                                <div id="file_name" class="file-name"></div>
+                            </div>
+                            <input type="file" id="file_input" class="file-input" accept="image/*,.pdf" onchange="displayFileName(this)">
+                            <span class="file-size-note">Max file size: 10MB</span>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Additional Information - FROM PREVIOUS VERSION -->
+                    <h2><i class="fas fa-cog"></i> Additional Information</h2>
+
+                    <div class="form-group">
+                        <div class="input-with-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                            <textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any special payment instructions..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Security Disclaimer -->
+                    <div class="info-tip">
+                        <i class="fas fa-shield-alt"></i>
+                        Your payment information is secured. Runners are verified and insured for handling financial transactions.
+                    </div>
+
+                     <div class="section-divider"></div>
+
+                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+
+                    <!-- Service Price and Phone Number in one row -->
+                    <div class="collection-row">
+                        <div style="margin-bottom: 0;">
+                            <label>Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price"
+                                       placeholder="Your price"
+                                       step="0.01" min="0.75"
+                                       inputmode="decimal" required>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 0;">
+                            <label>Your Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="contact_number" name="contact_number" placeholder="Your phone number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-lock"></i> Secure Bill Payment Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedBillType = 'utility';
+        let urgentPayment = false;
+        let receiptRequired = true;
+        let billCounter = 1;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form
+            initializeForm();
+
+            // Set up form event listeners
+            setupEventListeners();
+
+            // Update fee initially
+            updateEstimatedFee();
+            calculateTotal();
+            updatePaymentTimeline();
+            updateServiceType();
+        });
+
+        function initializeForm() {
+            // Set today's date as default for due date
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('due_date').value = formattedDate;
+            document.getElementById('due_date').min = formattedDate;
+
+            // Set up reimbursement method change listener
+            document.getElementById('reimbursement_method')?.addEventListener('change', function() {
+                const bankDetailsInput = document.getElementById('bankDetailsInput');
+                if (bankDetailsInput && this.value === 'bank_transfer') {
+                    bankDetailsInput.classList.add('expanded');
+                } else if (bankDetailsInput) {
+                    bankDetailsInput.classList.remove('expanded');
+                }
+            });
+
+            // Initialize auto-sliding text
+            initializeAutoSlidingText();
+
+            // Set default bill type
+            selectBillType('utility', document.querySelector('.bill-type.active'));
+        }
+
+        function initializeAutoSlidingText() {
+            const checkAndApplySliding = (input) => {
+                if (!input) return;
+
+                input.classList.remove('sliding-text');
+
+                if (input.scrollWidth > input.clientWidth && input.value.trim() !== '') {
+                    input.classList.add('sliding-text');
+                    const textLength = input.value.length;
+                    const duration = Math.max(10, textLength / 2);
+                    input.style.animationDuration = `${duration}s`;
+                }
+            };
+
+            const textInputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input[type="email"], textarea');
+            textInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    setTimeout(() => checkAndApplySliding(this), 100);
+                });
+
+                input.addEventListener('focus', function() {
+                    this.style.animationPlayState = 'paused';
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.classList.contains('sliding-text')) {
+                        this.style.animationPlayState = 'running';
+                    }
+                });
+
+                setTimeout(() => checkAndApplySliding(input), 300);
+            });
+
+            window.addEventListener('resize', () => {
+                textInputs.forEach(input => {
+                    setTimeout(() => checkAndApplySliding(input), 100);
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            // Update fee when inputs change
+            const feeInputs = ['payment_location', 'payment_urgency', 'receipt_required', 'payment_method'];
+            feeInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateEstimatedFee);
+                    element.addEventListener('change', updateEstimatedFee);
+                }
+            });
+
+            // Add service price to fee updates
+            const servicePriceInput = document.getElementById('service_price');
+            if (servicePriceInput) {
+                servicePriceInput.addEventListener('input', updateEstimatedFee);
+                servicePriceInput.addEventListener('change', updateEstimatedFee);
+            }
+
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Close modal on outside click
+            document.getElementById('mapModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMap();
+                }
+            });
+
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMap();
+                }
+            });
+
+            // Form submission
+            document.getElementById('billPaymentForm').addEventListener('submit', handleFormSubmit);
+
+            // Bill amount changes
+            document.addEventListener('input', function(e) {
+                if (e.target.name === 'amounts[]') {
+                    calculateTotal();
+                    updateEstimatedFee();
+                }
+            });
+
+            // Confirmation delivery change
+            document.getElementById('confirmation_delivery').addEventListener('change', function() {
+                toggleEmailInput();
+            });
+        }
+
+        // Bill Type Selection
+        function selectBillType(type, element) {
+            selectedBillType = type;
+
+            // Remove active class from all types
+            document.querySelectorAll('.bill-type').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Add active class to selected type
+            element.classList.add('active');
+
+            updateServiceType();
+            updateEstimatedFee();
+        }
+
+        // Toggle urgency fee
+        function toggleUrgencyFee() {
+            urgentPayment = document.getElementById('urgent_payment').checked;
+            updateEstimatedFee();
+            updateServiceType();
+            updatePaymentTimeline();
+        }
+
+        // Toggle receipt fee
+        function toggleReceiptFee() {
+            receiptRequired = document.getElementById('receipt_required').checked;
+            updateEstimatedFee();
+        }
+
+        function toggleOtherPaymentInput() {
+            const otherInput = document.getElementById('other_payment_input');
+            if (document.getElementById('payment_method').value === 'other') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('other_payment_method')?.focus(), 300);
+            } else {
+                otherInput.classList.remove('expanded');
+            }
+        }
+
+        function toggleEmailInput() {
+            const emailInput = document.getElementById('email_input');
+            if (document.getElementById('confirmation_delivery').value === 'email') {
+                emailInput.classList.add('expanded');
+                setTimeout(() => document.getElementById('confirmation_email')?.focus(), 300);
+            } else {
+                emailInput.classList.remove('expanded');
+            }
+        }
+
+        function toggleOtherBillInput(selectElement, index) {
+            const otherInput = document.getElementById(`other_bill_input_${index}`);
+            if (!otherInput) return;
+
+            if (selectElement.value === 'other') {
+                otherInput.classList.add('expanded');
+                setTimeout(() => {
+                    const input = document.getElementById(`other_bill_name_${index}`);
+                    if (input) input.focus();
+                }, 300);
+            } else {
+                otherInput.classList.remove('expanded');
+            }
+        }
+
+        // Update service type indicator
+        function updateServiceType() {
+            const indicator = document.getElementById('serviceTypeIndicator');
+            let serviceType = '';
+            let description = '';
+            let icon = '';
+
+            if (urgentPayment) {
+                serviceType = 'Urgent Payment';
+                description = 'Priority service for time-sensitive payments';
+                icon = 'fas fa-bolt';
+            } else {
+                switch(selectedBillType) {
+                    case 'utility':
+                        serviceType = 'Utility Bill Payment';
+                        description = 'Standard utility payment service';
+                        icon = 'fas fa-bolt';
+                        break;
+                    case 'government':
+                        serviceType = 'Government Payment';
+                        description = 'Government fee/tax payment service';
+                        icon = 'fas fa-landmark';
+                        break;
+                    case 'credit':
+                        serviceType = 'Credit Payment';
+                        description = 'Credit card or loan payment service';
+                        icon = 'fas fa-credit-card';
+                        break;
+                    default:
+                        serviceType = 'Bill Payment Service';
+                        description = 'General bill payment service';
+                        icon = 'fas fa-file-invoice-dollar';
+                }
+            }
+
+            if (serviceType) {
+                indicator.style.display = 'flex';
+                document.getElementById('serviceTypeIcon').className = icon;
+                document.getElementById('serviceTypeTitle').textContent = serviceType;
+                document.getElementById('serviceTypeDescription').textContent = description;
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // Update payment timeline indicator
+        function updatePaymentTimeline() {
+            const indicator = document.getElementById('paymentTimelineIndicator');
+            const urgency = document.getElementById('payment_urgency').value;
+            const dueDate = document.getElementById('due_date').value;
+
+            let timelineData = {
+                normal: {
+                    title: 'Standard Processing',
+                    description: 'Will be processed within 3-5 business days',
+                    icon: 'fas fa-calendar-check',
+                    color: '#4CAF50'
+                },
+                urgent: {
+                    title: 'Urgent Processing',
+                    description: 'Will be processed within 24 hours',
+                    icon: 'fas fa-clock',
+                    color: '#FF9800'
+                },
+                asap: {
+                    title: 'ASAP Processing',
+                    description: 'Will be processed today',
+                    icon: 'fas fa-bolt',
+                    color: '#f44336'
+                }
+            };
+
+            const timeline = timelineData[urgency] || timelineData.normal;
+
+            indicator.style.display = 'flex';
+            document.getElementById('timelineIcon').className = timeline.icon;
+            document.getElementById('timelineTitle').textContent = timeline.title;
+
+            // Add due date to description if available
+            let description = timeline.description;
+            if (dueDate) {
+                const dueDateObj = new Date(dueDate);
+                const formattedDate = dueDateObj.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                description += ` | Due: ${formattedDate}`;
+            }
+
+            document.getElementById('timelineDescription').textContent = description;
+            indicator.style.borderLeft = `3px solid ${timeline.color}`;
+        }
+
+        // Calculate total bill amount
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('input[name="amounts[]"]').forEach(input => {
+                const value = parseFloat(input.value);
+                if (!isNaN(value) && value > 0) {
+                    total += value;
+                }
+            });
+
+            const totalDisplay = document.getElementById('total_display');
+            if (totalDisplay) {
+                totalDisplay.textContent = total.toFixed(2);
+            }
+
+            const totalElement = document.querySelector('.total-bill-display');
+            if (totalElement) {
+                totalElement.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    totalElement.style.transform = 'scale(1)';
+                }, 300);
+            }
+
+            return total;
+        }
+
+        // Distance calculation
+        function calculateDistance() {
+            const paymentLocation = document.getElementById('payment_location').value;
+            if (!paymentLocation) return 0;
+
+            return Math.min(paymentLocation.length * 0.02, 10).toFixed(1);
+        }
+
+        // Calculate base service fee
+        function calculateBaseFee() {
+            let baseFee = 5.00; // Minimum base fee for bill payments
+
+            // Add premium for different bill types
+            switch(selectedBillType) {
+                case 'government':
+                    baseFee += 3.00; // Extra for government payments
+                    break;
+                case 'credit':
+                    baseFee += 2.50; // Extra for credit payments
+                    break;
+                case 'utility':
+                case 'telecom':
+                    baseFee += 1.50;
+                    break;
+                case 'school':
+                    baseFee += 2.00;
+                    break;
+            }
+
+            return baseFee;
+        }
+
+        // Calculate distance fee for bill payments
+        function calculateDistanceFee(distance) {
+            if (distance <= 0) return 0;
+
+            const distanceKm = parseFloat(distance);
+
+            // Bill payment pricing structure (time-sensitive)
+            if (distanceKm <= 5) {
+                return 2.00;
+            } else if (distanceKm <= 15) {
+                return 3.50;
+            } else if (distanceKm <= 30) {
+                return 5.00;
+            } else {
+                return 7.00;
+            }
+        }
+
+        // Calculate urgency fee
+        function calculateUrgencyFee() {
+            if (!urgentPayment) return 0;
+
+            // Urgent payment fee (50% premium)
+            const baseFee = calculateBaseFee();
+            return baseFee * 0.5;
+        }
+
+        // Calculate receipt handling fee
+        function calculateReceiptFee() {
+            if (!receiptRequired) return 0;
+
+            // Fee for obtaining and delivering receipt
+            return 2.00;
+        }
+
+        // Calculate total bill amount
+        function calculateTotalBillAmount() {
+            let total = 0;
+
+            document.querySelectorAll('input[name="amounts[]"]').forEach(input => {
+                const amount = parseFloat(input.value) || 0;
+                total += amount;
+            });
+
+            return total;
+        }
+
+        // Calculate payment processing fee
+        function calculateProcessingFee(totalBillAmount) {
+            if (totalBillAmount <= 0) return 0;
+
+            // Processing fee: 1% of total bill amount, minimum $1, maximum $10
+            const fee = totalBillAmount * 0.01;
+            return Math.min(Math.max(fee, 1.00), 10.00);
+        }
+
+        // Calculate total service fee
+        function calculateTotalServiceFee() {
+            const distance = calculateDistance();
+            const totalBillAmount = calculateTotalBillAmount();
+
+            const baseFee = calculateBaseFee();
+            const distanceFee = calculateDistanceFee(distance);
+            const urgencyFee = calculateUrgencyFee();
+            const receiptFee = calculateReceiptFee();
+            const processingFee = calculateProcessingFee(totalBillAmount);
+
+            return baseFee + distanceFee + urgencyFee + receiptFee + processingFee;
+        }
+
+        // Update total amount display
+        function updateTotalAmountDisplay() {
+            const totalBillAmount = calculateTotalBillAmount();
+            const serviceFee = calculateTotalServiceFee();
+            const totalPayment = totalBillAmount + serviceFee;
+
+            // Update displays
+            document.getElementById('totalAmount').textContent = '$' + totalPayment.toFixed(2);
+            document.getElementById('serviceFeeAmount').textContent = '$' + serviceFee.toFixed(2);
+        }
+
+        // Update estimated fee display
+        function updateEstimatedFee() {
+            const serviceFee = calculateTotalServiceFee();
+
+            // Update display
+            const feeElement = document.getElementById('estimated_fee');
+            if (feeElement) {
+                feeElement.textContent = '$' + serviceFee.toFixed(2);
+
+                // Update total amount display
+                updateTotalAmountDisplay();
+
+                // Visual feedback
+                feeElement.style.transform = 'scale(1.1)';
+                setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+            }
+        }
+
+        // Map functions
+        function showMap() {
+            const paymentLocation = document.getElementById('payment_location').value || 'Not specified';
+
+            if (!paymentLocation || paymentLocation === 'Not specified') {
+                alert('Please enter a payment location.');
+                return;
+            }
+
+            document.getElementById('mapPaymentAddress').textContent = paymentLocation;
+
+            const distance = calculateDistance();
+            const estimatedTime = Math.round(distance * 4);
+            const paymentMethod = document.getElementById('payment_method').value;
+            const paymentMethodText = paymentMethod === 'other'
+                ? document.getElementById('other_payment_method').value || 'Other'
+                : paymentMethod.replace('_', ' ').toUpperCase();
+
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapPaymentType').textContent = paymentMethodText;
+
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateMapDetails() {
+            const paymentLocation = document.getElementById('payment_location').value;
+            const distance = calculateDistance();
+            const estimatedTime = Math.round(distance * 4);
+            const paymentMethod = document.getElementById('payment_method').value;
+            const paymentMethodText = paymentMethod === 'other'
+                ? document.getElementById('other_payment_method').value || 'Other'
+                : paymentMethod.replace('_', ' ').toUpperCase();
+
+            if (paymentLocation) {
+                document.getElementById('mapPaymentAddress').textContent = paymentLocation;
+                document.getElementById('mapDistance').textContent = distance + ' km';
+                document.getElementById('mapTime').textContent = estimatedTime + ' min';
+                document.getElementById('mapPaymentType').textContent = paymentMethodText;
+            }
+        }
+
+        // File upload
+        function displayFileName(input) {
+            const fileNameDisplay = document.getElementById('file_name');
+            if (input.files.length > 0) {
+                fileNameDisplay.textContent = input.files[0].name;
+                fileNameDisplay.style.transform = 'scale(1.05)';
+                setTimeout(() => fileNameDisplay.style.transform = 'scale(1)', 300);
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        }
+
+        // Bill items management
+        function addBill() {
+            billCounter++;
+            const container = document.getElementById('bills-container');
+            const newBill = document.createElement('div');
+            newBill.className = 'bill-item';
+            newBill.innerHTML = `
+                <div class="bill-row">
+                    <div class="input-with-icon" style="flex: 2;">
+                        <i class="fas fa-file-invoice"></i>
+                        <select name="bill_types[]" required onchange="toggleOtherBillInput(this, ${billCounter})">
+                            <option value="">Select bill type</option>
+                            <option value="electricity">Electricity</option>
+                            <option value="water">Water</option>
+                            <option value="internet">Internet</option>
+                            <option value="phone">Phone/Mobile</option>
+                            <option value="cable">Cable TV</option>
+                            <option value="rent">Rent</option>
+                            <option value="mortgage">Mortgage</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="loan">Loan Payment</option>
+                            <option value="insurance">Insurance</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="input-with-icon" style="flex: 1;">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" name="amounts[]" placeholder="Amount" step="0.01" required>
+                    </div>
+                </div>
+                <div class="bill-row">
+                    <div class="input-with-icon">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" name="account_numbers[]" placeholder="Account Number" required>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="remove-item" onclick="removeBill(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newBill);
+
+            const otherInputContainer = document.createElement('div');
+            otherInputContainer.id = `other_bill_input_${billCounter}`;
+            otherInputContainer.className = 'expanding-input';
+            otherInputContainer.innerHTML = `
+                <div class="input-with-icon" style="margin-top: 6px;">
+                    <i class="fas fa-edit"></i>
+                    <input type="text" id="other_bill_name_${billCounter}" name="other_bill_names[]" placeholder="Specify bill type">
+                </div>
+            `;
+            container.appendChild(otherInputContainer);
+
+            newBill.style.opacity = '0';
+            newBill.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                newBill.style.transition = 'all 0.3s ease';
+                newBill.style.opacity = '1';
+                newBill.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Add event listener for amount changes
+            const amountInput = newBill.querySelector('input[name="amounts[]"]');
+            amountInput.addEventListener('input', function() {
+                calculateTotal();
+                updateEstimatedFee();
+            });
+
+            calculateTotal();
+            updateEstimatedFee();
+        }
+
+        function removeBill(button) {
+            const item = button.closest('.bill-item');
+            const container = item.parentElement;
+            const billIndex = Array.from(container.querySelectorAll('.bill-item')).indexOf(item);
+
+            item.style.transition = 'all 0.3s ease';
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(-10px)';
+
+            setTimeout(() => {
+                item.remove();
+                const otherInput = document.getElementById(`other_bill_input_${billIndex}`);
+                if (otherInput) otherInput.remove();
+
+                calculateTotal();
+                updateEstimatedFee();
+                reindexOtherInputs();
+            }, 300);
+        }
+
+        function reindexOtherInputs() {
+            const billItems = document.querySelectorAll('.bill-item');
+            billItems.forEach((item, index) => {
+                const select = item.querySelector('select[name="bill_types[]"]');
+                if (select) {
+                    select.setAttribute('onchange', `toggleOtherBillInput(this, ${index})`);
+                }
+                const otherInput = document.getElementById(`other_bill_input_${index}`);
+                if (otherInput) {
+                    otherInput.id = `other_bill_input_${index}`;
+                    const input = otherInput.querySelector('input[type="text"]');
+                    if (input) {
+                        input.id = `other_bill_name_${index}`;
+                    }
+                }
+            });
+            billCounter = billItems.length;
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+
+            inputs.forEach(input => {
+                if (input.value && input.type !== 'hidden' && input.type !== 'file') {
+                    filled++;
+                }
+            });
+
+            const progress = Math.min((filled / inputs.length) * 100, 100);
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        // Form validation and submission
+        function handleFormSubmit(e) {
+
+            const paymentMethod = document.getElementById('payment_method').value.trim();
+            const dueDate = document.getElementById('due_date').value;
+            const paymentLocation = document.getElementById('payment_location').value.trim();
+            const servicePrice = document.getElementById('service_price').value.trim();
+            const contactNumber = document.getElementById('contact_number').value.trim();
+            const billTypes = document.querySelectorAll('select[name="bill_types[]"]');
+
+            if (!paymentMethod) {
+                alert('Please select a payment method.');
+                document.getElementById('payment_method').focus();
+                return false;
+            }
+
+            if (paymentMethod === 'other') {
+                const otherPaymentMethod = document.getElementById('other_payment_method').value.trim();
+                if (!otherPaymentMethod) {
+                    alert('Please specify the payment method.');
+                    document.getElementById('other_payment_method').focus();
+                    return false;
+                }
+            }
+
+            if (!dueDate) {
+                alert('Please select a due date.');
+                document.getElementById('due_date').focus();
+                return false;
+            }
+
+            if (!paymentLocation) {
+                alert('Please enter a payment location.');
+                document.getElementById('payment_location').focus();
+                return false;
+            }
+
+            if (!servicePrice) {
+                alert('Please enter a service price.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            const servicePriceNum = parseFloat(servicePrice);
+            if (servicePriceNum < 0.75) {
+                alert('Service price must be at least $0.75.');
+                document.getElementById('service_price').focus();
+                return false;
+            }
+
+            if (!contactNumber) {
+                alert('Please enter your phone number.');
+                document.getElementById('contact_number').focus();
+                return false;
+            }
+
+            let hasValidBills = false;
+            let hasInvalidBills = false;
+            billTypes.forEach(select => {
+                const billType = select.value;
+                if (!billType) {
+                    hasInvalidBills = true;
+                } else if (billType === 'other') {
+                    const billItem = select.closest('.bill-item');
+                    const index = Array.from(billItem.parentElement.querySelectorAll('.bill-item')).indexOf(billItem);
+                    const otherInput = document.getElementById(`other_bill_name_${index}`);
+                    if (otherInput && !otherInput.value.trim()) {
+                        hasInvalidBills = true;
+                    } else {
+                        hasValidBills = true;
+                    }
+                } else {
+                    hasValidBills = true;
+                }
+            });
+
+            if (hasInvalidBills || !hasValidBills) {
+                alert('Please ensure all bills have valid types and amounts.');
+                return false;
+            }
+
+            let totalAmount = 0;
+            document.querySelectorAll('input[name="amounts[]"]').forEach(input => {
+                const amount = parseFloat(input.value);
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter valid amounts for all bills.');
+                    input.focus();
+                    return false;
+                }
+                totalAmount += amount;
+            });
+
+            if (totalAmount <= 0) {
+                alert('Total bill amount must be greater than zero.');
+                return false;
+            }
+
+            const confirmationDelivery = document.getElementById('confirmation_delivery').value;
+            if (confirmationDelivery === 'email') {
+                const confirmationEmail = document.getElementById('confirmation_email').value.trim();
+                if (!confirmationEmail) {
+                    alert('Please enter an email address for confirmation.');
+                    document.getElementById('confirmation_email').focus();
+                    return false;
+                }
+            }
+
+            const estimatedFee = document.getElementById('estimated_fee').textContent;
+            const urgency = document.getElementById('payment_urgency').value;
+
+            alert(`Bill payment order created successfully!\n\nTotal Bill Amount: $${totalAmount.toFixed(2)}\nService Fee: ${estimatedFee}\nYour Service Price: $${servicePriceNum.toFixed(2)}\nPhone Number: ${contactNumber}\nProcessing: ${urgency.toUpperCase()}\nTotal to Pay: $${(totalAmount + parseFloat(estimatedFee.replace('$', ''))).toFixed(2)}`);
+
+            // In a real app, you would submit the form here
+            // this.submit();
+
+            // For demo purposes, show success message
+            showSuccess();
+        }
+
+        function showSuccess() {
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalHTML = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Payment Request Submitted!';
+            submitBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)';
+
+            setTimeout(() => {
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.style.background = 'var(--gradient)';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1170 @@
+<!-- templates/completed_errands.html -->
+{% extends "base.html" %}
+{% block content %}
+<div id="completed-errands-page" class="page">
+    <!-- Enhanced Header -->
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Completed Errands</h1>
+                    <p class="header-subtitle">Your completed errands history</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('home_page') }}" class="back-btn" title="Go Back">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="stats-badge">
+                    <span class="stats-count">{{ completed_errands|length }}</span>
+                    <span class="stats-label">Completed</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-list-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-count">{{ completed_errands|length }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon rating">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-count">{{ "%.1f"|format(average_rating) }}/5</span>
+                    <span class="stat-label">Avg Rating</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="today">Today</button>
+            <button class="filter-tab" data-filter="week">This Week</button>
+            <button class="filter-tab" data-filter="month">This Month</button>
+        </div>
+
+        <div class="section-title animated-fadein">
+            <h3>Completed Errands History ✅</h3>
+            <p>Review and manage your completed errands</p>
+        </div>
+
+        <div class="errands-list">
+            {% if completed_errands %}
+                {% for errand in completed_errands %}
+                {% set runner = errand.runner %}
+                {% set user_rating = namespace(found=false, rating=0) %}
+                {% for rating in errand.ratings if rating.from_user_id == current_user.id %}
+                    {% set user_rating.found = true %}
+                    {% set user_rating.rating = rating.rating %}
+                {% endfor %}
+
+                <div class="errand-item animated-slideup" data-status="completed" data-id="{{ errand.id }}">
+                    <!-- Compact View -->
+                    <div class="errand-compact-view">
+                        <div class="errand-header">
+                            <div class="errand-type">
+                                <div class="service-icon service-{{ errand.type|lower|replace(' ', '-') }}">
+                                    {% if 'grocery' in errand.type|lower %}
+                                        <i class="fas fa-shopping-basket"></i>
+                                    {% elif 'food' in errand.type|lower %}
+                                        <i class="fas fa-utensils"></i>
+                                    {% elif 'bill' in errand.type|lower %}
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    {% elif 'package' in errand.type|lower %}
+                                        <i class="fas fa-box"></i>
+                                    {% elif 'gadget' in errand.type|lower %}
+                                        <i class="fas fa-laptop"></i>
+                                    {% elif 'gas' in errand.type|lower %}
+                                        <i class="fas fa-gas-pump"></i>
+                                    {% elif 'ticket' in errand.type|lower %}
+                                        <i class="fas fa-ticket-alt"></i>
+                                    {% elif 'spare' in errand.type|lower %}
+                                        <i class="fas fa-cog"></i>
+                                    {% elif 'collection' in errand.type|lower %}
+                                        <i class="fas fa-box-open"></i>
+                                    {% else %}
+                                        <i class="fas fa-running"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="errand-info">
+                                    <strong class="errand-title">{{ errand.type or "General Errand" }}</strong>
+                                    <span class="errand-id">#{{ errand.id }}</span>
+                                </div>
+                            </div>
+                            <span class="status-badge status-completed">
+                                <i class="status-icon fa-check-circle"></i>
+                                Completed
+                            </span>
+                        </div>
+
+                        <div class="errand-details">
+                            <div class="detail-row">
+                                <div class="detail">
+                                    <span class="detail-icon">📍</span>
+                                    <span class="detail-text">{{ errand.pickup_location or 'Location not specified' }}</span>
+                                </div>
+                                <div class="detail">
+                                    <span class="detail-icon">🎯</span>
+                                    <span class="detail-text">{{ errand.delivery_location or 'Destination not specified' }}</span>
+                                </div>
+                            </div>
+
+                            {% if errand.details %}
+                            <div class="errand-description">
+                                <span class="detail-icon">📝</span>
+                                <span class="description-text">{{ errand.details|truncate(80) }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="errand-footer">
+                            <div class="errand-meta">
+                                <div class="price-tag">
+                                    <span class="price-amount">${{ "%.2f"|format(errand.price_estimate) if errand.price_estimate else '0.00' }}</span>
+                                    <span class="price-label">Amount</span>
+                                </div>
+                                <div class="time-info">
+                                    <span class="time-ago">{{ errand.created_at|timesince if errand.created_at else 'Recently' }}</span>
+                                    <span class="time-exact">{{ errand.created_at.strftime('%b %d, %H:%M') if errand.created_at else '' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="errand-actions">
+                                {% if not user_rating.found and runner %}
+                                <button class="action-btn rate-btn" onclick="rateErrand({{ errand.id }})">
+                                    <i class="fas fa-star"></i>
+                                    Rate
+                                </button>
+                                {% endif %}
+                                <button class="action-btn details-btn" onclick="toggleErrandDetails({{ errand.id }})">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expanded View (Hidden by default) -->
+                    <div class="errand-expanded-view" id="expanded-{{ errand.id }}" style="display: none;">
+                        <div class="hide-details-container">
+                            <button class="hide-details-btn" onclick="toggleErrandDetails({{ errand.id }})">
+                                <i class="fas fa-chevron-up"></i>
+                                Hide Details
+                            </button>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-column">
+                                <h4>Delivery Information</h4>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="detail-content">
+                                        <strong>Pickup Location:</strong>
+                                        <span>{{ errand.pickup_location or 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker"></i>
+                                    <div class="detail-content">
+                                        <strong>Delivery Location:</strong>
+                                        <span>{{ errand.delivery_location or 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <div class="detail-content">
+                                        <strong>Date Completed:</strong>
+                                        <span>{{ errand.created_at.strftime('%b %d, %Y') if errand.created_at else 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div class="detail-content">
+                                        <strong>Completion Time:</strong>
+                                        <span>{{ errand.created_at.strftime('%H:%M') if errand.created_at else 'Not specified' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-column">
+                                <h4>Errand & Runner Information</h4>
+                                <div class="detail-item">
+                                    <i class="fas fa-tag"></i>
+                                    <div class="detail-content">
+                                        <strong>Service Type:</strong>
+                                        <span>{{ errand.type or 'General Errand' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <div class="detail-content">
+                                        <strong>Amount:</strong>
+                                        <span>${{ "%.2f"|format(errand.price_estimate) if errand.price_estimate else '0.00' }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-running"></i>
+                                    <div class="detail-content">
+                                        <strong>Runner:</strong>
+                                        <span>
+                                            {% if runner %}
+                                                {{ runner.fullname }}
+                                            {% else %}
+                                                Not assigned
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-phone"></i>
+                                    <div class="detail-content">
+                                        <strong>Runner Contact:</strong>
+                                        <span>
+                                            {% if runner and runner.phone %}
+                                                {{ runner.phone }}
+                                            {% else %}
+                                                Not available
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="errand-full-description">
+                            <h4>Errand Description</h4>
+                            <p>{{ errand.details or 'No additional details provided' }}</p>
+                        </div>
+
+                        <div class="rating-section">
+                            <h4>Your Rating</h4>
+                            {% if user_rating.found %}
+                                <div class="rating-display">
+                                    <div class="stars">
+                                        {% for i in range(5) %}
+                                            {% if i < user_rating.rating %}
+                                                <i class="fas fa-star rated"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <p class="rating-text">You rated this errand {{ user_rating.rating }}/5</p>
+                                </div>
+                            {% else %}
+                                <button class="action-btn rate-btn" onclick="rateErrand({{ errand.id }})">
+                                    <i class="fas fa-star"></i>
+                                    Rate This Errand
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state animated-fadein">
+                    <div class="empty-icon">✅</div>
+                    <h4>No Completed Errands Yet</h4>
+                    <p>Your completed errands will appear here once they're finished</p>
+                    <div class="empty-actions">
+                        <button class="create-btn primary" onclick="location.href='{{ url_for('dashboard') }}'">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Create Your First Errand
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --secondary: #2E7D32;
+    --accent: #FF9800;
+    --success: #8BC34A;
+    --warning: #FFC107;
+    --danger: #F44336;
+    --light: #f8fdf8;
+    --dark: #1A331A;
+    --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    --shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
+    --radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* Enhanced Header */
+.mobile-header {
+    background: var(--gradient);
+    color: white;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+}
+
+.header-text h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-btn {
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-2px);
+}
+
+.stats-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 12px;
+    border-radius: 20px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.stats-count {
+    display: block;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.stats-label {
+    font-size: 10px;
+    opacity: 0.9;
+}
+
+/* Stats Overview */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 20px;
+    background: white;
+}
+
+.stat-card {
+    background: var(--light);
+    padding: 15px;
+    border-radius: var(--radius);
+    text-align: center;
+    transition: var(--transition);
+    border: 1px solid #e8f5e9;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 16px;
+}
+
+.stat-icon.total { background: #e3f2fd; color: #1565c0; }
+.stat-icon.rating { background: #fff3cd; color: #856404; }
+
+.stat-count {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--dark);
+    opacity: 0.7;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+    display: flex;
+    background: white;
+    padding: 0 20px;
+    border-bottom: 1px solid #e8f5e9;
+}
+
+.filter-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: none;
+    color: var(--dark);
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: var(--transition);
+}
+
+.filter-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Section Title */
+.section-title {
+    padding: 20px;
+    text-align: center;
+}
+
+.section-title h3 {
+    font-size: 20px;
+    color: var(--dark);
+    margin-bottom: 5px;
+}
+
+.section-title p {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Errand Items */
+.errands-list {
+    padding: 0 20px 20px;
+}
+
+.errand-item {
+    background: white;
+    border-radius: var(--radius);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--success);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.errand-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+}
+
+.errand-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.errand-item:hover::before {
+    transform: scaleX(1);
+}
+
+.errand-compact-view {
+    padding: 20px;
+}
+
+.errand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.errand-type {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.service-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.errand-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.errand-title {
+    font-size: 16px;
+    color: var(--dark);
+}
+
+.errand-id {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-completed { background: #d4edda; color: #155724; }
+
+.errand-details {
+    margin-bottom: 15px;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.detail-icon {
+    font-size: 12px;
+}
+
+.errand-description {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--light);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #555;
+}
+
+.errand-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.errand-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.price-tag {
+    text-align: center;
+}
+
+.price-amount {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.price-label {
+    font-size: 11px;
+    color: #666;
+}
+
+.time-info {
+    text-align: center;
+}
+
+.time-ago {
+    display: block;
+    font-size: 12px;
+    color: var(--dark);
+    font-weight: 600;
+}
+
+.time-exact {
+    font-size: 11px;
+    color: #666;
+}
+
+.errand-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: white;
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: var(--light);
+    border-color: var(--primary-light);
+}
+
+.rate-btn { color: #FFC107; }
+.details-btn { color: #666; }
+
+/* Expanded View Styles */
+.errand-expanded-view {
+    padding: 20px;
+    border-top: 1px solid #e8f5e9;
+    background: #f8fdf8;
+    position: relative;
+}
+
+.hide-details-container {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 10;
+}
+
+.hide-details-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    font-size: 12px;
+}
+
+.hide-details-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin: 30px 0 20px;
+}
+
+.detail-column h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--dark);
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-item i {
+    width: 16px;
+    color: var(--primary);
+    margin-top: 3px;
+    font-size: 14px;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+.detail-content strong {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 600;
+}
+
+.detail-content span {
+    font-size: 14px;
+    color: var(--dark);
+    font-weight: 500;
+}
+
+.errand-full-description {
+    margin: 25px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.errand-full-description h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark);
+}
+
+.errand-full-description p {
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 14px;
+}
+
+.rating-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.rating-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark);
+}
+
+.rating-display {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stars {
+    display: flex;
+    gap: 4px;
+}
+
+.stars .rated {
+    color: #FFC107;
+}
+
+.rating-text {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    font-size: 18px;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.empty-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+.create-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.create-btn.primary {
+    background: var(--gradient);
+    color: white;
+}
+
+.create-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Animations */
+.animated-fadein {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animated-slideup {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .errand-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .errand-meta {
+        justify-content: space-between;
+    }
+
+    .errand-actions {
+        justify-content: center;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .hide-details-container {
+        top: 8px;
+        right: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .errand-compact-view {
+        padding: 15px;
+    }
+
+    .errand-expanded-view {
+        padding: 15px;
+    }
+
+    .details-grid {
+        gap: 15px;
+    }
+
+    .detail-item {
+        gap: 8px;
+    }
+
+    .detail-item i {
+        font-size: 13px;
+    }
+
+    .detail-content strong {
+        font-size: 12px;
+    }
+
+    .detail-content span {
+        font-size: 13px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ============ ONE-TIME BUTTON FUNCTIONALITY ============
+    // Check if user has already clicked the "Create Your First Errand" button
+    const createButton = document.querySelector('.create-btn.primary');
+
+    if (createButton) {
+        // Check localStorage to see if button has been clicked before
+        const hasClickedButton = localStorage.getItem('first_errand_button_clicked');
+
+        if (hasClickedButton === 'true') {
+            // Hide the button if it was clicked before
+            createButton.style.display = 'none';
+            console.log('Create Your First Errand button hidden (already clicked)');
+        } else {
+            // Add click event listener to track button click
+            createButton.addEventListener('click', function(e) {
+                // Store in localStorage that button has been clicked
+                localStorage.setItem('first_errand_button_clicked', 'true');
+                console.log('Create Your First Errand button clicked - will be hidden on next visit');
+
+                // Optional: Hide immediately after click (uncomment if you want immediate hiding)
+                // this.style.display = 'none';
+                // alert('Button will not appear again on this device');
+            });
+        }
+    }
+
+    // ============ FILTER FUNCTIONALITY ============
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const errandItems = document.querySelectorAll('.errand-item');
+
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+
+            // Update active tab
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Filter items based on date
+            errandItems.forEach(item => {
+                const dateText = item.querySelector('.time-exact').textContent;
+                if (!dateText) return;
+
+                const itemDate = new Date(dateText);
+                const now = new Date();
+                let show = true;
+
+                switch(filter) {
+                    case 'today':
+                        show = itemDate.toDateString() === now.toDateString();
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        show = itemDate >= weekAgo;
+                        break;
+                    case 'month':
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        show = itemDate >= monthAgo;
+                        break;
+                    case 'all':
+                    default:
+                        show = true;
+                }
+
+                if (show) {
+                    item.style.display = 'block';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0)';
+                    }, 10);
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    });
+
+    // ============ HOVER EFFECTS ============
+    errandItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // ============ ANIMATION OBSERVER ============
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    errandItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(item);
+    });
+
+    // ============ TESTING: Add reset button (optional) ============
+    // Uncomment to add a reset button for testing
+    // addResetButton();
+});
+
+// ============ RESET BUTTON FUNCTION (for testing) ============
+function addResetButton() {
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Reset First Errand Button';
+    resetBtn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 9999;
+        font-size: 12px;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    `;
+    resetBtn.onmouseenter = function() {
+        this.style.opacity = '1';
+    };
+    resetBtn.onmouseleave = function() {
+        this.style.opacity = '0.7';
+    };
+    resetBtn.onclick = function() {
+        localStorage.removeItem('first_errand_button_clicked');
+        alert('"Create Your First Errand" button has been reset! Refresh the page to see it again.');
+    };
+    document.body.appendChild(resetBtn);
+}
+
+// ============ TOGGLE ERRAND DETAILS ============
+function toggleErrandDetails(errandId) {
+    const expandedView = document.getElementById(`expanded-${errandId}`);
+    const errandItem = expandedView.closest('.errand-item');
+
+    if (expandedView.style.display === 'none') {
+        expandedView.style.display = 'block';
+        // Scroll to the expanded view
+        expandedView.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        expandedView.style.display = 'none';
+        // Scroll back to the errand item
+        errandItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// ============ RATE ERRAND FUNCTION ============
+function rateErrand(errandId) {
+    const rating = prompt('Please rate this errand (1-5 stars):');
+    if (!rating || rating < 1 || rating > 5) {
+        alert('Please enter a valid rating between 1 and 5.');
+        return;
+    }
+
+    const comment = prompt('Optional: Add a comment about your experience:');
+
+    fetch('/api/rate-errand', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            errand_id: errandId,
+            rating: parseInt(rating),
+            comment: comment || ''
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Thank you for your rating!');
+            location.reload();
+        } else {
+            alert(data.error || 'Failed to submit rating. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting rating:', error);
+        alert('Failed to submit rating. Please try again.');
+    });
+}
+</script>
+{% endblock %}

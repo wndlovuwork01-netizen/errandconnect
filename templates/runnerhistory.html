@@ -1,0 +1,1613 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #81C784;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E9;
+    --primary-100: #C8E6C9;
+    --background: #f8f9fa;
+    --surface: #ffffff;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --text-light: #9E9E9E;
+    --border: #E0E0E0;
+    --border-light: #EEEEEE;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+}
+
+/* History Page Specific Styles */
+#history-page {
+    min-height: 100vh;
+    background: var(--background);
+    position: relative;
+    overflow-y: auto;
+    padding-bottom: 80px;
+}
+
+/* Header Styles - Mobile Optimized */
+.main-header {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding-top: calc(12px + var(--safe-area-inset-top));
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+    border-bottom: 1px solid var(--border-light);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.logo h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    white-space: nowrap;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.welcome-text {
+    font-weight: 500;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+    color: var(--text-secondary);
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--primary-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+}
+
+.btn-icon:active {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(0.95);
+}
+
+/* Page Header - Mobile Optimized */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 16px;
+    margin-bottom: 12px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.page-header h1 {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.page-header p {
+    opacity: 0.9;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.header-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    min-width: 0;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* Time Period Filters - Mobile Optimized */
+.filters-section {
+    background: var(--surface);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 12px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+}
+
+.filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.time-period-filters h3 {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.period-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.period-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-align: center;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: none;
+}
+
+.period-btn:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.period-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.filter-group select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--background);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Orders Section - Mobile Optimized */
+.orders-section {
+    padding: 0 16px;
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+    padding-bottom: 20px;
+    min-height: calc(100vh - 280px);
+}
+
+.section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.export-options {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-outline {
+    padding: 8px 12px;
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    text-align: center;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: none;
+}
+
+.btn-outline:active {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Order Card Styles - Mobile Optimized */
+.order-card {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid #000000;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    width: 100%;
+}
+
+.order-card:active {
+    transform: scale(0.99);
+    box-shadow: var(--shadow-hover);
+}
+
+.order-main {
+    padding: 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Top Row with Errand Name and Earned Amount */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.order-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.order-amount-top {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.amount-top {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.amount-label-top {
+    font-size: 0.65rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Order Info Section */
+.order-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.order-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.order-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.order-id {
+    color: var(--text-light);
+    font-size: 0.7rem;
+    background: var(--background);
+    padding: 2px 5px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.order-date {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--text-light);
+    font-size: 0.7rem;
+}
+
+.order-status {
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: 1px solid #000000;
+}
+
+.order-status.completed { background: var(--primary-50); color: var(--primary-color); }
+.order-status.pending { background: #FFF3E0; color: #EF6C00; }
+.order-status.cancelled { background: #FFEBEE; color: #C62828; }
+
+.order-description {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Order Details Expanded - Mobile Optimized */
+.order-details-expanded {
+    padding: 0 14px 14px 14px;
+    border-top: 1px solid #000000;
+    display: none;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin: 16px 0;
+    padding-top: 12px;
+}
+
+.detail-column h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    padding-bottom: 5px;
+    border-bottom: 1px solid #000000;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.detail-item i {
+    width: 14px;
+    color: var(--primary-color);
+    margin-top: 2px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.detail-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.detail-content strong {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.detail-content span {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.rating {
+    color: #F59E0B;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.price {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.net-price {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.order-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+}
+
+/* Pagination - Mobile Optimized */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 15px 0;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    border: none;
+}
+
+.page-btn:active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.page-numbers {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-number {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-number:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.page-number.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.page-dots {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+/* Empty State - Mobile Optimized */
+.empty-state {
+    text-align: center;
+    padding: 30px 15px;
+    color: var(--text-light);
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid #000000;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+    color: var(--primary-color);
+}
+
+.empty-state h3 {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+.empty-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-primary {
+    padding: 10px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    text-decoration: none;
+    text-align: center;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+}
+
+.btn-primary:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Bottom Navigation - Mobile Optimized */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    padding: 10px 16px;
+    z-index: 1000;
+    padding-bottom: calc(10px + var(--safe-area-inset-bottom));
+    padding-left: calc(16px + var(--safe-area-inset-left));
+    padding-right: calc(16px + var(--safe-area-inset-right));
+    border-top: 1px solid #000000;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--text-light);
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+    background: var(--primary-50);
+}
+
+.nav-item:active {
+    transform: scale(0.95);
+}
+
+.nav-item i {
+    font-size: 18px;
+}
+
+/* Fix scrolling issues */
+#history-page {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+}
+
+/* Responsive Design for Tablets */
+@media (min-width: 481px) {
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .welcome-text {
+        font-size: 14px;
+        max-width: 200px;
+    }
+
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .page-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .stat-number {
+        font-size: 1.6rem;
+    }
+
+    .filters-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .period-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .period-btn {
+        padding: 10px 12px;
+    }
+
+    .filter-group {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .filter-group select {
+        width: auto;
+        min-width: 140px;
+    }
+
+    .section-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        text-align: left;
+    }
+
+    .order-header {
+        margin-bottom: 12px;
+    }
+
+    .order-title {
+        font-size: 1rem;
+    }
+
+    .amount-top {
+        font-size: 1.2rem;
+    }
+
+    .amount-label-top {
+        font-size: 0.7rem;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .order-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .empty-actions {
+        flex-direction: row;
+    }
+}
+
+@media (min-width: 768px) {
+    .header-content {
+        padding: 16px 0;
+    }
+
+    .page-header {
+        padding: 20px 24px;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .header-stats {
+        gap: 20px;
+    }
+
+    .stat-item {
+        min-width: 100px;
+        padding: 12px 15px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .filters-section {
+        padding: 15px 24px;
+    }
+
+    .orders-section {
+        padding: 0 24px;
+    }
+
+    .orders-list {
+        gap: 15px;
+    }
+
+    .order-main {
+        padding: 16px;
+    }
+
+    .order-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .order-title {
+        font-size: 1.1rem;
+    }
+
+    .amount-top {
+        font-size: 1.5rem;
+    }
+
+    .nav-item {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+
+    .nav-item i {
+        font-size: 20px;
+    }
+}
+
+/* Very Small Phones */
+@media (max-width: 360px) {
+    .logo h1 {
+        font-size: 16px;
+    }
+
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .welcome-text {
+        font-size: 12px;
+        max-width: 120px;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .page-header p {
+        font-size: 0.85rem;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .stat-item {
+        padding: 8px 6px;
+    }
+
+    .period-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .order-main {
+        padding: 12px;
+        gap: 6px;
+    }
+
+    .order-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .order-title {
+        font-size: 0.9rem;
+    }
+
+    .amount-top {
+        font-size: 0.9rem;
+    }
+
+    .nav-item {
+        font-size: 0.7rem;
+        padding: 6px 8px;
+    }
+
+    .nav-item i {
+        font-size: 16px;
+    }
+}
+
+/* Landscape mode */
+@media (max-height: 600px) and (orientation: landscape) {
+    .main-header {
+        padding-top: 8px;
+    }
+
+    .page-header {
+        padding: 12px 16px;
+    }
+
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .orders-section {
+        min-height: calc(100vh - 200px);
+    }
+}
+
+/* Prevent text selection on mobile */
+.period-btn,
+.btn-icon,
+.nav-item,
+.order-card,
+.btn-outline,
+.btn-primary,
+.page-btn,
+.page-number {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Improve scrolling performance */
+.orders-section {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize animations for mobile */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+</style>
+
+<div id="history-page" class="page">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>ErrandConnect</h1>
+            </div>
+            <div class="user-menu">
+                <span class="welcome-text">Welcome, {{ user.username|default('User') }}! 👋</span>
+                <div class="user-actions">
+                    <a href="{{ url_for('profile') }}" class="btn-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="header-content">
+                <h1>Order History</h1>
+                <p>Your complete errand history and financial overview</p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_orders|default(0) }}</span>
+                        <span class="stat-label">Total Orders</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${{ "%.2f"|format(total_amount|default(0.00)) }}</span>
+                        <span class="stat-label">
+                            {% if user.user_type == 'runner' %}
+                                Total Earned
+                            {% else %}
+                                Total Spent
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ completed_orders|default(0) }}</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Time Period Filters -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="time-period-filters">
+                    <h3>View History</h3>
+                    <div class="period-buttons">
+                        <button class="period-btn active" data-period="daily">
+                            <i class="fas fa-calendar-day"></i>
+                            Daily
+                        </button>
+                        <button class="period-btn" data-period="weekly">
+                            <i class="fas fa-calendar-week"></i>
+                            Weekly
+                        </button>
+                        <button class="period-btn" data-period="fortnightly">
+                            <i class="fas fa-calendar-alt"></i>
+                            Fortnightly
+                        </button>
+                        <button class="period-btn" data-period="monthly">
+                            <i class="fas fa-calendar"></i>
+                            Monthly
+                        </button>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <select id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                    <select id="sortFilter">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="price_high">Highest Price</option>
+                        <option value="price_low">Lowest Price</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order History -->
+        <section class="orders-section">
+            <div class="section-header">
+                <h2>Order History</h2>
+                <div class="export-options">
+                    <button class="btn-outline" onclick="exportHistory()">
+                        <i class="fas fa-download"></i>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="orders-list">
+                {% if orders %}
+                    {% for order in orders %}
+                    <div class="order-card" data-status="{{ order.status|default('completed') }}" data-date="{{ order.date|default('2023-01-01') }}" data-price="{{ order.amount|default(0) }}">
+                        <div class="order-main">
+                            <!-- Top row with Errand Name and EARNED amount -->
+                            <div class="order-header">
+                                <div class="order-title">
+                                    <i class="fas fa-{{ get_order_icon(order.type|default('delivery')) if get_order_icon is defined else 'shopping-bag' }}"></i>
+                                    {{ order.type|default('Food Delivery') }}
+                                </div>
+                                <div class="order-amount-top">
+                                    <div class="amount-top">
+                                        {% if user.user_type == 'runner' %}
+                                            +${{ "%.2f"|format(order.amount|default(18.50)) }}
+                                        {% else %}
+                                            -${{ "%.2f"|format(order.amount|default(18.50)) }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="amount-label-top">
+                                        {% if user.user_type == 'runner' %}
+                                            EARNED
+                                        {% else %}
+                                            SPENT
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Order details -->
+                            <div class="order-info">
+                                <div class="order-icon {{ order.status|default('completed') }}">
+                                    <i class="fas fa-{{ get_order_icon(order.type|default('delivery')) if get_order_icon is defined else 'shopping-bag' }}"></i>
+                                </div>
+                                <div class="order-details">
+                                    <div class="order-meta">
+                                        <span class="order-id">#{{ order.id|default('EC-7842') }}</span>
+                                        <span class="order-date">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ order.date|default('Oct 15, 2023') }}
+                                        </span>
+                                        <span class="order-status {{ order.status|default('completed') }}">
+                                            {{ order.status|default('completed')|title }}
+                                        </span>
+                                    </div>
+                                    <p class="order-description">{{ order.description|default('Grocery delivery from Fresh Market including fresh produce and dairy items') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Details Expanded -->
+                        <div class="order-details-expanded">
+                            <div class="details-grid">
+                                <div class="detail-column">
+                                    <h4>Order Information</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-tag"></i>
+                                        <div class="detail-content">
+                                            <strong>Order Type:</strong>
+                                            <span>{{ order.type|default('Food Delivery') }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <div class="detail-content">
+                                            <strong>Order Date:</strong>
+                                            <span>{{ order.date|default('Oct 15, 2023') }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        <div class="detail-content">
+                                            <strong>Completion Time:</strong>
+                                            <span>{{ order.completion_time|default('30 minutes') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-column">
+                                    <h4>Location Details</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <div class="detail-content">
+                                            <strong>Pickup:</strong>
+                                            <span>{{ order.pickup_location|default('Fresh Market, 123 Main St') }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-flag-checkered"></i>
+                                        <div class="detail-content">
+                                            <strong>Delivery:</strong>
+                                            <span>{{ order.delivery_location|default('456 Oak Avenue, Apt 3B') }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-road"></i>
+                                        <div class="detail-content">
+                                            <strong>Distance:</strong>
+                                            <span>{{ order.distance|default('5 km') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-column">
+                                    <h4>
+                                        {% if user.user_type == 'runner' %}
+                                            Client Information
+                                        {% else %}
+                                            Runner Information
+                                        {% endif %}
+                                    </h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-user"></i>
+                                        <div class="detail-content">
+                                            <strong>Name:</strong>
+                                            <span>
+                                                {% if user.user_type == 'runner' %}
+                                                    {{ order.client_name|default('Sarah Johnson') }}
+                                                {% else %}
+                                                    {{ order.runner_name|default('John Runner') }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-star"></i>
+                                        <div class="detail-content">
+                                            <strong>Rating:</strong>
+                                            <span class="rating">
+                                                {% if user.user_type == 'runner' %}
+                                                    {{ order.client_rating|default('4.8') }}/5
+                                                {% else %}
+                                                    {{ order.runner_rating|default('4.8') }}/5
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-comment"></i>
+                                        <div class="detail-content">
+                                            <strong>Feedback:</strong>
+                                            <span>{{ order.feedback|default('"Very prompt and careful with my groceries. Will definitely request again!"') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-column">
+                                    <h4>Payment Details</h4>
+                                    <div class="detail-item">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        <div class="detail-content">
+                                            <strong>Amount:</strong>
+                                            <span class="price">${{ "%.2f"|format(order.amount|default(18.50)) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-percentage"></i>
+                                        <div class="detail-content">
+                                            <strong>Service Fee:</strong>
+                                            <span>${{ "%.2f"|format(order.service_fee|default(2.00)) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-wallet"></i>
+                                        <div class="detail-content">
+                                            <strong>Net Amount:</strong>
+                                            <span class="net-price">
+                                                {% if user.user_type == 'runner' %}
+                                                    ${{ "%.2f"|format((order.amount|default(18.50) - order.service_fee|default(2.00))|round(2)) }}
+                                                {% else %}
+                                                    ${{ "%.2f"|format(order.amount|default(18.50)) }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="order-actions">
+                                {% if user.user_type == 'runner' %}
+                                    <button class="btn-outline" onclick="contactClient('{{ order.client_id|default(1) }}')">
+                                        <i class="fas fa-comments"></i>
+                                        Contact Client
+                                    </button>
+                                {% else %}
+                                    <button class="btn-outline" onclick="contactRunner('{{ order.runner_id|default(1) }}')">
+                                        <i class="fas fa-comments"></i>
+                                        Contact Runner
+                                    </button>
+                                {% endif %}
+                                <button class="btn-outline" onclick="reorder('{{ order.id|default(1) }}')">
+                                    <i class="fas fa-redo"></i>
+                                    Repeat Order
+                                </button>
+                                <button class="btn-outline" onclick="downloadReceipt('{{ order.id|default(1) }}')">
+                                    <i class="fas fa-receipt"></i>
+                                    Download Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>No Order History</h3>
+                        <p>
+                            {% if user.user_type == 'runner' %}
+                                Your completed errands will appear here once you start delivering.
+                            {% else %}
+                                Your order history will appear here once you place your first errand request.
+                            {% endif %}
+                        </p>
+                        <div class="empty-actions">
+                            {% if user.user_type == 'runner' %}
+                                <a href="{{ url_for('runneravailable_errands') }}" class="btn-primary">
+                                    <i class="fas fa-bolt"></i>
+                                    Find Errands
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('home_page') }}" class="btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Create Errand
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            {% if orders and orders|length > 10 %}
+            <div class="pagination">
+                <button class="page-btn" onclick="previousPage()">
+                    <i class="fas fa-chevron-left"></i>
+                    Previous
+                </button>
+                <div class="page-numbers">
+                    <span class="page-number active">1</span>
+                    <span class="page-number">2</span>
+                    <span class="page-number">3</span>
+                    <span class="page-dots">...</span>
+                    <span class="page-number">10</span>
+                </div>
+                <button class="page-btn" onclick="nextPage()">
+                    Next
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('home_page') }}" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('runnercompleted') if user.user_type == 'runner' else url_for('order_history') }}" class="nav-item">
+            <i class="fas fa-check-circle"></i>
+            <span>Completed</span>
+        </a>
+        <a href="{{ url_for('runnerhome') if user.user_type == 'runner' else url_for('home_page') }}" class="nav-item">
+            <i class="fas fa-list"></i>
+            <span>Errands</span>
+        </a>
+        <a href="{{ url_for('runnerwallet') if user.user_type == 'runner' else url_for('profile') }}" class="nav-item active">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+    </nav>
+</div>
+
+<script>
+// Mobile optimization code
+document.addEventListener('DOMContentLoaded', function() {
+    // Fix scrolling issues
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.body.style.minHeight = '100vh';
+
+    // Ensure page container is scrollable
+    const page = document.getElementById('history-page');
+    if (page) {
+        page.style.overflowY = 'auto';
+        page.style.height = 'auto';
+    }
+
+    // Prevent accidental double-clicks on mobile
+    let lastClickTime = 0;
+    document.addEventListener('click', function(e) {
+        const currentTime = new Date().getTime();
+        if (currentTime - lastClickTime < 300) {
+            e.preventDefault();
+        }
+        lastClickTime = currentTime;
+    }, true);
+
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 100);
+    });
+
+    // Add safe area support
+    const style = document.createElement('style');
+    style.textContent = `
+        @supports (padding: max(0px)) {
+            .main-header {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+            .bottom-nav {
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize
+    applyFilters();
+
+    console.log('Mobile history page initialized');
+});
+
+// Toggle order details
+document.querySelectorAll('.order-main').forEach(main => {
+    main.addEventListener('click', function() {
+        const card = this.closest('.order-card');
+        const details = card.querySelector('.order-details-expanded');
+
+        if (details.style.display === 'none' || !details.style.display) {
+            details.style.display = 'block';
+            // Scroll to show the expanded view
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 50);
+        } else {
+            details.style.display = 'none';
+        }
+    });
+});
+
+// Time period filter functionality
+document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('.period-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+
+        // Add active class to clicked button
+        this.classList.add('active');
+
+        const period = this.getAttribute('data-period');
+        filterByTimePeriod(period);
+    });
+});
+
+function filterByTimePeriod(period) {
+    // This would typically make an API call to fetch filtered data
+    // For now, we'll just show an alert and simulate filtering
+    alert(`Loading ${period} history...`);
+
+    // In a real application, you would:
+    // 1. Make an API call to fetch orders for the selected period
+    // 2. Update the orders list with the new data
+    // 3. Update the statistics in the header
+
+    // Example of what the API call might look like:
+    // fetch(`/api/orders/history?period=${period}`)
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         updateOrdersList(data.orders);
+    //         updateStatistics(data.stats);
+    //     });
+}
+
+// Filter functionality
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+function applyFilters() {
+    const status = document.getElementById('statusFilter').value;
+    const sort = document.getElementById('sortFilter').value;
+
+    const orders = document.querySelectorAll('.order-card');
+
+    orders.forEach(order => {
+        const orderStatus = order.getAttribute('data-status');
+
+        const statusMatch = status === 'all' || orderStatus === status;
+
+        if (statusMatch) {
+            order.style.display = 'block';
+        } else {
+            order.style.display = 'none';
+        }
+    });
+
+    // Sort orders
+    sortOrders(sort);
+}
+
+function sortOrders(sortBy) {
+    const container = document.querySelector('.orders-list');
+    const orders = Array.from(container.querySelectorAll('.order-card'));
+
+    orders.sort((a, b) => {
+        const aDate = new Date(a.getAttribute('data-date'));
+        const bDate = new Date(b.getAttribute('data-date'));
+        const aPrice = parseFloat(a.getAttribute('data-price'));
+        const bPrice = parseFloat(b.getAttribute('data-price'));
+
+        switch(sortBy) {
+            case 'newest':
+                return bDate - aDate;
+            case 'oldest':
+                return aDate - bDate;
+            case 'price_high':
+                return bPrice - aPrice;
+            case 'price_low':
+                return aPrice - bPrice;
+            default:
+                return 0;
+        }
+    });
+
+    // Re-append orders in sorted order
+    orders.forEach(order => container.appendChild(order));
+}
+
+// Export functionality
+function exportHistory() {
+    alert('Export feature would generate a CSV report of your order history');
+}
+
+// Action functions
+function contactClient(clientId) {
+    alert(`Contact client ${clientId} - This would open a chat interface`);
+}
+
+function contactRunner(runnerId) {
+    alert(`Contact runner ${runnerId} - This would open a chat interface`);
+}
+
+function reorder(orderId) {
+    alert(`Reorder ${orderId} - This would duplicate the order`);
+}
+
+function downloadReceipt(orderId) {
+    alert(`Download receipt for ${orderId} - This would generate a PDF receipt`);
+}
+
+// Pagination functions
+function previousPage() {
+    alert('Navigate to previous page');
+}
+
+function nextPage() {
+    alert('Navigate to next page');
+}
+</script>
+{% endblock %}
