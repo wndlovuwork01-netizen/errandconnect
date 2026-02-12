@@ -806,13 +806,15 @@
                 </button>
             </div>
             <ul class="nav-links">
-                <li><a href="#" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
-                <li><a href="#" class="nav-item" data-target="runnercompleted"><i class="fas fa-tasks"></i> <span>My Errands</span></a></li>
-                <li><a href="#" class="nav-item" data-target="map_view"><i class="fas fa-map-marker-alt"></i> <span>Map View</span></a></li>
-                <li><a href="#" class="nav-item" data-target="runnerwallet"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
-                <li><a href="#" class="nav-item" data-target="ratings"><i class="fas fa-star"></i> <span>Ratings</span></a></li>
-                <li><a href="#" class="nav-item" data-target="settings"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
-                <li><a href="#" class="nav-item" data-target="help"><i class="fas fa-question-circle"></i> <span>Help</span></a></li>
+                <li><a href="{{ url_for('runnerhome') }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
+                <li><a href="{{ url_for('dashboardrunner') }}" class="active"><i class="fas fa-chart-bar"></i> <span>Dashboard</span></a></li>
+                <li><a href="{{ url_for('runneravailable_errands') }}"><i class="fas fa-list"></i> <span>Available Errands</span></a></li>
+                <li><a href="{{ url_for('runnercompleted') }}"><i class="fas fa-tasks"></i> <span>My Errands</span></a></li>
+                <li><a href="{{ url_for('runnerwallet') }}"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
+                <li><a href="{{ url_for('runnerprofile') }}"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                <li><a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li><a href="{{ url_for('help_support') }}"><i class="fas fa-question-circle"></i> <span>Help</span></a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
             </ul>
         </div>
 

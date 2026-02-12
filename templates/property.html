@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ErrandConnect - Property Purchase & Delivery</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         :root {
             --primary: #4CAF50;
@@ -727,7 +729,7 @@
         }
 
         .map-placeholder {
-            padding: 30px 15px;
+            padding: 0;
             text-align: center;
             background: #f5f5f5;
             flex: 1;
@@ -735,7 +737,65 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 200px;
+            min-height: 300px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .map-selection-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            width: 90%;
+        }
+
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .selection-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .map-hint {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            z-index: 1000;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
         .map-placeholder i {
@@ -976,14 +1036,15 @@
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
             <div class="map-placeholder">
-                <i class="fas fa-route"></i>
-                <h3>Route Preview</h3>
-                <p>Map showing service route</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
-                    <p><strong>Service Type:</strong> <span id="mapServiceType">Not selected</span></p>
-                    <p id="mapPickupInfo" style="display: none;"><strong>Pickup:</strong> <span id="mapPickupLocation">Not specified</span></p>
-                    <p id="mapStoreInfo" style="display: none;"><strong>Store:</strong> <span id="mapStoreLocation">Not specified</span></p>
-                    <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
+                <div id="map"></div>
+                <div class="map-hint" id="mapHint">Tap map to set Collection Point</div>
+                <div class="map-selection-controls">
+                    <button type="button" id="selectPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                        <i class="fas fa-location-arrow"></i> Set Collection
+                    </button>
+                    <button type="button" id="selectDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                        <i class="fas fa-map-pin"></i> Set Delivery
+                    </button>
                 </div>
             </div>
             <div class="map-info">
@@ -1023,6 +1084,13 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_property_errand') }}" id="propertyForm">
+                    <!-- Hidden coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    <input type="hidden" id="distance" name="distance">
+                    
                     <!-- Service Type Selection -->
                     <h2><i class="fas fa-cogs"></i> Service Type</h2>
                     <div class="service-type-selector">
@@ -1385,6 +1453,149 @@
         let totalItems = 1;
         let assemblyRequired = false;
 
+        let map, pickupMarker, dropoffMarker, routingControl;
+        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+
+        function initMap() {
+            if (map) return;
+            
+            map = L.map('map').setView([5.6037, -0.1870], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            map.on('click', onMapClick);
+            
+            // Initial markers if coordinates exist
+            const pLat = document.getElementById('pickup_lat').value;
+            const pLon = document.getElementById('pickup_lon').value;
+            const dLat = document.getElementById('dropoff_lat').value;
+            const dLon = document.getElementById('dropoff_lon').value;
+
+            if (pLat && pLon) {
+                pickupMarker = L.marker([pLat, pLon], {
+                    draggable: true,
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div style='background-color:#4CAF50;' class='marker-pin'></div><i class='fas fa-location-arrow'></i>",
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 42]
+                    })
+                }).addTo(map);
+                pickupMarker.on('dragend', updateRoute);
+            }
+
+            if (dLat && dLon) {
+                dropoffMarker = L.marker([dLat, dLon], {
+                    draggable: true,
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div style='background-color:#2196F3;' class='marker-pin'></div><i class='fas fa-map-pin'></i>",
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 42]
+                    })
+                }).addTo(map);
+                dropoffMarker.on('dragend', updateRoute);
+            }
+
+            if (pickupMarker && dropoffMarker) updateRoute();
+        }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('selectPickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('selectDropoffBtn').classList.toggle('active', mode === 'dropoff');
+            document.getElementById('mapHint').textContent = mode === 'pickup' ? 
+                'Tap map to set Collection Point' : 'Tap map to set Delivery Point';
+        }
+
+        function onMapClick(e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+
+            if (selectionMode === 'pickup') {
+                if (pickupMarker) {
+                    pickupMarker.setLatLng(e.latlng);
+                } else {
+                    pickupMarker = L.marker(e.latlng, {
+                        draggable: true,
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: "<div style='background-color:#4CAF50;' class='marker-pin'></div><i class='fas fa-location-arrow'></i>",
+                            iconSize: [30, 42],
+                            iconAnchor: [15, 42]
+                        })
+                    }).addTo(map);
+                    pickupMarker.on('dragend', updateRoute);
+                }
+                document.getElementById('pickup_lat').value = lat;
+                document.getElementById('pickup_lon').value = lon;
+                
+                // Update text field based on service type
+                const targetId = selectedServiceType === 'buy-deliver' ? 'store_location' : 'collection_location';
+                document.getElementById(targetId).value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                
+            } else {
+                if (dropoffMarker) {
+                    dropoffMarker.setLatLng(e.latlng);
+                } else {
+                    dropoffMarker = L.marker(e.latlng, {
+                        draggable: true,
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: "<div style='background-color:#2196F3;' class='marker-pin'></div><i class='fas fa-map-pin'></i>",
+                            iconSize: [30, 42],
+                            iconAnchor: [15, 42]
+                        })
+                    }).addTo(map);
+                    dropoffMarker.on('dragend', updateRoute);
+                }
+                document.getElementById('dropoff_lat').value = lat;
+                document.getElementById('dropoff_lon').value = lon;
+                document.getElementById('delivery_address').value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+            }
+
+            updateRoute();
+        }
+
+        function updateRoute() {
+            if (!pickupMarker || !dropoffMarker) return;
+
+            const pLat = pickupMarker.getLatLng().lat;
+            const pLon = pickupMarker.getLatLng().lng;
+            const dLat = dropoffMarker.getLatLng().lat;
+            const dLon = dropoffMarker.getLatLng().lng;
+
+            // Update hidden fields in case markers were dragged
+            document.getElementById('pickup_lat').value = pLat;
+            document.getElementById('pickup_lon').value = pLon;
+            document.getElementById('dropoff_lat').value = dLat;
+            document.getElementById('dropoff_lon').value = dLon;
+
+            // Update text fields
+            const targetId = selectedServiceType === 'buy-deliver' ? 'store_location' : 'collection_location';
+            document.getElementById(targetId).value = `${pLat.toFixed(6)}, ${pLon.toFixed(6)}`;
+            document.getElementById('delivery_address').value = `${dLat.toFixed(6)}, ${dLon.toFixed(6)}`;
+
+            const dist = calculateHaversineDistance(pLat, pLon, dLat, dLon);
+            document.getElementById('distance').value = dist.toFixed(2);
+            document.getElementById('mapDistance').textContent = dist.toFixed(2) + ' km';
+            document.getElementById('mapTime').textContent = Math.round(dist * 8) + ' min';
+
+            updateEstimatedFee();
+        }
+
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form
             initializeForm();
@@ -1508,26 +1719,8 @@
 
         // Distance calculation
         function calculateDistance() {
-            let startLocation = '';
-            const deliveryAddress = document.getElementById('delivery_address').value;
-
-            if (selectedServiceType === 'buy-deliver') {
-                startLocation = document.getElementById('store_location').value;
-            } else {
-                startLocation = document.getElementById('collection_location').value;
-            }
-
-            if (startLocation && deliveryAddress) {
-                // Simulate distance based on input lengths
-                const startLength = startLocation.length;
-                const deliveryLength = deliveryAddress.length;
-
-                // Generate distance between 1km and 50km (property items usually travel further)
-                const baseDistance = 1 + (Math.abs(startLength - deliveryLength) / 100);
-                const randomFactor = 0.5 + (Math.random() * 3);
-                return Math.min(baseDistance * randomFactor, 50).toFixed(2);
-            }
-            return 0;
+            const dist = document.getElementById('distance').value;
+            return dist ? parseFloat(dist) : 0;
         }
 
         // Calculate distance fee for property items
@@ -1779,44 +1972,15 @@
 
         // Map functions
         function showMap() {
-            let startLocation = '';
-            let startLabel = '';
-            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
-
-            if (selectedServiceType === 'buy-deliver') {
-                startLocation = document.getElementById('store_location').value || 'Not specified';
-                startLabel = 'Store';
-                document.getElementById('mapStoreInfo').style.display = 'block';
-                document.getElementById('mapPickupInfo').style.display = 'none';
-                document.getElementById('mapStoreLocation').textContent = startLocation;
-            } else {
-                startLocation = document.getElementById('collection_location').value || 'Not specified';
-                startLabel = 'Pickup';
-                document.getElementById('mapStoreInfo').style.display = 'none';
-                document.getElementById('mapPickupInfo').style.display = 'block';
-                document.getElementById('mapPickupLocation').textContent = startLocation;
-            }
-
-            if (!startLocation || !deliveryAddress || startLocation === 'Not specified' || deliveryAddress === 'Not specified') {
-                alert(`Please enter both ${startLabel.toLowerCase()} location and delivery address.`);
-                return;
-            }
-
-            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
-            document.getElementById('mapServiceType').textContent = selectedServiceType === 'buy-deliver' ? 'Buy & Deliver' : 'Collect & Deliver';
-
-            const distance = calculateDistance();
-            const estimatedTime = Math.round(distance * 8); // 8 minutes per km for property items (slower)
-            const weight = document.getElementById('estimated_weight').value || 0;
-            const dimensions = document.getElementById('dimensions').value || '';
-            const method = getDeliveryMethod(weight, dimensions, selectedPropertyType);
-
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapDeliveryMethod').textContent = method.title;
-
             document.getElementById('mapModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            
+            setTimeout(() => {
+                initMap();
+                if (map) {
+                    map.invalidateSize();
+                }
+            }, 300);
         }
 
         function closeMap() {

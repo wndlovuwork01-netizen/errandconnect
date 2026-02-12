@@ -1,47 +1,157 @@
-@app.route("/runner_profile")
-def runner_profile():
-    """Runner Profile page"""
-    user = current_user()
-    if not user:
-        return redirect(url_for("signin"))
+{% extends "base.html" %}
+{% block content %}
+<div class="runner-profile-page">
+    <header class="runner-profile-header">
+        <div class="runner-profile-title">
+            <h1>Runner Profile</h1>
+            <p>{{ user.fullname or user.username }}</p>
+        </div>
+        <a href="{{ url_for('runnerhome') }}" class="runner-profile-back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </header>
 
-    if user.user_type != "runner":
-        flash("This page is for runners only", "warning")
-        return redirect(url_for("home_page"))
+    <main class="runner-profile-main">
+        <section class="runner-profile-summary">
+            <div class="runner-profile-card">
+                <h2>Stats</h2>
+                <div class="runner-profile-stats">
+                    <div class="runner-profile-stat">
+                        <span class="label">Completed</span>
+                        <span class="value">{{ completed_count }}</span>
+                    </div>
+                    <div class="runner-profile-stat">
+                        <span class="label">Active</span>
+                        <span class="value">{{ active_count }}</span>
+                    </div>
+                    <div class="runner-profile-stat">
+                        <span class="label">Rating</span>
+                        <span class="value">{{ "%.1f"|format(avg_rating) if avg_rating else "0.0" }}</span>
+                    </div>
+                    <div class="runner-profile-stat">
+                        <span class="label">Total Earnings</span>
+                        <span class="value">${{ "%.2f"|format(total_earnings) }}</span>
+                    </div>
+                </div>
+            </div>
 
-    # Get runner profile
-    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
-    
-    # Get runner statistics
-    completed_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").all()
-    active_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="ongoing").all()
-    
-    completed_count = len(completed_errands)
-    active_count = len(active_errands)
-    
-    # Calculate total earnings
-    total_earnings = 0.0
-    for active_errand in completed_errands:
-        negotiation = Negotiation.query.filter_by(
-            errand_id=active_errand.errand_id,
-            runner_id=user.id,
-            status="accepted"
-        ).first()
-        if negotiation:
-            total_earnings += negotiation.offer_price
-        else:
-            total_earnings += active_errand.errand.price_estimate
+            <div class="runner-profile-card">
+                <h2>Details</h2>
+                <div class="runner-profile-details">
+                    <div class="detail-row">
+                        <span class="label">Full name</span>
+                        <span class="value">{{ runner_profile.full_name if runner_profile and runner_profile.full_name else user.fullname }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Phone</span>
+                        <span class="value">{{ runner_profile.phone_number if runner_profile and runner_profile.phone_number else user.phone }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">City</span>
+                        <span class="value">{{ runner_profile.city if runner_profile and runner_profile.city else "Not set" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Vehicle</span>
+                        <span class="value">{{ runner_profile.vehicle_type if runner_profile and runner_profile.vehicle_type else "Not set" }}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
 
-    # Get average rating
-    ratings = Rating.query.filter_by(to_user_id=user.id).all()
-    avg_rating = sum(r.rating for r in ratings) / len(ratings) if ratings else 0
-
-    return render_template(
-        "runner_profile.html",
-        user=user,
-        runner_profile=runner_profile,
-        completed_count=completed_count,
-        active_count=active_count,
-        total_earnings=total_earnings,
-        avg_rating=avg_rating
-    )
+<style>
+.runner-profile-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px;
+}
+.runner-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.runner-profile-title h1 {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+.runner-profile-title p {
+    font-size: 14px;
+    color: #666;
+}
+.runner-profile-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid #ddd;
+    color: #333;
+    text-decoration: none;
+}
+.runner-profile-main {
+    display: grid;
+    gap: 16px;
+}
+.runner-profile-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.runner-profile-card h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+.runner-profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+.runner-profile-stat {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+.runner-profile-stat .label {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+.runner-profile-stat .value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+.runner-profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.detail-row .label {
+    font-size: 14px;
+    color: #64748b;
+}
+.detail-row .value {
+    font-size: 14px;
+    color: #111827;
+}
+@media (max-width: 600px) {
+    .runner-profile-page {
+        padding: 12px;
+    }
+    .runner-profile-header {
+        margin-bottom: 12px;
+    }
+}
+</style>
+{% endblock %}

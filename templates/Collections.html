@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Collection Service - ErrandConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         :root {
             --primary: #4CAF50;
@@ -768,13 +769,50 @@
             padding: 15px;
         }
 
+        .map-selection-controls {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .selection-btn.active {
+            border-color: var(--primary);
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--primary-dark);
+        }
+
+        .selection-btn i {
+            font-size: 14px;
+        }
+
         .map-content {
             background: white;
             border-radius: var(--radius);
             width: 100%;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
+            position: relative;
+        }
             flex-direction: column;
         }
 
@@ -1027,21 +1065,20 @@
     <div id="mapModal" class="map-modal">
         <div class="map-content">
             <div class="map-header">
-                <h3><i class="fas fa-map-marked-alt"></i> Collection Route</h3>
+                <h3><i class="fas fa-map-marked-alt"></i> Select Locations</h3>
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
-            <div class="map-placeholder">
-                <i class="fas fa-route"></i>
-                <h3>Collection to Delivery Route</h3>
-                <p>Map showing route from Collection Address to Delivery Address</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
-                    <p><strong>From Collection:</strong> <span id="mapCollectionAddress">Not specified</span></p>
-                    <p><strong>To Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
-                    <p style="margin-top: 10px; color: var(--primary); font-size: 12px;">
-                        <i class="fas fa-arrow-right"></i> Route direction: Collection → Delivery
-                    </p>
-                </div>
+            
+            <div class="map-selection-controls">
+                <button type="button" id="select-pickup-btn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-box"></i> Collection Point
+                </button>
+                <button type="button" id="select-dropoff-btn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-home"></i> Delivery Point
+                </button>
             </div>
+
+            <div id="map" style="height: 400px; width: 100%; z-index: 1;"></div>
             <div class="map-info">
                 <div class="info-item">
                     <div class="info-value" id="mapDistance">0 km</div>
@@ -1079,6 +1116,12 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_collections_errand') }}" id="collectionsForm">
+                    <!-- Hidden coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+
                     <!-- Service Type Selection -->
                     <h2><i class="fas fa-cogs"></i> Collection Type</h2>
                     <div class="service-type-selector">
@@ -1468,7 +1511,12 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
+        // Global variables for map
+        let map, marker1, marker2, polyline;
+        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+
         // Global variables
         let selectedServiceType = 'package';
         let selectedItemType = 'package';
@@ -1499,7 +1547,84 @@
 
             // Update fee initially
             updateEstimatedFee();
+            
+            // Initialize map if modal is opened
+            initMap();
         });
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('select-pickup-btn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('select-dropoff-btn').classList.toggle('active', mode === 'dropoff');
+        }
+
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([-17.8216, 31.0492], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                map.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+                    
+                    if (selectionMode === 'pickup') {
+                        document.getElementById('pickup_lat').value = lat;
+                        document.getElementById('pickup_lon').value = lng;
+                        if (marker1) map.removeLayer(marker1);
+                        marker1 = L.marker([lat, lng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map).bindPopup('Collection Point').openPopup();
+                        
+                        // After setting collection, automatically switch to delivery mode
+                        setSelectionMode('dropoff');
+                        
+                        // Set text address as "Selected on Map" if empty
+                        if (!document.getElementById('collection_address').value) {
+                            document.getElementById('collection_address').value = "Selected on Map";
+                        }
+                    } else {
+                        document.getElementById('dropoff_lat').value = lat;
+                        document.getElementById('dropoff_lon').value = lng;
+                        if (marker2) map.removeLayer(marker2);
+                        marker2 = L.marker([lat, lng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map).bindPopup('Delivery Point').openPopup();
+
+                        // Set text address as "Selected on Map" if empty
+                        if (!document.getElementById('delivery_address').value) {
+                            document.getElementById('delivery_address').value = "Selected on Map";
+                        }
+                    }
+
+                    updateRoute();
+                    updateEstimatedFee();
+                });
+            }
+        }
+
+        function updateRoute() {
+            if (marker1 && marker2) {
+                const latlngs = [marker1.getLatLng(), marker2.getLatLng()];
+                if (polyline) map.removeLayer(polyline);
+                polyline = L.polyline(latlngs, {color: '#4CAF50', weight: 3, opacity: 0.7, dashArray: '10, 10'}).addTo(map);
+                map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+            }
+        }
 
         function initializeForm() {
             // Set default service type
@@ -1616,20 +1741,36 @@
 
         // Distance calculation - FROM COLLECTION ADDRESS TO DELIVERY ADDRESS
         function calculateDistance() {
-            const collectionAddress = document.getElementById('collection_address').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
 
-            if (collectionAddress && deliveryAddress) {
-                // Simulate distance based on input lengths
-                const collectionLength = collectionAddress.length;
-                const deliveryLength = deliveryAddress.length;
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+                // Fallback to text-based simulation if coordinates aren't set
+                const collectionAddress = document.getElementById('collection_address').value;
+                const deliveryAddress = document.getElementById('delivery_address').value;
 
-                // Generate distance between 0.5km and 50km
-                const baseDistance = 0.5 + (Math.abs(collectionLength - deliveryLength) / 100);
-                const randomFactor = 0.5 + (Math.random() * 3);
-                return Math.min(baseDistance * randomFactor, 50).toFixed(2);
+                if (collectionAddress && deliveryAddress) {
+                    const collectionLength = collectionAddress.length;
+                    const deliveryLength = deliveryAddress.length;
+                    const baseDistance = 0.5 + (Math.abs(collectionLength - deliveryLength) / 100);
+                    const randomFactor = 0.5 + (Math.random() * 3);
+                    return parseFloat(Math.min(baseDistance * randomFactor, 50).toFixed(2));
+                }
+                return 0;
             }
-            return 0;
+
+            // Haversine formula
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const d = R * c;
+            return parseFloat(d.toFixed(2));
         }
 
         // Calculate distance fee for collections
@@ -1820,27 +1961,22 @@
 
         // MAP FUNCTIONS - SHOWS ROUTE FROM COLLECTION TO DELIVERY
         function showMap() {
-            const collectionAddress = document.getElementById('collection_address').value || 'Not specified';
-            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
-
-            if (!collectionAddress || !deliveryAddress || collectionAddress === 'Not specified' || deliveryAddress === 'Not specified') {
-                alert('Please enter both collection address and delivery address to view the route.');
-                return;
-            }
-
-            document.getElementById('mapCollectionAddress').textContent = collectionAddress;
-            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
-
-            const distance = calculateDistance();
-            const estimatedTime = Math.round(distance * 3); // 3 minutes per km for collection service
-            const deliveryMethod = getDeliveryMethod();
-
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
-
             document.getElementById('mapModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+
+            // Initialize map if not done
+            initMap();
+
+            // Force map resize
+            setTimeout(() => {
+                map.invalidateSize();
+                if (marker1 && marker2) {
+                    updateRoute();
+                }
+            }, 200);
+
+            // Update details
+            updateMapDetails(calculateDistance());
         }
 
         function closeMap() {

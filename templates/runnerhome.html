@@ -115,6 +115,19 @@
                     </div>
                 </div>
 
+                <div class="action-card" onclick="window.location.href='{{ url_for('dashboardrunner') }}'">
+                    <div class="action-icon dashboard">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="action-content">
+                        <h4>Runner Dashboard</h4>
+                        <p>Detailed performance stats, earnings overview, and management tools</p>
+                        <a href="{{ url_for('dashboardrunner') }}" class="action-link">
+                            Open Dashboard <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
                 <div class="action-card" onclick="window.location.href='{{ url_for('runnerhistory') }}'">
                     <div class="action-icon history">
                         <i class="fas fa-history"></i>
@@ -181,7 +194,7 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="{{ url_for('home_page') }}" class="nav-item active">
+        <a href="{{ url_for('runnerhome') }}" class="nav-item active">
             <i class="fas fa-home"></i>
             <span>Home</span>
         </a>
@@ -543,7 +556,16 @@ body {
 
 .action-icon.completed { background: #E8F5E8; color: var(--primary-color); }
 .action-icon.active { background: #FFF3E0; color: #EF6C00; }
-.action-icon.history { background: #F3E5F5; color: #7B1FA2; }
+.action-icon.history {
+    background: rgba(33, 150, 243, 0.1);
+    color: #2196F3;
+}
+
+.action-icon.dashboard {
+    background: rgba(156, 39, 176, 0.1);
+    color: #9C27B0;
+}
+
 .action-icon.wallet { background: #FFF3E0; color: #FF9800; }
 
 .action-content {

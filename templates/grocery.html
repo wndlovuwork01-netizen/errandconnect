@@ -596,6 +596,28 @@
             opacity: 0.8;
         }
 
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .selection-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
         /* Submit Button */
         .submit-btn {
             background: var(--gradient);
@@ -900,14 +922,17 @@
                 <h3><i class="fas fa-map-marked-alt"></i> Delivery Route</h3>
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
-            <div class="map-placeholder">
-                <i class="fas fa-route"></i>
-                <h3>Route Preview</h3>
-                <p>Map showing route from store to delivery</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
-                    <p><strong>Store:</strong> <span id="mapStoreLocation">Not specified</span></p>
-                    <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
-                </div>
+            <div id="map" style="height: 300px; width: 100%; border-radius: 8px; margin-bottom: 15px;"></div>
+            <div class="map-selection-controls" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button type="button" id="setPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-store"></i> Set Store
+                </button>
+                <button type="button" id="setDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-home"></i> Set Delivery
+                </button>
+            </div>
+            <div class="map-hint" style="font-size: 12px; color: #666; margin-bottom: 10px; text-align: center;">
+                <i class="fas fa-info-circle"></i> Tap on map to set location
             </div>
             <div class="map-info">
                 <div class="info-item">
@@ -946,6 +971,12 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_grocery_errand') }}" id="groceryForm">
+                    <!-- Hidden fields for coordinates -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+
                     <!-- Store Information -->
                     <h2><i class="fas fa-store"></i> Store Information</h2>
 
@@ -1572,29 +1603,141 @@
         }
 
         // Map functions
+        let map;
+        let marker1, marker2, polyline;
+        let selectionMode = 'pickup';
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('setPickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('setDropoffBtn').classList.toggle('active', mode === 'dropoff');
+        }
+
         function showMap() {
             const storeLocation = document.getElementById('store_location').value || 'Not specified';
             const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
 
-            if (!storeLocation || !deliveryAddress || storeLocation === 'Not specified' || deliveryAddress === 'Not specified') {
-                alert('Please enter both store location and delivery address.');
-                return;
-            }
-
-            document.getElementById('mapStoreLocation').textContent = storeLocation;
-            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
-
-            const distance = calculateDistance();
-            const estimatedTime = Math.round(distance * 5); // 5 minutes per km for grocery (shopping takes time)
-            const weight = document.getElementById('estimated_weight').value || 0;
-            const deliveryMethod = getDeliveryMethod(distance, weight);
-
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
-
             document.getElementById('mapModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+
+            // Initialize map if not already done
+            if (!map) {
+                map = L.map('map').setView([-17.8216, 31.0492], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Add click listener for manual selection
+                map.on('click', function(e) {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+
+                    if (selectionMode === 'pickup') {
+                        updatePickupLocation(lat, lng, "Selected on Map");
+                    } else {
+                        updateDropoffLocation(lat, lng, "Selected on Map");
+                    }
+                });
+            }
+
+            // Use existing coordinates if available, otherwise use defaults
+            const pLat = parseFloat(document.getElementById('pickup_lat').value) || -17.8216;
+            const pLon = parseFloat(document.getElementById('pickup_lon').value) || 31.0492;
+            const dLat = parseFloat(document.getElementById('dropoff_lat').value) || -17.8250;
+            const dLon = parseFloat(document.getElementById('dropoff_lon').value) || 31.0550;
+
+            updatePickupLocation(pLat, pLon, storeLocation, false);
+            updateDropoffLocation(dLat, dLon, deliveryAddress, false);
+
+            if (marker1 && marker2) {
+                updatePolyline();
+            }
+            
+            // Force map to recalculate size after modal display
+            setTimeout(() => {
+                map.invalidateSize();
+                if (polyline) {
+                    map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+                }
+            }, 100);
+        }
+
+        function updatePickupLocation(lat, lng, address, updateField = true) {
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            if (updateField && address) {
+                document.getElementById('store_location').value = address;
+            }
+
+            if (marker1) map.removeLayer(marker1);
+            marker1 = L.marker([lat, lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map).bindPopup('Store: ' + address);
+            
+            updatePolyline();
+        }
+
+        function updateDropoffLocation(lat, lng, address, updateField = true) {
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            if (updateField && address) {
+                document.getElementById('delivery_address').value = address;
+            }
+
+            if (marker2) map.removeLayer(marker2);
+            marker2 = L.marker([lat, lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map).bindPopup('Delivery: ' + address);
+            
+            updatePolyline();
+        }
+
+        function updatePolyline() {
+            if (marker1 && marker2) {
+                const latlng1 = marker1.getLatLng();
+                const latlng2 = marker2.getLatLng();
+                
+                if (polyline) map.removeLayer(polyline);
+                polyline = L.polyline([latlng1, latlng2], {color: '#4CAF50', weight: 3, opacity: 0.7, dashArray: '5, 10'}).addTo(map);
+                
+                const distance = calculateDistance();
+                updateMapDetails(distance);
+                updateEstimatedFee();
+            }
+        }
+
+        function calculateDistance() {
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
+
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return 0;
+
+            // Haversine formula
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const d = R * c;
+            return parseFloat(d.toFixed(1));
         }
 
         function closeMap() {

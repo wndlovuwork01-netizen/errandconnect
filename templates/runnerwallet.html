@@ -1157,7 +1157,7 @@ body {
             <div class="user-menu">
                 <span class="welcome-text">Welcome, {{ user.username|default('Runner') }}! 👋</span>
                 <div class="user-actions">
-                    <a href="{{ url_for('profile') }}" class="btn-icon">
+                    <a href="{{ url_for('runnerprofile') }}" class="btn-icon">
                         <i class="fas fa-user"></i>
                     </a>
                     <a href="{{ url_for('logout') }}" class="btn-icon">
@@ -1374,7 +1374,7 @@ body {
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="{{ url_for('home_page') }}" class="nav-item">
+        <a href="{{ url_for('runnerhome') }}" class="nav-item">
             <i class="fas fa-home"></i>
             <span>Home</span>
         </a>
@@ -1382,7 +1382,7 @@ body {
             <i class="fas fa-check-circle"></i>
             <span>Completed</span>
         </a>
-        <a href="{{ url_for('runnerhome') }}" class="nav-item">
+        <a href="{{ url_for('runneravailable_errands') }}" class="nav-item">
             <i class="fas fa-list"></i>
             <span>Errands</span>
         </a>

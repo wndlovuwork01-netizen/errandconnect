@@ -9,7 +9,7 @@
                 </div>
                 <h1>Profile</h1>
             </div>
-            <a href="{{ url_for('home') }}" class="back-btn">
+            <a href="{{ url_for('runnerhome') if user.user_type == 'runner' else url_for('home_page') }}" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
         </div>

@@ -9,7 +9,7 @@
                 </div>
                 <h1>Privacy & Security</h1>
             </div>
-            <a href="{{ url_for('settings') }}" class="back-btn">
+            <a href="{{ url_for('settings') if current_user.is_authenticated else url_for('signup') }}" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
         </div>

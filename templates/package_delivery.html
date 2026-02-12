@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ErrandConnect - Package Delivery</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS for interactive maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
             --primary: #4CAF50;
@@ -361,6 +363,43 @@
 
         .view-map-btn:hover {
             background: var(--primary-dark);
+        }
+
+        /* Map Selection Controls */
+        .map-selection-controls {
+            display: flex;
+            gap: 10px;
+            padding: 10px 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .selection-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .selection-btn i {
+            font-size: 14px;
         }
 
         /* Info Tip */
@@ -779,18 +818,21 @@
     <div id="mapModal" class="map-modal">
         <div class="map-content">
             <div class="map-header">
-                <h3><i class="fas fa-map-marked-alt"></i> Delivery Route</h3>
-                <button class="close-map" onclick="closeMap()">×</button>
-            </div>
-            <div class="map-placeholder">
-                <i class="fas fa-route"></i>
-                <h3>Route Preview</h3>
-                <p>Map showing route from pickup to delivery</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
-                    <p><strong>Pickup:</strong> <span id="mapPickupAddress">Not specified</span></p>
-                    <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
+                    <h3><i class="fas fa-map-marked-alt"></i> Delivery Route</h3>
+                    <button class="close-map" onclick="closeMap()">×</button>
                 </div>
-            </div>
+                
+                <!-- Selection Controls -->
+                <div class="map-selection-controls">
+                    <button type="button" id="selectPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                        <i class="fas fa-map-marker-alt"></i> Set Pickup
+                    </button>
+                    <button type="button" id="selectDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                        <i class="fas fa-flag-checkered"></i> Set Delivery
+                    </button>
+                </div>
+
+                <div id="map" style="height: 400px; width: 100%; z-index: 1;"></div>
             <div class="map-info">
                 <div class="info-item">
                     <div class="info-value" id="mapDistance">0 km</div>
@@ -828,6 +870,12 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_package_delivery_errand') }}" id="packageDeliveryForm">
+                    <!-- Hidden coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+
                     <h2><i class="fas fa-box-open"></i> Package Information</h2>
 
                     <div class="form-group">
@@ -1062,7 +1110,20 @@
         </div>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
+        // Global variables for Leaflet map
+        let map, marker1, marker2, polyline;
+        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('selectPickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('selectDropoffBtn').classList.toggle('active', mode === 'dropoff');
+        }
+
         // Mobile-optimized JavaScript
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form
@@ -1093,7 +1154,81 @@
                     closeMap();
                 }
             });
+
+            // Initialize Leaflet map
+            initMap();
         });
+
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([-17.8216, 31.0492], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                map.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+                    
+                    if (selectionMode === 'pickup') {
+                        document.getElementById('pickup_lat').value = lat;
+                        document.getElementById('pickup_lon').value = lng;
+                        if (marker1) map.removeLayer(marker1);
+                        marker1 = L.marker([lat, lng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map).bindPopup('Pickup Point').openPopup();
+                        
+                        // After setting pickup, automatically switch to dropoff mode
+                        setSelectionMode('dropoff');
+                    } else {
+                        document.getElementById('dropoff_lat').value = lat;
+                        document.getElementById('dropoff_lon').value = lng;
+                        if (marker2) map.removeLayer(marker2);
+                        marker2 = L.marker([lat, lng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map).bindPopup('Delivery Point').openPopup();
+                    }
+
+                    updateRoute();
+                    updateEstimatedFee();
+                });
+            }
+        }
+
+        function updateRoute() {
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
+
+            if (!isNaN(lat1) && !isNaN(lon1) && !isNaN(lat2) && !isNaN(lon2)) {
+                if (polyline) map.removeLayer(polyline);
+                polyline = L.polyline([[lat1, lon1], [lat2, lon2]], {
+                    color: '#4CAF50',
+                    weight: 3,
+                    opacity: 0.7,
+                    dashArray: '10, 10'
+                }).addTo(map);
+                
+                const distance = calculateDistance();
+                const volume = calculateVolume();
+                const weight = parseFloat(document.getElementById('weight').value) || 0;
+                updateMapDetails(distance, weight, volume);
+            }
+        }
 
         function initializeAutoSlidingText() {
             // Function to check if text needs sliding
@@ -1169,20 +1304,36 @@
 
         // Calculate distance between pickup and delivery
         function calculateDistance() {
-            const pickupAddress = document.getElementById('pickup_address').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
 
-            if (pickupAddress && deliveryAddress) {
-                // Simulate distance based on input lengths
-                const pickupLength = pickupAddress.length;
-                const deliveryLength = deliveryAddress.length;
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+                // Fallback to text-based simulation if coordinates aren't set
+                const pickupAddress = document.getElementById('pickup_address').value;
+                const deliveryAddress = document.getElementById('delivery_address').value;
 
-                // Generate distance between 0.05km and 50km
-                const baseDistance = 0.05 + (Math.abs(pickupLength - deliveryLength) / 100);
-                const randomFactor = 0.5 + (Math.random() * 2);
-                return Math.min(baseDistance * randomFactor, 50).toFixed(2);
+                if (pickupAddress && deliveryAddress) {
+                    const pickupLength = pickupAddress.length;
+                    const deliveryLength = deliveryAddress.length;
+                    const baseDistance = 0.05 + (Math.abs(pickupLength - deliveryLength) / 100);
+                    const randomFactor = 0.5 + (Math.random() * 2);
+                    return parseFloat(Math.min(baseDistance * randomFactor, 50).toFixed(2));
+                }
+                return 0;
             }
-            return 0;
+
+            // Haversine formula
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const d = R * c;
+            return parseFloat(d.toFixed(2));
         }
 
         // Calculate package volume
@@ -1340,29 +1491,37 @@
 
         // MAP FUNCTIONS
         function showMap() {
-            const pickupAddress = document.getElementById('pickup_address').value || 'Not specified';
-            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
 
-            if (!pickupAddress || !deliveryAddress || pickupAddress === 'Not specified' || deliveryAddress === 'Not specified') {
-                alert('Please enter both pickup address and delivery address.');
-                return;
+            // Initialize Leaflet map if not already done
+            initMap();
+
+            // Fit map to existing markers if both exist
+            if (marker1 && marker2) {
+                const group = new L.featureGroup([marker1, marker2]);
+                map.fitBounds(group.getBounds(), {padding: [50, 50]});
             }
 
-            document.getElementById('mapPickupAddress').textContent = pickupAddress;
-            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
+            // Fix Leaflet display issue in hidden modals
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        }
 
-            const distance = calculateDistance();
-            const estimatedTime = Math.round(distance * 3); // 3 minutes per km for package delivery
+        function calculateAndDisplayRoute(pickup, delivery) {
+            // Simulated route calculation logic
+            const distance = calculateDistance() || "3.5";
+            const estimatedTime = Math.round(distance * 3) || "12";
             const weight = document.getElementById('weight').value || 0;
             const volume = calculateVolume();
             const deliveryMethod = getDeliveryMethod(volume, weight, distance);
 
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
-
-            document.getElementById('mapModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            return {
+                distance: distance,
+                time: estimatedTime,
+                method: deliveryMethod.title
+            };
         }
 
         function closeMap() {

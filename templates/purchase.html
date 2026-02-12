@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ErrandConnect - General Purchasing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
             --primary: #4CAF50;
@@ -647,6 +648,29 @@
             gap: 8px;
         }
 
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .selection-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+
         .close-map {
             background: none;
             border: none;
@@ -860,15 +884,22 @@
                 <h3><i class="fas fa-map-marked-alt"></i> Pickup & Delivery Route</h3>
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
-            <div class="map-placeholder">
-                <i class="fas fa-route"></i>
-                <h3>Route Preview</h3>
-                <p>Map showing route from store to delivery</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
+            <div id="map" style="height: 300px; width: 100%; border-radius: 12px; margin-bottom: 15px; z-index: 1;"></div>
+            <div class="map-selection-controls" style="display: flex; gap: 10px; margin-bottom: 15px; padding: 0 10px;">
+                <button type="button" id="setPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-store"></i> Set Store
+                </button>
+                <button type="button" id="setDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-home"></i> Set Delivery
+                </button>
+            </div>
+            <div style="padding: 0 15px 10px; font-size: 12px; color: #666; text-align: center;">
+                <i class="fas fa-info-circle"></i> Tap on map to set location
+            </div>
+            <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
                     <p><strong>Pickup:</strong> <span id="mapStoreLocation">Not specified</span></p>
                     <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
                 </div>
-            </div>
             <div class="map-info">
                 <div class="info-item">
                     <div class="info-value" id="mapDistance">0 km</div>
@@ -906,6 +937,11 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_purchase_errand') }}" id="purchaseForm">
+                    <!-- Hidden coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
                     <!-- Purchase Type -->
                     <h2><i class="fas fa-tags"></i> Purchase Type</h2>
                     <div class="purchase-type-selector">
@@ -1167,7 +1203,15 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Map global variables
+        let map;
+        let mapMarker;
+        let deliveryMarker;
+        let routeLine;
+        let selectionMode = 'pickup';
+
         // Global variables
         let selectedPurchaseType = 'retail';
         let totalItems = 1;
@@ -1182,6 +1226,12 @@
             // Update fee initially
             updateEstimatedFee();
         });
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('setPickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('setDropoffBtn').classList.toggle('active', mode === 'dropoff');
+        }
 
         function initializeForm() {
             // Set default purchase type
@@ -1292,20 +1342,36 @@
 
         // Distance calculation
         function calculateDistance() {
-            const storeLocation = document.getElementById('store_location').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
 
-            if (storeLocation && deliveryAddress) {
-                // Simulate distance based on input lengths
-                const storeLength = storeLocation.length;
-                const deliveryLength = deliveryAddress.length;
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+                // Fallback to text-based simulation if coordinates aren't set
+                const storeLocation = document.getElementById('store_location').value;
+                const deliveryAddress = document.getElementById('delivery_address').value;
 
-                // Generate distance between 0.05km (50m) and 25km
-                const baseDistance = 0.05 + (Math.abs(storeLength - deliveryLength) / 100);
-                const randomFactor = 0.5 + (Math.random() * 2);
-                return Math.min(baseDistance * randomFactor, 25).toFixed(2);
+                if (storeLocation && deliveryAddress) {
+                    const storeLength = storeLocation.length;
+                    const deliveryLength = deliveryAddress.length;
+                    const baseDistance = 0.05 + (Math.abs(storeLength - deliveryLength) / 100);
+                    const randomFactor = 0.5 + (Math.random() * 2);
+                    return Math.min(baseDistance * randomFactor, 25).toFixed(2);
+                }
+                return 0;
             }
-            return 0;
+
+            // Haversine formula
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const d = R * c;
+            return parseFloat(d.toFixed(2));
         }
 
         // Calculate distance fee for general purchases
@@ -1472,6 +1538,11 @@
             // Update delivery method indicator
             updateDeliveryMethod(distance);
 
+            // Update map details if open
+            if (document.getElementById('mapModal').style.display === 'flex') {
+                updateMapDetails(distance);
+            }
+
             // Visual feedback
             feeElement.style.transform = 'scale(1.1)';
             setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
@@ -1507,28 +1578,112 @@
 
         // Map functions
         function showMap() {
-            const storeLocation = document.getElementById('store_location').value || 'Not specified';
-            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
+            document.getElementById('mapModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
 
-            if (!storeLocation || !deliveryAddress || storeLocation === 'Not specified' || deliveryAddress === 'Not specified') {
-                alert('Please enter both pickup location and delivery address.');
-                return;
+            // Initialize map if not already done
+            if (!map) {
+                map = L.map('map').setView([-17.8216, 31.0492], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                map.on('click', function(e) {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+
+                    if (selectionMode === 'pickup') {
+                        updatePickupLocation(lat, lng, "Selected on Map");
+                    } else {
+                        updateDropoffLocation(lat, lng, "Selected on Map");
+                    }
+                });
             }
 
-            document.getElementById('mapStoreLocation').textContent = storeLocation;
-            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
+            // Force map to recalculate size after modal display
+            setTimeout(() => {
+                map.invalidateSize();
+                if (routeLine) {
+                    map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+                }
+            }, 100);
+        }
 
-            const distance = calculateDistance();
-            const estimatedTime = Math.round(distance * 4); // 4 minutes per km for general delivery
+        function updatePickupLocation(lat, lng, address) {
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            
+            if (address) {
+                document.getElementById('store_location').value = address;
+            }
+
+            if (mapMarker) map.removeLayer(mapMarker);
+            
+            // Green marker for pickup
+            const pickupIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            mapMarker = L.marker([lat, lng], {icon: pickupIcon}).addTo(map)
+                .bindPopup('Store: ' + (address || 'Selected Location'))
+                .openPopup();
+
+            updateRoute();
+            updateEstimatedFee();
+        }
+
+        function updateDropoffLocation(lat, lng, address) {
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            
+            if (address) {
+                document.getElementById('delivery_address').value = address;
+            }
+
+            if (deliveryMarker) map.removeLayer(deliveryMarker);
+            
+            // Blue marker for delivery (default)
+            deliveryMarker = L.marker([lat, lng]).addTo(map)
+                .bindPopup('Delivery: ' + (address || 'Selected Location'))
+                .openPopup();
+
+            updateRoute();
+            updateEstimatedFee();
+        }
+
+        function updateRoute() {
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
+
+            if (!isNaN(lat1) && !isNaN(lon1) && !isNaN(lat2) && !isNaN(lon2)) {
+                if (routeLine) map.removeLayer(routeLine);
+                routeLine = L.polyline([[lat1, lon1], [lat2, lon2]], {color: '#4CAF50', weight: 3, opacity: 0.7, dashArray: '5, 10'}).addTo(map);
+                map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+                
+                const distance = calculateDistance();
+                updateMapDetails(distance);
+            }
+        }
+
+        function updateMapDetails(distance) {
+            const storeLocation = document.getElementById('store_location').value || 'Not specified';
+            const deliveryAddress = document.getElementById('delivery_address').value || 'Not specified';
+            const estimatedTime = Math.round(distance * 4);
             const weight = document.getElementById('estimated_weight').value || 0;
             const deliveryMethod = getDeliveryMethod(distance, weight);
 
+            document.getElementById('mapStoreLocation').textContent = storeLocation;
+            document.getElementById('mapDeliveryAddress').textContent = deliveryAddress;
             document.getElementById('mapDistance').textContent = distance + ' km';
             document.getElementById('mapTime').textContent = estimatedTime + ' min';
             document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
-
-            document.getElementById('mapModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
         }
 
         function closeMap() {

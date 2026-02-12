@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Spare Parts - ErrandConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         :root {
             --primary: #4CAF50;
@@ -758,13 +760,16 @@
                 <h3><i class="fas fa-route"></i> Delivery Route</h3>
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
-            <div class="map-placeholder">
-                <i class="fas fa-map-marked-alt"></i>
-                <h3 id="routeTitle">Store to Delivery Route</h3>
-                <p id="routeDescription">Route from store/supplier to delivery address</p>
-                <div id="routeDetails" style="margin-top: 15px; text-align: left; font-size: 13px; width: 100%; max-width: 300px;">
-                    <p><strong>Store/Supplier:</strong> <span id="mapSupplier">Not specified</span></p>
-                    <p><strong>Delivery Address:</strong> <span id="mapDelivery">Not specified</span></p>
+            <div class="map-placeholder" style="position: relative; padding: 0;">
+                <div id="map" style="height: 350px; width: 100%;"></div>
+                <div id="mapHintText" style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 12px; z-index: 1000; white-space: nowrap; pointer-events: none;">Tap on map to set Store location</div>
+                <div class="map-selection-controls" style="position: absolute; bottom: 15px; left: 10px; right: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 1000;">
+                    <button type="button" id="selectPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')" style="background: white; border: 2px solid #ddd; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-store"></i> Set Store
+                    </button>
+                    <button type="button" id="selectDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')" style="background: white; border: 2px solid #ddd; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-home"></i> Set Delivery
+                    </button>
                 </div>
             </div>
             <div class="map-info">
@@ -1019,9 +1024,16 @@
                             <i class="fas fa-info-circle"></i> This address will be used as the starting point for the delivery route.
                         </div>
                         <div class="form-group">
-                            <div class="input-with-icon">
-                                <i class="fas fa-location-dot"></i>
-                                <input type="text" id="store_address" name="store_address" placeholder="Store/supplier full address" required oninput="updateProgress(); updateEstimatedFee()">
+                            <div class="address-input-group" style="position: relative;">
+                                <div class="input-with-icon map-input">
+                                    <i class="fas fa-location-dot"></i>
+                                    <input type="text" id="store_address" name="store_address" placeholder="Store/supplier full address" required oninput="updateProgress(); updateEstimatedFee()">
+                                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                                    <input type="hidden" id="pickup_lng" name="pickup_lng">
+                                    <button type="button" class="map-input-button" onclick="showStoreMap()" title="View on map" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1036,9 +1048,16 @@
                         <div class="info-tip">
                             <i class="fas fa-info-circle"></i> This is where the parts will be delivered to.
                         </div>
-                        <div class="input-with-icon">
-                            <i class="fas fa-home"></i>
-                            <input type="text" id="delivery_address" name="delivery_address" placeholder="Where to deliver the parts?" required oninput="updateEstimatedFee(); updateProgress()">
+                        <div class="address-input-group" style="position: relative;">
+                            <div class="input-with-icon map-input">
+                                <i class="fas fa-home"></i>
+                                <input type="text" id="delivery_address" name="delivery_address" placeholder="Where to deliver the parts?" required oninput="updateEstimatedFee(); updateProgress()">
+                                <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                                <input type="hidden" id="dropoff_lng" name="dropoff_lng">
+                                <button type="button" class="map-input-button" onclick="showDeliveryMap()" title="View on map" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- NEW: View Route Button -->
@@ -1119,7 +1138,24 @@
         </div>
     </div>
 
+</script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
+        let map, pickupMarker, dropoffMarker, routePolyline;
+        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
         // Mobile-optimized JavaScript
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form
@@ -1161,42 +1197,374 @@
             }
         }
 
-        // NEW: Show Route Map - UPDATED TO USE STORE ADDRESS
-        function showRouteMap() {
-            const storeAddress = document.getElementById('store_address').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
-            const supplierName = document.getElementById('preferred_supplier').value;
+        function initMap() {
+            if (map) return;
+            
+            map = L.map('map', {
+                zoomControl: false,
+                tap: true
+            }).setView([-1.2921, 36.8219], 13); // Default to Nairobi
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
 
-            // Validate inputs
-            if (!storeAddress || storeAddress.trim() === '') {
-                alert('Please enter the store/supplier address first.');
-                document.getElementById('store_address').focus();
-                return;
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+
+            map.on('click', function(e) {
+                if (selectionMode === 'pickup') {
+                    setPickupLocation(e.latlng.lat, e.latlng.lng);
+                } else {
+                    setDropoffLocation(e.latlng.lat, e.latlng.lng);
+                }
+                vibrate();
+            });
+
+            // Try to get user location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    map.setView([position.coords.latitude, position.coords.longitude], 13);
+                });
             }
-
-            if (!deliveryAddress || deliveryAddress.trim() === '') {
-                alert('Please enter the delivery address first.');
-                document.getElementById('delivery_address').focus();
-                return;
-            }
-
-            // Create display name for supplier
-            let supplierDisplay = storeAddress;
-            if (supplierName && supplierName.trim() !== '') {
-                supplierDisplay = `${supplierName} - ${storeAddress}`;
-            }
-
-            // Update modal content
-            document.getElementById('mapSupplier').textContent = storeAddress;
-            document.getElementById('mapDelivery').textContent = deliveryAddress;
-
-            // Calculate route details
-            calculateAndDisplayRoute(storeAddress, deliveryAddress);
-
-            // Show modal
-            document.getElementById('mapModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
         }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('selectPickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('selectDropoffBtn').classList.toggle('active', mode === 'dropoff');
+            
+            const hintText = document.getElementById('mapHintText');
+            if (mode === 'pickup') {
+                hintText.textContent = "Tap on map to set Store location";
+                hintText.style.background = "rgba(76, 175, 80, 0.9)";
+            } else {
+                hintText.textContent = "Tap on map to set Delivery location";
+                hintText.style.background = "rgba(33, 150, 243, 0.9)";
+            }
+        }
+
+        function setPickupLocation(lat, lng) {
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lng').value = lng;
+            
+            if (pickupMarker) {
+                pickupMarker.setLatLng([lat, lng]);
+            } else {
+                pickupMarker = L.marker([lat, lng], {
+                    draggable: true,
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup("Store Location");
+                
+                pickupMarker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    setPickupLocation(pos.lat, pos.lng);
+                });
+            }
+            
+            updateRoute();
+            // Reverse geocode placeholder
+            document.getElementById('store_address').value = `Location set (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            updateEstimatedFee();
+        }
+
+        function setDropoffLocation(lat, lng) {
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lng').value = lng;
+            
+            if (dropoffMarker) {
+                dropoffMarker.setLatLng([lat, lng]);
+            } else {
+                dropoffMarker = L.marker([lat, lng], {
+                    draggable: true,
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup("Delivery Location");
+                
+                dropoffMarker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    setDropoffLocation(pos.lat, pos.lng);
+                });
+            }
+            
+            updateRoute();
+            // Reverse geocode placeholder
+            document.getElementById('delivery_address').value = `Location set (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            updateEstimatedFee();
+        }
+
+        function updateRoute() {
+            if (pickupMarker && dropoffMarker) {
+                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
+                if (routePolyline) {
+                    routePolyline.setLatLngs(points);
+                } else {
+                    routePolyline = L.polyline(points, {color: '#4CAF50', weight: 5, opacity: 0.7}).addTo(map);
+                }
+                map.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+                
+                const distance = calculateDistance();
+                const time = Math.round(distance * 3); // 3 mins per km approx
+                
+                document.getElementById('mapDistance').textContent = distance.toFixed(1) + ' km';
+                document.getElementById('mapTime').textContent = time + ' min';
+                
+                let mode = 'Vehicle';
+                if (distance <= 2) mode = 'Bike/Walking';
+                else if (distance <= 5) mode = 'Motorcycle';
+                document.getElementById('mapTransport').textContent = mode;
+            }
+        }
+
+        function showStoreMap() {
+            document.getElementById('mapModal').style.display = 'flex';
+            setSelectionMode('pickup');
+            setTimeout(() => {
+                initMap();
+                map.invalidateSize();
+                if (pickupMarker) {
+                    map.setView(pickupMarker.getLatLng(), 15);
+                }
+            }, 100);
+        }
+
+        function showDeliveryMap() {
+            document.getElementById('mapModal').style.display = 'flex';
+            setSelectionMode('dropoff');
+            setTimeout(() => {
+                initMap();
+                map.invalidateSize();
+                if (dropoffMarker) {
+                    map.setView(dropoffMarker.getLatLng(), 15);
+                }
+            }, 100);
+        }
+
+        function showRouteMap() {
+            document.getElementById('mapModal').style.display = 'flex';
+            setTimeout(() => {
+                initMap();
+                map.invalidateSize();
+                if (routePolyline) {
+                    map.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+                }
+            }, 100);
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function calculateDistance() {
+            const pLat = document.getElementById('pickup_lat').value;
+            const pLng = document.getElementById('pickup_lng').value;
+            const dLat = document.getElementById('dropoff_lat').value;
+            const dLng = document.getElementById('dropoff_lng').value;
+
+            if (pLat && pLng && dLat && dLng) {
+                return calculateHaversineDistance(
+                    parseFloat(pLat), parseFloat(pLng),
+                    parseFloat(dLat), parseFloat(dLng)
+                );
+            }
+
+            // Fallback to text length simulation
+            const store = document.getElementById('store_address').value;
+            const delivery = document.getElementById('delivery_address').value;
+            if (store && delivery) {
+                const dist = Math.abs(store.length - delivery.length) / 5;
+                return Math.min(Math.max(dist, 1), 25);
+            }
+            return 0;
+        }
+
+        function initializeForm() {
+            // Update fee when inputs change
+            const feeInputs = ['device_type', 'budget_range', 'urgency_level', 'quality_preference', 'installation_needed', 'delivery_timeframe'];
+            feeInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', updateEstimatedFee);
+                }
+            });
+
+            // Update progress bar
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('change', updateProgress);
+            });
+
+            // Initial calculations
+            updateBudgetDisplay();
+            updateEstimatedFee();
+        }
+
+        // Add part
+        function addPart() {
+            const container = document.getElementById('parts-container');
+            const newPart = document.createElement('div');
+            newPart.className = 'part-item';
+            newPart.innerHTML = `
+                <div class="part-row">
+                    <div class="input-with-icon" style="flex: 2;">
+                        <i class="fas fa-cog"></i>
+                        <input type="text" name="part_names[]" placeholder="Part name" required oninput="updateEstimatedFee(); updateProgress()">
+                    </div>
+                    <div class="input-with-icon" style="flex: 1;">
+                        <i class="fas fa-sort-amount-up"></i>
+                        <input type="number" name="quantities[]" placeholder="Qty" min="1" required oninput="updateEstimatedFee(); updateProgress()">
+                    </div>
+                </div>
+                <div class="part-row">
+                    <div class="input-with-icon">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" name="part_numbers[]" placeholder="Part number" oninput="updateProgress()">
+                    </div>
+                </div>
+                <div class="part-actions">
+                    <button type="button" class="remove-part" onclick="removePart(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newPart);
+
+            // Add animation
+            newPart.style.opacity = '0';
+            newPart.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                newPart.style.transition = 'all 0.3s ease';
+                newPart.style.opacity = '1';
+                newPart.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Focus on new part
+            setTimeout(() => {
+                newPart.querySelector('input[name="part_names[]"]').focus();
+            }, 300);
+        }
+
+        // Remove part
+        function removePart(button) {
+            const part = button.closest('.part-item');
+            part.style.transition = 'all 0.3s ease';
+            part.style.opacity = '0';
+            part.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                part.remove();
+                updateEstimatedFee();
+            }, 300);
+        }
+
+        // Calculate part count
+        function getPartCount() {
+            return document.querySelectorAll('input[name="part_names[]"]').length;
+        }
+
+        // Calculate quantity count
+        function getTotalQuantity() {
+            let total = 0;
+            document.querySelectorAll('input[name="quantities[]"]').forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            return total;
+        }
+
+        // Update budget display
+        function updateBudgetDisplay() {
+            const budgetRange = document.getElementById('budget_range').value;
+            const budgetLabels = {
+                'flexible': 'Flexible',
+                'under_50': 'Under $50',
+                '50_100': '$50 - $100',
+                '100_200': '$100 - $200',
+                '200_500': '$200 - $500',
+                '500_plus': '$500+'
+            };
+
+            document.getElementById('budget_display').textContent = budgetLabels[budgetRange];
+        }
+
+        // Update estimated fee
+        function updateEstimatedFee() {
+            const deviceType = document.getElementById('device_type').value;
+            const urgencyLevel = document.getElementById('urgency_level').value;
+            const installationNeeded = document.getElementById('installation_needed').value;
+            const deliveryTimeframe = document.getElementById('delivery_timeframe').value;
+            const partCount = getPartCount();
+            
+            const distance = calculateDistance();
+
+            // Base fee calculation
+            let baseFee = 5.00;
+            
+            // Device type factor
+            const deviceFees = {'car': 10, 'motorcycle': 5, 'truck': 15, 'appliance': 7, 'electronics': 8, 'computer': 6, 'bicycle': 3, 'other': 10};
+            baseFee += (deviceFees[deviceType] || 5);
+            
+            // Urgency factor
+            const urgencyFees = {'low': 0, 'medium': 5, 'high': 10, 'urgent': 20};
+            baseFee += (urgencyFees[urgencyLevel] || 0);
+            
+            // Installation factor
+            if (installationNeeded === 'yes') baseFee += 15;
+            else if (installationNeeded === 'maybe') baseFee += 5;
+            
+            // Delivery timeframe factor
+            const deliveryFees = {'asap': 10, 'today': 5, 'tomorrow': 2, 'this_week': 0, 'flexible': 0};
+            baseFee += (deliveryFees[deliveryTimeframe] || 0);
+            
+            // Distance fee ($0.50 per km)
+            baseFee += (distance * 0.5);
+            
+            // Part count fee ($2 per extra part)
+            if (partCount > 1) baseFee += (partCount - 1) * 2;
+
+            document.getElementById('estimated_fee').textContent = '$' + baseFee.toFixed(2);
+        }
+
+        // Haptic feedback simulation
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Progress bar
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            let filled = 0;
+            let total = 0;
+
+            inputs.forEach(input => {
+                if (input.required) {
+                    total++;
+                    if (input.value && input.value.trim() !== '') {
+                        filled++;
+                    }
+                }
+            });
+
+            const progress = total > 0 ? (filled / total) * 100 : 0;
+            const progressBar = document.querySelector('.progress');
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+        }
+    </script>
 
         // NEW: Calculate Route Details - IMPROVED
         function calculateAndDisplayRoute(from, to) {
@@ -1253,10 +1621,11 @@
             document.getElementById('mapTime').textContent = estimatedMinutes + ' min';
             document.getElementById('mapTransport').textContent = transportMode;
 
-            // Update route description
-            const fromShort = from.split(',')[0].substring(0, 30) + (from.split(',')[0].length > 30 ? '...' : '');
-            const toShort = to.split(',')[0].substring(0, 30) + (to.split(',')[0].length > 30 ? '...' : '');
-            document.getElementById('routeDescription').textContent = `Route from ${fromShort} to ${toShort}`;
+            return {
+                distance: distance,
+                time: estimatedMinutes,
+                transport: transportMode
+            };
         }
 
         // NEW: Close Map

@@ -1181,13 +1181,13 @@
                 <div class="user-menu">
                     <span class="welcome-text">Welcome, {{ user.fullname if user else 'Runner' }}! 👋</span>
                     <div class="user-actions">
-                        <button class="btn-icon">
-                            <i class="fas fa-user"></i>
-                        </button>
-                        <button class="btn-icon">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </div>
+                    <a href="{{ url_for('runnerprofile') }}" class="btn-icon">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
                 </div>
             </div>
         </header>
@@ -1231,7 +1231,7 @@
                         <i class="fas fa-dollar-sign"></i>
                         High Paying
                     </button>
-                    <button class="action-btn outline">
+                    <button class="action-btn outline" onclick="window.location.href='{{ url_for('runnercompleted') }}'">
                         <i class="fas fa-history"></i>
                         View Completed
                     </button>
@@ -1260,19 +1260,19 @@
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('runnerhome') }}" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('runnercompleted') }}" class="nav-item">
                 <i class="fas fa-check-circle"></i>
                 <span>Completed</span>
             </a>
-            <a href="#" class="nav-item active">
+            <a href="{{ url_for('runneravailable_errands') }}" class="nav-item active">
                 <i class="fas fa-list"></i>
                 <span>Errands</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('runnerprofile') }}" class="nav-item">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
@@ -1864,7 +1864,13 @@
         }
 
         function getDirections(errandId) {
-            alert('Directions would open in your maps application.');
+            const errand = errands.find(e => e.id === errandId);
+            if (errand) {
+                const destination = encodeURIComponent(errand.delivery);
+                const pickup = encodeURIComponent(errand.pickup);
+                const url = `https://www.google.com/maps/dir/?api=1&origin=${pickup}&destination=${destination}&travelmode=driving`;
+                window.open(url, '_blank');
+            }
         }
 
         function notInterested(errandId) {

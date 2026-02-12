@@ -74,31 +74,31 @@
         <div class="errands-list">
             {% if orders %}
                 {% for e in orders %}
-                <div class="errand-item animated-slideup" data-status="{{ e.status }}" data-id="{{ e.order_id }}">
+                <div class="errand-item animated-slideup" data-status="{{ e.status }}" data-id="{{ e.id }}">
                     <!-- Compact View -->
                     <div class="errand-compact-view">
                         <div class="errand-header">
                             <div class="errand-type">
-                                <div class="service-icon service-{{ e.service_type|lower|replace(' ', '-') }}">
-                                    {% if 'grocery' in e.service_type|lower %}
+                                <div class="service-icon service-{{ e.type|lower|replace(' ', '-') }}">
+                                    {% if 'grocery' in e.type|lower %}
                                         <i class="fas fa-shopping-basket"></i>
-                                    {% elif 'food' in e.service_type|lower %}
+                                    {% elif 'food' in e.type|lower %}
                                         <i class="fas fa-utensils"></i>
-                                    {% elif 'bill' in e.service_type|lower %}
+                                    {% elif 'bill' in e.type|lower %}
                                         <i class="fas fa-file-invoice-dollar"></i>
-                                    {% elif 'package' in e.service_type|lower %}
+                                    {% elif 'package' in e.type|lower %}
                                         <i class="fas fa-box"></i>
-                                    {% elif 'gadget' in e.service_type|lower %}
+                                    {% elif 'gadget' in e.type|lower %}
                                         <i class="fas fa-laptop"></i>
-                                    {% elif 'gas' in e.service_type|lower %}
+                                    {% elif 'gas' in e.type|lower %}
                                         <i class="fas fa-gas-pump"></i>
                                     {% else %}
                                         <i class="fas fa-running"></i>
                                     {% endif %}
                                 </div>
                                 <div class="errand-info">
-                                    <strong class="errand-title">{{ e.service_type or "General Errand" }}</strong>
-                                    <span class="errand-id">#{{ e.order_id }}</span>
+                                    <strong class="errand-title">{{ e.type or "General Errand" }}</strong>
+                                    <span class="errand-id">#{{ e.id }}</span>
                                 </div>
                             </div>
                             <span class="status-badge status-{{ e.status }}">
@@ -133,23 +133,23 @@
                         <div class="errand-footer">
                             <div class="errand-meta">
                                 <div class="price-tag">
-                                    <span class="price-amount">${{ "%.2f"|format(e.amount) if e.amount else '0.00' }}</span>
+                                    <span class="price-amount">${{ "%.2f"|format(e.price_estimate) if e.price_estimate else '0.00' }}</span>
                                     <span class="price-label">Estimated</span>
                                 </div>
                                 <div class="time-info">
-                                    <span class="time-ago">{{ e.date|timesince if e.date else 'Recently' }}</span>
-                                    <span class="time-exact">{{ e.date.strftime('%b %d, %H:%M') if e.date else '' }}</span>
+                                    <span class="time-ago">{{ e.created_at|timesince if e.created_at else 'Recently' }}</span>
+                                    <span class="time-exact">{{ e.created_at.strftime('%b %d, %H:%M') if e.created_at else '' }}</span>
                                 </div>
                             </div>
 
                             <div class="errand-actions">
                                 {% if e.status == 'completed' %}
-                                <button class="action-btn rate-btn" data-errand-id="{{ e.order_id }}">
+                                <button class="action-btn rate-btn" data-errand-id="{{ e.id }}">
                                     <i class="fas fa-star"></i>
                                     Rate
                                 </button>
                                 {% endif %}
-                                <button class="action-btn details-btn" onclick="toggleErrandDetails({{ e.order_id }})">
+                                <button class="action-btn details-btn" onclick="toggleErrandDetails({{ e.id }})">
                                     <i class="fas fa-eye"></i>
                                     View Details
                                 </button>
@@ -158,9 +158,9 @@
                     </div>
 
                     <!-- Expanded View (Hidden by default) -->
-                    <div class="errand-expanded-view" id="expanded-{{ e.order_id }}" style="display: none;">
+                    <div class="errand-expanded-view" id="expanded-{{ e.id }}" style="display: none;">
                         <div class="hide-details-container">
-                            <button class="hide-details-btn" onclick="toggleErrandDetails({{ e.order_id }})">
+                            <button class="hide-details-btn" onclick="toggleErrandDetails({{ e.id }})">
                                 <i class="fas fa-chevron-up"></i>
                                 Hide Details
                             </button>
@@ -187,14 +187,14 @@
                                     <i class="fas fa-clock"></i>
                                     <div class="detail-content">
                                         <strong>Time Created:</strong>
-                                        <span>{{ e.date.strftime('%b %d, %Y at %H:%M') if e.date else 'Not specified' }}</span>
+                                        <span>{{ e.created_at.strftime('%b %d, %Y at %H:%M') if e.created_at else 'Not specified' }}</span>
                                     </div>
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-hourglass-half"></i>
                                     <div class="detail-content">
                                         <strong>Delivery Time:</strong>
-                                        <span>{% if e.estimated_delivery_time %}{{ e.estimated_delivery_time }}{% else %}Standard delivery time{% endif %}</span>
+                                        <span>{% if e.delivery_time %}{{ e.delivery_time }}{% else %}Standard delivery time{% endif %}</span>
                                     </div>
                                 </div>
                             </div>
@@ -205,14 +205,14 @@
                                     <i class="fas fa-tag"></i>
                                     <div class="detail-content">
                                         <strong>Service Type:</strong>
-                                        <span>{{ e.service_type or 'General Errand' }}</span>
+                                        <span>{{ e.type or 'General Errand' }}</span>
                                     </div>
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-money-bill-wave"></i>
                                     <div class="detail-content">
                                         <strong>Agreed Price:</strong>
-                                        <span>${{ "%.2f"|format(e.final_price or e.amount) if e.final_price or e.amount else '0.00' }}</span>
+                                        <span>${{ "%.2f"|format(e.agreed_price or e.price_estimate) if e.agreed_price or e.price_estimate else '0.00' }}</span>
                                     </div>
                                 </div>
                                 <div class="detail-item">
@@ -220,8 +220,8 @@
                                     <div class="detail-content">
                                         <strong>Runner:</strong>
                                         <span>
-                                            {% if e.other_user %}
-                                                {{ e.other_user.fullname }}
+                                            {% if e.active_errand and e.active_errand.runner %}
+                                                {{ e.active_errand.runner.fullname }}
                                             {% else %}
                                                 Not assigned yet
                                             {% endif %}
@@ -233,8 +233,8 @@
                                     <div class="detail-content">
                                         <strong>Runner Contact:</strong>
                                         <span>
-                                            {% if e.other_user and e.other_user.phone %}
-                                                {{ e.other_user.phone }}
+                                            {% if e.active_errand and e.active_errand.runner and e.active_errand.runner.phone %}
+                                                {{ e.active_errand.runner.phone }}
                                             {% else %}
                                                 Not available
                                             {% endif %}
@@ -251,8 +251,8 @@
 
                         <div class="action-buttons">
                             {% if e.status == 'completed' %}
-                                {% set can_delete = e.date and (now - e.date).days > 7 %}
-                                <button class="btn-danger" onclick="deleteErrand({{ e.order_id }})" {% if not can_delete %}disabled title="Can only delete after 7 days"{% endif %}>
+                                {% set can_delete = e.created_at and (now - e.created_at).days > 7 %}
+                                <button class="btn-danger" onclick="deleteErrand({{ e.id }})" {% if not can_delete %}disabled title="Can only delete after 7 days"{% endif %}>
                                     <i class="fas fa-trash"></i>
                                     Delete Errand
                                 </button>

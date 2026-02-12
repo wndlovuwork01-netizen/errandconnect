@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ticket Booking - ErrandConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --primary: #4CAF50;
@@ -380,7 +382,7 @@
         }
 
         .map-placeholder {
-            padding: 30px 15px;
+            padding: 0;
             text-align: center;
             background: #f5f5f5;
             flex: 1;
@@ -389,7 +391,92 @@
             align-items: center;
             justify-content: center;
             min-height: 250px;
-            overflow-y: auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .map-hint {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .map-selection-controls {
+            position: absolute;
+            bottom: 15px;
+            left: 10px;
+            right: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .selection-btn {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .selection-btn.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .custom-div-icon {
+            background: transparent;
+            border: none;
+        }
+
+        .marker-pin {
+            width: 30px;
+            height: 30px;
+            border-radius: 50% 50% 50% 0;
+            background: var(--primary);
+            position: absolute;
+            transform: rotate(-45deg);
+            left: 50%;
+            top: 50%;
+            margin: -15px 0 0 -15px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .custom-div-icon i {
+            position: absolute;
+            width: 30px;
+            font-size: 14px;
+            color: white;
+            text-align: center;
+            top: 10px;
+            left: 0;
+            z-index: 2;
         }
 
         .map-placeholder i {
@@ -805,12 +892,15 @@
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
             <div class="map-placeholder">
-                <i class="fas fa-map-marked-alt"></i>
-                <h3>Ticket Route</h3>
-                <p>From ticket source to your location</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
-                    <p><strong>Venue:</strong> <span id="mapVenueLocation">Not specified</span></p>
-                    <p><strong>Delivery:</strong> <span id="mapDeliveryAddress">Not specified</span></p>
+                <div id="map"></div>
+                <div id="mapHintText" class="map-hint">Tap on map to set Venue location</div>
+                <div class="map-selection-controls">
+                    <button type="button" id="selectPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                        <i class="fas fa-map-marker-alt"></i> Set Venue
+                    </button>
+                    <button type="button" id="selectDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                        <i class="fas fa-home"></i> Set Delivery
+                    </button>
                 </div>
             </div>
             <div class="route-steps">
@@ -912,6 +1002,8 @@
                             <div class="input-with-icon map-input">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <input type="text" id="venue" name="venue" placeholder="Venue or location" required oninput="updateEstimatedFee(); updateProgress()">
+                                <input type="hidden" id="pickup_lat" name="pickup_lat">
+                                <input type="hidden" id="pickup_lng" name="pickup_lng">
                                 <button type="button" class="map-input-button" onclick="showVenueMap()" title="View on map">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </button>
@@ -1104,6 +1196,8 @@
                             <div class="input-with-icon map-input">
                                 <i class="fas fa-home"></i>
                                 <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address for physical tickets" oninput="updateEstimatedFee(); updateProgress()">
+                                <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                                <input type="hidden" id="dropoff_lng" name="dropoff_lng">
                                 <button type="button" class="map-input-button" onclick="showDeliveryMap()" title="View on map">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </button>
@@ -1157,6 +1251,143 @@
     </div>
 
     <script>
+        // Map selection state
+        let map, pickupMarker, dropoffMarker, polyline;
+        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+
+        function initMap() {
+            if (map) return;
+            
+            map = L.map('map').setView([5.6037, -0.1870], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                if (selectionMode === 'pickup') {
+                    setPickupLocation(lat, lng, "Selected Venue Location");
+                } else {
+                    setDropoffLocation(lat, lng, "Selected Delivery Location");
+                }
+                updateRoute();
+            });
+        }
+
+        function setPickupLocation(lat, lng, label) {
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lng').value = lng;
+            
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            
+            const pickupIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="marker-pin" style="background: #4CAF50;"></div><i class="fas fa-map-marker-alt"></i>`,
+                iconSize: [30, 42],
+                iconAnchor: [15, 42]
+            });
+            
+            pickupMarker = L.marker([lat, lng], {icon: pickupIcon}).addTo(map);
+            if (label) document.getElementById('venue').value = label;
+            updateEstimatedFee();
+        }
+
+        function setDropoffLocation(lat, lng, label) {
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lng').value = lng;
+            
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            
+            const dropoffIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="marker-pin" style="background: #2196F3;"></div><i class="fas fa-home"></i>`,
+                iconSize: [30, 42],
+                iconAnchor: [15, 42]
+            });
+            
+            dropoffMarker = L.marker([lat, lng], {icon: dropoffIcon}).addTo(map);
+            if (label) document.getElementById('delivery_address').value = label;
+            updateEstimatedFee();
+        }
+
+        function updateRoute() {
+            if (pickupMarker && dropoffMarker) {
+                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
+                if (polyline) map.removeLayer(polyline);
+                polyline = L.polyline(points, {color: '#4CAF50', weight: 3, dashArray: '10, 10'}).addTo(map);
+                map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+            }
+        }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.querySelectorAll('.selection-btn').forEach(btn => btn.classList.remove('active'));
+            if (mode === 'pickup') {
+                document.getElementById('selectPickupBtn').classList.add('active');
+                document.getElementById('mapHintText').textContent = 'Tap on map to set Venue location';
+            } else {
+                document.getElementById('selectDropoffBtn').classList.add('active');
+                document.getElementById('mapHintText').textContent = 'Tap on map to set Delivery location';
+            }
+        }
+
+        function showVenueMap() {
+            document.getElementById('mapModal').style.display = 'flex';
+            setSelectionMode('pickup');
+            setTimeout(() => {
+                initMap();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        map.setView([lat, lng], 15);
+                    });
+                }
+            }, 100);
+        }
+
+        function showDeliveryMap() {
+            document.getElementById('mapModal').style.display = 'flex';
+            setSelectionMode('dropoff');
+            setTimeout(() => {
+                initMap();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        map.setView([lat, lng], 15);
+                    });
+                }
+            }, 100);
+        }
+
+        function showFullMap() {
+            document.getElementById('mapModal').style.display = 'flex';
+            setTimeout(() => {
+                initMap();
+                if (pickupMarker && dropoffMarker) {
+                    updateRoute();
+                }
+            }, 100);
+        }
+
+        function closeMap() {
+            document.getElementById('mapModal').style.display = 'none';
+        }
+
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
         // Mobile-optimized JavaScript
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form
@@ -1211,7 +1442,8 @@
 
             // Set minimum date to today
             const today = new Date().toISOString().split('T')[0];
-            document.querySelector('input[name="event_date"]').min = today;
+            const eventDateInput = document.querySelector('input[name="event_date"]');
+            if (eventDateInput) eventDateInput.min = today;
 
             // Initial calculations
             updateTicketCount();
@@ -1219,17 +1451,27 @@
             updateDeliveryMethod();
         }
 
-        // Calculate distance (simulated for mobile)
+        // Calculate distance (using coordinates if available, otherwise simulated)
         function calculateDistance(venue, deliveryAddress) {
+            const pLat = document.getElementById('pickup_lat').value;
+            const pLng = document.getElementById('pickup_lng').value;
+            const dLat = document.getElementById('dropoff_lat').value;
+            const dLng = document.getElementById('dropoff_lng').value;
+
+            if (pLat && pLng && dLat && dLng) {
+                return calculateHaversineDistance(
+                    parseFloat(pLat), parseFloat(pLng),
+                    parseFloat(dLat), parseFloat(dLng)
+                );
+            }
+
             if (venue && deliveryAddress) {
-                // Simulate distance based on input lengths
+                // Fallback to length-based simulation if coordinates aren't both set
                 const venueLength = venue.length;
                 const deliveryLength = deliveryAddress.length;
-
-                // Generate distance between 0.5km and 30km for ticket delivery
                 const baseDistance = 0.5 + (Math.abs(venueLength - deliveryLength) / 25);
                 const randomFactor = 0.8 + (Math.random() * 1.4);
-                return Math.min(baseDistance * randomFactor, 30).toFixed(1);
+                return Math.min(baseDistance * randomFactor, 30);
             }
             return 0;
         }
@@ -1237,9 +1479,21 @@
         // Determine delivery method
         function getDeliveryMethod(deliveryType, distance) {
             const distanceKm = parseFloat(distance) || 0;
+            
+            // Update map info
+            const mapDistance = document.getElementById('mapDistance');
+            const mapTime = document.getElementById('mapTime');
+            const mapDeliveryMethod = document.getElementById('mapDeliveryMethod');
 
+            if (mapDistance) mapDistance.textContent = distanceKm.toFixed(1) + ' km';
+            if (mapTime) {
+                const estTime = Math.round(distanceKm * 3); // 3 mins per km
+                mapTime.textContent = estTime + ' min';
+            }
+
+            let methodInfo;
             if (deliveryType === 'electronic') {
-                return {
+                methodInfo = {
                     method: 'digital',
                     title: 'Digital Delivery',
                     description: 'Tickets will be sent electronically',
@@ -1248,7 +1502,7 @@
                 };
             } else if (deliveryType === 'physical' || deliveryType === 'pickup') {
                 if (distanceKm <= 3) {
-                    return {
+                    methodInfo = {
                         method: 'bike',
                         title: 'Bike Delivery',
                         description: 'Fast delivery within short distances',
@@ -1256,7 +1510,7 @@
                         color: '#4CAF50'
                     };
                 } else {
-                    return {
+                    methodInfo = {
                         method: 'vehicle',
                         title: 'Vehicle Delivery',
                         description: 'Requires vehicle for ticket transport',
@@ -1265,7 +1519,7 @@
                     };
                 }
             } else if (deliveryType === 'venue') {
-                return {
+                methodInfo = {
                     method: 'venue_pickup',
                     title: 'Venue Pickup',
                     description: 'Tickets will be available at venue',
@@ -1273,7 +1527,7 @@
                     color: '#9C27B0'
                 };
             } else {
-                return {
+                methodInfo = {
                     method: 'standard',
                     title: 'Standard Delivery',
                     description: 'Standard ticket delivery',
@@ -1281,6 +1535,9 @@
                     color: '#607D8B'
                 };
             }
+
+            if (mapDeliveryMethod) mapDeliveryMethod.textContent = methodInfo.title;
+            return methodInfo;
         }
 
         // Update delivery method display
@@ -1462,61 +1719,43 @@
 
         // Map functions
         function showVenueMap() {
-            const venue = document.getElementById('venue').value;
-            if (!venue) {
-                vibrate();
-                alert('Please enter venue location first.');
-                document.getElementById('venue').focus();
-                return;
-            }
-            showFullMap();
+            document.getElementById('mapModal').style.display = 'flex';
+            setSelectionMode('pickup');
+            setTimeout(() => {
+                initMap();
+                if (navigator.geolocation && !pickupMarker) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        if (map) map.setView([lat, lng], 15);
+                    });
+                }
+            }, 100);
         }
 
         function showDeliveryMap() {
-            const deliveryAddress = document.getElementById('delivery_address').value;
-            if (!deliveryAddress) {
-                vibrate();
-                alert('Please enter delivery address first.');
-                document.getElementById('delivery_address').focus();
-                return;
-            }
-            showFullMap();
+            document.getElementById('mapModal').style.display = 'flex';
+            setSelectionMode('dropoff');
+            setTimeout(() => {
+                initMap();
+                if (navigator.geolocation && !dropoffMarker) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        if (map) map.setView([lat, lng], 15);
+                    });
+                }
+            }, 100);
         }
 
         function showFullMap() {
-            const venue = document.getElementById('venue').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
-            const deliveryMethod = document.getElementById('delivery_method').value;
-
-            if (!venue) {
-                vibrate();
-                alert('Please enter venue location first.');
-                document.getElementById('venue').focus();
-                return;
-            }
-
-            if (deliveryMethod === 'physical' && !deliveryAddress) {
-                vibrate();
-                alert('Please enter delivery address for physical tickets.');
-                document.getElementById('delivery_address').focus();
-                return;
-            }
-
-            document.getElementById('mapVenueLocation').textContent = venue || 'Not specified';
-            document.getElementById('mapDeliveryAddress').textContent = deliveryMethod === 'physical' ?
-                (deliveryAddress || 'Not specified') : 'Electronic Delivery';
-
-            const distance = calculateDistance(venue, deliveryAddress);
-            const estimatedTime = Math.round(distance * 3);
-            const deliveryMethodType = getDeliveryMethod(deliveryMethod, distance);
-
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapDeliveryMethod').textContent = deliveryMethodType.title;
-
             document.getElementById('mapModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            document.querySelector('.close-map').focus();
+            setTimeout(() => {
+                initMap();
+                if (pickupMarker && dropoffMarker) {
+                    updateRoute();
+                }
+            }, 100);
         }
 
         function closeMap() {

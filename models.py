@@ -77,6 +77,8 @@ class Errand(db.Model):
     delivery_time = db.Column(db.String(50))
     details = db.Column(db.Text)
     price_estimate = db.Column(db.Float)
+    agreed_price = db.Column(db.Float)  # Final agreed price
+    calculated_minimum_fee = db.Column(db.Float)
     status = db.Column(db.String(50), default="pending")  # pending, accepted, completed, cancelled
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -84,6 +86,7 @@ class Errand(db.Model):
     negotiations = db.relationship("Negotiation", back_populates="errand", lazy=True)
     active_errand = db.relationship("ActiveErrand", back_populates="errand", uselist=False)
     ratings = db.relationship("Rating", backref="errand_rated", lazy=True)
+    chats = db.relationship("Chat", back_populates="errand", lazy=True)
 
     def __repr__(self):
         return f"<Errand id={self.id} client_id={self.client_id}>"
@@ -110,6 +113,47 @@ class Negotiation(db.Model):
 
 
 # ============================================================
+# CHAT MODEL
+# ============================================================
+class Chat(db.Model):
+    __tablename__ = "chats"
+
+    id = db.Column(db.Integer, primary_key=True)
+    errand_id = db.Column(db.Integer, db.ForeignKey("errands.id"), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    runner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    errand = db.relationship("Errand", back_populates="chats")
+    client = db.relationship("User", foreign_keys=[client_id], backref="client_chats")
+    runner = db.relationship("User", foreign_keys=[runner_id], backref="runner_chats")
+    messages = db.relationship("Message", back_populates="chat", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Chat errand={self.errand_id}>"
+
+
+# ============================================================
+# MESSAGE MODEL
+# ============================================================
+class Message(db.Model):
+    __tablename__ = "messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey("chats.id"), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    chat = db.relationship("Chat", back_populates="messages")
+    sender = db.relationship("User", foreign_keys=[sender_id])
+
+    def __repr__(self):
+        return f"<Message {self.id} from {self.sender_id}>"
+
+
+# ============================================================
 # ACTIVE ERRAND MODEL
 # ============================================================
 class ActiveErrand(db.Model):
@@ -120,6 +164,7 @@ class ActiveErrand(db.Model):
     runner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime, nullable=True)
+    estimated_duration = db.Column(db.String(100)) # e.g. "15 mins"
     status = db.Column(db.String(50))  # ongoing, completed, cancelled
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -185,3 +230,22 @@ class AppFeedback(db.Model):
 
     def __repr__(self):
         return f"<AppFeedback from user {self.user_id}: {self.rating} stars>"
+
+
+# ============================================================
+# FEE CONFIGURATION MODEL
+# ============================================================
+class FeeConfig(db.Model):
+    __tablename__ = "fee_configs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    base_fee = db.Column(db.Float, nullable=False)
+    per_km_fee = db.Column(db.Float, nullable=False)
+    per_kg_fee = db.Column(db.Float, nullable=False)
+    night_multiplier = db.Column(db.Float, nullable=False)
+    rush_hour_multiplier = db.Column(db.Float, nullable=False)
+    vehicle_type_multiplier_json = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<FeeConfig id={self.id}>"

@@ -1052,7 +1052,7 @@ body {
             <div class="user-menu">
                 <span class="welcome-text">Welcome, {{ user.username|default('User') }}! 👋</span>
                 <div class="user-actions">
-                    <a href="{{ url_for('profile') }}" class="btn-icon">
+                    <a href="{{ url_for('runnerprofile') if user.user_type == 'runner' else url_for('profile') }}" class="btn-icon">
                         <i class="fas fa-user"></i>
                     </a>
                     <a href="{{ url_for('logout') }}" class="btn-icon">
@@ -1148,9 +1148,10 @@ body {
 
             <div class="orders-list">
                 {% if orders %}
-                    {% for order in orders %}
-                    <div class="order-card" data-status="{{ order.status|default('completed') }}" data-date="{{ order.date|default('2023-01-01') }}" data-price="{{ order.amount|default(0) }}">
-                        <div class="order-main">
+                    {% for active_errand in orders %}
+                    {% set order = active_errand.errand %}
+                    <div class="order-card" data-status="{{ active_errand.status|default('completed') }}" data-date="{{ order.created_at.strftime('%Y-%m-%d') if order.created_at else '2023-01-01' }}" data-price="{{ order.price_estimate|default(0) }}">
+                        <div class="order-main" onclick="toggleOrderDetails({{ active_errand.id }})">
                             <!-- Top row with Errand Name and EARNED amount -->
                             <div class="order-header">
                                 <div class="order-title">
@@ -1160,9 +1161,9 @@ body {
                                 <div class="order-amount-top">
                                     <div class="amount-top">
                                         {% if user.user_type == 'runner' %}
-                                            +${{ "%.2f"|format(order.amount|default(18.50)) }}
+                                            +${{ "%.2f"|format(order.price_estimate|default(0.00)) }}
                                         {% else %}
-                                            -${{ "%.2f"|format(order.amount|default(18.50)) }}
+                                            -${{ "%.2f"|format(order.price_estimate|default(0.00)) }}
                                         {% endif %}
                                     </div>
                                     <div class="amount-label-top">
@@ -1177,27 +1178,27 @@ body {
 
                             <!-- Order details -->
                             <div class="order-info">
-                                <div class="order-icon {{ order.status|default('completed') }}">
+                                <div class="order-icon {{ active_errand.status|default('completed') }}">
                                     <i class="fas fa-{{ get_order_icon(order.type|default('delivery')) if get_order_icon is defined else 'shopping-bag' }}"></i>
                                 </div>
                                 <div class="order-details">
                                     <div class="order-meta">
-                                        <span class="order-id">#{{ order.id|default('EC-7842') }}</span>
+                                        <span class="order-id">#{{ order.id }}</span>
                                         <span class="order-date">
                                             <i class="fas fa-calendar"></i>
-                                            {{ order.date|default('Oct 15, 2023') }}
+                                            {{ order.created_at.strftime('%b %d, %Y') if order.created_at else 'N/A' }}
                                         </span>
-                                        <span class="order-status {{ order.status|default('completed') }}">
-                                            {{ order.status|default('completed')|title }}
+                                        <span class="order-status {{ active_errand.status|default('completed') }}">
+                                            {{ active_errand.status|default('completed')|title }}
                                         </span>
                                     </div>
-                                    <p class="order-description">{{ order.description|default('Grocery delivery from Fresh Market including fresh produce and dairy items') }}</p>
+                                    <p class="order-description">{{ order.description|default('No description provided') }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Order Details Expanded -->
-                        <div class="order-details-expanded">
+                        <div class="order-details-expanded" id="details-{{ active_errand.id }}">
                             <div class="details-grid">
                                 <div class="detail-column">
                                     <h4>Order Information</h4>
@@ -1212,14 +1213,14 @@ body {
                                         <i class="fas fa-calendar"></i>
                                         <div class="detail-content">
                                             <strong>Order Date:</strong>
-                                            <span>{{ order.date|default('Oct 15, 2023') }}</span>
+                                            <span>{{ order.created_at.strftime('%b %d, %Y') if order.created_at else 'N/A' }}</span>
                                         </div>
                                     </div>
                                     <div class="detail-item">
                                         <i class="fas fa-clock"></i>
                                         <div class="detail-content">
-                                            <strong>Completion Time:</strong>
-                                            <span>{{ order.completion_time|default('30 minutes') }}</span>
+                                            <strong>Status:</strong>
+                                            <span>{{ active_errand.status|title }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1230,21 +1231,14 @@ body {
                                         <i class="fas fa-map-marker-alt"></i>
                                         <div class="detail-content">
                                             <strong>Pickup:</strong>
-                                            <span>{{ order.pickup_location|default('Fresh Market, 123 Main St') }}</span>
+                                            <span>{{ order.pickup_location|default('N/A') }}</span>
                                         </div>
                                     </div>
                                     <div class="detail-item">
                                         <i class="fas fa-flag-checkered"></i>
                                         <div class="detail-content">
                                             <strong>Delivery:</strong>
-                                            <span>{{ order.delivery_location|default('456 Oak Avenue, Apt 3B') }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-road"></i>
-                                        <div class="detail-content">
-                                            <strong>Distance:</strong>
-                                            <span>{{ order.distance|default('5 km') }}</span>
+                                            <span>{{ order.delivery_location|default('N/A') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1263,31 +1257,11 @@ body {
                                             <strong>Name:</strong>
                                             <span>
                                                 {% if user.user_type == 'runner' %}
-                                                    {{ order.client_name|default('Sarah Johnson') }}
+                                                    {{ order.client.username if order.client else 'Anonymous' }}
                                                 {% else %}
-                                                    {{ order.runner_name|default('John Runner') }}
+                                                    {{ active_errand.runner.username if active_errand.runner else 'Anonymous' }}
                                                 {% endif %}
                                             </span>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-star"></i>
-                                        <div class="detail-content">
-                                            <strong>Rating:</strong>
-                                            <span class="rating">
-                                                {% if user.user_type == 'runner' %}
-                                                    {{ order.client_rating|default('4.8') }}/5
-                                                {% else %}
-                                                    {{ order.runner_rating|default('4.8') }}/5
-                                                {% endif %}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-comment"></i>
-                                        <div class="detail-content">
-                                            <strong>Feedback:</strong>
-                                            <span>{{ order.feedback|default('"Very prompt and careful with my groceries. Will definitely request again!"') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1298,27 +1272,7 @@ body {
                                         <i class="fas fa-money-bill-wave"></i>
                                         <div class="detail-content">
                                             <strong>Amount:</strong>
-                                            <span class="price">${{ "%.2f"|format(order.amount|default(18.50)) }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-percentage"></i>
-                                        <div class="detail-content">
-                                            <strong>Service Fee:</strong>
-                                            <span>${{ "%.2f"|format(order.service_fee|default(2.00)) }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-wallet"></i>
-                                        <div class="detail-content">
-                                            <strong>Net Amount:</strong>
-                                            <span class="net-price">
-                                                {% if user.user_type == 'runner' %}
-                                                    ${{ "%.2f"|format((order.amount|default(18.50) - order.service_fee|default(2.00))|round(2)) }}
-                                                {% else %}
-                                                    ${{ "%.2f"|format(order.amount|default(18.50)) }}
-                                                {% endif %}
-                                            </span>
+                                            <span class="price">${{ "%.2f"|format(order.price_estimate|default(0.00)) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1326,24 +1280,16 @@ body {
 
                             <div class="order-actions">
                                 {% if user.user_type == 'runner' %}
-                                    <button class="btn-outline" onclick="contactClient('{{ order.client_id|default(1) }}')">
+                                    <button class="btn-outline" onclick="location.href='mailto:{{ order.client.email }}'">
                                         <i class="fas fa-comments"></i>
                                         Contact Client
                                     </button>
                                 {% else %}
-                                    <button class="btn-outline" onclick="contactRunner('{{ order.runner_id|default(1) }}')">
+                                    <button class="btn-outline" onclick="location.href='mailto:{{ active_errand.runner.email }}'">
                                         <i class="fas fa-comments"></i>
                                         Contact Runner
                                     </button>
                                 {% endif %}
-                                <button class="btn-outline" onclick="reorder('{{ order.id|default(1) }}')">
-                                    <i class="fas fa-redo"></i>
-                                    Repeat Order
-                                </button>
-                                <button class="btn-outline" onclick="downloadReceipt('{{ order.id|default(1) }}')">
-                                    <i class="fas fa-receipt"></i>
-                                    Download Receipt
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -1401,7 +1347,7 @@ body {
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="{{ url_for('home_page') }}" class="nav-item">
+        <a href="{{ url_for('runnerhome') if user.user_type == 'runner' else url_for('home_page') }}" class="nav-item">
             <i class="fas fa-home"></i>
             <span>Home</span>
         </a>
@@ -1409,11 +1355,11 @@ body {
             <i class="fas fa-check-circle"></i>
             <span>Completed</span>
         </a>
-        <a href="{{ url_for('runnerhome') if user.user_type == 'runner' else url_for('home_page') }}" class="nav-item">
+        <a href="{{ url_for('runneravailable_errands') if user.user_type == 'runner' else url_for('home_page') }}" class="nav-item">
             <i class="fas fa-list"></i>
             <span>Errands</span>
         </a>
-        <a href="{{ url_for('runnerwallet') if user.user_type == 'runner' else url_for('profile') }}" class="nav-item active">
+        <a href="{{ url_for('runnerhistory') if user.user_type == 'runner' else url_for('order_history') }}" class="nav-item active">
             <i class="fas fa-history"></i>
             <span>History</span>
         </a>
@@ -1472,11 +1418,10 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Mobile history page initialized');
 });
 
-// Toggle order details
-document.querySelectorAll('.order-main').forEach(main => {
-    main.addEventListener('click', function() {
-        const card = this.closest('.order-card');
-        const details = card.querySelector('.order-details-expanded');
+    // Toggle order details
+    function toggleOrderDetails(id) {
+        const details = document.getElementById(`details-${id}`);
+        const card = details.closest('.order-card');
 
         if (details.style.display === 'none' || !details.style.display) {
             details.style.display = 'block';
@@ -1487,8 +1432,7 @@ document.querySelectorAll('.order-main').forEach(main => {
         } else {
             details.style.display = 'none';
         }
-    });
-});
+    }
 
 // Time period filter functionality
 document.querySelectorAll('.period-btn').forEach(btn => {

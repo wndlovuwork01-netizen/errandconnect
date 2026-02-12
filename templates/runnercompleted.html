@@ -1061,10 +1061,10 @@
                 <div class="user-menu">
                     <span class="welcome-text">Welcome, Runner! 👋</span>
                     <div class="user-actions">
-                        <button class="btn-icon">
+                        <button class="btn-icon" onclick="location.href='{{ url_for('runnerprofile') }}'">
                             <i class="fas fa-user"></i>
                         </button>
-                        <button class="btn-icon">
+                        <button class="btn-icon" onclick="location.href='{{ url_for('logout') }}'">
                             <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </div>

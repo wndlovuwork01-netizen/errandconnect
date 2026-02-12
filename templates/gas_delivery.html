@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gas Delivery - ErrandConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --primary: #4CAF50;
@@ -443,6 +445,44 @@
             display: none;
         }
 
+        /* Map Selection Controls */
+        .map-selection-controls {
+            display: flex;
+            gap: 10px;
+            padding: 10px 15px;
+            background: #f8fdf8;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            color: var(--dark);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .selection-btn.active {
+            background: var(--gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .selection-btn i {
+            font-size: 14px;
+        }
+
         /* NEW: Map Modal */
         .map-modal {
             display: none;
@@ -683,15 +723,15 @@
                 <h3><i class="fas fa-route"></i> Fuel Delivery Route</h3>
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
-            <div class="map-placeholder">
-                <i class="fas fa-map-marked-alt"></i>
-                <h3 id="routeTitle">Supplier to Delivery Route</h3>
-                <p id="routeDescription">Route from supplier location to delivery address</p>
-                <div id="routeDetails" style="margin-top: 15px; text-align: left; font-size: 13px; width: 100%; max-width: 300px;">
-                    <p><strong>Supplier Location:</strong> <span id="mapSupplier">Not specified</span></p>
-                    <p><strong>Delivery Address:</strong> <span id="mapDelivery">Not specified</span></p>
-                </div>
+            <div class="map-selection-controls">
+                <button type="button" id="pickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-gas-pump"></i> Supplier
+                </button>
+                <button type="button" id="dropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-map-marker-alt"></i> Delivery
+                </button>
             </div>
+            <div id="map" style="height: 300px; width: 100%; border-radius: 0; margin-bottom: 0;"></div>
             <div class="map-info">
                 <div class="info-item">
                     <div class="info-value" id="mapDistance">0 km</div>
@@ -741,6 +781,12 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_gas_delivery_errand') }}" id="gasDeliveryForm">
+                    <!-- Hidden coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    
                     <!-- Fuel Information -->
                     <h2><i class="fas fa-oil-can"></i> Fuel Information</h2>
 
@@ -846,9 +892,9 @@
                             <input type="text" id="delivery_address" name="delivery_address" placeholder="Where should fuel be delivered?" required oninput="updateViewRouteButton(); updateEstimatedFee(); updateProgress()">
                         </div>
 
-                        <!-- NEW: View Route Button (initially hidden) -->
-                        <button type="button" id="viewRouteBtn" class="view-route-btn hidden" onclick="showRouteMap()">
-                            <i class="fas fa-route"></i> View Route Map
+                        <!-- NEW: View Route Button -->
+                        <button type="button" id="viewRouteBtn" class="view-route-btn" onclick="showRouteMap()">
+                            <i class="fas fa-route"></i> Select Locations on Map
                         </button>
                     </div>
 
@@ -1141,74 +1187,143 @@
             const supplierLocation = document.getElementById('supplier_location').value;
             const deliveryAddress = document.getElementById('delivery_address').value;
 
-            // Show button only if:
-            // 1. User selected "Yes" for specific supplier
-            // 2. Supplier location is entered
-            // 3. Delivery address is entered
-            if (specificSupplier === 'yes' && supplierLocation && supplierLocation.trim() !== '' && deliveryAddress && deliveryAddress.trim() !== '') {
-                viewRouteBtn.classList.remove('hidden');
-            } else {
-                viewRouteBtn.classList.add('hidden');
-            }
+            // Show button always to allow manual selection
+            viewRouteBtn.classList.remove('hidden');
         }
 
         // NEW: Show Route Map
+        let map, marker1, marker2, polyline;
+        let selectionMode = 'pickup';
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('pickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('dropoffBtn').classList.toggle('active', mode === 'dropoff');
+        }
+
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([-17.8216, 31.0492], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                map.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+                    
+                    if (selectionMode === 'pickup') {
+                        document.getElementById('pickup_lat').value = lat;
+                        document.getElementById('pickup_lon').value = lng;
+                        if (marker1) map.removeLayer(marker1);
+                        marker1 = L.marker([lat, lng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map).bindPopup('Supplier Location').openPopup();
+                        
+                        setSelectionMode('dropoff');
+                        
+                        if (!document.getElementById('supplier_location').value) {
+                            document.getElementById('supplier_location').value = "Selected on Map";
+                        }
+                    } else {
+                        document.getElementById('dropoff_lat').value = lat;
+                        document.getElementById('dropoff_lon').value = lng;
+                        if (marker2) map.removeLayer(marker2);
+                        marker2 = L.marker([lat, lng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map).bindPopup('Delivery Point').openPopup();
+
+                        if (!document.getElementById('delivery_address').value) {
+                            document.getElementById('delivery_address').value = "Selected on Map";
+                        }
+                    }
+
+                    updateRoute();
+                    updateEstimatedFee();
+                });
+            }
+        }
+
+        function updateRoute() {
+            if (marker1 && marker2) {
+                const latlngs = [marker1.getLatLng(), marker2.getLatLng()];
+                if (polyline) map.removeLayer(polyline);
+                polyline = L.polyline(latlngs, { color: 'var(--primary)', weight: 3, dashArray: '5, 10' }).addTo(map);
+                map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+                
+                const distance = calculateDistance();
+                calculateAndDisplayRouteDetails(distance);
+            }
+        }
+
+        function calculateDistance() {
+            const lat1 = document.getElementById('pickup_lat').value;
+            const lon1 = document.getElementById('pickup_lon').value;
+            const lat2 = document.getElementById('dropoff_lat').value;
+            const lon2 = document.getElementById('dropoff_lon').value;
+
+            if (lat1 && lon1 && lat2 && lon2) {
+                // Haversine formula
+                const R = 6371; // Radius of the earth in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = 
+                    Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return (R * c).toFixed(1);
+            }
+            
+            // Fallback to simulated distance if coordinates aren't available
+            const from = document.getElementById('supplier_location').value || "";
+            const to = document.getElementById('delivery_address').value || "";
+            return (5 + (Math.abs(from.length - to.length) / 30)).toFixed(1);
+        }
+
         function showRouteMap() {
-            const supplierLocation = document.getElementById('supplier_location').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
-
-            // Validate inputs
-            if (!supplierLocation || supplierLocation.trim() === '') {
-                alert('Please enter the supplier location first.');
-                document.getElementById('supplier_location').focus();
-                return;
-            }
-
-            if (!deliveryAddress || deliveryAddress.trim() === '') {
-                alert('Please enter the delivery address first.');
-                document.getElementById('delivery_address').focus();
-                return;
-            }
-
-            // Update modal content
-            document.getElementById('mapSupplier').textContent = supplierLocation;
-            document.getElementById('mapDelivery').textContent = deliveryAddress;
-
-            // Calculate route details
-            calculateAndDisplayRoute(supplierLocation, deliveryAddress);
-
             // Show modal
             document.getElementById('mapModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+
+            initMap();
+            
+            // Force map to recalculate size after modal display
+            setTimeout(() => {
+                map.invalidateSize();
+                if (marker1 && marker2) {
+                    updateRoute();
+                }
+            }, 100);
         }
 
-        // NEW: Calculate Route Details
-        function calculateAndDisplayRoute(from, to) {
-            // Simulate distance calculation based on input lengths
-            const fromLength = from.length;
-            const toLength = to.length;
-
-            // Generate realistic distance for fuel delivery (usually longer distances)
-            const baseDistance = 5 + (Math.abs(fromLength - toLength) / 30);
-            const randomFactor = 0.8 + (Math.random() * 1.4);
-            const distance = Math.max(2, Math.min(baseDistance * randomFactor, 50)).toFixed(1);
+        // NEW: Calculate Route Details (Updated to use provided distance)
+        function calculateAndDisplayRouteDetails(distance) {
+            const distanceNum = parseFloat(distance);
 
             // Calculate estimated time based on distance (fuel trucks move slower)
             let estimatedMinutes;
-            const distanceNum = parseFloat(distance);
-
             if (distanceNum <= 5) {
-                // Local delivery: 10-15 minutes per km
                 estimatedMinutes = Math.round(distanceNum * 12 + Math.random() * 15);
             } else if (distanceNum <= 20) {
-                // Medium distance: 8-12 minutes per km
                 estimatedMinutes = Math.round(distanceNum * 10 + Math.random() * 20);
             } else {
-                // Long distance: 6-9 minutes per km (highways)
                 estimatedMinutes = Math.round(distanceNum * 7.5 + Math.random() * 30);
             }
 
-            // Ensure minimum and maximum reasonable times
             estimatedMinutes = Math.max(15, Math.min(estimatedMinutes, 180));
 
             // Determine vehicle type based on fuel type and quantity
@@ -1216,27 +1331,22 @@
             const quantity = parseFloat(document.getElementById('quantity').value) || 0;
             let vehicleType = 'Fuel Truck';
 
-            if (quantity <= 50) {
-                vehicleType = 'Small Tanker';
-            }
-
-            if (quantity <= 20 && (fuelType === 'lpg' || fuelType === 'cng')) {
-                vehicleType = 'Cylinder Delivery Van';
-            }
-
-            if (quantity <= 5) {
-                vehicleType = 'Delivery Van';
-            }
+            if (quantity <= 50) vehicleType = 'Small Tanker';
+            if (quantity <= 20 && (fuelType === 'lpg' || fuelType === 'cng')) vehicleType = 'Cylinder Delivery Van';
+            if (quantity <= 5) vehicleType = 'Delivery Van';
 
             // Update modal display
             document.getElementById('mapDistance').textContent = distance + ' km';
             document.getElementById('mapTime').textContent = estimatedMinutes + ' min';
             document.getElementById('mapTransport').textContent = vehicleType;
 
-            // Update route description
-            const fromShort = from.split(',')[0].substring(0, 30) + (from.split(',')[0].length > 30 ? '...' : '');
-            const toShort = to.split(',')[0].substring(0, 30) + (to.split(',')[0].length > 30 ? '...' : '');
-            document.getElementById('routeDescription').textContent = `Fuel delivery route from ${fromShort} to ${toShort}`;
+            return { distance, estimatedMinutes, vehicleType };
+        }
+
+        // Keep this for backward compatibility if needed by other functions, but update it to use the new logic
+        function calculateAndDisplayRoute(from, to) {
+            const distance = calculateDistance();
+            return calculateAndDisplayRouteDetails(distance);
         }
 
         // NEW: Close Map

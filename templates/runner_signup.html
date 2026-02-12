@@ -14,9 +14,7 @@
                 <p class="step-indicator">Step <span id="currentStep">1</span> of 4</p>
             </div>
             <div class="header-logo">
-                <a href="{{ url_for('logout') }}" style="color: #6c5ce7; font-size: 1.2rem;" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <i class="fas fa-running"></i>
             </div>
         </div>
 
@@ -32,7 +30,7 @@
         <!-- Flash Messages -->
         <div class="alerts-container" id="flashMessagesContainer"></div>
 
-        <form method="post" action="{{ url_for('runner_signup') }}" enctype="multipart/form-data" class="profile-form" id="runnerRegistrationForm">
+        <form method="post" action="/runner/signup" enctype="multipart/form-data" class="profile-form" id="runnerRegistrationForm">
             <!-- Slide Container -->
             <div class="slides-container">
                 <!-- ===== SLIDE 1: PERSONAL INFORMATION ===== -->

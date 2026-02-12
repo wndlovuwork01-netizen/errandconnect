@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Errand</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .map-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .map-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .map-btn.active.dropoff {
+            background: #2196F3;
+        }
+        .map-hint {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create a New Errand</h1>
+        
+        <div class="map-controls">
+            <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')">
+                <i class="fas fa-map-marker-alt"></i> Set Pickup
+            </button>
+            <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')">
+                <i class="fas fa-flag-checkered"></i> Set Delivery
+            </button>
+        </div>
+        <div id="mapHint" class="map-hint">Tap on map to set Pickup location</div>
+        <div id="map"></div>
+
+        <form action="{{ url_for('create_errand') }}" method="post">
+            <input type="hidden" id="pickup_latitude" name="pickup_latitude">
+            <input type="hidden" id="pickup_longitude" name="pickup_longitude">
+            <input type="hidden" id="dropoff_latitude" name="dropoff_latitude">
+            <input type="hidden" id="dropoff_longitude" name="dropoff_longitude">
+            
+            <div class="form-group">
+    <label for="pickup_location">Pickup Location</label>
+    <input type="text" id="pickup_location" name="pickup_location" required>
+    <button type="button" onclick="getAddress('pickup')">Get Address</button>
+</div>
+<div class="form-group">
+    <label for="delivery_location">Delivery Location</label>
+    <input type="text" id="delivery_location" name="delivery_location" required>
+    <button type="button" onclick="getAddress('dropoff')">Get Address</button>
+</div>
+            <div class="form-group">
+                <label for="type">Errand Type</label>
+                <input type="text" id="type" name="type" required>
+            </div>
+            <div class="form-group">
+                <label for="weight_kg">Weight (kg)</label>
+                <input type="number" id="weight_kg" name="weight_kg" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="vehicle_type">Vehicle Type</label>
+                <select id="vehicle_type" name="vehicle_type" required>
+                    <option value="foot">Foot</option>
+                    <option value="bike">Bike</option>
+                    <option value="motorcycle">Motorcycle</option>
+                    <option value="car" selected>Car</option>
+                    <option value="truck">Truck</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="delivery_time">Delivery Time</label>
+                <input type="text" id="delivery_time" name="delivery_time" required>
+            </div>
+            <div class="form-group">
+                <label for="details">Details</label>
+                <textarea id="details" name="details" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="price_estimate">Your Price Offer</label>
+                <input type="number" id="price_estimate" name="price_estimate" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Create Errand</button>
+        </form>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
+    <script>
+        var map;
+        var pickupMarker, dropoffMarker;
+        var selectionMode = 'pickup';
+        var routeLine;
+
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: false,
+                tap: true
+            }).setView([-1.2921, 36.8219], 13); // Default to Nairobi
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+
+            // Show hint on start
+            document.getElementById('mapHint').style.display = 'block';
+
+            map.on('click', function(e) {
+                if (selectionMode === 'pickup') {
+                    setPickupLocation(e.latlng.lat, e.latlng.lng);
+                } else {
+                    setDropoffLocation(e.latlng.lat, e.latlng.lng);
+                }
+                
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(50);
+                }
+            });
+
+            // Try to get user location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    map.setView([position.coords.latitude, position.coords.longitude], 13);
+                });
+            }
+        }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            const pBtn = document.getElementById('selectPickupBtn');
+            const dBtn = document.getElementById('selectDropoffBtn');
+            const hint = document.getElementById('mapHint');
+
+            pBtn.classList.toggle('active', mode === 'pickup');
+            dBtn.classList.toggle('active', mode === 'dropoff');
+            dBtn.classList.toggle('dropoff', mode === 'dropoff');
+
+            if (mode === 'pickup') {
+                hint.textContent = "Tap on map to set Pickup location";
+                hint.style.background = "rgba(76, 175, 80, 0.9)";
+            } else {
+                hint.textContent = "Tap on map to set Delivery location";
+                hint.style.background = "rgba(33, 150, 243, 0.9)";
+            }
+            hint.style.display = 'block';
+        }
+
+        function setPickupLocation(lat, lng) {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            
+            pickupMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div style='background-color:#4CAF50; width:30px; height:30px; border-radius:50%; border:3px solid white; display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 2px 5px rgba(0,0,0,0.3)'><i class='fas fa-map-marker-alt'></i></div>",
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30]
+                })
+            }).addTo(map).bindPopup("Pickup Point").openPopup();
+
+            document.getElementById('pickup_latitude').value = lat;
+            document.getElementById('pickup_longitude').value = lng;
+            
+            getAddress(lat, lng, 'pickup_location');
+            updateRoute();
+            
+            // Switch to dropoff automatically if not set
+            if (!dropoffMarker) {
+                setTimeout(() => setSelectionMode('dropoff'), 1000);
+            }
+        }
+
+        function setDropoffLocation(lat, lng) {
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            
+            dropoffMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div style='background-color:#2196F3; width:30px; height:30px; border-radius:50%; border:3px solid white; display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 2px 5px rgba(0,0,0,0.3)'><i class='fas fa-flag-checkered'></i></div>",
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30]
+                })
+            }).addTo(map).bindPopup("Delivery Point").openPopup();
+
+            document.getElementById('dropoff_latitude').value = lat;
+            document.getElementById('dropoff_longitude').value = lng;
+            
+            getAddress(lat, lng, 'delivery_location');
+            updateRoute();
+        }
+
+        function updateRoute() {
+            if (pickupMarker && dropoffMarker) {
+                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
+                
+                if (routeLine) map.removeLayer(routeLine);
+                
+                routeLine = L.polyline(points, {
+                    color: '#4CAF50',
+                    weight: 4,
+                    opacity: 0.6,
+                    dashArray: '10, 10',
+                    lineCap: 'round'
+                }).addTo(map);
+
+                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                
+                // Calculate distance and update price estimate if needed
+                const dist = calculateHaversineDistance(
+                    points[0].lat, points[0].lng,
+                    points[1].lat, points[1].lng
+                );
+                
+                updatePriceEstimate(dist);
+            }
+        }
+
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function updatePriceEstimate(distance) {
+            // Simple pricing logic: Base 50 + 20 per km
+            const basePrice = 50;
+            const pricePerKm = 20;
+            const estimate = basePrice + (distance * pricePerKm);
+            document.getElementById('price_estimate').value = estimate.toFixed(2);
+        }
+
+        function getAddress(lat, lng, inputId) {
+            if (!lat || !lng) return;
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById(inputId).value = data.display_name;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Initialize map on load
+        window.onload = initMap;
+    </script>
+</body>
+</html>

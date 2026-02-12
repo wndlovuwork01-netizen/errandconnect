@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ErrandConnect - Bill Payment Service</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
             --primary: #4CAF50;
@@ -761,6 +762,30 @@
             color: white;
         }
 
+        /* Map Selection Buttons */
+        .selection-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            color: #666;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .selection-btn.active {
+            border-color: var(--primary);
+            background: rgba(76, 175, 80, 0.05);
+            color: var(--primary-dark);
+        }
+
         /* Toggle Switch */
         .toggle-switch {
             display: flex;
@@ -1144,18 +1169,24 @@
     <div id="mapModal" class="map-modal">
         <div class="map-content">
             <div class="map-header">
-                <h3><i class="fas fa-map-marked-alt"></i> Payment Route</h3>
+                <h3><i class="fas fa-map-marked-alt"></i> Set Payment Route</h3>
                 <button class="close-map" onclick="closeMap()">×</button>
             </div>
-            <div class="map-placeholder">
-                <i class="fas fa-route"></i>
-                <h3>Payment Location Route</h3>
-                <p>Map showing route to payment location</p>
-                <div id="mapDetails" style="margin-top: 15px; text-align: center; font-size: 13px;">
-                    <p><strong>Pickup:</strong> <span id="mapPickupLocation">Your location</span></p>
-                    <p><strong>Payment Location:</strong> <span id="mapPaymentAddress">Not specified</span></p>
-                </div>
+            
+            <div class="map-selection-controls" style="display: flex; gap: 10px; margin-bottom: 15px; padding: 15px 15px 0;">
+                <button type="button" id="setPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-user"></i> Set My Location
+                </button>
+                <button type="button" id="setDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-map-pin"></i> Set Payment Point
+                </button>
             </div>
+            <div style="padding: 0 15px 10px; font-size: 12px; color: #666; text-align: center;">
+                <i class="fas fa-info-circle"></i> Tap on map to set location
+            </div>
+
+            <div id="map" style="flex: 1; width: 100%; min-height: 300px;"></div>
+
             <div class="map-info">
                 <div class="info-item">
                     <div class="info-value" id="mapDistance">0 km</div>
@@ -1193,6 +1224,12 @@
                 </div>
 
                 <form method="post" action="{{ url_for('create_bill_payment_errand') }}" id="billPaymentForm">
+                    <!-- Hidden coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    
                     <!-- Bill Type Selection - FROM PREVIOUS VERSION -->
                     <h2><i class="fas fa-tags"></i> Bill Type</h2>
                     <div class="bill-type-selector">
@@ -1501,12 +1538,17 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Global variables
         let selectedBillType = 'utility';
         let urgentPayment = false;
         let receiptRequired = true;
         let billCounter = 1;
+
+        // Map variables
+        let map, pickupMarker, dropoffMarker, routeLine;
+        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form
@@ -1515,12 +1557,97 @@
             // Set up form event listeners
             setupEventListeners();
 
+            // Initialize map
+            initMap();
+
             // Update fee initially
             updateEstimatedFee();
             calculateTotal();
             updatePaymentTimeline();
             updateServiceType();
         });
+
+        function initMap() {
+            // Default center (e.g., city center)
+            const defaultCenter = [6.5244, 3.3792]; 
+            
+            map = L.map('map').setView(defaultCenter, 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Click listener for location selection
+            map.on('click', function(e) {
+                if (selectionMode === 'pickup') {
+                    updatePickupLocation(e.latlng.lat, e.latlng.lng);
+                } else {
+                    updateDropoffLocation(e.latlng.lat, e.latlng.lng);
+                }
+            });
+        }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            document.getElementById('setPickupBtn').classList.toggle('active', mode === 'pickup');
+            document.getElementById('setDropoffBtn').classList.toggle('active', mode === 'dropoff');
+        }
+
+        function updatePickupLocation(lat, lng) {
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            
+            if (pickupMarker) {
+                pickupMarker.setLatLng([lat, lng]);
+            } else {
+                pickupMarker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div style='background-color:#4CAF50; width:12px; height:12px; border-radius:50%; border:2px solid white;'></div>",
+                        iconSize: [12, 12],
+                        iconAnchor: [6, 6]
+                    })
+                }).addTo(map);
+            }
+            
+            updateRoute();
+            updateMapDetails();
+            updateEstimatedFee();
+        }
+
+        function updateDropoffLocation(lat, lng) {
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            
+            if (dropoffMarker) {
+                dropoffMarker.setLatLng([lat, lng]);
+            } else {
+                dropoffMarker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div style='background-color:#2196F3; width:12px; height:12px; border-radius:50%; border:2px solid white;'></div>",
+                        iconSize: [12, 12],
+                        iconAnchor: [6, 6]
+                    })
+                }).addTo(map);
+            }
+            
+            updateRoute();
+            updateMapDetails();
+            updateEstimatedFee();
+        }
+
+        function updateRoute() {
+            if (pickupMarker && dropoffMarker) {
+                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
+                if (routeLine) {
+                    routeLine.setLatLngs(points);
+                } else {
+                    routeLine = L.polyline(points, {color: '#4CAF50', weight: 3, dashArray: '5, 10'}).addTo(map);
+                }
+                map.fitBounds(L.latLngBounds(points).pad(0.2));
+            }
+        }
 
         function initializeForm() {
             // Set today's date as default for due date
@@ -1829,10 +1956,30 @@
 
         // Distance calculation
         function calculateDistance() {
-            const paymentLocation = document.getElementById('payment_location').value;
-            if (!paymentLocation) return 0;
+            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
 
-            return Math.min(paymentLocation.length * 0.02, 10).toFixed(1);
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+                // Fallback to text-based simulation if coordinates aren't set
+                const paymentLocation = document.getElementById('payment_location').value;
+                if (paymentLocation) {
+                    return Math.min(paymentLocation.length * 0.02, 10).toFixed(1);
+                }
+                return 0;
+            }
+
+            // Haversine formula
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const d = R * c;
+            return parseFloat(d.toFixed(2));
         }
 
         // Calculate base service fee
@@ -1960,28 +2107,25 @@
 
         // Map functions
         function showMap() {
-            const paymentLocation = document.getElementById('payment_location').value || 'Not specified';
-
-            if (!paymentLocation || paymentLocation === 'Not specified') {
-                alert('Please enter a payment location.');
-                return;
-            }
-
-            document.getElementById('mapPaymentAddress').textContent = paymentLocation;
-
-            const distance = calculateDistance();
-            const estimatedTime = Math.round(distance * 4);
-            const paymentMethod = document.getElementById('payment_method').value;
-            const paymentMethodText = paymentMethod === 'other'
-                ? document.getElementById('other_payment_method').value || 'Other'
-                : paymentMethod.replace('_', ' ').toUpperCase();
-
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapPaymentType').textContent = paymentMethodText;
-
             document.getElementById('mapModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            
+            // Fix Leaflet gray tiles issue
+            setTimeout(() => {
+                map.invalidateSize();
+                
+                // If we already have coordinates, zoom to them
+                const lat1 = parseFloat(document.getElementById('pickup_lat').value);
+                const lon1 = parseFloat(document.getElementById('pickup_lon').value);
+                const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
+                const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
+                
+                if (!isNaN(lat1) && !isNaN(lat2)) {
+                    updateRoute();
+                }
+            }, 300);
+            
+            updateMapDetails();
         }
 
         function closeMap() {
@@ -1990,20 +2134,16 @@
         }
 
         function updateMapDetails() {
-            const paymentLocation = document.getElementById('payment_location').value;
             const distance = calculateDistance();
             const estimatedTime = Math.round(distance * 4);
             const paymentMethod = document.getElementById('payment_method').value;
             const paymentMethodText = paymentMethod === 'other'
                 ? document.getElementById('other_payment_method').value || 'Other'
-                : paymentMethod.replace('_', ' ').toUpperCase();
+                : paymentMethod ? paymentMethod.replace('_', ' ').toUpperCase() : '-';
 
-            if (paymentLocation) {
-                document.getElementById('mapPaymentAddress').textContent = paymentLocation;
-                document.getElementById('mapDistance').textContent = distance + ' km';
-                document.getElementById('mapTime').textContent = estimatedTime + ' min';
-                document.getElementById('mapPaymentType').textContent = paymentMethodText;
-            }
+            document.getElementById('mapDistance').textContent = distance + ' km';
+            document.getElementById('mapTime').textContent = estimatedTime + ' min';
+            document.getElementById('mapPaymentType').textContent = paymentMethodText;
         }
 
         // File upload
