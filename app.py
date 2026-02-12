@@ -654,6 +654,180 @@ def property_page():
     user = current_user()
     return render_template("property.html", user=user)
 
+@app.route("/create_purchase_errand", methods=["POST"])
+@login_required
+def create_purchase_errand():
+    user = current_user()
+    store_name = request.form.get("store_name")
+    store_location = request.form.get("store_location")
+    delivery_address = request.form.get("delivery_address")
+    delivery_time = request.form.get("delivery_time")
+    specific_time = request.form.get("specific_time")
+    delivery_instructions = request.form.get("delivery_instructions")
+    budget_limit = request.form.get("budget_limit")
+    estimated_weight = request.form.get("estimated_weight")
+
+    pickup_lat = request.form.get("pickup_lat")
+    pickup_lon = request.form.get("pickup_lon")
+    dropoff_lat = request.form.get("dropoff_lat")
+    dropoff_lon = request.form.get("dropoff_lon")
+
+    items = []
+    item_names = request.form.getlist("items[]")
+    quantities = request.form.getlist("quantities[]")
+    brands = request.form.getlist("brands[]")
+    prices = request.form.getlist("prices[]")
+    for index, name in enumerate(item_names):
+        name = (name or "").strip()
+        if not name:
+            continue
+        items.append({
+            "name": name,
+            "quantity": quantities[index] if index < len(quantities) else "",
+            "brand": brands[index] if index < len(brands) else "",
+            "price": prices[index] if index < len(prices) else ""
+        })
+
+    distance = 0
+    if pickup_lat and dropoff_lat:
+        distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
+
+    weight_value = estimated_weight or "0"
+    fee = calculate_minimum_fee(distance, weight_value, "car", datetime.now())
+    selected_delivery_time = specific_time if delivery_time == "specific" and specific_time else delivery_time
+
+    details = {
+        "store_name": store_name,
+        "store_location": store_location,
+        "delivery_address": delivery_address,
+        "delivery_time": delivery_time,
+        "specific_time": specific_time,
+        "delivery_instructions": delivery_instructions,
+        "budget_limit": budget_limit,
+        "items": items
+    }
+
+    errand = Errand(
+        client_id=user.id,
+        type="Purchase",
+        pickup_location=store_location,
+        delivery_location=delivery_address,
+        weight=weight_value,
+        delivery_time=selected_delivery_time,
+        details=json.dumps(details),
+        price_estimate=fee,
+        calculated_minimum_fee=fee,
+        status="pending"
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return redirect(url_for('available_runners', errand_id=errand.id))
+
+@app.route("/create_property_errand", methods=["POST"])
+@login_required
+def create_property_errand():
+    user = current_user()
+    store_name = request.form.get("store_name")
+    store_location = request.form.get("store_location")
+    collection_location = request.form.get("collection_location")
+    collection_contact = request.form.get("collection_contact")
+    collection_instructions = request.form.get("collection_instructions")
+    delivery_address = request.form.get("delivery_address")
+    delivery_location = request.form.get("delivery_location")
+    delivery_time = request.form.get("delivery_time")
+    specific_time = request.form.get("specific_time")
+    delivery_instructions = request.form.get("delivery_instructions")
+    special_instructions = request.form.get("special_instructions")
+    budget_limit = request.form.get("budget_limit")
+    estimated_weight = request.form.get("estimated_weight")
+    dimensions = request.form.get("dimensions")
+    item_condition = request.form.get("item_condition")
+    assembly_required = request.form.get("assembly_required")
+    item_substitutions = request.form.get("item_substitutions")
+    receipt_required = request.form.get("receipt_required")
+    payment_method = request.form.get("payment_method")
+    service_price = request.form.get("service_price")
+    contact_number = request.form.get("contact_number")
+    distance_value = request.form.get("distance")
+
+    pickup_lat = request.form.get("pickup_lat")
+    pickup_lon = request.form.get("pickup_lon")
+    dropoff_lat = request.form.get("dropoff_lat")
+    dropoff_lon = request.form.get("dropoff_lon")
+
+    items = []
+    item_names = request.form.getlist("items[]")
+    quantities = request.form.getlist("quantities[]")
+    brands = request.form.getlist("brands[]")
+    prices = request.form.getlist("prices[]")
+    for index, name in enumerate(item_names):
+        name = (name or "").strip()
+        if not name:
+            continue
+        items.append({
+            "name": name,
+            "quantity": quantities[index] if index < len(quantities) else "",
+            "brand": brands[index] if index < len(brands) else "",
+            "price": prices[index] if index < len(prices) else ""
+        })
+
+    service_type = "collect-deliver" if collection_location else "buy-deliver"
+    pickup_location = store_location if service_type == "buy-deliver" else collection_location
+
+    distance = 0
+    if distance_value:
+        try:
+            distance = float(distance_value)
+        except ValueError:
+            distance = 0
+    elif pickup_lat and dropoff_lat:
+        distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
+
+    weight_value = estimated_weight or "0"
+    fee = calculate_minimum_fee(distance, weight_value, "car", datetime.now())
+    selected_delivery_time = specific_time if delivery_time == "specific" and specific_time else delivery_time
+
+    details = {
+        "service_type": service_type,
+        "store_name": store_name,
+        "store_location": store_location,
+        "collection_location": collection_location,
+        "collection_contact": collection_contact,
+        "collection_instructions": collection_instructions,
+        "delivery_address": delivery_address,
+        "delivery_location": delivery_location,
+        "delivery_time": delivery_time,
+        "specific_time": specific_time,
+        "delivery_instructions": delivery_instructions,
+        "special_instructions": special_instructions,
+        "budget_limit": budget_limit,
+        "dimensions": dimensions,
+        "item_condition": item_condition,
+        "assembly_required": assembly_required,
+        "item_substitutions": item_substitutions,
+        "receipt_required": receipt_required,
+        "payment_method": payment_method,
+        "service_price": service_price,
+        "contact_number": contact_number,
+        "items": items
+    }
+
+    errand = Errand(
+        client_id=user.id,
+        type="Property",
+        pickup_location=pickup_location,
+        delivery_location=delivery_address,
+        weight=weight_value,
+        delivery_time=selected_delivery_time,
+        details=json.dumps(details),
+        price_estimate=fee,
+        calculated_minimum_fee=fee,
+        status="pending"
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return redirect(url_for('available_runners', errand_id=errand.id))
+
 @app.route("/create_errand", methods=["GET", "POST"])
 @login_required
 def create_errand():
