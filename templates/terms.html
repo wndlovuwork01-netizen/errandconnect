@@ -6,7 +6,7 @@
 <div id="terms-page" class="page">
     <header class="mobile-header">
         <div class="header-content">
-            <a href="{{ url_for('settings') if current_user.is_authenticated else url_for('signup') }}" class="back-btn">
+            <a href="{{ url_for('settings') if user else url_for('signup') }}" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div class="logo">

@@ -174,12 +174,23 @@ def signin():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
         fullname = request.form.get("fullname")
         username = request.form.get("username")
         email = request.form.get("email")
-        phone = request.form.get("phone")
+        phone_number = request.form.get("phone_number")
+        country_code = request.form.get("country_code")
         password = request.form.get("password")
         user_type = request.form.get("user_type", "client")
+
+        if not fullname:
+            name_parts = [part for part in [first_name, last_name] if part]
+            fullname = " ".join(name_parts) if name_parts else username
+        if country_code and phone_number:
+            phone = f"{country_code}{phone_number}"
+        else:
+            phone = phone_number
         
         if User.query.filter((User.email == email) | (User.username == username)).first():
             flash("User already exists", "warning")
@@ -511,16 +522,22 @@ def completed():
     return render_template("completed.html", user=user)
 
 @app.route("/terms")
+@login_required
 def terms():
-    return render_template("terms.html")
+    user = current_user()
+    return render_template("terms.html", user=user, current_date=datetime.utcnow())
 
 @app.route("/privacy")
+@login_required
 def privacy():
-    return render_template("Privacy.html")
+    user = current_user()
+    return render_template("Privacy.html", user=user)
 
 @app.route("/help")
+@login_required
 def help_support():
-    return render_template("help.html")
+    user = current_user()
+    return render_template("help.html", user=user)
 
 @app.route("/personal_info")
 @login_required
@@ -695,10 +712,17 @@ def runner_register():
             filename = secure_filename(profile_photo.filename)
             profile_photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
+        full_name = request.form.get("full_name")
+        phone_number = request.form.get("phone_number")
+        if full_name:
+            user.fullname = full_name
+        if phone_number:
+            user.phone = phone_number
+
         profile = RunnerProfile(
             user_id=user.id,
-            full_name=request.form.get("full_name"),
-            phone_number=request.form.get("phone_number"),
+            full_name=full_name,
+            phone_number=phone_number,
             national_id_number=request.form.get("national_id_number"),
             vehicle_type=request.form.get("vehicle_type"),
             vehicle_registration_number=request.form.get("vehicle_registration_number"),
