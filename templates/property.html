@@ -1453,7 +1453,7 @@
         let totalItems = 1;
         let assemblyRequired = false;
 
-        let map, pickupMarker, dropoffMarker, routingControl;
+        let map, pickupMarker, dropoffMarker, routingControl, routeLine;
         let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
 
         function initMap() {
@@ -1499,6 +1499,35 @@
             }
 
             if (pickupMarker && dropoffMarker) updateRoute();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const currentLat = position.coords.latitude;
+                    const currentLng = position.coords.longitude;
+                    map.setView([currentLat, currentLng], 13);
+                    if (!document.getElementById('pickup_lat').value) {
+                        if (pickupMarker) map.removeLayer(pickupMarker);
+                        pickupMarker = L.marker([currentLat, currentLng], {
+                            draggable: true,
+                            icon: L.divIcon({
+                                className: 'custom-div-icon',
+                                html: "<div style='background-color:#4CAF50;' class='marker-pin'></div><i class='fas fa-location-arrow'></i>",
+                                iconSize: [30, 42],
+                                iconAnchor: [15, 42]
+                            })
+                        }).addTo(map);
+                        pickupMarker.on('dragend', updateRoute);
+                        document.getElementById('pickup_lat').value = currentLat;
+                        document.getElementById('pickup_lon').value = currentLng;
+                        const targetId = selectedServiceType === 'buy-deliver' ? 'store_location' : 'collection_location';
+                        reverseGeocode(currentLat, currentLng, function(address) {
+                            if (address) {
+                                document.getElementById(targetId).value = address;
+                            }
+                        });
+                    }
+                });
+            }
         }
 
         function setSelectionMode(mode) {
@@ -1533,7 +1562,11 @@
                 
                 // Update text field based on service type
                 const targetId = selectedServiceType === 'buy-deliver' ? 'store_location' : 'collection_location';
-                document.getElementById(targetId).value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                reverseGeocode(lat, lon, function(address) {
+                    if (address) {
+                        document.getElementById(targetId).value = address;
+                    }
+                });
                 
             } else {
                 if (dropoffMarker) {
@@ -1552,7 +1585,11 @@
                 }
                 document.getElementById('dropoff_lat').value = lat;
                 document.getElementById('dropoff_lon').value = lon;
-                document.getElementById('delivery_address').value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                reverseGeocode(lat, lon, function(address) {
+                    if (address) {
+                        document.getElementById('delivery_address').value = address;
+                    }
+                });
             }
 
             updateRoute();
@@ -1574,15 +1611,58 @@
 
             // Update text fields
             const targetId = selectedServiceType === 'buy-deliver' ? 'store_location' : 'collection_location';
-            document.getElementById(targetId).value = `${pLat.toFixed(6)}, ${pLon.toFixed(6)}`;
-            document.getElementById('delivery_address').value = `${dLat.toFixed(6)}, ${dLon.toFixed(6)}`;
+            reverseGeocode(pLat, pLon, function(address) {
+                if (address) {
+                    document.getElementById(targetId).value = address;
+                }
+            });
+            reverseGeocode(dLat, dLon, function(address) {
+                if (address) {
+                    document.getElementById('delivery_address').value = address;
+                }
+            });
 
-            const dist = calculateHaversineDistance(pLat, pLon, dLat, dLon);
-            document.getElementById('distance').value = dist.toFixed(2);
-            document.getElementById('mapDistance').textContent = dist.toFixed(2) + ' km';
-            document.getElementById('mapTime').textContent = Math.round(dist * 8) + ' min';
+            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${pLon},${pLat};${dLon},${dLat}?overview=full&geometries=geojson`;
+            fetch(routeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.routes && data.routes.length) {
+                        const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                        if (routeLine) map.removeLayer(routeLine);
+                        routeLine = L.polyline(coords, {color: '#4CAF50', weight: 3, opacity: 0.7}).addTo(map);
+                        const dist = data.routes[0].distance / 1000;
+                        document.getElementById('distance').value = dist.toFixed(2);
+                        document.getElementById('mapDistance').textContent = dist.toFixed(2) + ' km';
+                        document.getElementById('mapTime').textContent = Math.round(dist * 8) + ' min';
+                        map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+                    } else {
+                        const dist = calculateHaversineDistance(pLat, pLon, dLat, dLon);
+                        document.getElementById('distance').value = dist.toFixed(2);
+                        document.getElementById('mapDistance').textContent = dist.toFixed(2) + ' km';
+                        document.getElementById('mapTime').textContent = Math.round(dist * 8) + ' min';
+                    }
+                    updateEstimatedFee();
+                })
+                .catch(() => {
+                    const dist = calculateHaversineDistance(pLat, pLon, dLat, dLon);
+                    document.getElementById('distance').value = dist.toFixed(2);
+                    document.getElementById('mapDistance').textContent = dist.toFixed(2) + ' km';
+                    document.getElementById('mapTime').textContent = Math.round(dist * 8) + ' min';
+                    updateEstimatedFee();
+                });
+        }
 
-            updateEstimatedFee();
+        function reverseGeocode(lat, lng, callback) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        callback(data.display_name);
+                    } else {
+                        callback('');
+                    }
+                })
+                .catch(() => callback(''));
         }
 
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {

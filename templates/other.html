@@ -1112,10 +1112,11 @@
                         }).addTo(map).bindPopup('Pickup Location').openPopup();
                         
                         setSelectionMode('dropoff');
-                        
-                        if (!document.getElementById('pickup_location').value) {
-                            document.getElementById('pickup_location').value = "Selected on Map";
-                        }
+                        reverseGeocode(lat, lng, function(address) {
+                            if (address) {
+                                document.getElementById('pickup_location').value = address;
+                            }
+                        });
                     } else {
                         document.getElementById('dropoff_lat').value = lat;
                         document.getElementById('dropoff_lon').value = lng;
@@ -1131,14 +1132,44 @@
                             })
                         }).addTo(map).bindPopup('Delivery Point').openPopup();
 
-                        if (!document.getElementById('delivery_location').value) {
-                            document.getElementById('delivery_location').value = "Selected on Map";
-                        }
+                        reverseGeocode(lat, lng, function(address) {
+                            if (address) {
+                                document.getElementById('delivery_location').value = address;
+                            }
+                        });
                     }
 
                     updateRoute();
                     updateEstimatedFee();
                 });
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const currentLat = position.coords.latitude;
+                        const currentLng = position.coords.longitude;
+                        map.setView([currentLat, currentLng], 13);
+                        if (!document.getElementById('pickup_lat').value) {
+                            document.getElementById('pickup_lat').value = currentLat;
+                            document.getElementById('pickup_lon').value = currentLng;
+                            if (marker1) map.removeLayer(marker1);
+                            marker1 = L.marker([currentLat, currentLng], {
+                                icon: L.icon({
+                                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 41],
+                                    popupAnchor: [1, -34],
+                                    shadowSize: [41, 41]
+                                })
+                            }).addTo(map).bindPopup('Pickup Location').openPopup();
+                            reverseGeocode(currentLat, currentLng, function(address) {
+                                if (address) {
+                                    document.getElementById('pickup_location').value = address;
+                                }
+                            });
+                        }
+                    });
+                }
             }
             
             // Refresh map size
@@ -1149,20 +1180,54 @@
 
         function updateRoute() {
             if (marker1 && marker2) {
-                const points = [marker1.getLatLng(), marker2.getLatLng()];
-                if (routeLine) map.removeLayer(routeLine);
-                routeLine = L.polyline(points, {color: 'var(--primary)', weight: 3, dashArray: '5, 10'}).addTo(map);
-                map.fitBounds(L.latLngBounds(points), {padding: [50, 50]});
-                
-                const dist = calculateDistance(
-                    marker1.getLatLng().lat, marker1.getLatLng().lng,
-                    marker2.getLatLng().lat, marker2.getLatLng().lng
-                );
-                
-                document.getElementById('mapDistance').textContent = dist.toFixed(1) + ' km';
-                document.getElementById('mapTime').textContent = Math.round(dist * 5 + 10) + ' min';
-                document.getElementById('distance').value = dist.toFixed(2);
+                const start = marker1.getLatLng();
+                const end = marker2.getLatLng();
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+                fetch(routeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            if (routeLine) map.removeLayer(routeLine);
+                            routeLine = L.polyline(coords, {color: 'var(--primary)', weight: 3}).addTo(map);
+                            map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+                            const dist = data.routes[0].distance / 1000;
+                            document.getElementById('mapDistance').textContent = dist.toFixed(1) + ' km';
+                            document.getElementById('mapTime').textContent = Math.round(dist * 5 + 10) + ' min';
+                            document.getElementById('distance').value = dist.toFixed(2);
+                        } else {
+                            const dist = calculateDistance(
+                                start.lat, start.lng,
+                                end.lat, end.lng
+                            );
+                            document.getElementById('mapDistance').textContent = dist.toFixed(1) + ' km';
+                            document.getElementById('mapTime').textContent = Math.round(dist * 5 + 10) + ' min';
+                            document.getElementById('distance').value = dist.toFixed(2);
+                        }
+                    })
+                    .catch(() => {
+                        const dist = calculateDistance(
+                            start.lat, start.lng,
+                            end.lat, end.lng
+                        );
+                        document.getElementById('mapDistance').textContent = dist.toFixed(1) + ' km';
+                        document.getElementById('mapTime').textContent = Math.round(dist * 5 + 10) + ' min';
+                        document.getElementById('distance').value = dist.toFixed(2);
+                    });
             }
+        }
+
+        function reverseGeocode(lat, lng, callback) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        callback(data.display_name);
+                    } else {
+                        callback('');
+                    }
+                })
+                .catch(() => callback(''));
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {

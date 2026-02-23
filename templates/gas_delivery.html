@@ -1227,10 +1227,11 @@
                         }).addTo(map).bindPopup('Supplier Location').openPopup();
                         
                         setSelectionMode('dropoff');
-                        
-                        if (!document.getElementById('supplier_location').value) {
-                            document.getElementById('supplier_location').value = "Selected on Map";
-                        }
+                        reverseGeocode(lat, lng, function(address) {
+                            if (address) {
+                                document.getElementById('supplier_location').value = address;
+                            }
+                        });
                     } else {
                         document.getElementById('dropoff_lat').value = lat;
                         document.getElementById('dropoff_lon').value = lng;
@@ -1246,27 +1247,84 @@
                             })
                         }).addTo(map).bindPopup('Delivery Point').openPopup();
 
-                        if (!document.getElementById('delivery_address').value) {
-                            document.getElementById('delivery_address').value = "Selected on Map";
-                        }
+                        reverseGeocode(lat, lng, function(address) {
+                            if (address) {
+                                document.getElementById('delivery_address').value = address;
+                            }
+                        });
                     }
 
                     updateRoute();
                     updateEstimatedFee();
                 });
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const currentLat = position.coords.latitude;
+                        const currentLng = position.coords.longitude;
+                        map.setView([currentLat, currentLng], 13);
+                        if (!document.getElementById('pickup_lat').value) {
+                            document.getElementById('pickup_lat').value = currentLat;
+                            document.getElementById('pickup_lon').value = currentLng;
+                            if (marker1) map.removeLayer(marker1);
+                            marker1 = L.marker([currentLat, currentLng], {
+                                icon: L.icon({
+                                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 41],
+                                    popupAnchor: [1, -34],
+                                    shadowSize: [41, 41]
+                                })
+                            }).addTo(map).bindPopup('Supplier Location').openPopup();
+                            reverseGeocode(currentLat, currentLng, function(address) {
+                                if (address) {
+                                    document.getElementById('supplier_location').value = address;
+                                }
+                            });
+                        }
+                    });
+                }
             }
         }
 
         function updateRoute() {
             if (marker1 && marker2) {
-                const latlngs = [marker1.getLatLng(), marker2.getLatLng()];
-                if (polyline) map.removeLayer(polyline);
-                polyline = L.polyline(latlngs, { color: 'var(--primary)', weight: 3, dashArray: '5, 10' }).addTo(map);
-                map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
-                
-                const distance = calculateDistance();
-                calculateAndDisplayRouteDetails(distance);
+                const start = marker1.getLatLng();
+                const end = marker2.getLatLng();
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+                fetch(routeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            if (polyline) map.removeLayer(polyline);
+                            polyline = L.polyline(coords, { color: 'var(--primary)', weight: 3 }).addTo(map);
+                            map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+                            calculateAndDisplayRouteDetails((data.routes[0].distance / 1000).toFixed(1));
+                        } else {
+                            const distance = calculateDistance();
+                            calculateAndDisplayRouteDetails(distance);
+                        }
+                    })
+                    .catch(() => {
+                        const distance = calculateDistance();
+                        calculateAndDisplayRouteDetails(distance);
+                    });
             }
+        }
+
+        function reverseGeocode(lat, lng, callback) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        callback(data.display_name);
+                    } else {
+                        callback('');
+                    }
+                })
+                .catch(() => callback(''));
         }
 
         function calculateDistance() {

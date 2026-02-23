@@ -1567,6 +1567,8 @@
             updateServiceType();
         });
 
+        let currentRouteDistance = null;
+
         function initMap() {
             // Default center (e.g., city center)
             const defaultCenter = [6.5244, 3.3792]; 
@@ -1585,6 +1587,17 @@
                     updateDropoffLocation(e.latlng.lat, e.latlng.lng);
                 }
             });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const currentLat = position.coords.latitude;
+                    const currentLng = position.coords.longitude;
+                    map.setView([currentLat, currentLng], 13);
+                    if (!document.getElementById('pickup_lat').value) {
+                        updatePickupLocation(currentLat, currentLng);
+                    }
+                });
+            }
         }
 
         function setSelectionMode(mode) {
@@ -1639,13 +1652,44 @@
 
         function updateRoute() {
             if (pickupMarker && dropoffMarker) {
-                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
-                if (routeLine) {
-                    routeLine.setLatLngs(points);
-                } else {
-                    routeLine = L.polyline(points, {color: '#4CAF50', weight: 3, dashArray: '5, 10'}).addTo(map);
-                }
-                map.fitBounds(L.latLngBounds(points).pad(0.2));
+                const start = pickupMarker.getLatLng();
+                const end = dropoffMarker.getLatLng();
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+                fetch(routeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            currentRouteDistance = data.routes[0].distance / 1000;
+                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            if (routeLine) {
+                                routeLine.setLatLngs(coords);
+                            } else {
+                                routeLine = L.polyline(coords, {color: '#4CAF50', weight: 3}).addTo(map);
+                            }
+                            map.fitBounds(routeLine.getBounds().pad(0.2));
+                        } else {
+                            currentRouteDistance = null;
+                            const points = [start, end];
+                            if (routeLine) {
+                                routeLine.setLatLngs(points);
+                            } else {
+                                routeLine = L.polyline(points, {color: '#4CAF50', weight: 3}).addTo(map);
+                            }
+                            map.fitBounds(L.latLngBounds(points).pad(0.2));
+                        }
+                        updateMapDetails();
+                    })
+                    .catch(() => {
+                        currentRouteDistance = null;
+                        const points = [start, end];
+                        if (routeLine) {
+                            routeLine.setLatLngs(points);
+                        } else {
+                            routeLine = L.polyline(points, {color: '#4CAF50', weight: 3}).addTo(map);
+                        }
+                        map.fitBounds(L.latLngBounds(points).pad(0.2));
+                        updateMapDetails();
+                    });
             }
         }
 
@@ -2134,7 +2178,7 @@
         }
 
         function updateMapDetails() {
-            const distance = calculateDistance();
+            const distance = currentRouteDistance !== null ? currentRouteDistance.toFixed(1) : calculateDistance();
             const estimatedTime = Math.round(distance * 4);
             const paymentMethod = document.getElementById('payment_method').value;
             const paymentMethodText = paymentMethod === 'other'

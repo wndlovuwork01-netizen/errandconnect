@@ -707,7 +707,7 @@
             const distance = (Math.random() * 15 + 0.5).toFixed(1); // 0.5 to 15.5 km
 
             // Profile image placeholder (in real app, fetch from profile)
-            const profileImage = profile.profile_image || null;
+            const profileImage = profile.profile_image_url || profile.profile_image || null;
             const avatarLetter = user.fullname.charAt(0).toUpperCase();
 
             return {

@@ -1138,8 +1138,6 @@
         </div>
     </div>
 
-</script>
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         let map, pickupMarker, dropoffMarker, routePolyline;
@@ -1225,7 +1223,12 @@
             // Try to get user location
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                    map.setView([position.coords.latitude, position.coords.longitude], 13);
+                    const currentLat = position.coords.latitude;
+                    const currentLng = position.coords.longitude;
+                    map.setView([currentLat, currentLng], 13);
+                    if (!document.getElementById('pickup_lat').value) {
+                        setPickupLocation(currentLat, currentLng);
+                    }
                 });
             }
         }
@@ -1271,8 +1274,11 @@
             }
             
             updateRoute();
-            // Reverse geocode placeholder
-            document.getElementById('store_address').value = `Location set (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            reverseGeocode(lat, lng, function(address) {
+                if (address) {
+                    document.getElementById('store_address').value = address;
+                }
+            });
             updateEstimatedFee();
         }
 
@@ -1302,32 +1308,73 @@
             }
             
             updateRoute();
-            // Reverse geocode placeholder
-            document.getElementById('delivery_address').value = `Location set (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            reverseGeocode(lat, lng, function(address) {
+                if (address) {
+                    document.getElementById('delivery_address').value = address;
+                }
+            });
             updateEstimatedFee();
         }
 
         function updateRoute() {
             if (pickupMarker && dropoffMarker) {
-                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
-                if (routePolyline) {
-                    routePolyline.setLatLngs(points);
-                } else {
-                    routePolyline = L.polyline(points, {color: '#4CAF50', weight: 5, opacity: 0.7}).addTo(map);
-                }
-                map.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
-                
-                const distance = calculateDistance();
-                const time = Math.round(distance * 3); // 3 mins per km approx
-                
-                document.getElementById('mapDistance').textContent = distance.toFixed(1) + ' km';
-                document.getElementById('mapTime').textContent = time + ' min';
-                
-                let mode = 'Vehicle';
-                if (distance <= 2) mode = 'Bike/Walking';
-                else if (distance <= 5) mode = 'Motorcycle';
-                document.getElementById('mapTransport').textContent = mode;
+                const start = pickupMarker.getLatLng();
+                const end = dropoffMarker.getLatLng();
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+                fetch(routeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        let distance = calculateDistance();
+                        if (data.routes && data.routes.length) {
+                            distance = data.routes[0].distance / 1000;
+                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            if (routePolyline) {
+                                routePolyline.setLatLngs(coords);
+                            } else {
+                                routePolyline = L.polyline(coords, {color: '#4CAF50', weight: 5, opacity: 0.7}).addTo(map);
+                            }
+                            map.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+                        } else {
+                            const points = [start, end];
+                            if (routePolyline) {
+                                routePolyline.setLatLngs(points);
+                            } else {
+                                routePolyline = L.polyline(points, {color: '#4CAF50', weight: 5, opacity: 0.7}).addTo(map);
+                            }
+                            map.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+                        }
+
+                        const time = Math.round(distance * 3);
+                        document.getElementById('mapDistance').textContent = distance.toFixed(1) + ' km';
+                        document.getElementById('mapTime').textContent = time + ' min';
+                        let mode = 'Vehicle';
+                        if (distance <= 2) mode = 'Bike/Walking';
+                        else if (distance <= 5) mode = 'Motorcycle';
+                        document.getElementById('mapTransport').textContent = mode;
+                    })
+                    .catch(() => {
+                        const points = [start, end];
+                        if (routePolyline) {
+                            routePolyline.setLatLngs(points);
+                        } else {
+                            routePolyline = L.polyline(points, {color: '#4CAF50', weight: 5, opacity: 0.7}).addTo(map);
+                        }
+                        map.fitBounds(routePolyline.getBounds(), {padding: [50, 50]});
+                    });
             }
+        }
+
+        function reverseGeocode(lat, lng, callback) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        callback(data.display_name);
+                    } else {
+                        callback('');
+                    }
+                })
+                .catch(() => callback(''));
         }
 
         function showStoreMap() {
@@ -1564,7 +1611,6 @@
                 progressBar.style.width = progress + '%';
             }
         }
-    </script>
 
         // NEW: Calculate Route Details - IMPROVED
         function calculateAndDisplayRoute(from, to) {
@@ -1914,8 +1960,6 @@
 
         // Form validation
         document.getElementById('sparePartsForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent actual submission for demo
-
             // Validate required fields
             const deviceType = document.getElementById('device_type').value.trim();
             const make = document.getElementById('make').value.trim();
@@ -1932,6 +1976,7 @@
                 vibrate();
                 showError('Please specify your device/vehicle type in the "Other (Specify below)" field.');
                 document.getElementById('other_device_specify').focus();
+                e.preventDefault();
                 return false;
             }
 
@@ -1944,6 +1989,7 @@
             if (!deviceType || !make || !model || !storeAddress || !deliveryAddress || !hasParts || !servicePrice || !phoneNumber) {
                 vibrate();
                 showError('Please fill in all required fields: Device type, make, model, store address, delivery address, service price, phone number, and at least one part.');
+                e.preventDefault();
                 return false;
             }
 
@@ -1953,40 +1999,10 @@
                 vibrate();
                 showError('Service price must be at least $0.50.');
                 document.getElementById('service_price').focus();
+                e.preventDefault();
                 return false;
             }
 
-            // Show success summary
-            const estimatedFee = document.getElementById('estimated_fee').textContent;
-            const partCount = getPartCount();
-            const urgencyLevel = document.getElementById('urgency_level').value;
-            const budgetDisplay = document.getElementById('budget_display').textContent;
-            const supplierName = document.getElementById('preferred_supplier').value || 'No specific store';
-
-            const summary = `
-✅ Spare parts errand created!
-
-⚙️ Device: ${make} ${model} (${deviceType === 'other' ? otherDeviceSpecify : deviceType})
-🏪 Store: ${supplierName}
-📍 Store Address: ${storeAddress}
-🚚 Delivery To: ${deliveryAddress}
-📦 Parts: ${partCount} different parts
-⏰ Urgency: ${urgencyLevel}
-💰 Budget: ${budgetDisplay}
-💸 Estimated Fee: ${estimatedFee}
-💵 Your Price: $${servicePriceNum.toFixed(2)}
-📱 Contact: ${phoneNumber}
-
-Our agent will visit the store at the specified address, purchase the parts, and deliver them to you.
-
-Thank you for using ErrandConnect!
-            `;
-
-            alert(summary);
-            vibrate();
-
-            // In a real mobile app, you would submit the form here
-            // this.submit();
             return true;
         });
 

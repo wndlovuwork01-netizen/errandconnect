@@ -1593,11 +1593,28 @@
                     const lng = e.latlng.lng;
 
                     if (selectionMode === 'pickup') {
-                        updatePickupLocation(lat, lng, "Selected on Map");
+                        reverseGeocode(lat, lng, function(address) {
+                            updatePickupLocation(lat, lng, address);
+                        });
                     } else {
-                        updateDropoffLocation(lat, lng, "Selected on Map");
+                        reverseGeocode(lat, lng, function(address) {
+                            updateDropoffLocation(lat, lng, address);
+                        });
                     }
                 });
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const currentLat = position.coords.latitude;
+                        const currentLng = position.coords.longitude;
+                        map.setView([currentLat, currentLng], 13);
+                        if (!document.getElementById('pickup_lat').value) {
+                            reverseGeocode(currentLat, currentLng, function(address) {
+                                updatePickupLocation(currentLat, currentLng, address);
+                            });
+                        }
+                    });
+                }
             }
 
             // Force map to recalculate size after modal display
@@ -1663,13 +1680,39 @@
             const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
 
             if (!isNaN(lat1) && !isNaN(lon1) && !isNaN(lat2) && !isNaN(lon2)) {
-                if (routeLine) map.removeLayer(routeLine);
-                routeLine = L.polyline([[lat1, lon1], [lat2, lon2]], {color: '#4CAF50', weight: 3, opacity: 0.7, dashArray: '5, 10'}).addTo(map);
-                map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
-                
-                const distance = calculateDistance();
-                updateMapDetails(distance);
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+                fetch(routeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            if (routeLine) map.removeLayer(routeLine);
+                            routeLine = L.polyline(coords, {color: '#4CAF50', weight: 3, opacity: 0.7}).addTo(map);
+                            map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+                            updateMapDetails((data.routes[0].distance / 1000).toFixed(1));
+                        } else {
+                            const distance = calculateDistance();
+                            updateMapDetails(distance);
+                        }
+                    })
+                    .catch(() => {
+                        const distance = calculateDistance();
+                        updateMapDetails(distance);
+                    });
             }
+        }
+
+        function reverseGeocode(lat, lng, callback) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        callback(data.display_name);
+                    } else {
+                        callback('');
+                    }
+                })
+                .catch(() => callback(''));
         }
 
         function updateMapDetails(distance) {

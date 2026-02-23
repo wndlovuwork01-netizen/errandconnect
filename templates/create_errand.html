@@ -163,7 +163,12 @@
             // Try to get user location
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                    map.setView([position.coords.latitude, position.coords.longitude], 13);
+                    const currentLat = position.coords.latitude;
+                    const currentLng = position.coords.longitude;
+                    map.setView([currentLat, currentLng], 13);
+                    if (!pickupMarker && !document.getElementById('pickup_latitude').value) {
+                        setPickupLocation(currentLat, currentLng);
+                    }
                 });
             }
         }
@@ -233,27 +238,39 @@
 
         function updateRoute() {
             if (pickupMarker && dropoffMarker) {
-                const points = [pickupMarker.getLatLng(), dropoffMarker.getLatLng()];
-                
-                if (routeLine) map.removeLayer(routeLine);
-                
-                routeLine = L.polyline(points, {
-                    color: '#4CAF50',
-                    weight: 4,
-                    opacity: 0.6,
-                    dashArray: '10, 10',
-                    lineCap: 'round'
-                }).addTo(map);
+                const start = pickupMarker.getLatLng();
+                const end = dropoffMarker.getLatLng();
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
 
-                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                
-                // Calculate distance and update price estimate if needed
-                const dist = calculateHaversineDistance(
-                    points[0].lat, points[0].lng,
-                    points[1].lat, points[1].lng
-                );
-                
-                updatePriceEstimate(dist);
+                fetch(routeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            if (routeLine) map.removeLayer(routeLine);
+                            routeLine = L.polyline(coords, {
+                                color: '#4CAF50',
+                                weight: 4,
+                                opacity: 0.7,
+                                lineCap: 'round'
+                            }).addTo(map);
+                            map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                            updatePriceEstimate(data.routes[0].distance / 1000);
+                        } else {
+                            const fallbackDistance = calculateHaversineDistance(
+                                start.lat, start.lng,
+                                end.lat, end.lng
+                            );
+                            updatePriceEstimate(fallbackDistance);
+                        }
+                    })
+                    .catch(() => {
+                        const fallbackDistance = calculateHaversineDistance(
+                            start.lat, start.lng,
+                            end.lat, end.lng
+                        );
+                        updatePriceEstimate(fallbackDistance);
+                    });
             }
         }
 
@@ -279,14 +296,14 @@
         function getAddress(lat, lng, inputId) {
             if (!lat || !lng) return;
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.display_name) {
                         document.getElementById(inputId).value = data.display_name;
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(() => {});
         }
 
         // Initialize map on load
