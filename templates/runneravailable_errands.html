@@ -1330,7 +1330,7 @@
         });
 
         // Get real errands data passed from Flask
-        const realErrands = {{ available_errands | tojson | safe }};
+        const realErrands = {{ errands | tojson | safe }};
 
         // Transform the data to match the expected format
         let errands = realErrands.map(errandData => {

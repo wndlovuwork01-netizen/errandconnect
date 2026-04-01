@@ -19,7 +19,7 @@ Do NOT break existing functionality.
 FEATURE 1: RUNNER REGISTRATION SYSTEM
 Create a runner registration page and backend logic.
 Template:
-runner_register.html
+runner_signup.html
 Purpose:
 Allow users to register as runners.
 
@@ -40,7 +40,7 @@ current_longitude (nullable)
 created_at
 
 RUNNER REGISTRATION FLOW
-User opens runner_register.html
+User opens runner_signup.html
 User submits:
 Full name
 Phone number
@@ -210,7 +210,7 @@ create_errand(client_id, errand_data)
 update_runner_eta(errand_id, eta_minutes)
 
 FRONTEND FILES REQUIRED
-runner_register.html
+runner_signup.html
 create_errand.html (with map)
 chats.html (map + ETA display)
 errandfinal.html (agreement confirmation)

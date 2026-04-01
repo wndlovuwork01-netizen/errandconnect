@@ -30,7 +30,7 @@
         <!-- Flash Messages -->
         <div class="alerts-container" id="flashMessagesContainer"></div>
 
-        <form method="post" action="/runner/signup" enctype="multipart/form-data" class="profile-form" id="runnerRegistrationForm">
+        <form action="{{ url_for('runner_signup') }}" method="POST"> enctype="multipart/form-data" class="profile-form" id="runnerRegistrationForm">
             <!-- Slide Container -->
             <div class="slides-container">
                 <!-- ===== SLIDE 1: PERSONAL INFORMATION ===== -->

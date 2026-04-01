@@ -105,7 +105,7 @@
                         <p class="service-note">Browse available errands to accept</p>
                         <div class="action-stats">
                             <div class="stat-badge large">
-                                <span class="stat-number">{{ available_errands|length if available_errands else 0 }}</span>
+                                <span class="stat-number">{{ available_count or 0 }}</span>
                                 <span class="stat-label">Available</span>
                             </div>
                         </div>
