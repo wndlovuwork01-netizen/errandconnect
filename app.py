@@ -644,7 +644,41 @@ def wallet():
 @login_required
 def completed():
     user = current_user()
-    return render_template("completed.html", user=user)
+
+    # Get a completed errand for this user
+    errand = Errand.query.filter_by(client_id=user.id, status="completed").first()
+
+    # Get user's rating for that errand
+    rating = None
+    if errand:
+        rating = Rating.query.filter_by(
+            client_id=user.id,
+            errand_id=errand.id
+        ).first()
+
+    # Build user_rating object
+    user_rating = {
+        "found": rating is not None,
+        "rating": rating.value if rating else 0
+    }
+
+    # Calculate average rating
+    if errand:
+        ratings = Rating.query.filter_by(errand_id=errand.id).all()
+        average_rating = (
+            sum(r.value for r in ratings) / len(ratings)
+            if ratings else 0
+        )
+    else:
+        average_rating = 0
+
+    return render_template(
+        "completed.html",
+        user=user,
+        errand=errand,
+        user_rating=user_rating,
+        average_rating=average_rating
+    )
 
 @app.route("/terms")
 @login_required
