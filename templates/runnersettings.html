@@ -1,0 +1,613 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="settings-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Settings</h1>
+            </div>
+            <a href="/home" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Profile Section - clickable -->
+        <a href="{{ url_for('runnerprofile') }}" class="profile-link">
+            <section class="profile-section" style="cursor: pointer;">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <div class="avatar-circle">
+                            {{ user.username[0]|upper if user.username else 'R' }}
+                        </div>
+                        <span class="online-badge"></span>
+                    </div>
+                    <div class="profile-info">
+                        <h3 class="profile-name">{{ user.username if user.username else 'Runner' }}</h3>
+                        <p class="profile-email">{{ user.email if user.email else 'No email provided' }}</p>
+                        <div class="runner-stats">
+                            <span class="rating">⭐ 4.9</span>
+                            <span class="deliveries">🚀 238 deliveries</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </a>
+
+        <!-- Account Settings -->
+        <section class="settings-section">
+            <h3 class="section-title">🔐 Account Settings</h3>
+            <div class="settings-list">
+                <a href="{{ url_for('runnerpersonal') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-id-card setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Personal & Vehicle Info</span>
+                                <span class="setting-desc">Name, phone, bike/car details</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerbank') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-credit-card setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Bank & Payment Details</span>
+                                <span class="setting-desc">Manage your payout method</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerpasswords') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-lock setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Change Password</span>
+                                <span class="setting-desc">Update your security credentials</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerprivacy') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-shield-alt setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Privacy & Security</span>
+                                <span class="setting-desc">Manage your privacy settings</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Notifications -->
+        <section class="settings-section">
+            <h3 class="section-title">🔔 Notifications</h3>
+            <div class="settings-list">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-briefcase setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">New Job Alerts</span>
+                            <span class="setting-desc">Nearby errand requests</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Enabled</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-comment-dots setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Chat Messages</span>
+                            <span class="setting-desc">Messages from senders</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Enabled</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-truck setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Delivery Updates</span>
+                            <span class="setting-desc">Status changes, tips received</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Enabled</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-tag setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Promotions & News</span>
+                            <span class="setting-desc">Bonus zones, events</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Disabled</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- App Preferences (all static) -->
+        <section class="settings-section">
+            <h3 class="section-title">⚙️ App Preferences</h3>
+            <div class="settings-list">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-language setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Language</span>
+                            <span class="setting-desc">English</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">English</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-palette setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Theme</span>
+                            <span class="setting-desc">Green (Default)</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Green</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-map setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Map Navigation</span>
+                            <span class="setting-desc">Google Maps</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Google Maps</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-ruler setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Distance Unit</span>
+                            <span class="setting-desc">Kilometers</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Kilometers</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-location-arrow setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Background Location</span>
+                            <span class="setting-desc">Keep tracking while app is closed</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Enabled</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-magic setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Auto-Accept Orders</span>
+                            <span class="setting-desc">Instantly accept eligible jobs</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Disabled</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-toggle-on setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">Availability Status</span>
+                            <span class="setting-desc">Go online to receive orders</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">Online</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support -->
+        <section class="settings-section">
+            <h3 class="section-title">💚 Support</h3>
+            <div class="settings-list">
+                <a href="{{ url_for('runnerhelp') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-question-circle setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Help & Support</span>
+                                <span class="setting-desc">Get help with the app</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerguideline') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-book setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Runner Guidelines</span>
+                                <span class="setting-desc">Best practices and rules</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerfaqs') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-comments setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">FAQ</span>
+                                <span class="setting-desc">Frequently asked questions</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerterms') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-file-contract setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Terms & Conditions</span>
+                                <span class="setting-desc">Read our terms of service</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('runnerrate') }}" class="setting-item-link">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-star setting-icon"></i>
+                            <div class="setting-details">
+                                <span class="setting-name">Rate ErrandGo</span>
+                                <span class="setting-desc">Share your experience</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right setting-arrow"></i>
+                    </div>
+                </a>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-info-circle setting-icon"></i>
+                        <div class="setting-details">
+                            <span class="setting-name">About</span>
+                            <span class="setting-desc">Version 1.0.0 (Runner)</span>
+                        </div>
+                    </div>
+                    <span class="setting-value">1.0.0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="settings-actions">
+            <button class="btn-secondary" onclick="location.href='/signin'">
+                <i class="fas fa-sign-out-alt"></i>
+                Sign Out
+            </button>
+        </section>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --primary-100: #C8E6C9;
+    --primary-200: #A5D6A7;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+}
+
+#settings-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 20px;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.mobile-main {
+    padding: 20px;
+}
+
+/* Profile Link */
+.profile-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Profile Section Styles */
+.profile-section {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+}
+
+.profile-section:active {
+    background: var(--primary-50);
+    transform: scale(0.99);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar {
+    position: relative;
+}
+
+.avatar-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.online-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: #4CAF50;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.profile-email {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.runner-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.runner-stats span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rating {
+    color: #f39c12;
+}
+
+.deliveries {
+    color: var(--primary-color);
+}
+
+/* Settings Sections */
+.settings-section {
+    margin-bottom: 32px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-left: 8px;
+}
+
+.settings-list {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Setting Item Links */
+.setting-item-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.setting-item:active,
+.setting-item-link:active .setting-item {
+    background: var(--primary-50);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.setting-icon {
+    font-size: 20px;
+    color: var(--primary-color);
+    width: 24px;
+    text-align: center;
+}
+
+.setting-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.setting-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.setting-desc {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.setting-arrow {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.setting-value {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-align: right;
+}
+
+.settings-actions {
+    margin-top: 32px;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: #F44336;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+    background: #FFEBEE;
+}
+</style>
+{% endblock %}

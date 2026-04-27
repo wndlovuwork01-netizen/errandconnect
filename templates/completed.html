@@ -63,24 +63,15 @@
         </div>
 
         <div class="errands-list">
-    {% if completed_errands %}
-        {% for item in completed_errands %}
+            {% if completed_errands %}
+                {% for errand in completed_errands %}
+                {% set runner = errand.runner %}
+                {% set user_rating = namespace(found=false, rating=0) %}
+                {% for rating in errand.ratings if rating.from_user_id == current_user.id %}
+                    {% set user_rating.found = true %}
+                    {% set user_rating.rating = rating.rating %}
+                {% endfor %}
 
-        {% set errand = item.errand %}
-
-        <div class="errand-card">
-            <h4>{{ errand.type }}</h4>
-            <p><strong>Pickup:</strong> {{ errand.pickup_location }}</p>
-            <p><strong>Dropoff:</strong> {{ errand.delivery_location }}</p>
-            <p><strong>Price:</strong> ${{ errand.price_estimate }}</p>
-            <p><strong>Status:</strong> {{ item.status }}</p>
-            <p><strong>Runner:</strong> {{ user.username }}</p>
-        </div>
-
-        {% endfor %}
-    {% else %}
-        <p>No completed errands</p>
-    {% endif %}
                 <div class="errand-item animated-slideup" data-status="completed" data-id="{{ errand.id }}">
                     <!-- Compact View -->
                     <div class="errand-compact-view">
@@ -228,7 +219,7 @@
                                 <div class="detail-item">
                                     <i class="fas fa-running"></i>
                                     <div class="detail-content">
-                                        <strong>{{ user.username }}</strong>
+                                        <strong>Runner:</strong>
                                         <span>
                                             {% if runner %}
                                                 {{ runner.fullname }}

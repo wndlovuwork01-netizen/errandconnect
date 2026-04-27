@@ -37,21 +37,17 @@
             min-height: 100vh;
             padding: 0;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Mobile-friendly container */
         .container {
             width: 100%;
             max-width: 100%;
             margin: 0;
             background: white;
             min-height: 100vh;
-            position: relative;
         }
 
-        /* Fixed Service Bar for Mobile */
+        /* Smaller top bar */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -60,28 +56,28 @@
             z-index: 1000;
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 10px 15px;
+            padding: 6px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 60px;
+            height: 48px;
             border-bottom: 1px solid #e0e0e0;
         }
 
         .service-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex: 1;
             min-width: 0;
         }
 
         .service-icon {
-            font-size: 20px;
+            font-size: 18px;
             background: var(--gradient);
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -89,62 +85,42 @@
             flex-shrink: 0;
         }
 
-        .service-text {
-            min-width: 0;
-        }
-
         .service-text h3 {
-            color: var(--primary-dark);
-            margin: 0;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .service-text p {
-            color: var(--dark);
-            margin: 0;
-            font-size: 11px;
-            opacity: 0.8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: none;
         }
 
         .estimated-fee-display {
             background: var(--gradient);
             color: white;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: var(--radius);
             font-weight: 600;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-            min-width: 100px;
+            font-size: 11px;
+            min-width: 85px;
             text-align: center;
-            flex-shrink: 0;
-            margin-left: 10px;
         }
 
         .fee-amount {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
-            display: block;
-            line-height: 1.2;
         }
 
-        /* Main content area */
         .content-wrapper {
-            padding-top: 70px;
+            padding-top: 58px;
             padding-bottom: 20px;
         }
 
-        /* Mobile Header */
         .mobile-header {
             background: var(--gradient);
             color: white;
-            padding: 20px 15px;
+            padding: 12px 15px;
             text-align: center;
         }
 
@@ -152,39 +128,107 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 4px;
         }
 
         .logo-icon {
             background: rgba(255, 255, 255, 0.2);
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 20px;
+            margin-bottom: 2px;
         }
 
         .service-tag {
-            display: inline-block;
             background: rgba(255, 255, 255, 0.2);
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 15px;
-            font-size: 11px;
-            backdrop-filter: blur(10px);
-            margin-top: 2px;
+            font-size: 10px;
         }
 
-        /* Form Section */
+        /* Map styles */
+        #map {
+            height: 280px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .map-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .map-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .map-btn.active.dropoff {
+            background: #2196F3;
+        }
+        .map-hint {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            display: none;
+        }
+        /* Route info bar */
+        .route-info-bar {
+            background: white;
+            border-radius: 12px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9e9e9;
+        }
+        .route-info-item {
+            flex: 1;
+            text-align: center;
+        }
+        .route-info-label {
+            font-size: 9px;
+            color: #777;
+            text-transform: uppercase;
+        }
+        .route-info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .route-info-value small {
+            font-size: 9px;
+        }
+
         .form-section {
             padding: 15px;
         }
@@ -193,8 +237,7 @@
             height: 3px;
             background: #e0e0e0;
             border-radius: 2px;
-            margin: 20px 0;
-            overflow: hidden;
+            margin: 15px 0 20px;
         }
 
         .progress {
@@ -207,30 +250,23 @@
 
         h2 {
             font-size: 16px;
-            margin: 20px 0 15px;
+            margin: 15px 0 12px;
             color: var(--primary-dark);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        h2 i {
-            color: var(--primary);
-            font-size: 14px;
-        }
-
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-weight: 600;
-            color: var(--dark);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .input-with-icon {
@@ -244,299 +280,36 @@
             transform: translateY(-50%);
             color: var(--primary);
             font-size: 14px;
-            z-index: 1;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 14px 14px 14px 40px;
+            padding: 12px 12px 12px 38px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 15px;
-            transition: var(--transition);
-            background: white;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        select {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding-right: 40px;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
-        }
-
-        /* AUTO-SLIDING TEXT FOR MOBILE */
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            white-space: nowrap;
-            overflow: hidden;
-            cursor: text;
-        }
-
-        /* Auto-sliding text animation */
-        @keyframes slideTextLeft {
-            0% {
-                transform: translateX(0);
-            }
-            10% {
-                transform: translateX(0);
-            }
-            90% {
-                transform: translateX(calc(-100% + 100px));
-            }
-            100% {
-                transform: translateX(calc(-100% + 100px));
-            }
-        }
-
-        /* For inputs with long text - auto slide show */
-        .input-with-icon input.sliding-text {
-            animation: slideTextLeft 15s linear infinite;
-            animation-play-state: running;
-            padding-right: 40px;
-        }
-
-        /* Pause animation on hover/focus */
-        .input-with-icon input.sliding-text:focus {
-            animation-play-state: paused;
-        }
-
-        /* For textarea specifically (multi-line) */
-        textarea {
-            white-space: pre-wrap;
-            overflow-wrap: break-word;
-            overflow-y: auto;
-            min-height: 60px;
-            max-height: 120px;
-            resize: vertical;
-        }
-
-        textarea:focus {
-            white-space: pre-wrap;
-            overflow-x: hidden;
-        }
-
-        /* NEW: Service Price and Phone Number Row */
-        .service-phone-row {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .service-phone-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-            min-width: 0;
-        }
-
-        /* VIEW MAP BUTTON */
-        .view-map-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            padding: 14px;
-            cursor: pointer;
-            font-weight: 600;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            width: 100%;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-        }
-
-        .view-map-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Map Selection Controls */
-        .map-selection-controls {
-            display: flex;
-            gap: 10px;
-            padding: 10px 15px;
             background: white;
-            border-bottom: 1px solid #eee;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
-        .selection-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            white-space: nowrap;
-            transition: all 0.2s;
+        textarea {
+            padding: 12px;
         }
 
-        .selection-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .selection-btn i {
-            font-size: 14px;
-        }
-
-        /* Info Tip */
-        .info-tip {
-            background: rgba(76, 175, 80, 0.1);
-            border-left: 3px solid var(--primary);
-            padding: 10px 12px;
-            margin: 12px 0;
-            border-radius: 0 var(--radius) var(--radius) 0;
-            font-size: 12px;
-            color: var(--dark);
-        }
-
-        /* Device Grid - Mobile Optimized */
+        /* Device grid */
         .device-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 12px;
             margin-top: 8px;
         }
-
         .device-item {
             background: var(--light);
-            padding: 12px;
+            padding: 10px;
             border-radius: var(--radius);
             border: 1px solid #e0e0e0;
         }
 
-        /* Section Divider */
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
-            margin: 25px 0;
-        }
-
-        /* Submit Button */
-        .submit-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-        }
-
-        /* Service Type Indicator */
-        .service-type-indicator {
-            background: var(--light);
-            border: 1px solid #e0e0e0;
-            border-radius: var(--radius);
-            padding: 12px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .service-type-icon {
-            font-size: 20px;
-            color: var(--primary);
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .service-type-text h4 {
-            margin: 0;
-            font-size: 14px;
-            color: var(--primary-dark);
-        }
-
-        .service-type-text p {
-            margin: 2px 0 0;
-            font-size: 12px;
-            color: var(--dark);
-            opacity: 0.8;
-        }
-
-        /* Budget Range Fix - Dollar Sign */
-        .budget-option {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .budget-option::before {
-            content: "$";
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        /* Urgency Badge */
-        .urgency-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-
-        .urgency-low { background: #e8f5e8; color: var(--primary-dark); }
-        .urgency-medium { background: #fff3cd; color: #856404; }
-        .urgency-high { background: #f8d7da; color: #721c24; }
-        .urgency-urgent { background: #f5c6cb; color: #721c24; }
-
-        /* Expanding Input for Other Option */
-        .expanding-input {
-            transition: all 0.3s ease;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            margin-top: 0;
-        }
-
-        .expanding-input.expanded {
-            max-height: 80px;
-            opacity: 1;
-            margin-top: 10px;
-        }
-
-        /* Pickup Location Fields */
+        /* Pickup location fields */
         .pickup-location-fields {
             display: grid;
             grid-template-columns: 1fr;
@@ -544,283 +317,107 @@
             margin-top: 12px;
         }
 
-        /* MAP MODAL - Mobile Optimized */
-        .map-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .map-content {
-            background: white;
-            border-radius: var(--radius);
-            width: 100%;
-            max-height: 85vh;
+        /* Expanding inputs */
+        .expanding-input {
+            max-height: 0;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            transition: 0.3s;
+            opacity: 0;
+        }
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 8px;
         }
 
-        .map-header {
+        /* Service type indicator */
+        .service-type-indicator {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        /* Urgency badge */
+        .urgency-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .urgency-low { background: #e8f5e8; color: var(--primary-dark); }
+        .urgency-medium { background: #fff3cd; color: #856404; }
+        .urgency-high { background: #f8d7da; color: #721c24; }
+        .urgency-urgent { background: #f5c6cb; color: #721c24; }
+
+        /* Submit button */
+        .submit-btn {
             background: var(--gradient);
             color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .map-header h3 {
-            margin: 0;
-            font-size: 16px;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
         }
 
-        .close-map {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .section-divider {
+            margin: 20px 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
         }
 
-        .map-placeholder {
-            padding: 30px 15px;
-            text-align: center;
-            background: #f5f5f5;
+        .info-tip {
+            background: rgba(76,175,80,0.1);
+            border-left: 3px solid var(--primary);
+            padding: 8px 12px;
+            font-size: 11px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .service-phone-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .service-phone-row .form-group {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
+            margin-bottom: 0;
         }
 
-        .map-placeholder i {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .map-placeholder h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-
-        .map-placeholder p {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .map-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            padding: 15px;
-            background: var(--light);
-            border-top: 1px solid #e0e0e0;
-            flex-shrink: 0;
-        }
-
-        .info-item {
-            text-align: center;
-        }
-
-        .info-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 4px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: var(--dark);
-        }
-
-        /* iOS Safe Areas */
-        @supports (padding: max(0px)) {
-            .fixed-service-bar {
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-                padding-top: max(10px, env(safe-area-inset-top));
-                height: calc(60px + env(safe-area-inset-top));
-            }
-
-            .content-wrapper {
-                padding-top: calc(70px + env(safe-area-inset-top));
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            }
-
-            .mobile-header, .form-section {
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-            }
-
-            .submit-btn {
-                margin-bottom: max(20px, env(safe-area-inset-bottom));
-            }
-
-            .map-modal {
-                padding: max(15px, env(safe-area-inset-left));
-            }
-        }
-
-        /* Larger screens */
         @media (min-width: 768px) {
-            body {
-                padding: 10px;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                min-height: 100vh;
-            }
-
-            .container {
-                max-width: 500px;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-                margin: 0 auto;
-            }
-
-            .fixed-service-bar {
-                border-radius: var(--radius) var(--radius) 0 0;
-            }
-
-            .device-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            /* Service Phone Row for larger screens */
-            .service-phone-row {
-                gap: 15px;
-            }
-
-            .pickup-location-fields {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .map-info {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
+            body { padding: 10px; display: flex; justify-content: center; }
+            .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
+            .device-grid { grid-template-columns: 1fr 1fr; }
+            .pickup-location-fields { grid-template-columns: 1fr 1fr; }
         }
-
-        /* Very small screens */
         @media (max-width: 320px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            h2 {
-                font-size: 15px;
-            }
-
-            input, select, textarea {
-                font-size: 14px;
-                padding: 12px 12px 12px 36px;
-            }
-
-            .estimated-fee-display {
-                min-width: 90px;
-                font-size: 11px;
-                padding: 5px 8px;
-            }
-
-            .fee-amount {
-                font-size: 14px;
-            }
-
-            /* Service Phone Row for very small screens */
-            .service-phone-row {
-                gap: 8px;
-            }
-
-            .service-phone-row .input-with-icon i {
-                font-size: 12px;
-                left: 8px;
-            }
-
-            .service-phone-row input {
-                padding-left: 32px;
-                padding-right: 8px;
-                font-size: 13px;
-            }
-
-            .map-info {
-                grid-template-columns: 1fr 1fr;
-            }
+            .route-info-value { font-size: 11px; }
+            .map-btn { font-size: 11px; padding: 8px; }
+            .service-phone-row { gap: 8px; }
         }
     </style>
 </head>
 <body>
-    <!-- Fixed Service Bar for Mobile -->
     <div class="fixed-service-bar">
         <div class="service-info">
-            <div class="service-icon">
-                <i class="fas fa-laptop"></i>
-            </div>
-            <div class="service-text">
-                <h3>Gadget Services</h3>
-                <p>Expert repair & assistance</p>
-            </div>
+            <div class="service-icon"><i class="fas fa-laptop"></i></div>
+            <div class="service-text"><h3>Gadget Services</h3><p>Expert repair & assistance</p></div>
         </div>
         <div class="estimated-fee-display">
-            <span>Estimated:</span>
+            <span>Est.</span>
             <span id="estimated_fee" class="fee-amount">$0.00</span>
-        </div>
-    </div>
-
-    <!-- Map Modal -->
-    <div id="mapModal" class="map-modal">
-        <div class="map-content">
-            <div class="map-header">
-                    <h3><i class="fas fa-map-marked-alt"></i> Service Route</h3>
-                    <button class="close-map" onclick="closeMap()">×</button>
-                </div>
-                
-                <!-- Selection Controls -->
-                <div class="map-selection-controls">
-                    <button type="button" id="selectPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
-                        <i class="fas fa-map-marker-alt"></i> Set Pickup
-                    </button>
-                    <button type="button" id="selectDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
-                        <i class="fas fa-flag-checkered"></i> Set Service Point
-                    </button>
-                </div>
-
-                <div id="map" style="height: 400px; width: 100%; z-index: 1;"></div>
-            <div class="map-info">
-                <div class="info-item">
-                    <div class="info-value" id="mapDistance">0 km</div>
-                    <div class="info-label">Distance</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-value" id="mapTime">0 min</div>
-                    <div class="info-label">Est. Time</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-value" id="mapServiceType">-</div>
-                    <div class="info-label">Service Type</div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -828,1251 +425,462 @@
         <div class="content-wrapper">
             <div class="mobile-header">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-laptop"></i>
-                    </div>
-                    <div>
-                        <h1>ErrandConnect</h1>
-                        <div class="service-tag">Gadget Services</div>
-                    </div>
+                    <div class="logo-icon"><i class="fas fa-laptop"></i></div>
+                    <div><h1>ErrandConnect</h1><div class="service-tag">Gadget Services</div></div>
                 </div>
             </div>
 
             <div class="form-section">
-                <div class="progress-bar">
-                    <div class="progress"></div>
+                <div class="progress-bar"><div class="progress"></div></div>
+
+                <!-- INLINE MAP SECTION -->
+                <div class="map-wrapper">
+                    <div class="map-controls">
+                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-map-marker-alt"></i> Set Pickup</button>
+                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Service Location</button>
+                    </div>
+                    <div id="mapHint" class="map-hint">Tap map to set location</div>
+                    <div id="map"></div>
+
+                    <div class="route-info-bar" id="routeInfoBar">
+                        <div class="route-info-item">
+                            <div class="route-info-label">Distance</div>
+                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Time</div>
+                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Fee</div>
+                            <div class="route-info-value" id="infoFee">$0.00</div>
+                        </div>
+                    </div>
                 </div>
 
                 <form method="post" action="{{ url_for('create_gadget_service_errand') }}" id="gadgetServiceForm">
-                    <!-- Hidden coordinate fields -->
+                    <!-- Hidden map coordinate fields -->
                     <input type="hidden" id="pickup_lat" name="pickup_lat">
                     <input type="hidden" id="pickup_lon" name="pickup_lon">
                     <input type="hidden" id="dropoff_lat" name="dropoff_lat">
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
 
-                    <h2><i class="fas fa-laptop-medical"></i> Device Information</h2>
+                    <!-- ========== DEVICE INFORMATION ========== -->
+                    <h2><i class="fas fa-mobile-alt"></i> Device Information</h2>
 
                     <div class="device-grid">
                         <div class="device-item">
                             <label for="device_type">Device Type</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-laptop"></i>
-                                <select id="device_type" name="device_type" required onchange="updateEstimatedFee()">
-                                    <option value="">Select device type</option>
-                                    <option value="smartphone">Smartphone</option>
-                                    <option value="laptop">Laptop</option>
-                                    <option value="tablet">Tablet</option>
-                                    <option value="desktop">Desktop Computer</option>
-                                    <option value="printer">Printer</option>
-                                    <option value="camera">Camera</option>
-                                    <option value="gaming_console">Gaming Console</option>
-                                    <option value="smart_watch">Smart Watch</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div id="other_device_input" class="expanding-input">
-                                <div class="input-with-icon" style="margin-top: 8px;">
-                                    <i class="fas fa-edit"></i>
-                                    <input type="text" id="other_device_type" name="other_device_type" placeholder="Specify device type">
-                                </div>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-laptop"></i><select id="device_type" name="device_type" required onchange="toggleOtherDeviceInput(); updateEstimatedFee();"><option value="">Select device type</option><option value="smartphone">Smartphone</option><option value="laptop">Laptop</option><option value="tablet">Tablet</option><option value="desktop">Desktop Computer</option><option value="printer">Printer</option><option value="camera">Camera</option><option value="gaming_console">Gaming Console</option><option value="smart_watch">Smart Watch</option><option value="other">Other</option></select></div>
+                            <div id="other_device_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_device_type" name="other_device_type" placeholder="Specify device type"></div></div>
                         </div>
-
                         <div class="device-item">
                             <label for="device_age">Device Age</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-calendar-alt"></i>
-                                <select id="device_age" name="device_age" onchange="updateEstimatedFee()">
-                                    <option value="less_than_1">Less than 1 year</option>
-                                    <option value="1_2_years">1-2 years</option>
-                                    <option value="2_3_years">2-3 years</option>
-                                    <option value="3_plus_years">3+ years</option>
-                                    <option value="unknown">Unknown</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-calendar-alt"></i><select id="device_age" name="device_age" onchange="updateEstimatedFee()"><option value="less_than_1">Less than 1 year</option><option value="1_2_years">1-2 years</option><option value="2_3_years">2-3 years</option><option value="3_plus_years">3+ years</option><option value="unknown">Unknown</option></select></div>
                         </div>
                     </div>
 
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="brand" name="brand" placeholder="Brand (e.g., Apple, Samsung, Dell)" required></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-cube"></i><input type="text" id="model" name="model" placeholder="Model (e.g., iPhone 14, Galaxy S23)" required></div></div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- ========== SERVICE LOCATION & TIMING (moved here - between Device Info and Service Required) ========== -->
+                    <h2><i class="fas fa-map-marker-alt"></i> Service Location & Timing</h2>
+
                     <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-tag"></i>
-                            <input type="text" id="brand" name="brand" placeholder="Brand (e.g., Apple, Samsung, Dell)" required oninput="updateEstimatedFee()">
-                        </div>
+                        <div class="input-with-icon"><i class="fas fa-location-arrow"></i><input type="text" id="service_location" name="service_location" placeholder="Where should service be performed?" required readonly onfocus="this.removeAttribute('readonly')"></div>
                     </div>
 
                     <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-cube"></i>
-                            <input type="text" id="model" name="model" placeholder="Model (e.g., iPhone 14, Galaxy S23)" required oninput="updateEstimatedFee()">
+                        <div class="input-with-icon"><i class="fas fa-store"></i><input type="text" id="preferred_repair_shop" name="preferred_repair_shop" placeholder="Preferred repair shop (optional)"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-with-icon"><i class="fas fa-truck"></i><select id="pickup_dropoff" name="pickup_dropoff" onchange="togglePickupLocationFields(); updateEstimatedFee();"><option value="pickup">Pickup from my location</option><option value="dropoff">I will drop off</option><option value="both">Both pickup and drop-off</option></select></div>
+                    </div>
+
+                    <div id="pickup_location_fields" class="expanding-input">
+                        <div class="pickup-location-fields">
+                            <div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="pickup_location" name="pickup_location" placeholder="Pickup location address" readonly onfocus="this.removeAttribute('readonly')"></div>
+                            <div id="dropoff_location_field" class="expanding-input"><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="dropoff_location" name="dropoff_location" placeholder="Drop-off location address" readonly onfocus="this.removeAttribute('readonly')"></div></div>
                         </div>
                     </div>
 
                     <div class="section-divider"></div>
 
+                    <!-- ========== SERVICE REQUIRED ========== -->
                     <h2><i class="fas fa-tools"></i> Service Required</h2>
 
                     <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-cogs"></i>
-                            <select id="service_type" name="service_type" required onchange="toggleSpecificRepair(); updateEstimatedFee()">
-                                <option value="">Select service type</option>
-                                <option value="repair">Repair</option>
-                                <option value="diagnostic">Diagnostic Only</option>
-                                <option value="purchase_assistance">Purchase Assistance</option>
-                                <option value="setup">Setup/Installation</option>
-                                <option value="data_transfer">Data Transfer</option>
-                                <option value="software_issue">Software Issue</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div id="other_service_input" class="expanding-input">
-                            <div class="input-with-icon" style="margin-top: 8px;">
-                                <i class="fas fa-edit"></i>
-                                <input type="text" id="other_service_type" name="other_service_type" placeholder="Specify service type">
-                            </div>
-                        </div>
+                        <div class="input-with-icon"><i class="fas fa-cogs"></i><select id="service_type" name="service_type" required onchange="toggleSpecificRepair(); toggleOtherServiceInput(); updateEstimatedFee();"><option value="">Select service type</option><option value="repair">Repair</option><option value="diagnostic">Diagnostic Only</option><option value="purchase_assistance">Purchase Assistance</option><option value="setup">Setup/Installation</option><option value="data_transfer">Data Transfer</option><option value="software_issue">Software Issue</option><option value="other">Other</option></select></div>
+                        <div id="other_service_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_service_type" name="other_service_type" placeholder="Specify service type"></div></div>
                     </div>
 
-                    <div id="specific_repair_section">
-                        <div class="form-group">
-                            <div class="input-with-icon">
-                                <i class="fas fa-wrench"></i>
-                                <select id="specific_repair" name="specific_repair" onchange="updateEstimatedFee()">
-                                    <option value="">Select repair type</option>
-                                    <option value="screen_replacement">Screen Replacement</option>
-                                    <option value="battery_replacement">Battery Replacement</option>
-                                    <option value="charging_port">Charging Port Repair</option>
-                                    <option value="camera_repair">Camera Repair</option>
-                                    <option value="software_update">Software Update</option>
-                                    <option value="virus_removal">Virus/Malware Removal</option>
-                                    <option value="data_recovery">Data Recovery</option>
-                                    <option value="water_damage">Water Damage Repair</option>
-                                    <option value="other_repair">Other Repair</option>
-                                </select>
-                            </div>
-                        </div>
+                    <div id="specific_repair_section" style="display: none;">
+                        <div class="form-group"><div class="input-with-icon"><i class="fas fa-wrench"></i><select id="specific_repair" name="specific_repair" onchange="updateEstimatedFee()"><option value="">Select repair type</option><option value="screen_replacement">Screen Replacement</option><option value="battery_replacement">Battery Replacement</option><option value="charging_port">Charging Port Repair</option><option value="camera_repair">Camera Repair</option><option value="software_update">Software Update</option><option value="virus_removal">Virus/Malware Removal</option><option value="data_recovery">Data Recovery</option><option value="water_damage">Water Damage Repair</option><option value="other_repair">Other Repair</option></select></div></div>
                     </div>
 
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <textarea id="issue_description" name="issue_description" rows="3" placeholder="Describe the problem..." required></textarea>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-exclamation-circle"></i><textarea id="issue_description" name="issue_description" rows="3" placeholder="Describe the problem..." required></textarea></div></div>
 
                     <div class="section-divider"></div>
 
+                    <!-- ========== WARRANTY & BUDGET ========== -->
                     <h2><i class="fas fa-file-contract"></i> Warranty & Budget</h2>
 
                     <div class="device-grid">
                         <div class="device-item">
                             <label for="warranty_status">Warranty Status</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-file-signature"></i>
-                                <select id="warranty_status" name="warranty_status" required onchange="updateEstimatedFee()">
-                                    <option value="in_warranty">In Warranty</option>
-                                    <option value="out_of_warranty">Out of Warranty</option>
-                                    <option value="extended_warranty">Extended Warranty</option>
-                                    <option value="unknown">Unknown</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-file-signature"></i><select id="warranty_status" name="warranty_status" required onchange="updateEstimatedFee()"><option value="in_warranty">In Warranty</option><option value="out_of_warranty">Out of Warranty</option><option value="extended_warranty">Extended Warranty</option><option value="unknown">Unknown</option></select></div>
                         </div>
-
                         <div class="device-item">
                             <label for="diagnostic_fee">Diagnostic Fee</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-search-dollar"></i>
-                                <select id="diagnostic_fee" name="diagnostic_fee" onchange="updateEstimatedFee()">
-                                    <option value="yes">Willing to pay</option>
-                                    <option value="no">Not willing</option>
-                                    <option value="depends">Depends on amount</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-search-dollar"></i><select id="diagnostic_fee" name="diagnostic_fee" onchange="updateEstimatedFee()"><option value="yes">Willing to pay</option><option value="no">Not willing</option><option value="depends">Depends on amount</option></select></div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="budget_range">Budget Range</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <select id="budget_range" name="budget_range" onchange="updateEstimatedFee()">
-                                <option value="under_50">Under $50</option>
-                                <option value="50_100">$50 - $100</option>
-                                <option value="100_200">$100 - $200</option>
-                                <option value="200_500">$200 - $500</option>
-                                <option value="500_plus">$500+</option>
-                                <option value="flexible">Flexible</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-money-bill-wave"></i><select id="budget_range" name="budget_range" onchange="updateEstimatedFee()"><option value="under_50">Under $50</option><option value="50_100">$50 - $100</option><option value="100_200">$100 - $200</option><option value="200_500">$200 - $500</option><option value="500_plus">$500+</option><option value="flexible">Flexible</option></select></div></div>
 
                     <div id="serviceTypeIndicator" class="service-type-indicator" style="display: none;">
-                        <div class="service-type-icon">
-                            <i id="serviceTypeIcon" class="fas fa-tools"></i>
-                        </div>
-                        <div class="service-type-text">
-                            <h4 id="serviceTypeTitle">Service Type</h4>
-                            <p id="serviceTypeDescription">Based on your selection</p>
-                        </div>
+                        <div class="service-type-icon"><i id="serviceTypeIcon" class="fas fa-tools"></i></div>
+                        <div class="service-type-text"><h4 id="serviceTypeTitle">Service Type</h4><p id="serviceTypeDescription">Based on your selection</p></div>
                     </div>
 
                     <div class="section-divider"></div>
 
+                    <!-- ========== DATA & BACKUP ========== -->
                     <h2><i class="fas fa-database"></i> Data & Backup</h2>
 
                     <div class="device-grid">
                         <div class="device-item">
                             <label for="data_backup">Data Backup</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-save"></i>
-                                <select id="data_backup" name="data_backup" onchange="updateEstimatedFee()">
-                                    <option value="no">No backup needed</option>
-                                    <option value="yes">Yes, backup my data</option>
-                                    <option value="already_backed_up">Already backed up</option>
-                                    <option value="unsure">Unsure</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-save"></i><select id="data_backup" name="data_backup" onchange="updateEstimatedFee()"><option value="no">No backup needed</option><option value="yes">Yes, backup my data</option><option value="already_backed_up">Already backed up</option><option value="unsure">Unsure</option></select></div>
                         </div>
-
                         <div class="device-item">
                             <label for="remote_access">Remote Access</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-desktop"></i>
-                                <select id="remote_access" name="remote_access">
-                                    <option value="no">No remote access</option>
-                                    <option value="yes">Allow remote access</option>
-                                    <option value="supervised_only">Supervised only</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-desktop"></i><select id="remote_access" name="remote_access"><option value="no">No remote access</option><option value="yes">Allow remote access</option><option value="supervised_only">Supervised only</option></select></div>
                         </div>
                     </div>
 
                     <div class="section-divider"></div>
 
+                    <!-- ========== PURCHASE ASSISTANCE ========== -->
                     <h2><i class="fas fa-shopping-cart"></i> Purchase Assistance</h2>
-                    <div class="info-tip">
-                        <i class="fas fa-info-circle"></i> Fill this section only if you need help purchasing a new device
-                    </div>
+                    <div class="info-tip"><i class="fas fa-info-circle"></i> Fill this section only if you need help purchasing a new device</div>
 
                     <div class="device-grid">
                         <div class="device-item">
                             <label for="purchase_budget">Purchase Budget</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-dollar-sign"></i>
-                                <input type="number" id="purchase_budget" name="purchase_budget" placeholder="Budget for new device" step="0.01" min="0" oninput="updateEstimatedFee()">
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="purchase_budget" name="purchase_budget" placeholder="Budget for new device" step="0.01" min="0"></div>
                         </div>
-
                         <div class="device-item">
                             <label for="urgency">Urgency Level</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-clock"></i>
-                                <select id="urgency" name="urgency" required onchange="updateUrgencyBadge(); updateEstimatedFee()">
-                                    <option value="low">Low - Flexible timing</option>
-                                    <option value="medium">Medium - Within a week</option>
-                                    <option value="high">High - Within 2-3 days</option>
-                                    <option value="urgent">Urgent - As soon as possible</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-clock"></i><select id="urgency" name="urgency" required onchange="updateUrgencyBadge(); updateEstimatedFee();"><option value="low">Low - Flexible timing</option><option value="medium">Medium - Within a week</option><option value="high">High - Within 2-3 days</option><option value="urgent">Urgent - As soon as possible</option></select></div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-star"></i>
-                            <textarea id="preferred_features" name="preferred_features" rows="2" placeholder="Important features (e.g., battery, camera, storage)"></textarea>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-star"></i><textarea id="preferred_features" name="preferred_features" rows="2" placeholder="Important features (e.g., battery, camera, storage)"></textarea></div></div>
+
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><textarea id="special_instructions" name="special_instructions" rows="2" placeholder="Any other special instructions..."></textarea></div></div>
 
                     <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-map-marker-alt"></i> Service Location & Timing</h2>
-
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-location-arrow"></i>
-                            <input type="text" id="service_location" name="service_location" placeholder="Where should service be performed?" required oninput="updateEstimatedFee()">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-store"></i>
-                            <input type="text" id="preferred_repair_shop" name="preferred_repair_shop" placeholder="Preferred repair shop (optional)">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-truck"></i>
-                            <select id="pickup_dropoff" name="pickup_dropoff" onchange="togglePickupLocationFields(); updateEstimatedFee()">
-                                <option value="pickup">Pickup from my location</option>
-                                <option value="dropoff">I will drop off</option>
-                                <option value="both">Both pickup and drop-off</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Expanding pickup location fields -->
-                    <div id="pickup_location_fields" class="expanding-input">
-                        <div class="pickup-location-fields">
-                            <div class="input-with-icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <input type="text" id="pickup_location" name="pickup_location" placeholder="Pickup location address" oninput="updateEstimatedFee()">
-                            </div>
-
-                            <!-- Show dropoff location only when "both" is selected -->
-                            <div id="dropoff_location_field" class="expanding-input">
-                                <div class="input-with-icon">
-                                    <i class="fas fa-home"></i>
-                                    <input type="text" id="dropoff_location" name="dropoff_location" placeholder="Drop-off location address" oninput="updateEstimatedFee()">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- VIEW MAP BUTTON - Added after pickup/dropoff fields -->
-                    <button type="button" class="view-map-btn" onclick="showMap()">
-                        <i class="fas fa-map-marked-alt"></i> View Route Map
-                    </button>
-
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-sticky-note"></i>
-                            <textarea id="special_instructions" name="special_instructions" rows="2" placeholder="Any other special instructions..."></textarea>
-                        </div>
-                    </div>
-
-                     <div class="section-divider"></div>
-
-                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <!-- ========== CONTACT & PRICING ========== -->
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-
-                    <!-- NEW: Service Price and Phone Number Row -->
                     <div class="service-phone-row">
-                        <!-- Service Price -->
-                        <div class="form-group">
-                            <label for="service_price">Service Price ($)</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-hand-holding-usd"></i>
-                                <input type="number" id="service_price" name="service_price"
-                                       placeholder="Your price"
-                                       step="0.01" min="0.50"
-                                       inputmode="decimal" required>
-                            </div>
-                        </div>
-
-                        <!-- Phone Number -->
-                        <div class="form-group">
-                            <label for="phone_number">Phone Number</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel" id="phone_number" name="phone_number"
-                                       placeholder="Phone number" required>
-                            </div>
-                        </div>
+                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
+                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
                     </div>
 
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-paper-plane"></i> Create Gadget Service Order
-                    </button>
+                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Gadget Service Order</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Global variables for Leaflet map
-        let map, marker1, marker2, polyline;
+        // ========== MAP LOGIC ==========
+        let map, pickupMarker, dropoffMarker, routeLine;
         let selectionMode = 'pickup';
 
-        function setSelectionMode(mode) {
-            selectionMode = mode;
-            document.getElementById('selectPickupBtn').classList.toggle('active', mode === 'pickup');
-            document.getElementById('selectDropoffBtn').classList.toggle('active', mode === 'dropoff');
-        }
-
         function initMap() {
-            if (!map) {
-                map = L.map('map').setView([-17.8216, 31.0492], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                map.on('click', function(e) {
-                    const { lat, lng } = e.latlng;
-                    
-                    if (selectionMode === 'pickup') {
-                        document.getElementById('pickup_lat').value = lat;
-                        document.getElementById('pickup_lon').value = lng;
-                        if (marker1) map.removeLayer(marker1);
-                        marker1 = L.marker([lat, lng], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('Pickup Point').openPopup();
-                        
-                        // Automatically switch to dropoff mode after setting pickup
-                        setSelectionMode('dropoff');
-                    } else {
-                        document.getElementById('dropoff_lat').value = lat;
-                        document.getElementById('dropoff_lon').value = lng;
-                        if (marker2) map.removeLayer(marker2);
-                        marker2 = L.marker([lat, lng], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('Service Point').openPopup();
-                    }
-
-                    updateRoute();
-                    updateEstimatedFee();
+            map = L.map('map').setView([-1.2921, 36.8219], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+            document.getElementById('mapHint').style.display = 'block';
+            map.on('click', e => {
+                if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
+                else setDropoffLocation(e.latlng.lat, e.latlng.lng);
+                if (navigator.vibrate) navigator.vibrate(50);
+            });
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    let { latitude, longitude } = pos.coords;
+                    map.setView([latitude, longitude], 13);
+                    if (!pickupMarker) setPickupLocation(latitude, longitude);
                 });
             }
+        }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
+            p.classList.toggle('active', mode === 'pickup');
+            d.classList.toggle('active', mode === 'dropoff');
+            d.classList.toggle('dropoff', mode === 'dropoff');
+            hint.textContent = mode === 'pickup' ? "Tap map to set Pickup location" : "Tap map to set Service location";
+            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
+            hint.style.display = 'block';
+        }
+
+        function setPickupLocation(lat, lng) {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-map-marker-alt'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Pickup");
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'pickup_location');
+            updateRoute();
+            if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
+        }
+
+        function setDropoffLocation(lat, lng) {
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Service Location");
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'service_location');
+            updateRoute();
         }
 
         function updateRoute() {
-            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
-            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
-            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
-            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
-
-            if (!isNaN(lat1) && !isNaN(lon1) && !isNaN(lat2) && !isNaN(lon2)) {
-                if (polyline) map.removeLayer(polyline);
-                polyline = L.polyline([[lat1, lon1], [lat2, lon2]], {color: '#4CAF50', weight: 3, opacity: 0.7, dashArray: '5, 10'}).addTo(map);
-                map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                
-                const distance = calculateDistance();
-                document.getElementById('mapDistance').textContent = distance + ' km';
-                document.getElementById('mapTime').textContent = Math.round(distance * 4) + ' min';
-            }
-        }
-        function setSelectionMode(mode) {
-            selectionMode = mode;
-            document.getElementById('selectPickupBtn').classList.toggle('active', mode === 'pickup');
-            document.getElementById('selectDropoffBtn').classList.toggle('active', mode === 'dropoff');
-        }
-
-        // Mobile-optimized JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize form
-            initializeForm();
-
-            // Prevent form submission on Enter key in inputs
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && this.type !== 'textarea' && this.type !== 'submit') {
-                        e.preventDefault();
-                    }
-                });
-            });
-
-            // Initialize auto-sliding text
-            initializeAutoSlidingText();
-
-            // Close modal on outside click
-            document.getElementById('mapModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeMap();
-                }
-            });
-
-            // Close modal on ESC key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeMap();
-                }
-            });
-
-            // Initialize Leaflet map
-            initMap();
-        });
-
-        function initMap() {
-            if (!map) {
-                map = L.map('map').setView([-17.8216, 31.0492], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                map.on('click', function(e) {
-                    const { lat, lng } = e.latlng;
-                    
-                    if (selectionMode === 'pickup') {
-                        document.getElementById('pickup_lat').value = lat;
-                        document.getElementById('pickup_lon').value = lng;
-                        if (marker1) map.removeLayer(marker1);
-                        marker1 = L.marker([lat, lng], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('Pickup Point').openPopup();
-                        
-                        setSelectionMode('dropoff');
-                        reverseGeocode(lat, lng, function(address) {
-                            const pickupField = document.getElementById('pickup_location');
-                            if (pickupField && address) {
-                                pickupField.value = address;
-                            }
-                        });
-                    } else {
-                        document.getElementById('dropoff_lat').value = lat;
-                        document.getElementById('dropoff_lon').value = lng;
-                        if (marker2) map.removeLayer(marker2);
-                        marker2 = L.marker([lat, lng], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('Service Point').openPopup();
-                        reverseGeocode(lat, lng, function(address) {
-                            const dropoffField = document.getElementById('dropoff_location');
-                            if (dropoffField && address) {
-                                dropoffField.value = address;
-                            }
-                        });
-                    }
-
-                    updateRoute();
-                    updateEstimatedFee();
-                });
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        const currentLat = position.coords.latitude;
-                        const currentLng = position.coords.longitude;
-                        map.setView([currentLat, currentLng], 13);
-                        if (!document.getElementById('pickup_lat').value) {
-                            document.getElementById('pickup_lat').value = currentLat;
-                            document.getElementById('pickup_lon').value = currentLng;
-                            if (marker1) map.removeLayer(marker1);
-                            marker1 = L.marker([currentLat, currentLng], {
-                                icon: L.icon({
-                                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                    iconSize: [25, 41],
-                                    iconAnchor: [12, 41],
-                                    popupAnchor: [1, -34],
-                                    shadowSize: [41, 41]
-                                })
-                            }).addTo(map).bindPopup('Pickup Point').openPopup();
-                            reverseGeocode(currentLat, currentLng, function(address) {
-                                const pickupField = document.getElementById('pickup_location');
-                                if (pickupField && address) {
-                                    pickupField.value = address;
-                                }
-                            });
-                        }
-                    });
-                }
+            if (pickupMarker && dropoffMarker) {
+                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
+                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
+                    .then(res => res.json()).then(data => {
+                        if (data.routes?.length) {
+                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                            if (routeLine) map.removeLayer(routeLine);
+                            routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
+                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+                            let distKm = data.routes[0].distance / 1000;
+                            updateUIwithDistance(distKm);
+                        } else fallbackDistance(p, d);
+                    }).catch(() => fallbackDistance(p, d));
             }
         }
 
-        function updateRoute() {
-            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
-            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
-            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
-            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
-
-            if (!isNaN(lat1) && !isNaN(lon1) && !isNaN(lat2) && !isNaN(lon2)) {
-                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
-                fetch(routeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.routes && data.routes.length) {
-                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                            if (polyline) map.removeLayer(polyline);
-                            polyline = L.polyline(coords, {
-                                color: '#4CAF50',
-                                weight: 3,
-                                opacity: 0.7
-                            }).addTo(map);
-                            updateMapDetails((data.routes[0].distance / 1000).toFixed(1));
-                        } else {
-                            const distance = calculateDistance();
-                            updateMapDetails(distance);
-                        }
-                    })
-                    .catch(() => {
-                        const distance = calculateDistance();
-                        updateMapDetails(distance);
-                    });
-            }
+        function fallbackDistance(p, d) {
+            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
+            updateUIwithDistance(dist);
         }
 
-        function reverseGeocode(lat, lng, callback) {
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function reverseGeocode(lat, lng, inputId) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.display_name) {
-                        callback(data.display_name);
-                    } else {
-                        callback('');
-                    }
-                })
-                .catch(() => callback(''));
+                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
+                .catch(()=>{});
         }
 
-        function initializeAutoSlidingText() {
-            // Function to check if text needs sliding
-            const checkAndApplySliding = (input) => {
-                if (!input) return;
+        // ========== FEE & INFO BAR ==========
+        function updateUIwithDistance(distKm) {
+            let pickupDropoff = document.getElementById('pickup_dropoff').value;
+            let distanceFee = 0;
+            if (pickupDropoff === 'pickup' && distKm > 0) {
+                if (distKm <= 1) distanceFee = 2.00;
+                else if (distKm <= 5) distanceFee = 5.00;
+                else if (distKm <= 10) distanceFee = 8.00;
+                else if (distKm <= 20) distanceFee = 12.00;
+                else distanceFee = 15.00;
+            } else if (pickupDropoff === 'both' && distKm > 0) {
+                if (distKm <= 1) distanceFee = 4.00;
+                else if (distKm <= 5) distanceFee = 8.00;
+                else if (distKm <= 10) distanceFee = 12.00;
+                else if (distKm <= 20) distanceFee = 18.00;
+                else distanceFee = 25.00;
+            }
 
-                // Remove any existing sliding class first
-                input.classList.remove('sliding-text');
+            let diagnosticFee = document.getElementById('diagnostic_fee').value === 'yes' ? 25.00 : 0;
+            let deviceType = document.getElementById('device_type').value;
+            let serviceType = document.getElementById('service_type').value;
+            let specificRepair = document.getElementById('specific_repair').value;
+            let deviceAge = document.getElementById('device_age').value;
+            let warranty = document.getElementById('warranty_status').value;
+            let dataBackup = document.getElementById('data_backup').value;
+            let purchaseBudget = parseFloat(document.getElementById('purchase_budget').value) || 0;
+            let urgency = document.getElementById('urgency').value;
 
-                // Check if text is longer than input width
-                if (input.scrollWidth > input.clientWidth && input.value.trim() !== '') {
-                    // Calculate how much extra text there is
-                    const overflowAmount = input.scrollWidth - input.clientWidth;
-                    if (overflowAmount > 20) {
-                        // Add sliding animation class
-                        input.classList.add('sliding-text');
+            let complexity = 1;
+            if (deviceType === 'smartphone' || deviceType === 'tablet') complexity += 1;
+            if (deviceType === 'laptop' || deviceType === 'desktop') complexity += 2;
+            if (deviceType === 'gaming_console' || deviceType === 'camera') complexity += 1.5;
+            if (serviceType === 'diagnostic') complexity += 0.5;
+            if (serviceType === 'repair') complexity += 2;
+            if (serviceType === 'data_transfer' || serviceType === 'data_recovery') complexity += 1.5;
+            if (serviceType === 'software_issue') complexity += 1;
+            if (specificRepair === 'screen_replacement') complexity += 2;
+            if (specificRepair === 'water_damage') complexity += 3;
+            if (specificRepair === 'data_recovery') complexity += 2.5;
+            complexity = Math.min(complexity, 5);
 
-                        // Calculate animation duration based on text length
-                        const textLength = input.value.length;
-                        const duration = Math.max(15, textLength / 3);
-                        input.style.animationDuration = `${duration}s`;
-                    }
-                }
-            };
+            let serviceFee = complexity * 15.00;
+            if (deviceAge === '3_plus_years') serviceFee += 10.00;
+            if (deviceAge === 'unknown') serviceFee += 5.00;
+            if (warranty === 'out_of_warranty') serviceFee += 20.00;
+            if (dataBackup === 'yes') serviceFee += 15.00;
+            if (dataBackup === 'unsure') serviceFee += 10.00;
+            if (serviceType === 'purchase_assistance' && purchaseBudget > 0) serviceFee += purchaseBudget * 0.05;
+            if (urgency === 'high') serviceFee += 15.00;
+            if (urgency === 'urgent') serviceFee += 25.00;
 
-            // Apply to all existing text inputs
-            const textInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
-            textInputs.forEach(input => {
-                // Check on input change
-                input.addEventListener('input', function() {
-                    setTimeout(() => checkAndApplySliding(this), 100);
-                });
+            let total = Math.max(diagnosticFee + distanceFee + serviceFee, 15.00);
+            let budgetRange = document.getElementById('budget_range').value;
+            if (budgetRange === 'under_50') total = Math.min(total, 50);
+            else if (budgetRange === '50_100') total = Math.min(total, 100);
+            else if (budgetRange === '100_200') total = Math.min(total, 200);
+            else if (budgetRange === '200_500') total = Math.min(total, 500);
 
-                // Check on focus/blur
-                input.addEventListener('focus', function() {
-                    if (this.classList.contains('sliding-text')) {
-                        this.style.animationPlayState = 'paused';
-                    }
-                });
-
-                input.addEventListener('blur', function() {
-                    if (this.classList.contains('sliding-text')) {
-                        this.style.animationPlayState = 'running';
-                    }
-                });
-
-                // Initial check
-                setTimeout(() => checkAndApplySliding(input), 300);
-            });
+            let estMinutes = Math.round(distKm * 4);
+            document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+            document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
+            document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
+            document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
         }
 
-        function initializeForm() {
-            // Update fee when inputs change
-            const feeInputs = ['device_type', 'device_age', 'brand', 'model', 'service_type', 'specific_repair', 'warranty_status', 'diagnostic_fee', 'budget_range', 'data_backup', 'purchase_budget', 'urgency', 'service_location', 'pickup_dropoff', 'pickup_location', 'dropoff_location'];
-            feeInputs.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('input', updateEstimatedFee);
-                    element.addEventListener('change', updateEstimatedFee);
-                }
-            });
+        // Listeners for fee recalculation
+        document.getElementById('pickup_dropoff').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('diagnostic_fee').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('device_type').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('service_type').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('specific_repair').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('device_age').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('warranty_status').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('data_backup').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('purchase_budget').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('urgency').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('budget_range').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
 
-            // Update progress bar
-            document.querySelectorAll('input, select, textarea').forEach(input => {
-                input.addEventListener('input', updateProgress);
-                input.addEventListener('change', updateProgress);
-            });
-
-            // Set up other option toggles
-            setupOtherOptions();
-
-            // Initial calculations
-            updateEstimatedFee();
-            updateUrgencyBadge();
-
-            // Initial pickup/dropoff field state
-            togglePickupLocationFields();
+        // ========== UI HELPERS ==========
+        function toggleOtherDeviceInput() {
+            let div = document.getElementById('other_device_input');
+            if (document.getElementById('device_type').value === 'other') div.classList.add('expanded');
+            else div.classList.remove('expanded');
         }
 
-        function setupOtherOptions() {
-            // Device type other option
-            document.getElementById('device_type').addEventListener('change', function() {
-                const otherInput = document.getElementById('other_device_input');
-                if (this.value === 'other') {
-                    otherInput.classList.add('expanded');
-                    setTimeout(() => document.getElementById('other_device_type')?.focus(), 300);
-                } else {
-                    otherInput.classList.remove('expanded');
-                }
-            });
-
-            // Service type other option
-            document.getElementById('service_type').addEventListener('change', function() {
-                const otherInput = document.getElementById('other_service_input');
-                if (this.value === 'other') {
-                    otherInput.classList.add('expanded');
-                    setTimeout(() => document.getElementById('other_service_type')?.focus(), 300);
-                } else {
-                    otherInput.classList.remove('expanded');
-                }
-            });
+        function toggleOtherServiceInput() {
+            let div = document.getElementById('other_service_input');
+            if (document.getElementById('service_type').value === 'other') div.classList.add('expanded');
+            else div.classList.remove('expanded');
         }
 
         function toggleSpecificRepair() {
-            const serviceType = document.getElementById('service_type').value;
-            const specificRepairSection = document.getElementById('specific_repair_section');
-
-            if (serviceType === 'repair') {
-                specificRepairSection.style.display = 'block';
-            } else {
-                specificRepairSection.style.display = 'none';
-            }
+            let section = document.getElementById('specific_repair_section');
+            if (document.getElementById('service_type').value === 'repair') section.style.display = 'block';
+            else section.style.display = 'none';
         }
 
-        // NEW: Toggle pickup location fields based on selection
         function togglePickupLocationFields() {
-            const pickupDropoff = document.getElementById('pickup_dropoff').value;
-            const pickupLocationFields = document.getElementById('pickup_location_fields');
-            const dropoffLocationField = document.getElementById('dropoff_location_field');
-
-            if (pickupDropoff === 'pickup' || pickupDropoff === 'both') {
-                pickupLocationFields.classList.add('expanded');
-
-                if (pickupDropoff === 'both') {
-                    dropoffLocationField.classList.add('expanded');
-                } else {
-                    dropoffLocationField.classList.remove('expanded');
-                }
-
-                // Focus on pickup location field
-                setTimeout(() => document.getElementById('pickup_location')?.focus(), 300);
+            let val = document.getElementById('pickup_dropoff').value;
+            let pickupFields = document.getElementById('pickup_location_fields');
+            let dropoffField = document.getElementById('dropoff_location_field');
+            if (val === 'pickup' || val === 'both') {
+                pickupFields.classList.add('expanded');
+                if (val === 'both') dropoffField.classList.add('expanded');
+                else dropoffField.classList.remove('expanded');
             } else {
-                pickupLocationFields.classList.remove('expanded');
-                dropoffLocationField.classList.remove('expanded');
+                pickupFields.classList.remove('expanded');
+                dropoffField.classList.remove('expanded');
             }
         }
 
         function updateUrgencyBadge() {
-            const urgencySelect = document.getElementById('urgency');
-            const urgency = urgencySelect.value;
-            let badgeClass = '';
-            let badgeText = '';
-            let badgeIcon = '';
-
-            switch(urgency) {
-                case 'low':
-                    badgeClass = 'urgency-low';
-                    badgeText = 'Low Priority';
-                    badgeIcon = '🟢';
-                    break;
-                case 'medium':
-                    badgeClass = 'urgency-medium';
-                    badgeText = 'Medium Priority';
-                    badgeIcon = '🟡';
-                    break;
-                case 'high':
-                    badgeClass = 'urgency-high';
-                    badgeText = 'High Priority';
-                    badgeIcon = '🔴';
-                    break;
-                case 'urgent':
-                    badgeClass = 'urgency-urgent';
-                    badgeText = 'Urgent';
-                    badgeIcon = '🚨';
-                    break;
-            }
-
-            // Update or create badge
+            let urgency = document.getElementById('urgency').value;
             let badge = document.querySelector('.urgency-badge');
             if (!badge) {
                 badge = document.createElement('span');
-                badge.className = `urgency-badge`;
-                urgencySelect.parentNode.appendChild(badge);
+                badge.className = 'urgency-badge';
+                document.getElementById('urgency').parentNode.appendChild(badge);
             }
-
-            badge.className = `urgency-badge ${badgeClass}`;
-            badge.innerHTML = `${badgeIcon} ${badgeText}`;
-        }
-
-        function getServiceComplexity(deviceType, serviceType, specificRepair) {
-            // Simple complexity scoring
-            let complexity = 1; // Base complexity
-
-            // Device type complexity
-            if (deviceType === 'smartphone' || deviceType === 'tablet') complexity += 1;
-            if (deviceType === 'laptop' || deviceType === 'desktop') complexity += 2;
-            if (deviceType === 'gaming_console' || deviceType === 'camera') complexity += 1.5;
-
-            // Service type complexity
-            if (serviceType === 'diagnostic') complexity += 0.5;
-            if (serviceType === 'repair') complexity += 2;
-            if (serviceType === 'data_recovery' || serviceType === 'data_transfer') complexity += 1.5;
-            if (serviceType === 'software_issue') complexity += 1;
-
-            // Specific repair complexity
-            if (specificRepair === 'screen_replacement') complexity += 2;
-            if (specificRepair === 'water_damage') complexity += 3;
-            if (specificRepair === 'data_recovery') complexity += 2.5;
-
-            return Math.min(complexity, 5); // Cap at 5
-        }
-
-        // NEW: Calculate distance between service location and pickup location
-        function calculateDistance() {
-            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
-            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
-            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
-            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
-
-            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
-                // Fallback to text-based simulation if coordinates aren't set
-                const serviceLocation = document.getElementById('service_location').value;
-                const pickupLocation = document.getElementById('pickup_location').value || '';
-                const pickupDropoff = document.getElementById('pickup_dropoff').value;
-
-                if (pickupDropoff === 'dropoff') return 0;
-
-                if (serviceLocation && pickupLocation) {
-                    const serviceLength = serviceLocation.length;
-                    const pickupLength = pickupLocation.length;
-                    const baseDistance = 0.05 + (Math.abs(serviceLength - pickupLength) / 100);
-                    const randomFactor = 0.5 + (Math.random() * 1.5);
-                    return parseFloat(Math.min(baseDistance * randomFactor, 20).toFixed(2));
-                }
-                return 0;
-            }
-
-            // Haversine formula
-            const R = 6371; // km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const d = R * c;
-            return parseFloat(d.toFixed(2));
-        }
-
-        // NEW: Calculate distance fee for gadget services
-        function calculateDistanceFee(distance) {
-            if (distance <= 0) return 0;
-
-            const distanceKm = parseFloat(distance);
-            const pickupDropoff = document.getElementById('pickup_dropoff').value;
-
-            // Different pricing for pickup vs both
-            if (pickupDropoff === 'pickup') {
-                // Pickup only pricing
-                if (distanceKm <= 1) {
-                    return 2.00;
-                } else if (distanceKm <= 5) {
-                    return 5.00;
-                } else if (distanceKm <= 10) {
-                    return 8.00;
-                } else if (distanceKm <= 20) {
-                    return 12.00;
-                } else {
-                    return 15.00;
-                }
-            } else if (pickupDropoff === 'both') {
-                // Both pickup and dropoff pricing (higher)
-                if (distanceKm <= 1) {
-                    return 4.00;
-                } else if (distanceKm <= 5) {
-                    return 8.00;
-                } else if (distanceKm <= 10) {
-                    return 12.00;
-                } else if (distanceKm <= 20) {
-                    return 18.00;
-                } else {
-                    return 25.00;
-                }
-            }
-            return 0; // Dropoff only has no distance fee
-        }
-
-        function calculateEstimatedFee() {
-            const deviceType = document.getElementById('device_type').value;
-            const deviceAge = document.getElementById('device_age').value;
-            const serviceType = document.getElementById('service_type').value;
-            const specificRepair = document.getElementById('specific_repair').value;
-            const warrantyStatus = document.getElementById('warranty_status').value;
-            const diagnosticFee = document.getElementById('diagnostic_fee').value;
-            const budgetRange = document.getElementById('budget_range').value;
-            const dataBackup = document.getElementById('data_backup').value;
-            const purchaseBudget = parseFloat(document.getElementById('purchase_budget').value) || 0;
-            const urgency = document.getElementById('urgency').value;
-            const pickupDropoff = document.getElementById('pickup_dropoff').value;
-
-            let fee = 0;
-
-            // Base diagnostic fee
-            if (diagnosticFee === 'yes') {
-                fee += 25.00;
-            }
-
-            // Service complexity fee
-            const complexity = getServiceComplexity(deviceType, serviceType, specificRepair);
-            fee += complexity * 15.00;
-
-            // Device age adjustment (older devices may need more work)
-            if (deviceAge === '3_plus_years') fee += 10.00;
-            if (deviceAge === 'unknown') fee += 5.00;
-
-            // Out of warranty fee
-            if (warrantyStatus === 'out_of_warranty') fee += 20.00;
-
-            // Data backup fee
-            if (dataBackup === 'yes') fee += 15.00;
-            if (dataBackup === 'unsure') fee += 10.00;
-
-            // Purchase assistance fee (percentage of budget)
-            if (serviceType === 'purchase_assistance' && purchaseBudget > 0) {
-                fee += purchaseBudget * 0.05; // 5% of purchase budget
-            }
-
-            // Urgency premium
-            if (urgency === 'high') fee += 15.00;
-            if (urgency === 'urgent') fee += 25.00;
-
-            // NEW: Distance fee calculation
-            const distance = calculateDistance();
-            const distanceFee = calculateDistanceFee(distance);
-            fee += distanceFee;
-
-            // Minimum fee
-            fee = Math.max(fee, 15.00);
-
-            // Apply budget range cap (if specified)
-            const budgetCaps = {
-                'under_50': 50.00,
-                '50_100': 100.00,
-                '100_200': 200.00,
-                '200_500': 500.00
-            };
-
-            if (budgetRange in budgetCaps) {
-                fee = Math.min(fee, budgetCaps[budgetRange]);
-            }
-
-            return fee;
+            if (urgency === 'low') { badge.className = 'urgency-badge urgency-low'; badge.innerText = '🟢 Low Priority'; }
+            else if (urgency === 'medium') { badge.className = 'urgency-badge urgency-medium'; badge.innerText = '🟡 Medium Priority'; }
+            else if (urgency === 'high') { badge.className = 'urgency-badge urgency-high'; badge.innerText = '🔴 High Priority'; }
+            else if (urgency === 'urgent') { badge.className = 'urgency-badge urgency-urgent'; badge.innerText = '🚨 Urgent'; }
         }
 
         function updateServiceTypeIndicator() {
-            const serviceType = document.getElementById('service_type').value;
-            const indicator = document.getElementById('serviceTypeIndicator');
-
+            let serviceType = document.getElementById('service_type').value;
+            let indicator = document.getElementById('serviceTypeIndicator');
             if (serviceType) {
                 indicator.style.display = 'flex';
-
-                let title = '';
-                let description = '';
-                let icon = 'fas fa-tools';
-
+                let title = '', icon = 'fas fa-tools';
                 switch(serviceType) {
-                    case 'repair':
-                        title = 'Device Repair';
-                        description = 'Expert repair service';
-                        icon = 'fas fa-wrench';
-                        break;
-                    case 'diagnostic':
-                        title = 'Diagnostic Service';
-                        description = 'Problem identification';
-                        icon = 'fas fa-search';
-                        break;
-                    case 'purchase_assistance':
-                        title = 'Purchase Assistance';
-                        description = 'Help buying new device';
-                        icon = 'fas fa-shopping-cart';
-                        break;
-                    case 'setup':
-                        title = 'Setup Service';
-                        description = 'Device setup & installation';
-                        icon = 'fas fa-cogs';
-                        break;
-                    case 'data_transfer':
-                        title = 'Data Transfer';
-                        description = 'Secure data migration';
-                        icon = 'fas fa-database';
-                        break;
-                    case 'software_issue':
-                        title = 'Software Fix';
-                        description = 'Software troubleshooting';
-                        icon = 'fas fa-code';
-                        break;
-                    default:
-                        title = 'Custom Service';
-                        description = 'Tailored to your needs';
+                    case 'repair': title = 'Device Repair'; icon = 'fas fa-wrench'; break;
+                    case 'diagnostic': title = 'Diagnostic Service'; icon = 'fas fa-search'; break;
+                    case 'purchase_assistance': title = 'Purchase Assistance'; icon = 'fas fa-shopping-cart'; break;
+                    case 'setup': title = 'Setup Service'; icon = 'fas fa-cogs'; break;
+                    case 'data_transfer': title = 'Data Transfer'; icon = 'fas fa-database'; break;
+                    case 'software_issue': title = 'Software Fix'; icon = 'fas fa-code'; break;
+                    default: title = 'Custom Service';
                 }
-
-                document.getElementById('serviceTypeTitle').textContent = title;
-                document.getElementById('serviceTypeDescription').textContent = description;
+                document.getElementById('serviceTypeTitle').innerText = title;
                 document.getElementById('serviceTypeIcon').className = icon;
-            } else {
-                indicator.style.display = 'none';
-            }
+            } else indicator.style.display = 'none';
         }
 
-        // MAP FUNCTIONS
-        function showMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-
-            // Initialize map if not already done
-            initMap();
-
-            // Refresh map view
-            setTimeout(() => {
-                map.invalidateSize();
-                
-                // If we already have coordinates, update route and markers
-                const lat1 = parseFloat(document.getElementById('pickup_lat').value);
-                const lon1 = parseFloat(document.getElementById('pickup_lon').value);
-                const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
-                const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
-
-                if (!isNaN(lat1) && !isNaN(lon1)) {
-                    if (marker1) map.removeLayer(marker1);
-                    marker1 = L.marker([lat1, lon1], {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map).bindPopup('Pickup Point');
-                }
-
-                if (!isNaN(lat2) && !isNaN(lon2)) {
-                    if (marker2) map.removeLayer(marker2);
-                    marker2 = L.marker([lat2, lon2], {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map).bindPopup('Service Point');
-                }
-
-                if (!isNaN(lat1) && !isNaN(lon1) && !isNaN(lat2) && !isNaN(lon2)) {
-                    updateRoute();
-                } else if (!isNaN(lat1) && !isNaN(lon1)) {
-                    map.setView([lat1, lon1], 15);
-                } else if (!isNaN(lat2) && !isNaN(lon2)) {
-                    map.setView([lat2, lon2], 15);
-                }
-            }, 100);
-
-            // Update details
-            const distance = calculateDistance();
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = Math.round(distance * 4) + ' min';
-            
-            const serviceType = document.getElementById('service_type').value;
-            let serviceTypeText = 'Gadget Service';
-            if (serviceType) {
-                const select = document.getElementById('service_type');
-                serviceTypeText = select.options[select.selectedIndex].text;
-            }
-            document.getElementById('mapServiceType').textContent = serviceTypeText;
-        }
-
-        function calculateAndDisplayRoute(origin, destination) {
-            // Simulated route calculation logic
-            const distance = calculateDistance() || "2.5";
-            const time = Math.round(distance * 4) || "10";
-
-            return {
-                distance: distance,
-                time: time
-            };
-        }
-
-        function closeMap() {
-            document.getElementById('mapModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        // Update estimated fee
-        function updateEstimatedFee() {
-            const fee = calculateEstimatedFee();
-            const feeElement = document.getElementById('estimated_fee');
-            feeElement.textContent = '$' + fee.toFixed(2);
-
-            // Update service type indicator
-            updateServiceTypeIndicator();
-
-            // Visual feedback
-            feeElement.style.transform = 'scale(1.1)';
-            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
-        }
-
-        // Progress bar
         function updateProgress() {
-            const inputs = document.querySelectorAll('input, select, textarea');
-            let filled = 0;
+            let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length;
+            let total = document.querySelectorAll('input,select,textarea').length;
+            document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%';
+        }
+        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
 
-            inputs.forEach(input => {
-                if (input.value && input.type !== 'hidden' && input.type !== 'file') {
-                    filled++;
-                }
+        function initAutoSliding() {
+            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
+                const check = () => {
+                    inp.classList.remove('sliding-text');
+                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
+                        inp.classList.add('sliding-text');
+                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
+                    }
+                };
+                inp.addEventListener('input', () => setTimeout(check, 100));
+                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
+                inp.addEventListener('blur', () => { if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running'; });
+                setTimeout(check, 300);
             });
-
-            const progress = Math.min((filled / inputs.length) * 100, 100);
-            document.querySelector('.progress').style.width = `${progress}%`;
+            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
         }
 
         // Form validation
         document.getElementById('gadgetServiceForm').addEventListener('submit', function(e) {
-
-            const deviceType = document.getElementById('device_type').value.trim();
-            const brand = document.getElementById('brand').value.trim();
-            const model = document.getElementById('model').value.trim();
-            const serviceType = document.getElementById('service_type').value.trim();
-            const issueDescription = document.getElementById('issue_description').value.trim();
-            const serviceLocation = document.getElementById('service_location').value.trim();
-            const pickupDropoff = document.getElementById('pickup_dropoff').value;
-            const servicePrice = document.getElementById('service_price').value.trim();
-            const phoneNumber = document.getElementById('phone_number').value.trim();
-
-            // Validate required fields
-            if (!deviceType) {
-                alert('Please select a device type.');
-                document.getElementById('device_type').focus();
-                return false;
+            if (!document.getElementById('pickup_location').value.trim() && document.getElementById('pickup_dropoff').value !== 'dropoff') {
+                alert('Please set pickup location on map.'); e.preventDefault(); return false;
             }
-
-            if (deviceType === 'other') {
-                const otherDeviceType = document.getElementById('other_device_type').value.trim();
-                if (!otherDeviceType) {
-                    alert('Please specify the device type.');
-                    document.getElementById('other_device_type').focus();
-                    return false;
-                }
-            }
-
-            if (!brand) {
-                alert('Please enter the device brand.');
-                document.getElementById('brand').focus();
-                return false;
-            }
-
-            if (!model) {
-                alert('Please enter the device model.');
-                document.getElementById('model').focus();
-                return false;
-            }
-
-            if (!serviceType) {
-                alert('Please select a service type.');
-                document.getElementById('service_type').focus();
-                return false;
-            }
-
-            if (serviceType === 'other') {
-                const otherServiceType = document.getElementById('other_service_type').value.trim();
-                if (!otherServiceType) {
-                    alert('Please specify the service type.');
-                    document.getElementById('other_service_type').focus();
-                    return false;
-                }
-            }
-
-            if (!issueDescription) {
-                alert('Please describe the issue or service needed.');
-                document.getElementById('issue_description').focus();
-                return false;
-            }
-
-            if (!serviceLocation) {
-                alert('Please enter the service location.');
-                document.getElementById('service_location').focus();
-                return false;
-            }
-
-            // Validate pickup/dropoff location based on selection
-            if (pickupDropoff === 'pickup' || pickupDropoff === 'both') {
-                const pickupLocation = document.getElementById('pickup_location').value.trim();
-                if (!pickupLocation) {
-                    alert('Please enter a pickup location address.');
-                    document.getElementById('pickup_location').focus();
-                    return false;
-                }
-            }
-
-            if (pickupDropoff === 'both') {
-                const dropoffLocation = document.getElementById('dropoff_location').value.trim();
-                if (!dropoffLocation) {
-                    alert('Please enter a drop-off location address.');
-                    document.getElementById('dropoff_location').focus();
-                    return false;
-                }
-            }
-
-            // Validate service price
-            if (!servicePrice) {
-                alert('Please enter a service price.');
-                document.getElementById('service_price').focus();
-                return false;
-            }
-
-            const servicePriceNum = parseFloat(servicePrice);
-            if (servicePriceNum < 0.50) {
-                alert('Service price must be at least $0.50.');
-                document.getElementById('service_price').focus();
-                return false;
-            }
-
-            // Validate phone number
-            if (!phoneNumber) {
-                alert('Please enter your phone number.');
-                document.getElementById('phone_number').focus();
-                return false;
-            }
-
-            // Show summary with estimated fee
-            const estimatedFee = document.getElementById('estimated_fee').textContent;
-            const serviceTypeText = document.getElementById('serviceTypeTitle').textContent;
-            const urgency = document.getElementById('urgency').options[document.getElementById('urgency').selectedIndex].text;
-            const distance = calculateDistance();
-
-            let pickupInfo = '';
-            if (pickupDropoff === 'pickup') {
-                pickupInfo = `\nPickup from: ${document.getElementById('pickup_location').value}`;
-            } else if (pickupDropoff === 'both') {
-                pickupInfo = `\nPickup from: ${document.getElementById('pickup_location').value}\nDrop-off to: ${document.getElementById('dropoff_location').value}`;
-            } else {
-                pickupInfo = '\nCustomer will drop off device';
-            }
-
-            alert(`Gadget service order created successfully!\n\nService Type: ${serviceTypeText}\nDistance: ${distance} km${pickupInfo}\nUrgency: ${urgency}\nEstimated Fee: ${estimatedFee}\nYour Service Price: $${servicePriceNum.toFixed(2)}\nPhone: ${phoneNumber}`);
-
-            // In a real app, you would submit the form here
-            // this.submit();
+            if (!document.getElementById('service_location').value.trim()) { alert('Please set service location on map.'); e.preventDefault(); return false; }
+            if (!document.getElementById('device_type').value) { alert('Select device type.'); e.preventDefault(); return false; }
+            if (!document.getElementById('brand').value.trim()) { alert('Enter device brand.'); e.preventDefault(); return false; }
+            if (!document.getElementById('model').value.trim()) { alert('Enter device model.'); e.preventDefault(); return false; }
+            if (!document.getElementById('service_type').value) { alert('Select service type.'); e.preventDefault(); return false; }
+            if (!document.getElementById('issue_description').value.trim()) { alert('Describe the issue.'); e.preventDefault(); return false; }
+            let price = parseFloat(document.getElementById('service_price').value);
+            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
+            if (!document.getElementById('phone_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
         });
+
+        window.onload = function() {
+            initMap();
+            initAutoSliding();
+            updateProgress();
+            updateServiceTypeIndicator();
+            updateUrgencyBadge();
+            toggleSpecificRepair();
+            togglePickupLocationFields();
+        };
     </script>
 </body>
 </html>

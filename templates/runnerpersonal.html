@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="personal-info-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <a href="{{ url_for('settings') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Personal & Vehicle Info</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Profile Header -->
+        <section class="profile-header">
+            <a href="{{ url_for('runnerprofile') }}" class="avatar-link">
+                <div class="profile-avatar">
+                    <div class="avatar-circle">
+                        <span class="avatar-text">{{ user.username[0] if user.username else 'U' }}</span>
+                    </div>
+                </div>
+                <h2 class="profile-name">{{ user.username }}</h2>
+            </a>
+        </section>
+
+        <!-- Account Details (only email and phone editable) -->
+        <section class="info-section">
+            <h3 class="section-title">📝 Account Details</h3>
+            <form id="account-form" class="info-form" method="POST" action="{{ url_for('runnerpersonal') }}">
+                <!-- Username (display only) -->
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="field-display">
+                        <i class="fas fa-user field-icon"></i>
+                        <span>{{ user.username if user.username else 'Not set' }}</span>
+                    </div>
+                    <small class="form-note">Username cannot be changed</small>
+                </div>
+
+                <!-- Email (editable) -->
+                <div class="form-group">
+                    <label for="email" class="form-label required">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-input"
+                        value="{{ user.email if user.email else '' }}"
+                        placeholder="Enter your email"
+                        required
+                    >
+                    <small class="form-note">We'll send updates to this email</small>
+                </div>
+
+                <!-- Phone (editable) -->
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        class="form-input"
+                        value="{{ user.phone if user.phone else '' }}"
+                        placeholder="+1 (123) 456-7890"
+                    >
+                    <small class="form-note">Optional - for delivery updates</small>
+                </div>
+
+                <!-- Vehicle details (display only) -->
+                <div class="form-group">
+                    <label class="form-label">Vehicle Type</label>
+                    <div class="field-display">
+                        <i class="fas fa-car field-icon"></i>
+                        <span>{{ runner_profile.vehicle_type if runner_profile and runner_profile.vehicle_type else 'Not specified' }}</span>
+                    </div>
+                    <small class="form-note">Vehicle type is set during registration</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Vehicle Number / Plate</label>
+                    <div class="field-display">
+                        <i class="fas fa-id-card field-icon"></i>
+                        <span>{{ runner_profile.vehicle_plate if runner_profile and runner_profile.vehicle_plate else 'Not specified' }}</span>
+                    </div>
+                    <small class="form-note">Vehicle plate is for identification</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" id="save-account">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Change Password Section -->
+        <section class="info-section">
+            <h3 class="section-title">🔒 Password Security</h3>
+
+            <div class="form-group">
+                <button type="button" class="change-password-trigger" id="change-password-trigger">
+                    <i class="fas fa-key"></i>
+                    Change your account password
+                </button>
+                <small class="form-note">Click to show password change fields</small>
+            </div>
+
+            <form id="password-form" class="info-form password-form" style="display: none;" method="POST" action="{{ url_for('runnerpasswords') }}">
+                <!-- [Password fields identical to previous version] -->
+                <div class="form-group">
+                    <label for="current-password" class="form-label required">Current Password</label>
+                    <div class="password-input">
+                        <input type="password" id="current-password" name="current_password" class="form-input" placeholder="Enter your current password" required>
+                        <button type="button" class="toggle-password" data-target="current-password"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <small class="form-note">Enter your current login password</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-password" class="form-label required">New Password</label>
+                    <div class="password-input">
+                        <input type="password" id="new-password" name="new_password" class="form-input" placeholder="Enter new password" required minlength="6">
+                        <button type="button" class="toggle-password" data-target="new-password"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <small class="form-note">Minimum 6 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password" class="form-label required">Confirm New Password</label>
+                    <div class="password-input">
+                        <input type="password" id="confirm-password" name="confirm_password" class="form-input" placeholder="Confirm new password" required>
+                        <button type="button" class="toggle-password" data-target="confirm-password"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <small class="form-note">Re-enter your new password</small>
+                </div>
+
+                <div class="password-requirements">
+                    <h4>Password Requirements:</h4>
+                    <ul>
+                        <li id="req-length">At least 6 characters</li>
+                        <li id="req-match">Passwords must match</li>
+                    </ul>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-outline" id="cancel-password">Cancel</button>
+                    <button type="submit" class="btn-secondary" id="update-password" disabled>
+                        <i class="fas fa-key"></i> Update Password
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon"><i class="fas fa-check-circle"></i></div>
+            <h3>Updated!</h3>
+            <p id="modal-message">Your information has been updated successfully.</p>
+            <button class="btn-primary modal-close" onclick="closeModal()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4CAF50;
+        --primary-light: #66BB6A;
+        --primary-dark: #388E3C;
+        --primary-50: #E8F5E8;
+        --surface: #FFFFFF;
+        --background: #F8FDF8;
+        --text-primary: #1A331A;
+        --text-secondary: #666666;
+        --text-light: #888888;
+        --border: #E0E0E0;
+        --border-light: #F0F0F0;
+        --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+        --success: #4CAF50;
+        --error: #F44336;
+    }
+
+    * { box-sizing: border-box; }
+
+    #personal-info-page {
+        min-height: 100vh;
+        background: var(--background);
+        padding-bottom: 20px;
+    }
+
+    .mobile-header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-light);
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .back-btn {
+        color: var(--text-secondary);
+        padding: 8px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+
+    .back-btn:active {
+        background: var(--primary-50);
+        color: var(--primary-color);
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .logo-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        padding: 8px;
+        border-radius: 10px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .logo h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
+
+    .mobile-main {
+        padding: 20px;
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .avatar-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .profile-avatar {
+        margin-bottom: 12px;
+    }
+
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 32px;
+        font-weight: 600;
+        margin: 0 auto;
+    }
+
+    .profile-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .info-section {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        padding-left: 8px;
+    }
+
+    .info-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--error);
+    }
+
+    .form-input {
+        padding: 14px 16px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font-size: 16px;
+        color: var(--text-primary);
+        background: var(--surface);
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    select.form-input {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 40px;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .field-display {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        background: var(--background);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        font-size: 16px;
+        color: var(--text-primary);
+    }
+
+    .field-icon {
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+    }
+
+    .form-note {
+        font-size: 12px;
+        color: var(--text-light);
+    }
+
+    /* Password section styles (identical to previous) */
+    .change-password-trigger {
+        width: 100%;
+        padding: 14px 16px;
+        background: var(--primary-50);
+        border: 2px solid var(--primary-light);
+        border-radius: 12px;
+        color: var(--primary-dark);
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .change-password-trigger:active {
+        background: var(--primary-100);
+        transform: scale(0.98);
+        border-color: var(--primary-color);
+    }
+
+    .password-input {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-input .form-input {
+        padding-right: 50px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 16px;
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 16px;
+        cursor: pointer;
+        padding: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .toggle-password:active {
+        color: var(--primary-color);
+    }
+
+    .password-requirements {
+        background: var(--background);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 8px;
+    }
+
+    .password-requirements h4 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .password-requirements ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .password-requirements li {
+        font-size: 12px;
+        color: var(--text-light);
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .password-requirements li::before {
+        content: "○";
+        font-size: 8px;
+    }
+
+    .password-requirements li.valid {
+        color: var(--success);
+    }
+
+    .password-requirements li.valid::before {
+        content: "✓";
+        color: var(--success);
+    }
+
+    .password-requirements li.invalid {
+        color: var(--error);
+    }
+
+    .password-requirements li.invalid::before {
+        content: "✗";
+        color: var(--error);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 16px;
+        background: var(--primary-color);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+        background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+        flex: 1;
+        padding: 16px;
+        background: var(--surface);
+        border: 2px solid var(--primary-color);
+        border-radius: 12px;
+        color: var(--primary-color);
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-secondary:disabled {
+        background: var(--border-light);
+        border-color: var(--border);
+        color: var(--text-light);
+        cursor: not-allowed;
+    }
+
+    .btn-secondary:active:not(:disabled) {
+        transform: scale(0.98);
+        background: var(--primary-50);
+    }
+
+    .btn-outline {
+        flex: 1;
+        padding: 16px;
+        background: transparent;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-outline:active {
+        transform: scale(0.98);
+        background: var(--background);
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 32px;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+        animation: modalSlide 0.3s ease;
+    }
+
+    @keyframes modalSlide {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-icon {
+        font-size: 64px;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+
+    .modal-content h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+    }
+
+    .modal-content p {
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+
+    .modal-close {
+        width: 100%;
+    }
+
+    @media (max-width: 480px) {
+        .logo h1 { font-size: 1rem; }
+        .info-section { padding: 20px; }
+        .form-actions { flex-direction: column; }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const accountForm = document.getElementById('account-form');
+        const saveBtn = document.getElementById('save-account');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+
+        // Store original values for edit detection
+        const originalValues = {
+            email: emailInput.value,
+            phone: phoneInput.value
+        };
+
+        function checkFormModified() {
+            const currentEmail = emailInput.value;
+            const currentPhone = phoneInput.value;
+            const isModified = currentEmail !== originalValues.email || currentPhone !== originalValues.phone;
+            if (isModified) {
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                saveBtn.style.background = 'var(--primary-color)';
+            } else {
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                saveBtn.style.background = 'var(--primary-light)';
+            }
+        }
+
+        emailInput.addEventListener('input', checkFormModified);
+        phoneInput.addEventListener('input', checkFormModified);
+
+        // Account form submission
+        accountForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const origText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled = true;
+
+            // Simulate API call – replace with real fetch/submit logic
+            setTimeout(() => {
+                document.getElementById('modal-message').textContent = 'Contact information updated successfully.';
+                document.getElementById('success-modal').style.display = 'flex';
+                // Update stored values to match
+                originalValues.email = emailInput.value;
+                originalValues.phone = phoneInput.value;
+                saveBtn.innerHTML = origText;
+                saveBtn.disabled = false;
+                checkFormModified();
+            }, 800);
+        });
+
+        // Password visibility toggle
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
+        // Password form show/hide
+        const trigger = document.getElementById('change-password-trigger');
+        const passwordForm = document.getElementById('password-form');
+        const cancelBtn = document.getElementById('cancel-password');
+        const currentPass = document.getElementById('current-password');
+        const newPass = document.getElementById('new-password');
+        const confirmPass = document.getElementById('confirm-password');
+        const updateBtn = document.getElementById('update-password');
+        const reqLength = document.getElementById('req-length');
+        const reqMatch = document.getElementById('req-match');
+
+        trigger.addEventListener('click', () => {
+            passwordForm.style.display = 'flex';
+            trigger.style.display = 'none';
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            passwordForm.style.display = 'none';
+            trigger.style.display = 'flex';
+            passwordForm.reset();
+            validatePassword();
+        });
+
+        function validatePassword() {
+            const newVal = newPass.value;
+            const confirmVal = confirmPass.value;
+            const curVal = currentPass.value;
+
+            if (newVal.length >= 6) {
+                reqLength.classList.add('valid');
+                reqLength.classList.remove('invalid');
+            } else if (newVal.length > 0) {
+                reqLength.classList.add('invalid');
+                reqLength.classList.remove('valid');
+            } else {
+                reqLength.classList.remove('valid', 'invalid');
+            }
+
+            if (newVal && confirmVal) {
+                if (newVal === confirmVal) {
+                    reqMatch.classList.add('valid');
+                    reqMatch.classList.remove('invalid');
+                } else {
+                    reqMatch.classList.add('invalid');
+                    reqMatch.classList.remove('valid');
+                }
+            } else {
+                reqMatch.classList.remove('valid', 'invalid');
+            }
+
+            updateBtn.disabled = !(newVal.length >= 6 && newVal === confirmVal && curVal.length > 0);
+        }
+
+        currentPass.addEventListener('input', validatePassword);
+        newPass.addEventListener('input', validatePassword);
+        confirmPass.addEventListener('input', validatePassword);
+
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const origText = updateBtn.innerHTML;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            updateBtn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('modal-message').textContent = 'Password updated successfully!';
+                document.getElementById('success-modal').style.display = 'flex';
+                updateBtn.innerHTML = origText;
+                updateBtn.disabled = true;
+                passwordForm.reset();
+                validatePassword();
+                passwordForm.style.display = 'none';
+                trigger.style.display = 'flex';
+            }, 800);
+        });
+
+        window.closeModal = function() {
+            document.getElementById('success-modal').style.display = 'none';
+        };
+
+        document.getElementById('success-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        checkFormModified();
+        validatePassword();
+    });
+</script>
+{% endblock %}

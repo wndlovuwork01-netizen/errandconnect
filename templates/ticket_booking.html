@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ticket Booking - ErrandConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         :root {
             --primary: #4CAF50;
@@ -18,10 +17,9 @@
             --light: #f8fdf8;
             --dark: #1A331A;
             --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            --shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
-            --radius: 12px;
-            --transition: all 0.3s ease;
-            --border: #E8F5E9;
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
         }
 
         * {
@@ -39,21 +37,17 @@
             min-height: 100vh;
             padding: 0;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Mobile-friendly container */
         .container {
             width: 100%;
             max-width: 100%;
             margin: 0;
             background: white;
             min-height: 100vh;
-            position: relative;
         }
 
-        /* Fixed Service Bar for Mobile - UPDATED WITH SERVICE INFO */
+        /* Smaller top bar */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -62,28 +56,28 @@
             z-index: 1000;
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 12px 15px;
+            padding: 6px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 60px;
+            height: 48px;
             border-bottom: 1px solid #e0e0e0;
         }
 
         .service-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex: 1;
             min-width: 0;
         }
 
         .service-icon {
-            font-size: 20px;
+            font-size: 18px;
             background: var(--gradient);
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -91,63 +85,42 @@
             flex-shrink: 0;
         }
 
-        .service-text {
-            min-width: 0;
-        }
-
         .service-text h3 {
-            color: var(--primary-dark);
-            margin: 0;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .service-text p {
-            color: var(--dark);
-            margin: 0;
-            font-size: 11px;
-            opacity: 0.8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: none;
         }
 
-        /* ESTIMATED FEE DISPLAY ON FIXED BAR - RIGHT SIDE */
         .estimated-fee-display {
             background: var(--gradient);
             color: white;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: var(--radius);
             font-weight: 600;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-            min-width: 100px;
+            font-size: 11px;
+            min-width: 85px;
             text-align: center;
-            flex-shrink: 0;
-            margin-left: 10px;
         }
 
         .fee-amount {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
-            display: block;
-            line-height: 1.2;
         }
 
-        /* Main content area */
         .content-wrapper {
-            padding-top: 70px;
+            padding-top: 58px;
             padding-bottom: 20px;
         }
 
-        /* Mobile Header - SIMPLIFIED (just logo and title) */
         .mobile-header {
             background: var(--gradient);
             color: white;
-            padding: 20px 15px;
+            padding: 12px 15px;
             text-align: center;
         }
 
@@ -155,39 +128,107 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 4px;
         }
 
         .logo-icon {
             background: rgba(255, 255, 255, 0.2);
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 20px;
+            margin-bottom: 2px;
         }
 
         .service-tag {
-            display: inline-block;
             background: rgba(255, 255, 255, 0.2);
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 15px;
-            font-size: 11px;
-            backdrop-filter: blur(10px);
-            margin-top: 2px;
+            font-size: 10px;
         }
 
-        /* Form Section */
+        /* Map styles */
+        #map {
+            height: 280px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .map-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .map-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .map-btn.active.dropoff {
+            background: #2196F3;
+        }
+        .map-hint {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            display: none;
+        }
+        /* Route info bar */
+        .route-info-bar {
+            background: white;
+            border-radius: 12px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9e9e9;
+        }
+        .route-info-item {
+            flex: 1;
+            text-align: center;
+        }
+        .route-info-label {
+            font-size: 9px;
+            color: #777;
+            text-transform: uppercase;
+        }
+        .route-info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .route-info-value small {
+            font-size: 9px;
+        }
+
         .form-section {
             padding: 15px;
         }
@@ -196,8 +237,7 @@
             height: 3px;
             background: #e0e0e0;
             border-radius: 2px;
-            margin: 20px 0;
-            overflow: hidden;
+            margin: 15px 0 20px;
         }
 
         .progress {
@@ -210,30 +250,23 @@
 
         h2 {
             font-size: 16px;
-            margin: 20px 0 15px;
+            margin: 15px 0 12px;
             color: var(--primary-dark);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        h2 i {
-            color: var(--primary);
-            font-size: 14px;
-        }
-
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-weight: 600;
-            color: var(--dark);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .input-with-icon {
@@ -247,637 +280,141 @@
             transform: translateY(-50%);
             color: var(--primary);
             font-size: 14px;
-            z-index: 1;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 14px 14px 14px 40px;
+            padding: 12px 12px 12px 38px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 15px;
-            transition: var(--transition);
-            background: white;
-            -webkit-appearance: none;
-            appearance: none;
-            touch-action: manipulation;
-        }
-
-        select {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding-right: 40px;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
-        }
-
-        /* Address Fields with Map Buttons */
-        .address-input-group {
-            position: relative;
-        }
-
-        .map-input-button {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            z-index: 2;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(76, 175, 80, 0.3);
-        }
-
-        .map-input-button:active {
-            transform: translateY(-50%) scale(0.95);
-            background: var(--primary-dark);
-        }
-
-        .input-with-icon.map-input input {
-            padding-right: 50px;
-        }
-
-        /* Map Modal */
-        .map-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-
-        .map-content {
-            background: white;
-            border-radius: var(--radius);
-            width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .map-header {
-            background: var(--gradient);
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .map-header h3 {
-            margin: 0;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .close-map {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .close-map:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .map-placeholder {
-            padding: 0;
-            text-align: center;
-            background: #f5f5f5;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 250px;
-            height: 300px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #map {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .map-hint {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 1000;
-            white-space: nowrap;
-            pointer-events: none;
-        }
-
-        .map-selection-controls {
-            position: absolute;
-            bottom: 15px;
-            left: 10px;
-            right: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .selection-btn {
-            background: white;
-            border: 2px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #666;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .selection-btn.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(76, 175, 80, 0.1);
-        }
-
-        .custom-div-icon {
-            background: transparent;
-            border: none;
-        }
-
-        .marker-pin {
-            width: 30px;
-            height: 30px;
-            border-radius: 50% 50% 50% 0;
-            background: var(--primary);
-            position: absolute;
-            transform: rotate(-45deg);
-            left: 50%;
-            top: 50%;
-            margin: -15px 0 0 -15px;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        .custom-div-icon i {
-            position: absolute;
-            width: 30px;
             font-size: 14px;
-            color: white;
-            text-align: center;
-            top: 10px;
-            left: 0;
-            z-index: 2;
-        }
-
-        .map-placeholder i {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .map-placeholder h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-            color: var(--dark);
-        }
-
-        .map-placeholder p {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-
-        /* Route Steps */
-        .route-steps {
             background: white;
-            padding: 15px;
-            border-top: 1px solid #e0e0e0;
-            flex-shrink: 0;
         }
 
-        .route-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed #e0e0e0;
+        textarea {
+            padding: 12px;
         }
 
-        .route-step:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .step-number {
-            background: var(--primary);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .step-content h4 {
-            margin: 0 0 4px 0;
-            color: var(--dark);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .step-content p {
-            margin: 0;
-            color: #666;
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .map-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            padding: 15px;
-            background: var(--light);
-            border-top: 1px solid #e0e0e0;
-            flex-shrink: 0;
-        }
-
-        .info-item {
-            text-align: center;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .info-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 4px;
-        }
-
-        .info-label {
-            font-size: 11px;
-            color: var(--dark);
-            opacity: 0.8;
-        }
-
-        /* Date-Time Grid */
+        /* Date-time grid */
         .date-time-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 10px;
         }
-
         .date-time-item {
             background: var(--light);
-            padding: 12px;
+            padding: 10px;
             border-radius: var(--radius);
             border: 1px solid #e0e0e0;
-            transition: var(--transition);
-            text-align: center;
         }
-
-        .date-time-item:active {
-            background: #f0f9f0;
-            border-color: var(--primary-light);
-        }
-
         .date-time-item label {
-            font-size: 12px;
-            color: var(--primary-dark);
-            margin-bottom: 6px;
+            font-size: 11px;
         }
-
         .date-time-item input {
-            padding: 10px;
+            padding: 8px;
             text-align: center;
-            font-weight: 600;
-            background: white;
         }
 
-        /* Travel Section */
-        .travel-section {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-radius: var(--radius);
-            padding: 15px;
-            margin: 15px 0;
-            border-left: 4px solid #2196F3;
-        }
-
-        .travel-section h3 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: #1976D2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Fee Breakdown */
+        /* Fee breakdown */
         .fee-breakdown {
             background: var(--light);
             border-radius: var(--radius);
-            padding: 12px;
+            padding: 10px;
             margin: 15px 0;
             border: 1px solid #e0e0e0;
-            display: none;
         }
-
         .fee-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
+            margin-bottom: 6px;
+            font-size: 12px;
         }
-
         .fee-item:last-child {
-            margin-bottom: 0;
-            padding-top: 8px;
+            margin-top: 6px;
+            padding-top: 6px;
             border-top: 1px dashed #ddd;
             font-weight: 600;
-            color: var(--primary-dark);
         }
 
-        /* Delivery Method Indicator */
-        .delivery-method-indicator {
-            background: var(--light);
-            border: 1px solid #e0e0e0;
+        /* Travel section */
+        .travel-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
             border-radius: var(--radius);
             padding: 12px;
-            margin-top: 15px;
+            margin: 15px 0;
+        }
+
+        /* Delivery method indicator */
+        .delivery-method-indicator {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 10px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            display: none;
+            gap: 10px;
+            margin: 15px 0;
         }
 
-        .delivery-method-icon {
-            font-size: 20px;
-            color: var(--primary);
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .delivery-method-text h4 {
-            margin: 0;
-            font-size: 14px;
-            color: var(--primary-dark);
-        }
-
-        .delivery-method-text p {
-            margin: 2px 0 0;
-            font-size: 12px;
-            color: var(--dark);
-            opacity: 0.8;
-        }
-
-        /* Submit Button */
+        /* Submit button */
         .submit-btn {
             background: var(--gradient);
             color: white;
             border: none;
             border-radius: var(--radius);
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-            touch-action: manipulation;
-        }
-
-        .submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* View Map Button */
-        .view-map-btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
             padding: 14px;
-            cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            width: 100%;
+            margin-top: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-top: 10px;
-            width: 100%;
-            touch-action: manipulation;
         }
 
-        .view-map-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Section Divider */
         .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
             margin: 20px 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
         }
 
-        /* Info Tip */
         .info-tip {
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(76,175,80,0.1);
             border-left: 3px solid var(--primary);
-            padding: 10px 12px;
-            margin: 12px 0;
-            border-radius: 0 var(--radius) var(--radius) 0;
-            font-size: 12px;
-            color: var(--dark);
-            line-height: 1.4;
+            padding: 8px 12px;
+            font-size: 11px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
         }
 
-        /* Service Phone Row - ADDED THIS FOR TWO COLUMNS */
         .service-phone-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: flex;
+            gap: 12px;
             margin-bottom: 20px;
         }
-
         .service-phone-row .form-group {
+            flex: 1;
             margin-bottom: 0;
         }
 
-        /* iOS Safe Areas */
-        @supports (padding: max(0px)) {
-            .fixed-service-bar {
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-                padding-top: max(12px, env(safe-area-inset-top));
-                height: calc(60px + env(safe-area-inset-top));
-            }
-
-            .content-wrapper {
-                padding-top: calc(70px + env(safe-area-inset-top));
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            }
-
-            .mobile-header, .form-section {
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-            }
-
-            .submit-btn {
-                margin-bottom: max(20px, env(safe-area-inset-bottom));
-            }
-        }
-
-        /* Larger screens */
         @media (min-width: 768px) {
-            body {
-                padding: 10px;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                min-height: 100vh;
-            }
-
-            .container {
-                max-width: 500px;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-                margin: 0 auto;
-            }
-
-            .fixed-service-bar {
-                border-radius: var(--radius) var(--radius) 0 0;
-            }
-
-            .date-time-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+            body { padding: 10px; display: flex; justify-content: center; }
+            .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
+            .date-time-grid { grid-template-columns: 1fr 1fr; }
         }
-
-        /* Very small screens */
         @media (max-width: 320px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            h2 {
-                font-size: 15px;
-            }
-
-            input, select, textarea {
-                font-size: 14px;
-                padding: 12px 12px 12px 36px;
-            }
-
-            .estimated-fee-display {
-                min-width: 90px;
-                font-size: 11px;
-                padding: 5px 8px;
-            }
-
-            .fee-amount {
-                font-size: 14px;
-            }
-
-            .date-time-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .map-info {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            /* Stack the two columns on very small screens */
-            .service-phone-row {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
+            .route-info-value { font-size: 11px; }
+            .map-btn { font-size: 11px; padding: 8px; }
+            .service-phone-row { gap: 8px; }
+            .date-time-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Fixed Service Bar for Mobile WITH SERVICE INFO AND FEE -->
     <div class="fixed-service-bar">
         <div class="service-info">
-            <div class="service-icon">
-                <i class="fas fa-ticket-alt"></i>
-            </div>
-            <div class="service-text">
-                <h3>Ticket Booking</h3>
-                <p>Book tickets for events, travel and more</p>
-            </div>
+            <div class="service-icon"><i class="fas fa-ticket-alt"></i></div>
+            <div class="service-text"><h3>Ticket Booking</h3><p>Book tickets for events</p></div>
         </div>
         <div class="estimated-fee-display">
             <span>Fee:</span>
@@ -885,1063 +422,382 @@
         </div>
     </div>
 
-    <!-- Map Modal -->
-    <div id="mapModal" class="map-modal">
-        <div class="map-content">
-            <div class="map-header">
-                <h3><i class="fas fa-route"></i> Ticket Route Overview</h3>
-                <button class="close-map" onclick="closeMap()">×</button>
-            </div>
-            <div class="map-placeholder">
-                <div id="map"></div>
-                <div id="mapHintText" class="map-hint">Tap on map to set Venue location</div>
-                <div class="map-selection-controls">
-                    <button type="button" id="selectPickupBtn" class="selection-btn active" onclick="setSelectionMode('pickup')">
-                        <i class="fas fa-map-marker-alt"></i> Set Venue
-                    </button>
-                    <button type="button" id="selectDropoffBtn" class="selection-btn" onclick="setSelectionMode('dropoff')">
-                        <i class="fas fa-home"></i> Set Delivery
-                    </button>
-                </div>
-            </div>
-            <div class="route-steps">
-                <div class="route-step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h4>Acquire Tickets</h4>
-                        <p>Purchase from authorized vendors or box office</p>
-                    </div>
-                </div>
-                <div class="route-step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h4>Transport Tickets</h4>
-                        <p>Safe delivery of physical or electronic tickets</p>
-                    </div>
-                </div>
-                <div class="route-step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h4>Confirm Delivery</h4>
-                        <p>Verify ticket receipt and provide confirmation</p>
-                    </div>
-                </div>
-            </div>
-            <div class="map-info">
-                <div class="info-item">
-                    <div class="info-value" id="mapDistance">0 km</div>
-                    <div class="info-label">Distance</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-value" id="mapTime">0 min</div>
-                    <div class="info-label">Est. Time</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-value" id="mapDeliveryMethod">-</div>
-                    <div class="info-label">Method</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="container">
         <div class="content-wrapper">
-            <!-- Simplified Mobile Header (just company branding) -->
             <div class="mobile-header">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <div>
-                        <h1>ErrandConnect</h1>
-                        <div class="service-tag">Professional Ticket Booking</div>
-                    </div>
+                    <div class="logo-icon"><i class="fas fa-ticket-alt"></i></div>
+                    <div><h1>ErrandConnect</h1><div class="service-tag">Ticket Booking</div></div>
                 </div>
             </div>
 
             <div class="form-section">
-                <!-- REMOVED service-indicator from here since it's now on fixed bar -->
+                <div class="progress-bar"><div class="progress"></div></div>
 
-                <div class="progress-bar">
-                    <div class="progress"></div>
+                <!-- INLINE MAP SECTION -->
+                <div class="map-wrapper">
+                    <div class="map-controls">
+                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-map-marker-alt"></i> Set Venue</button>
+                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+                    </div>
+                    <div id="mapHint" class="map-hint">Tap map to set location</div>
+                    <div id="map"></div>
+
+                    <div class="route-info-bar" id="routeInfoBar">
+                        <div class="route-info-item">
+                            <div class="route-info-label">Distance</div>
+                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Time</div>
+                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Fee</div>
+                            <div class="route-info-value" id="infoFee">$0.00</div>
+                        </div>
+                    </div>
                 </div>
 
                 <form method="post" action="{{ url_for('create_ticket_booking_errand') }}" id="ticketForm">
-                    <!-- Event Information -->
+                    <!-- Hidden map coordinate fields -->
+                    <input type="hidden" id="pickup_lat" name="pickup_lat">
+                    <input type="hidden" id="pickup_lon" name="pickup_lon">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+
+                    <!-- ========== EVENT INFORMATION ========== -->
                     <h2><i class="fas fa-info-circle"></i> Event Information</h2>
 
                     <div class="form-group">
                         <label for="ticket_type">Ticket Type</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-ticket-alt"></i>
-                            <select id="ticket_type" name="ticket_type" required onchange="updateEstimatedFee()">
-                                <option value="">Select ticket type</option>
-                                <option value="movie">Movie Tickets</option>
-                                <option value="concert">Concert</option>
-                                <option value="theater">Theater/Play</option>
-                                <option value="sports">Sports Event</option>
-                                <option value="museum">Museum/Exhibition</option>
-                                <option value="transport">Transportation</option>
-                                <option value="airline">Airline Ticket</option>
-                                <option value="train">Train Ticket</option>
-                                <option value="bus">Bus Ticket</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
+                        <div class="input-with-icon"><i class="fas fa-ticket-alt"></i><select id="ticket_type" name="ticket_type" required onchange="updateEstimatedFee()"><option value="">Select ticket type</option><option value="movie">Movie Tickets</option><option value="concert">Concert</option><option value="theater">Theater/Play</option><option value="sports">Sports Event</option><option value="museum">Museum/Exhibition</option><option value="transport">Transportation</option><option value="airline">Airline Ticket</option><option value="train">Train Ticket</option><option value="bus">Bus Ticket</option><option value="other">Other</option></select></div>
                     </div>
 
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-star"></i>
-                            <input type="text" id="event_name" name="event_name" placeholder="Event or show name" required oninput="updateProgress()">
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-star"></i><input type="text" id="event_name" name="event_name" placeholder="Event or show name" required></div></div>
 
+                    <!-- Venue Location -->
                     <div class="form-group">
                         <label for="venue">Venue Location</label>
-                        <div class="address-input-group">
-                            <div class="input-with-icon map-input">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <input type="text" id="venue" name="venue" placeholder="Venue or location" required oninput="updateEstimatedFee(); updateProgress()">
-                                <input type="hidden" id="pickup_lat" name="pickup_lat">
-                                <input type="hidden" id="pickup_lng" name="pickup_lng">
-                                <button type="button" class="map-input-button" onclick="showVenueMap()" title="View on map">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </button>
-                            </div>
-                        </div>
+                        <div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="venue" name="venue" placeholder="Venue or location" required readonly onfocus="this.removeAttribute('readonly')"></div>
                     </div>
 
+                    <!-- ========== TICKET DELIVERY (moved here) ========== -->
+                    <div class="form-group">
+                        <label for="delivery_method">Ticket Delivery</label>
+                        <div class="input-with-icon"><i class="fas fa-shipping-fast"></i><select id="delivery_method" name="delivery_method" required onchange="updateDeliveryMethod(); updateEstimatedFee();"><option value="electronic">Electronic Ticket</option><option value="physical">Physical Ticket Delivery</option><option value="pickup">I will pick up</option><option value="venue">Pick up at venue</option></select></div>
+                    </div>
+
+                    <!-- Delivery Address (shown only when physical delivery selected) -->
+                    <div id="deliveryAddressGroup" class="form-group" style="display: none;">
+                        <label for="delivery_address">Delivery Address</label>
+                        <div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address for physical tickets" readonly onfocus="this.removeAttribute('readonly')"></div>
+                    </div>
+
+                    <!-- Event Date & Time -->
                     <div class="form-group">
                         <label>Event Date & Time</label>
                         <div class="date-time-grid">
-                            <div class="date-time-item">
-                                <label>Event Date</label>
-                                <input type="date" name="event_date" required onchange="updateEstimatedFee(); updateProgress()">
-                            </div>
-                            <div class="date-time-item">
-                                <label>Event Time</label>
-                                <input type="time" name="event_time" onchange="updateEstimatedFee(); updateProgress()">
-                            </div>
+                            <div class="date-time-item"><label>Event Date</label><input type="date" name="event_date" required></div>
+                            <div class="date-time-item"><label>Event Time</label><input type="time" name="event_time"></div>
                         </div>
                     </div>
 
                     <div class="section-divider"></div>
 
-                    <!-- Ticket Details -->
+                    <!-- ========== TICKET DETAILS ========== -->
                     <h2><i class="fas fa-chair"></i> Ticket Details</h2>
 
-                    <div class="form-group">
-                        <label for="number_of_tickets">Number of Tickets</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-users"></i>
-                            <input type="number" id="number_of_tickets" name="number_of_tickets" placeholder="How many tickets?" min="1" required oninput="updateTicketCount(); updateEstimatedFee(); updateProgress()">
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-users"></i><input type="number" id="number_of_tickets" name="number_of_tickets" placeholder="How many tickets?" min="1" required oninput="updateTicketCount(); updateEstimatedFee();"></div></div>
 
-                    <div class="form-group">
-                        <label for="seat_preference">Seat Preference</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-couch"></i>
-                            <select id="seat_preference" name="seat_preference" onchange="updateEstimatedFee(); updateProgress()">
-                                <option value="any">Any seats</option>
-                                <option value="front">Front rows</option>
-                                <option value="middle">Middle rows</option>
-                                <option value="back">Back rows</option>
-                                <option value="balcony">Balcony</option>
-                                <option value="vip">VIP/Premium</option>
-                                <option value="specific">Specific section</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-couch"></i><select id="seat_preference" name="seat_preference" onchange="updateEstimatedFee()"><option value="any">Any seats</option><option value="front">Front rows</option><option value="middle">Middle rows</option><option value="back">Back rows</option><option value="balcony">Balcony</option><option value="vip">VIP/Premium</option><option value="specific">Specific section</option></select></div></div>
 
                     <div class="section-divider"></div>
 
-                    <!-- Budget & Payment -->
+                    <!-- ========== BUDGET & PAYMENT ========== -->
                     <h2><i class="fas fa-dollar-sign"></i> Budget & Payment</h2>
 
-                    <div class="form-group">
-                        <label for="budget_range">Budget per Ticket</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <select id="budget_range" name="budget_range" required onchange="updateEstimatedFee(); updateProgress()">
-                                <option value="">Select budget range</option>
-                                <option value="under_20">Under $20</option>
-                                <option value="20_50">$20 - $50</option>
-                                <option value="50_100">$50 - $100</option>
-                                <option value="100_200">$100 - $200</option>
-                                <option value="200_plus">$200+</option>
-                                <option value="flexible">Flexible</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-money-bill-wave"></i><select id="budget_range" name="budget_range" required onchange="updateEstimatedFee()"><option value="">Select budget range</option><option value="under_20">Under $20</option><option value="20_50">$20 - $50</option><option value="50_100">$50 - $100</option><option value="100_200">$100 - $200</option><option value="200_plus">$200+</option><option value="flexible">Flexible</option></select></div></div>
 
-                    <div class="form-group">
-                        <label for="payment_method">Payment Method</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-credit-card"></i>
-                            <select id="payment_method" name="payment_method" required onchange="updateProgress()">
-                                <option value="">Select payment method</option>
-                                <option value="cash">Cash</option>
-                                <option value="card">Credit/Debit Card</option>
-                                <option value="mobile">Mobile Payment</option>
-                                <option value="online">Online Payment</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="delivery_method">Ticket Delivery</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-shipping-fast"></i>
-                            <select id="delivery_method" name="delivery_method" required onchange="updateDeliveryMethod(); updateEstimatedFee(); updateProgress()">
-                                <option value="electronic">Electronic Ticket</option>
-                                <option value="physical">Physical Ticket Delivery</option>
-                                <option value="pickup">I will pick up</option>
-                                <option value="venue">Pick up at venue</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method" required><option value="">Select payment method</option><option value="cash">Cash</option><option value="card">Credit/Debit Card</option><option value="mobile">Mobile Payment</option><option value="online">Online Payment</option></select></div></div>
 
                     <!-- Fee Breakdown -->
                     <div id="feeBreakdown" class="fee-breakdown">
-                        <div class="fee-item">
-                            <span>Service Fee:</span>
-                            <span id="serviceFee">$0.00</span>
-                        </div>
-                        <div class="fee-item">
-                            <span>Delivery Fee:</span>
-                            <span id="deliveryFee">$0.00</span>
-                        </div>
-                        <div class="fee-item">
-                            <span>Convenience Fee:</span>
-                            <span id="convenienceFee">$0.00</span>
-                        </div>
-                        <div class="fee-item">
-                            <span>Total Fee:</span>
-                            <span id="totalFee">$0.00</span>
-                        </div>
+                        <div class="fee-item"><span>Service Fee:</span><span id="serviceFee">$0.00</span></div>
+                        <div class="fee-item"><span>Delivery Fee:</span><span id="deliveryFee">$0.00</span></div>
+                        <div class="fee-item"><span>Convenience Fee:</span><span id="convenienceFee">$0.00</span></div>
+                        <div class="fee-item"><span>Total Fee:</span><span id="totalFee">$0.00</span></div>
                     </div>
 
-                    <button type="button" class="view-map-btn" onclick="showFullMap()">
-                        <i class="fas fa-route"></i> View Ticket Route Map
-                    </button>
-
                     <!-- Delivery Method Indicator -->
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator">
-                        <div class="delivery-method-icon">
-                            <i id="deliveryMethodIcon" class="fas fa-motorcycle"></i>
-                        </div>
-                        <div class="delivery-method-text">
-                            <h4 id="deliveryMethodTitle">Delivery Method</h4>
-                            <p id="deliveryMethodDescription">Calculating based on delivery type...</p>
-                        </div>
+                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
+                        <div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-motorcycle"></i></div>
+                        <div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div>
                     </div>
 
                     <div class="section-divider"></div>
 
-                    <!-- Additional Requirements -->
+                    <!-- ========== ADDITIONAL REQUIREMENTS ========== -->
                     <h2><i class="fas fa-cog"></i> Additional Requirements</h2>
 
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-wheelchair"></i>
-                            <select id="special_access" name="special_access" onchange="updateEstimatedFee(); updateProgress()">
-                                <option value="none">No special needs</option>
-                                <option value="wheelchair">Wheelchair accessible</option>
-                                <option value="hearing">Hearing assistance</option>
-                                <option value="visual">Visual assistance</option>
-                                <option value="other_access">Other accessibility needs</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-wheelchair"></i><select id="special_access" name="special_access" onchange="updateEstimatedFee()"><option value="none">No special needs</option><option value="wheelchair">Wheelchair accessible</option><option value="hearing">Hearing assistance</option><option value="visual">Visual assistance</option><option value="other_access">Other accessibility needs</option></select></div></div>
 
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-shield-alt"></i>
-                            <select id="cancellation_insurance" name="cancellation_insurance" onchange="updateEstimatedFee(); updateProgress()">
-                                <option value="no">No insurance</option>
-                                <option value="yes">Yes, include cancellation insurance</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-shield-alt"></i><select id="cancellation_insurance" name="cancellation_insurance" onchange="updateEstimatedFee()"><option value="no">No insurance</option><option value="yes">Yes, include cancellation insurance</option></select></div></div>
 
                     <!-- Travel Section -->
                     <div class="travel-section">
                         <h3><i class="fas fa-plane"></i> Travel Information (if applicable)</h3>
-                        <div class="form-group">
-                            <label for="departure_location">Departure From</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-plane-departure"></i>
-                                <input type="text" id="departure_location" name="departure_location" placeholder="Departing from" oninput="updateEstimatedFee(); updateProgress()">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="destination">Destination</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-plane-arrival"></i>
-                                <input type="text" id="destination" name="destination" placeholder="Traveling to" oninput="updateEstimatedFee(); updateProgress()">
-                            </div>
-                        </div>
+                        <div class="form-group"><div class="input-with-icon"><i class="fas fa-plane-departure"></i><input type="text" id="departure_location" name="departure_location" placeholder="Departing from"></div></div>
+                        <div class="form-group"><div class="input-with-icon"><i class="fas fa-plane-arrival"></i><input type="text" id="destination" name="destination" placeholder="Traveling to"></div></div>
                     </div>
 
                     <div class="section-divider"></div>
 
-                    <!-- Contact & Delivery -->
-                    <h2><i class="fas fa-address-card"></i> Delivery Address</h2>
-
-
-                    <div class="form-group">
-                        <div class="address-input-group">
-                            <div class="input-with-icon map-input">
-                                <i class="fas fa-home"></i>
-                                <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address for physical tickets" oninput="updateEstimatedFee(); updateProgress()">
-                                <input type="hidden" id="dropoff_lat" name="dropoff_lat">
-                                <input type="hidden" id="dropoff_lng" name="dropoff_lng">
-                                <button type="button" class="map-input-button" onclick="showDeliveryMap()" title="View on map">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-comment-alt"></i>
-                            <textarea id="special_requests" name="special_requests" rows="3" placeholder="Any special requests or instructions..." oninput="updateProgress()"></textarea>
-                        </div>
-                    </div>
+                    <!-- ========== ADDITIONAL INFORMATION ========== -->
+                    <h2><i class="fas fa-comment-alt"></i> Additional Information</h2>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><textarea id="special_requests" name="special_requests" rows="2" placeholder="Any special requests or instructions..."></textarea></div></div>
 
                     <div class="section-divider"></div>
 
-                    <!-- Service Price and Phone Number - Now in a single row -->
+                    <!-- ========== CONTACT & PRICING ========== -->
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-
                     <div class="service-phone-row">
-                        <!-- Service Price -->
-                        <div class="form-group">
-                            <label for="service_price">Service Price ($)</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-hand-holding-usd"></i>
-                                <input type="number" id="service_price" name="service_price"
-                                       placeholder="Your price"
-                                       step="0.01" min="0.50"
-                                       inputmode="decimal" required>
-                            </div>
-                        </div>
-
-                        <!-- Phone Number -->
-                        <div class="form-group">
-                            <label for="phone_number">Phone Number</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel" id="phone_number" name="phone_number"
-                                       placeholder="Phone number" required>
-                            </div>
-                        </div>
+                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
+                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
                     </div>
 
-
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-paper-plane"></i> Create Ticket Booking
-                    </button>
+                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Ticket Booking</button>
                 </form>
             </div>
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Map selection state
-        let map, pickupMarker, dropoffMarker, polyline;
-        let currentRouteDistance = null;
-        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+        // ========== MAP LOGIC ==========
+        let map, pickupMarker, dropoffMarker, routeLine;
+        let selectionMode = 'pickup';
 
         function initMap() {
-            if (map) return;
-            
-            map = L.map('map').setView([5.6037, -0.1870], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-
-            map.on('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
-                
-                if (selectionMode === 'pickup') {
-                    reverseGeocode(lat, lng, function(address) {
-                        setPickupLocation(lat, lng, address);
-                    });
-                } else {
-                    reverseGeocode(lat, lng, function(address) {
-                        setDropoffLocation(lat, lng, address);
-                    });
-                }
-                updateRoute();
+            map = L.map('map').setView([-1.2921, 36.8219], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+            document.getElementById('mapHint').style.display = 'block';
+            map.on('click', e => {
+                if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
+                else setDropoffLocation(e.latlng.lat, e.latlng.lng);
+                if (navigator.vibrate) navigator.vibrate(50);
             });
-
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const currentLat = position.coords.latitude;
-                    const currentLng = position.coords.longitude;
-                    map.setView([currentLat, currentLng], 15);
-                    if (!document.getElementById('pickup_lat').value) {
-                        reverseGeocode(currentLat, currentLng, function(address) {
-                            setPickupLocation(currentLat, currentLng, address);
-                        });
-                    }
+                navigator.geolocation.getCurrentPosition(pos => {
+                    let { latitude, longitude } = pos.coords;
+                    map.setView([latitude, longitude], 13);
+                    if (!pickupMarker) setPickupLocation(latitude, longitude);
                 });
             }
         }
 
-        function setPickupLocation(lat, lng, label) {
-            document.getElementById('pickup_lat').value = lat;
-            document.getElementById('pickup_lng').value = lng;
-            
-            if (pickupMarker) map.removeLayer(pickupMarker);
-            
-            const pickupIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="marker-pin" style="background: #4CAF50;"></div><i class="fas fa-map-marker-alt"></i>`,
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
-            });
-            
-            pickupMarker = L.marker([lat, lng], {icon: pickupIcon}).addTo(map);
-            if (label) document.getElementById('venue').value = label;
-            updateEstimatedFee();
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
+            p.classList.toggle('active', mode === 'pickup');
+            d.classList.toggle('active', mode === 'dropoff');
+            d.classList.toggle('dropoff', mode === 'dropoff');
+            hint.textContent = mode === 'pickup' ? "Tap map to set Venue location" : "Tap map to set Delivery address";
+            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
+            hint.style.display = 'block';
         }
 
-        function setDropoffLocation(lat, lng, label) {
-            document.getElementById('dropoff_lat').value = lat;
-            document.getElementById('dropoff_lng').value = lng;
-            
+        function setPickupLocation(lat, lng) {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-map-marker-alt'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Venue");
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'venue');
+            updateRoute();
+            if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
+        }
+
+        function setDropoffLocation(lat, lng) {
             if (dropoffMarker) map.removeLayer(dropoffMarker);
-            
-            const dropoffIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="marker-pin" style="background: #2196F3;"></div><i class="fas fa-home"></i>`,
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
-            });
-            
-            dropoffMarker = L.marker([lat, lng], {icon: dropoffIcon}).addTo(map);
-            if (label) document.getElementById('delivery_address').value = label;
-            updateEstimatedFee();
+            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'delivery_address');
+            updateRoute();
         }
 
         function updateRoute() {
             if (pickupMarker && dropoffMarker) {
-                const start = pickupMarker.getLatLng();
-                const end = dropoffMarker.getLatLng();
-                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
-                fetch(routeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.routes && data.routes.length) {
-                            currentRouteDistance = data.routes[0].distance / 1000;
-                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                            if (polyline) map.removeLayer(polyline);
-                            polyline = L.polyline(coords, {color: '#4CAF50', weight: 3}).addTo(map);
-                            map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                        } else {
-                            currentRouteDistance = null;
-                            const points = [start, end];
-                            if (polyline) map.removeLayer(polyline);
-                            polyline = L.polyline(points, {color: '#4CAF50', weight: 3}).addTo(map);
-                            map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                        }
-                    })
-                    .catch(() => {
-                        currentRouteDistance = null;
-                        const points = [start, end];
-                        if (polyline) map.removeLayer(polyline);
-                        polyline = L.polyline(points, {color: '#4CAF50', weight: 3}).addTo(map);
-                        map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                    });
+                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
+                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
+                    .then(res => res.json()).then(data => {
+                        if (data.routes?.length) {
+                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                            if (routeLine) map.removeLayer(routeLine);
+                            routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
+                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+                            let distKm = data.routes[0].distance / 1000;
+                            updateUIwithDistance(distKm);
+                        } else fallbackDistance(p, d);
+                    }).catch(() => fallbackDistance(p, d));
             }
         }
 
-        function reverseGeocode(lat, lng, callback) {
+        function fallbackDistance(p, d) {
+            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
+            updateUIwithDistance(dist);
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function reverseGeocode(lat, lng, inputId) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.display_name) {
-                        callback(data.display_name);
-                    } else {
-                        callback('');
-                    }
-                })
-                .catch(() => callback(''));
+                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
+                .catch(()=>{});
         }
 
-        function setSelectionMode(mode) {
-            selectionMode = mode;
-            document.querySelectorAll('.selection-btn').forEach(btn => btn.classList.remove('active'));
-            if (mode === 'pickup') {
-                document.getElementById('selectPickupBtn').classList.add('active');
-                document.getElementById('mapHintText').textContent = 'Tap on map to set Venue location';
-            } else {
-                document.getElementById('selectDropoffBtn').classList.add('active');
-                document.getElementById('mapHintText').textContent = 'Tap on map to set Delivery location';
-            }
-        }
+        // ========== FEE & INFO BAR (ticket booking pricing) ==========
+        function updateUIwithDistance(distKm) {
+            let ticketType = document.getElementById('ticket_type').value;
+            let ticketCount = parseInt(document.getElementById('number_of_tickets').value) || 1;
+            let budgetRange = document.getElementById('budget_range').value;
+            let deliveryMethod = document.getElementById('delivery_method').value;
+            let specialAccess = document.getElementById('special_access').value;
+            let cancellationInsurance = document.getElementById('cancellation_insurance').value;
 
-        function showVenueMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            setSelectionMode('pickup');
-            setTimeout(() => {
-                initMap();
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        map.setView([lat, lng], 15);
-                    });
-                }
-            }, 100);
-        }
+            // Service fee
+            let fees = { movie:2.00, concert:5.00, theater:4.00, sports:6.00, museum:3.00, transport:3.50, airline:15.00, train:8.00, bus:5.00, other:4.00 };
+            let serviceFee = (fees[ticketType] || 4.00) * ticketCount;
 
-        function showDeliveryMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            setSelectionMode('dropoff');
-            setTimeout(() => {
-                initMap();
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        map.setView([lat, lng], 15);
-                    });
-                }
-            }, 100);
-        }
+            // Delivery fee based on distance
+            let deliveryFee = 0;
+            if (deliveryMethod === 'electronic') deliveryFee = 0.50;
+            else if (deliveryMethod === 'physical') {
+                if (distKm <= 1) deliveryFee = 2.00;
+                else if (distKm <= 5) deliveryFee = 4.00;
+                else if (distKm <= 10) deliveryFee = 6.00;
+                else deliveryFee = 8.00;
+            } else if (deliveryMethod === 'pickup') deliveryFee = 1.00;
+            else if (deliveryMethod === 'venue') deliveryFee = 2.00;
+            else deliveryFee = 1.00;
 
-        function showFullMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            setTimeout(() => {
-                initMap();
-                map.invalidateSize();
-                if (pickupMarker && dropoffMarker) {
-                    updateRoute();
-                }
-            }, 100);
-        }
+            // Convenience fee
+            let percentages = { under_20:0.10, '20_50':0.08, '50_100':0.06, '100_200':0.05, '200_plus':0.04, flexible:0.07 };
+            let budgetAverages = { under_20:15, '20_50':35, '50_100':75, '100_200':150, '200_plus':300, flexible:50 };
+            let convPct = percentages[budgetRange] || 0.07;
+            let avgBudget = budgetAverages[budgetRange] || 50;
+            let convenienceFee = (avgBudget * convPct) * ticketCount;
 
-        function closeMap() {
-            document.getElementById('mapModal').style.display = 'none';
-        }
+            // Additional fees
+            let additional = 0;
+            if (specialAccess === 'wheelchair' || specialAccess === 'other_access') additional += 2.00;
+            if (cancellationInsurance === 'yes') additional += 5.00;
 
-        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
+            let total = Math.max(serviceFee + deliveryFee + convenienceFee + additional, 2.00);
+            let estMinutes = Math.round(distKm * 3);
 
-        // Mobile-optimized JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize form
-            initializeForm();
+            document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+            document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
+            document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
+            document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
 
-            // Close modal on outside click
-            document.getElementById('mapModal').addEventListener('touchstart', function(e) {
-                if (e.target === this) {
-                    closeMap();
-                }
-            });
+            // Update detailed breakdown
+            document.getElementById('serviceFee').innerText = '$' + serviceFee.toFixed(2);
+            document.getElementById('deliveryFee').innerText = '$' + deliveryFee.toFixed(2);
+            document.getElementById('convenienceFee').innerText = '$' + convenienceFee.toFixed(2);
+            document.getElementById('totalFee').innerText = '$' + total.toFixed(2);
+            document.getElementById('feeBreakdown').style.display = 'block';
 
-            // Close modal on ESC key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeMap();
-                }
-            });
-
-            // Prevent pull-to-refresh on mobile
-            document.addEventListener('touchmove', function(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                    return;
-                }
-                if (window.scrollY === 0) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            // Handle back button on Android
-            if (history.pushState) {
-                history.pushState(null, null, location.href);
-                window.onpopstate = function() {
-                    if (document.getElementById('mapModal').style.display === 'flex') {
-                        closeMap();
-                        history.pushState(null, null, location.href);
-                    }
-                };
-            }
-        });
-
-        function initializeForm() {
-            // Update fee when inputs change
-            const feeInputs = ['ticket_type', 'venue', 'number_of_tickets', 'budget_range', 'delivery_method', 'delivery_address'];
-            feeInputs.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('change', updateEstimatedFee);
-                    element.addEventListener('input', updateEstimatedFee);
-                }
-            });
-
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            const eventDateInput = document.querySelector('input[name="event_date"]');
-            if (eventDateInput) eventDateInput.min = today;
-
-            // Initial calculations
-            updateTicketCount();
-            updateEstimatedFee();
-            updateDeliveryMethod();
-        }
-
-        // Calculate distance (using coordinates if available, otherwise simulated)
-        function calculateDistance(venue, deliveryAddress) {
-            if (currentRouteDistance !== null) {
-                return currentRouteDistance;
-            }
-            const pLat = document.getElementById('pickup_lat').value;
-            const pLng = document.getElementById('pickup_lng').value;
-            const dLat = document.getElementById('dropoff_lat').value;
-            const dLng = document.getElementById('dropoff_lng').value;
-
-            if (pLat && pLng && dLat && dLng) {
-                return calculateHaversineDistance(
-                    parseFloat(pLat), parseFloat(pLng),
-                    parseFloat(dLat), parseFloat(dLng)
-                );
-            }
-
-            if (venue && deliveryAddress) {
-                // Fallback to length-based simulation if coordinates aren't both set
-                const venueLength = venue.length;
-                const deliveryLength = deliveryAddress.length;
-                const baseDistance = 0.5 + (Math.abs(venueLength - deliveryLength) / 25);
-                const randomFactor = 0.8 + (Math.random() * 1.4);
-                return Math.min(baseDistance * randomFactor, 30);
-            }
-            return 0;
-        }
-
-        // Determine delivery method
-        function getDeliveryMethod(deliveryType, distance) {
-            const distanceKm = parseFloat(distance) || 0;
-            
-            // Update map info
-            const mapDistance = document.getElementById('mapDistance');
-            const mapTime = document.getElementById('mapTime');
-            const mapDeliveryMethod = document.getElementById('mapDeliveryMethod');
-
-            if (mapDistance) mapDistance.textContent = distanceKm.toFixed(1) + ' km';
-            if (mapTime) {
-                const estTime = Math.round(distanceKm * 3); // 3 mins per km
-                mapTime.textContent = estTime + ' min';
-            }
-
-            let methodInfo;
-            if (deliveryType === 'electronic') {
-                methodInfo = {
-                    method: 'digital',
-                    title: 'Digital Delivery',
-                    description: 'Tickets will be sent electronically',
-                    icon: 'fas fa-mobile-alt',
-                    color: '#2196F3'
-                };
-            } else if (deliveryType === 'physical' || deliveryType === 'pickup') {
-                if (distanceKm <= 3) {
-                    methodInfo = {
-                        method: 'bike',
-                        title: 'Bike Delivery',
-                        description: 'Fast delivery within short distances',
-                        icon: 'fas fa-bicycle',
-                        color: '#4CAF50'
-                    };
-                } else {
-                    methodInfo = {
-                        method: 'vehicle',
-                        title: 'Vehicle Delivery',
-                        description: 'Requires vehicle for ticket transport',
-                        icon: 'fas fa-car',
-                        color: '#FF9800'
-                    };
-                }
-            } else if (deliveryType === 'venue') {
-                methodInfo = {
-                    method: 'venue_pickup',
-                    title: 'Venue Pickup',
-                    description: 'Tickets will be available at venue',
-                    icon: 'fas fa-building',
-                    color: '#9C27B0'
-                };
-            } else {
-                methodInfo = {
-                    method: 'standard',
-                    title: 'Standard Delivery',
-                    description: 'Standard ticket delivery',
-                    icon: 'fas fa-ticket-alt',
-                    color: '#607D8B'
-                };
-            }
-
-            if (mapDeliveryMethod) mapDeliveryMethod.textContent = methodInfo.title;
-            return methodInfo;
-        }
-
-        // Update delivery method display
-        function updateDeliveryMethod() {
-            const deliveryType = document.getElementById('delivery_method').value;
-            const venue = document.getElementById('venue').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
-            const distance = calculateDistance(venue, deliveryAddress);
-            const method = getDeliveryMethod(deliveryType, distance);
-            const indicator = document.getElementById('deliveryMethodIndicator');
-
-            if (deliveryType === 'physical' || deliveryType === 'pickup') {
+            // Update delivery method indicator
+            let methodIcon = { electronic: 'fas fa-mobile-alt', physical: 'fas fa-bicycle', pickup: 'fas fa-hand-paper', venue: 'fas fa-building' };
+            let methodTitle = { electronic: 'Digital Delivery', physical: 'Physical Delivery', pickup: 'Self Pickup', venue: 'Venue Pickup' };
+            let indicator = document.getElementById('deliveryMethodIndicator');
+            if (deliveryMethod === 'physical' || deliveryMethod === 'pickup') {
                 indicator.style.display = 'flex';
-                document.getElementById('deliveryMethodIcon').className = method.icon;
-                document.getElementById('deliveryMethodTitle').textContent = method.title;
-                document.getElementById('deliveryMethodDescription').textContent = method.description;
-                indicator.style.borderLeft = `3px solid ${method.color}`;
-            } else {
-                indicator.style.display = 'none';
-            }
-
-            return method;
+                document.getElementById('deliveryMethodIcon').className = methodIcon[deliveryMethod] || 'fas fa-truck';
+                document.getElementById('deliveryMethodTitle').innerText = methodTitle[deliveryMethod] || 'Standard Delivery';
+                document.getElementById('deliveryMethodDescription').innerText = deliveryMethod === 'physical' ? 'Will be delivered to your address' : 'You will pick up the tickets';
+            } else indicator.style.display = 'none';
         }
 
-        // Update ticket count
+        // Show/hide delivery address based on delivery method
+        function updateDeliveryMethod() {
+            let method = document.getElementById('delivery_method').value;
+            let addrGroup = document.getElementById('deliveryAddressGroup');
+            if (method === 'physical') addrGroup.style.display = 'block';
+            else addrGroup.style.display = 'none';
+            if (pickupMarker && dropoffMarker) updateRoute();
+        }
+
+        // Listeners for fee recalculation
+        document.getElementById('ticket_type').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('number_of_tickets').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('budget_range').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('delivery_method').addEventListener('change', () => { updateDeliveryMethod(); if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('special_access').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('cancellation_insurance').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+
+        // ========== UI HELPERS ==========
         function updateTicketCount() {
-            const count = document.getElementById('number_of_tickets').value || '1';
+            let count = document.getElementById('number_of_tickets').value || 1;
+            if (pickupMarker && dropoffMarker) updateRoute();
             return count;
         }
 
-        // Calculate service fee based on ticket type
-        function calculateServiceFee(ticketType, ticketCount) {
-            const count = parseInt(ticketCount) || 1;
-            let baseFee = 0;
-
-            // Service fee structure
-            const fees = {
-                'movie': 2.00,
-                'concert': 5.00,
-                'theater': 4.00,
-                'sports': 6.00,
-                'museum': 3.00,
-                'transport': 3.50,
-                'airline': 15.00,
-                'train': 8.00,
-                'bus': 5.00,
-                'other': 4.00
-            };
-
-            baseFee = fees[ticketType] || 4.00;
-            return baseFee * count;
-        }
-
-        // Calculate delivery fee
-        function calculateDeliveryFee(deliveryMethod, ticketCount, venue, deliveryAddress) {
-            const count = parseInt(ticketCount) || 1;
-            let fee = 0;
-            const distance = calculateDistance(venue, deliveryAddress);
-
-            switch(deliveryMethod) {
-                case 'electronic':
-                    fee = 0.50;
-                    break;
-                case 'physical':
-                    if (distance <= 1) {
-                        fee = 2.00;
-                    } else if (distance <= 5) {
-                        fee = 4.00;
-                    } else if (distance <= 10) {
-                        fee = 6.00;
-                    } else {
-                        fee = 8.00;
-                    }
-                    break;
-                case 'pickup':
-                    fee = 1.00;
-                    break;
-                case 'venue':
-                    fee = 2.00;
-                    break;
-                default:
-                    fee = 1.00;
-            }
-
-            return fee * Math.min(count, 1);
-        }
-
-        // Calculate convenience fee based on budget
-        function calculateConvenienceFee(budgetRange, ticketCount) {
-            const count = parseInt(ticketCount) || 1;
-            let percentage = 0;
-
-            // Convenience fee as percentage of ticket budget
-            const percentages = {
-                'under_20': 0.10,
-                '20_50': 0.08,
-                '50_100': 0.06,
-                '100_200': 0.05,
-                '200_plus': 0.04,
-                'flexible': 0.07
-            };
-
-            // Calculate average budget for fee estimation
-            const budgetAverages = {
-                'under_20': 15,
-                '20_50': 35,
-                '50_100': 75,
-                '100_200': 150,
-                '200_plus': 300,
-                'flexible': 50
-            };
-
-            percentage = percentages[budgetRange] || 0.07;
-            const avgBudget = budgetAverages[budgetRange] || 50;
-
-            return (avgBudget * percentage) * count;
-        }
-
-        // Calculate additional fees
-        function calculateAdditionalFees(specialAccess, cancellationInsurance) {
-            let additional = 0;
-
-            if (specialAccess === 'wheelchair' || specialAccess === 'other_access') {
-                additional += 2.00;
-            }
-
-            if (cancellationInsurance === 'yes') {
-                additional += 5.00;
-            }
-
-            return additional;
-        }
-
-        // Update estimated fee - UPDATES THE FIXED BAR
-        function updateEstimatedFee() {
-            const ticketType = document.getElementById('ticket_type').value;
-            const ticketCount = document.getElementById('number_of_tickets').value || '1';
-            const budgetRange = document.getElementById('budget_range').value;
-            const deliveryMethod = document.getElementById('delivery_method').value;
-            const specialAccess = document.getElementById('special_access').value;
-            const cancellationInsurance = document.getElementById('cancellation_insurance').value;
-            const venue = document.getElementById('venue').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
-
-            // Calculate all fees
-            const serviceFee = calculateServiceFee(ticketType, ticketCount);
-            const deliveryFee = calculateDeliveryFee(deliveryMethod, ticketCount, venue, deliveryAddress);
-            const convenienceFee = calculateConvenienceFee(budgetRange, ticketCount);
-            const additionalFees = calculateAdditionalFees(specialAccess, cancellationInsurance);
-
-            // Total fee (minimum $2.00)
-            const totalFee = Math.max(serviceFee + deliveryFee + convenienceFee + additionalFees, 2.00);
-
-            // Update FIXED BAR display
-            document.getElementById('estimated_fee').textContent = '$' + totalFee.toFixed(2);
-
-            // Update detailed fee breakdown
-            document.getElementById('serviceFee').textContent = '$' + serviceFee.toFixed(2);
-            document.getElementById('deliveryFee').textContent = '$' + deliveryFee.toFixed(2);
-            document.getElementById('convenienceFee').textContent = '$' + convenienceFee.toFixed(2);
-            document.getElementById('totalFee').textContent = '$' + totalFee.toFixed(2);
-
-            // Show/hide fee breakdown
-            const feeBreakdown = document.getElementById('feeBreakdown');
-            if (ticketType && budgetRange) {
-                feeBreakdown.style.display = 'block';
-            } else {
-                feeBreakdown.style.display = 'none';
-            }
-
-            // Update delivery method
-            updateDeliveryMethod();
-
-            // Visual feedback on the fixed bar
-            const feeElement = document.getElementById('estimated_fee');
-            feeElement.style.transform = 'scale(1.1)';
-            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
-        }
-
-        // Map functions
-        function showVenueMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            setSelectionMode('pickup');
-            setTimeout(() => {
-                initMap();
-                if (navigator.geolocation && !pickupMarker) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        if (map) map.setView([lat, lng], 15);
-                    });
-                }
-            }, 100);
-        }
-
-        function showDeliveryMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            setSelectionMode('dropoff');
-            setTimeout(() => {
-                initMap();
-                if (navigator.geolocation && !dropoffMarker) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        if (map) map.setView([lat, lng], 15);
-                    });
-                }
-            }, 100);
-        }
-
-        function showFullMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            setTimeout(() => {
-                initMap();
-                map.invalidateSize();
-                if (pickupMarker && dropoffMarker) {
-                    updateRoute();
-                }
-            }, 100);
-        }
-
-        function closeMap() {
-            document.getElementById('mapModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            vibrate();
-        }
-
-        // Haptic feedback simulation
-        function vibrate() {
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-        }
-
-        // Progress bar
         function updateProgress() {
-            const inputs = document.querySelectorAll('input, select, textarea');
-            let filled = 0;
-
-            inputs.forEach(input => {
-                if (input.value && input.type !== 'hidden') {
-                    filled++;
-                }
-            });
-
-            const progress = Math.min((filled / inputs.length) * 100, 100);
-            document.querySelector('.progress').style.width = `${progress}%`;
+            let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length;
+            let total = document.querySelectorAll('input,select,textarea').length;
+            document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%';
         }
+        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
+
+        function initAutoSliding() {
+            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
+                const check = () => {
+                    inp.classList.remove('sliding-text');
+                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
+                        inp.classList.add('sliding-text');
+                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
+                    }
+                };
+                inp.addEventListener('input', () => setTimeout(check, 100));
+                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
+                inp.addEventListener('blur', () => { if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running'; });
+                setTimeout(check, 300);
+            });
+            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
+        }
+
+        // Set minimum date to today
+        document.querySelector('input[name="event_date"]').min = new Date().toISOString().split('T')[0];
 
         // Form validation
         document.getElementById('ticketForm').addEventListener('submit', function(e) {
-
-            // Validate required fields
-            const ticketType = document.getElementById('ticket_type').value.trim();
-            const eventName = document.getElementById('event_name').value.trim();
-            const venue = document.getElementById('venue').value.trim();
-            const eventDate = document.querySelector('input[name="event_date"]').value.trim();
-            const ticketCount = document.getElementById('number_of_tickets').value.trim();
-            const budgetRange = document.getElementById('budget_range').value.trim();
-            const paymentMethod = document.getElementById('payment_method').value.trim();
-            const deliveryMethod = document.getElementById('delivery_method').value.trim();
-            const deliveryAddress = document.getElementById('delivery_address').value.trim();
-            const contactNumber = document.getElementById('contact_number').value.trim();
-
-            // Check required fields
-            if (!ticketType || !eventName || !venue || !eventDate || !ticketCount || !budgetRange || !paymentMethod || !deliveryMethod || !contactNumber) {
-                vibrate();
-                showError('Please fill in all required fields.');
-                return false;
-            }
-
-            // Check delivery address for physical delivery
-            if (deliveryMethod === 'physical' && !deliveryAddress) {
-                vibrate();
-                showError('Please enter delivery address for physical tickets.');
-                document.getElementById('delivery_address').focus();
-                return false;
-            }
-
-            // Validate ticket count
-            if (parseInt(ticketCount) < 1) {
-                vibrate();
-                showError('Please enter at least 1 ticket.');
-                document.getElementById('number_of_tickets').focus();
-                return false;
-            }
-
-            // Validate event date is not in the past
-            const today = new Date().toISOString().split('T')[0];
-            if (eventDate < today) {
-                vibrate();
-                showError('Event date cannot be in the past.');
-                document.querySelector('input[name="event_date"]').focus();
-                return false;
-            }
-
-            // Show success summary
-            const estimatedFee = document.getElementById('estimated_fee').textContent;
-            const eventTime = document.querySelector('input[name="event_time"]').value || 'Not specified';
-            const deliveryMethodType = updateDeliveryMethod();
-
-            const summary = `
-✅ Ticket booking created!
-
-🎫 Event: ${eventName}
-📍 Venue: ${venue}
-📅 Date: ${eventDate}
-⏰ Time: ${eventTime}
-🎟️ Tickets: ${ticketCount}
-💰 Estimated Fee: ${estimatedFee}
-🚚 Delivery: ${deliveryMethodType.title}
-
-Our agent will contact you shortly to confirm details and payment.
-
-Thank you for using ErrandConnect!
-            `;
-
-            alert(summary);
-            vibrate();
-
-            // In a real mobile app, you would submit the form here
-            // this.submit();
+            if (!document.getElementById('venue').value.trim()) { alert('Please set venue location on map.'); e.preventDefault(); return false; }
+            if (document.getElementById('delivery_method').value === 'physical' && !document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
+            if (!document.getElementById('ticket_type').value) { alert('Select ticket type.'); e.preventDefault(); return false; }
+            if (!document.getElementById('event_name').value.trim()) { alert('Enter event name.'); e.preventDefault(); return false; }
+            if (!document.querySelector('input[name="event_date"]').value) { alert('Select event date.'); e.preventDefault(); return false; }
+            let count = parseInt(document.getElementById('number_of_tickets').value);
+            if (isNaN(count) || count < 1) { alert('Enter valid ticket count.'); e.preventDefault(); return false; }
+            if (!document.getElementById('budget_range').value) { alert('Select budget range.'); e.preventDefault(); return false; }
+            if (!document.getElementById('payment_method').value) { alert('Select payment method.'); e.preventDefault(); return false; }
+            let price = parseFloat(document.getElementById('service_price').value);
+            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
+            if (!document.getElementById('phone_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
         });
 
-        function showError(message) {
-            // Add shake animation to form
-            const form = document.getElementById('ticketForm');
-            form.style.animation = 'shake 0.5s ease-in-out';
-            setTimeout(() => {
-                form.style.animation = '';
-            }, 500);
-
-            alert(message);
-        }
-
-        // Shake animation for form validation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
+        window.onload = function() {
+            initMap();
+            initAutoSliding();
+            updateProgress();
+            updateDeliveryMethod();
+        };
     </script>
 </body>
 </html>

@@ -10,7 +10,6 @@ from werkzeug.utils import secure_filename
 from config import Config
 from extensions import db
 from math import radians, sin, cos, sqrt, atan2
-from sqlalchemy import func
 
 # Create instance folder if missing
 os.makedirs(os.path.join(os.path.dirname(__file__), "instance"), exist_ok=True)
@@ -91,6 +90,76 @@ def calculate_minimum_fee(distance_km, weight_kg, vehicle_type, current_time):
     
     return round(fee, 2)
 
+def get_first_form_value(form, keys):
+    for key in keys:
+        value = form.get(key)
+        if value:
+            return value.strip()
+    return ""
+
+def create_basic_errand(user, errand_type):
+    form = request.form
+    pickup_lat = form.get("pickup_lat") or form.get("pickup_latitude")
+    pickup_lon = form.get("pickup_lon") or form.get("pickup_lng") or form.get("pickup_longitude")
+    dropoff_lat = form.get("dropoff_lat") or form.get("dropoff_latitude")
+    dropoff_lon = form.get("dropoff_lon") or form.get("dropoff_lng") or form.get("dropoff_longitude")
+
+    distance = 0
+    if pickup_lat and pickup_lon and dropoff_lat and dropoff_lon:
+        try:
+            distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
+        except ValueError:
+            distance = 0
+
+    weight_value = form.get("estimated_weight") or form.get("weight") or form.get("weight_kg") or form.get("package_weight") or "0"
+    vehicle_type = form.get("vehicle_type") or "car"
+    delivery_time = form.get("delivery_time") or form.get("delivery_timeframe") or form.get("collection_time") or form.get("specific_time") or ""
+
+    pickup_location = get_first_form_value(form, [
+        "pickup_location",
+        "pickup_address",
+        "store_location",
+        "store_address",
+        "restaurant_location",
+        "collection_location",
+        "collection_address",
+        "service_location",
+        "venue",
+        "service_provider"
+    ])
+    delivery_location = get_first_form_value(form, [
+        "delivery_location",
+        "delivery_address",
+        "dropoff_location",
+        "dropoff_address",
+        "destination",
+        "to_location",
+        "to_address"
+    ])
+
+    fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+    details = form.to_dict(flat=False)
+
+    errand = Errand(
+        client_id=user.id,
+        type=errand_type,
+        pickup_location=pickup_location,
+        delivery_location=delivery_location,
+        weight=weight_value,
+        delivery_time=delivery_time,
+        details=json.dumps(details),
+        price_estimate=fee,
+        calculated_minimum_fee=fee,
+        status="pending"
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return errand
+
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
 def get_available_errands_count(user_id):
     runner_profile = RunnerProfile.query.filter_by(user_id=user_id).first()
     runner_city = getattr(runner_profile, 'city', '')
@@ -104,109 +173,94 @@ def get_available_errands_count(user_id):
         count = Errand.query.filter_by(status="pending").count()
     return count
 
+def serialize_user(user):
+    if not user:
+        return None
+    return {
+        "id": user.id,
+        "fullname": user.fullname,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone,
+        "average_rating": user.average_rating
+    }
 
-def _extract_first(form, keys, default=""):
-    for key in keys:
-        value = form.get(key)
-        if value is not None and str(value).strip() != "":
-            return str(value).strip()
-    return default
+def serialize_runner_profile(profile):
+    if not profile:
+        return None
+    profile_image_url = url_for("uploaded_file", filename=profile.profile_photo) if profile.profile_photo else None
+    return {
+        "id": profile.id,
+        "user_id": profile.user_id,
+        "full_name": profile.full_name,
+        "phone_number": profile.phone_number,
+        "profile_image": profile.profile_photo,
+        "profile_photo": profile.profile_photo,
+        "profile_image_url": profile_image_url,
+        "city": profile.city,
+        "vehicle_type": profile.vehicle_type,
+        "is_available": profile.is_available,
+        "current_latitude": profile.current_latitude,
+        "current_longitude": profile.current_longitude
+    }
 
+def serialize_errand(errand):
+    if not errand:
+        return None
+    created_at = errand.created_at.isoformat() if errand.created_at else None
+    return {
+        "id": errand.id,
+        "type": errand.type,
+        "pickup_location": errand.pickup_location,
+        "delivery_location": errand.delivery_location,
+        "weight": errand.weight,
+        "delivery_time": errand.delivery_time,
+        "details": errand.details,
+        "price_estimate": errand.price_estimate,
+        "status": errand.status,
+        "created_at": created_at
+    }
 
-def _build_service_errand(user, service_type):
-    form = request.form
+# ============================================================================
+# JINJA FILTERS
+# ============================================================================
 
-    pickup = _extract_first(
-        form,
-        [
-            "pickup_location",
-            "pickup_address",
-            "store_location",
-            "collection_location",
-            "collection_address",
-            "location",
-        ],
-        default="Pickup location not specified",
-    )
-    dropoff = _extract_first(
-        form,
-        [
-            "delivery_location",
-            "delivery_address",
-            "dropoff_location",
-            "destination",
-            "address",
-        ],
-        default="Delivery location not specified",
-    )
-    vehicle_type = _extract_first(form, ["vehicle_type"], default="car")
-    weight = _extract_first(form, ["weight", "weight_kg", "estimated_weight"], default="0")
-    delivery_time = _extract_first(form, ["delivery_time", "specific_time"], default="")
-
-    pickup_lat = form.get("pickup_lat")
-    pickup_lon = form.get("pickup_lon")
-    dropoff_lat = form.get("dropoff_lat")
-    dropoff_lon = form.get("dropoff_lon")
-
-    distance = 0
-    if pickup_lat and pickup_lon and dropoff_lat and dropoff_lon:
+@app.template_filter('timesince')
+def timesince_filter(dt):
+    """
+    Returns a string representing how long ago a datetime occurred.
+    """
+    if not dt:
+        return ""
+    
+    if isinstance(dt, str):
         try:
-            distance = calculate_distance(
-                float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon)
-            )
-        except (TypeError, ValueError):
-            distance = 0
+            dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+        except ValueError:
+            return dt
 
-    calculated_fee = calculate_minimum_fee(distance, weight, vehicle_type, datetime.now())
-    requested_price = _extract_first(form, ["service_price", "budget_limit"], default="")
-    try:
-        price_estimate = float(requested_price) if requested_price else float(calculated_fee)
-    except (TypeError, ValueError):
-        price_estimate = float(calculated_fee)
-
-    # Keep a compact snapshot of submitted form data for service-specific details.
-    detail_pairs = []
-    for key, values in form.to_dict(flat=False).items():
-        if key in {"pickup_lat", "pickup_lon", "dropoff_lat", "dropoff_lon"}:
-            continue
-        clean_values = [str(v).strip() for v in values if str(v).strip()]
-        if not clean_values:
-            continue
-        detail_pairs.append(f"{key}: {', '.join(clean_values)}")
-    details = " | ".join(detail_pairs[:25]) if detail_pairs else f"{service_type} errand"
-
-    errand = Errand(
-        client_id=user.id,
-        type=service_type,
-        pickup_location=pickup,
-        delivery_location=dropoff,
-        weight=weight,
-        delivery_time=delivery_time,
-        details=details,
-        price_estimate=price_estimate,
-        calculated_minimum_fee=calculated_fee,
-        status="pending",
+    now = datetime.now()
+    # Handle timezone-naive vs timezone-aware
+    if dt.tzinfo is not None:
+        now = datetime.now(dt.tzinfo)
+        
+    diff = now - dt
+    
+    periods = (
+        (diff.days // 365, "year", "years"),
+        (diff.days // 30, "month", "months"),
+        (diff.days // 7, "week", "weeks"),
+        (diff.days, "day", "days"),
+        (diff.seconds // 3600, "hour", "hours"),
+        (diff.seconds // 60, "minute", "minutes"),
+        (diff.seconds, "second", "seconds"),
     )
-    db.session.add(errand)
-    db.session.commit()
-    return errand
 
+    for count, singular, plural in periods:
+        if count >= 1:
+            return f"{count} {singular if count == 1 else plural} ago"
 
-@app.template_filter("timesince")
-def timesince(value):
-    if not value:
-        return "Recently"
-    now = datetime.utcnow()
-    diff = now - value
-    if diff.days > 0:
-        return f"{diff.days}d ago"
-    hours = diff.seconds // 3600
-    if hours > 0:
-        return f"{hours}h ago"
-    minutes = diff.seconds // 60
-    if minutes > 0:
-        return f"{minutes}m ago"
-    return "Just now"
+    return "just now"
 
 # ============================================================================
 # CORE ROUTES
@@ -221,46 +275,40 @@ def index():
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
     if request.method == "POST":
-        identifier = (
-                request.form.get("identifier")
-                or request.form.get("email")
-                or request.form.get("username")
-                or ""
-        ).strip()
-        # Do not trim password; spaces may be intentional.
-        password = request.form.get("password", "")
-
-        user = User.query.filter(
-            (User.email.ilike(identifier)) | (User.username.ilike(identifier))
-        ).first()
-
+        identifier = request.form.get("identifier") or request.form.get("username") or request.form.get("email")
+        password = request.form.get("password")
+        
+        user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
+        
         if user and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
             if user.user_type == "runner":
                 return redirect(url_for('runnerhome'))
             return redirect(url_for('home_page'))
-
+        
         flash("Invalid credentials", "danger")
     return render_template("signin.html")
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        first_name = (request.form.get("first_name") or "").strip()
-        last_name = (request.form.get("last_name") or "").strip()
-        fullname = f"{first_name} {last_name}".strip()
-        email = (request.form.get("email") or "").strip().lower()
-        country_code = (request.form.get("country_code") or "").strip()
-        phone_number = (request.form.get("phone_number") or "").strip()
-        phone = f"{country_code}{phone_number}".strip()
-        date_of_birth = request.form.get("date_of_birth") # Not directly used in User model yet
-        username = (request.form.get("username") or "").strip()
-        password = request.form.get("password", "")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        fullname = request.form.get("fullname")
+        username = request.form.get("username")
+        email = request.form.get("email")
+        phone_number = request.form.get("phone_number")
+        country_code = request.form.get("country_code")
+        password = request.form.get("password")
         user_type = request.form.get("user_type", "client")
 
-        if not email or not username or not password:
-            flash("Email, username and password are required", "warning")
-            return redirect(url_for('signup'))
+        if not fullname:
+            name_parts = [part for part in [first_name, last_name] if part]
+            fullname = " ".join(name_parts) if name_parts else username
+        if country_code and phone_number:
+            phone = f"{country_code}{phone_number}"
+        else:
+            phone = phone_number
         
         if User.query.filter((User.email == email) | (User.username == username)).first():
             flash("User already exists", "warning")
@@ -280,9 +328,7 @@ def signup():
         flash("Account created! Please sign in.", "success")
         return redirect(url_for('signin'))
     return render_template("signup.html")
-@app.route("/privacy")
-def privacy():
-    return render_template("privacy.html")
+
 @app.route("/logout")
 def logout():
     session.pop('user_id', None)
@@ -294,85 +340,12 @@ def home_page():
     user = current_user()
     if user.user_type == "runner":
         return redirect(url_for('runnerhome'))
-    return render_template("home.html", user=user)
-
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    user = current_user()
-    if user.user_type == "runner":
-        return redirect(url_for("runnerhome"))
-    return render_template("dashboard_client.html", user=user)
-
-
-@app.route("/profile")
-@login_required
-def profile():
-    user = current_user()
-    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
-    return render_template("profile.html", user=user, runner_profile=runner_profile)
-
-
-@app.route("/personal-info")
-@login_required
-def personal_info():
-    user = current_user()
-    return render_template("personal_info.html", user=user)
-
-
-@app.route("/settings")
-@login_required
-def settings():
-    user = current_user()
-    return render_template("settings.html", user=user)
-
-
-@app.route("/privacy-security")
-@login_required
-def privacy_security():
-    user = current_user()
-    return render_template("privacy.html", user=user)
-
-
-@app.route("/help-support")
-@login_required
-def help_support():
-    user = current_user()
-    return render_template("help.html", user=user)
-
-
-@app.route("/notifications")
-@login_required
-def notifications():
-    user = current_user()
-    items = Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).all()
-    return render_template("notifications.html", user=user, notifications=items)
-
-
-@app.route("/rate-app", methods=["GET", "POST"])
-@login_required
-def rate_app():
-    user = current_user()
-    if request.method == "POST":
-        rating = request.form.get("rating", "0")
-        try:
-            rating_value = max(1, min(5, int(rating)))
-        except ValueError:
-            rating_value = 5
-        feedback = AppFeedback(
-            user_id=user.id,
-            rating=rating_value,
-            feedback_type=request.form.get("feedback_type", "general"),
-            feedback=request.form.get("feedback", "").strip() or "No feedback text provided.",
-            suggestions=request.form.get("suggestions", "").strip() or None,
-            contact_permission=bool(request.form.get("contact_permission")),
-        )
-        db.session.add(feedback)
-        db.session.commit()
-        flash("Thanks for your feedback.", "success")
-        return redirect(url_for("settings"))
-    return render_template("rate.html", user=user)
+    
+    # Fetch counts for client
+    pending_count = Errand.query.filter_by(client_id=user.id, status="pending").count()
+    completed_count = Errand.query.filter_by(client_id=user.id, status="completed").count()
+    
+    return render_template("home.html", user=user, pending_count=pending_count, completed_count=completed_count)
 
 @app.route("/runnerhome")
 @login_required
@@ -384,27 +357,610 @@ def runnerhome():
     runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
     if not runner_profile:
         flash("Please complete your profile", "info")
-        return redirect(url_for('runner_signup'))
+        return redirect(url_for('runner_register'))
         
     # Stats logic (simplified for restoration)
     completed = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").count()
     active = ActiveErrand.query.filter_by(runner_id=user.id, status="ongoing").count()
-    available = get_available_errands_count(user.id)
     
-    return render_template("runnerhome.html", user=user, completed_count=completed, active_count=active, available_count=available)
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    runner_city = getattr(runner_profile, 'city', '')
+
+    if runner_city:
+        available_errands = Errand.query.filter(
+            Errand.status == "pending",
+            Errand.pickup_location.ilike(f"%{runner_city}%")
+        ).all()
+    else:
+        available_errands = Errand.query.filter_by(status="pending").all()
+    
+    # Calculate total earnings
+    completed_errands_list = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").all()
+    total_earnings = 0.0
+    for active_errand in completed_errands_list:
+        negotiation = Negotiation.query.filter_by(
+            errand_id=active_errand.errand_id,
+            runner_id=user.id,
+            status="accepted"
+        ).first()
+        if negotiation:
+            total_earnings += negotiation.offer_price
+        else:
+            total_earnings += active_errand.errand.price_estimate
+
+    return render_template("runnerhome.html", 
+                         user=user, 
+                         completed_count=completed, 
+                         pending_count=active, 
+                         available_errands=available_errands,
+                         total_earnings=total_earnings)
+
+@app.route("/runnerprofile")
+@login_required
+def runnerprofile():
+    user = current_user()
+    if not user:
+        return redirect(url_for("signin"))
+    if user.user_type != "runner":
+        flash("This page is for runners only", "warning")
+        return redirect(url_for("home_page"))
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    completed_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").all()
+    active_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="ongoing").all()
+    completed_count = len(completed_errands)
+    active_count = len(active_errands)
+    total_earnings = 0.0
+    for active_errand in completed_errands:
+        negotiation = Negotiation.query.filter_by(
+            errand_id=active_errand.errand_id,
+            runner_id=user.id,
+            status="accepted"
+        ).first()
+        if negotiation:
+            total_earnings += negotiation.offer_price
+        else:
+            total_earnings += active_errand.errand.price_estimate
+    ratings = Rating.query.filter_by(to_user_id=user.id).all()
+    avg_rating = sum(r.rating for r in ratings) / len(ratings) if ratings else 0
+    return render_template(
+        "runnerprofile.html",
+        user=user,
+        runner_profile=runner_profile,
+        completed_count=completed_count,
+        active_count=active_count,
+        total_earnings=total_earnings,
+        avg_rating=avg_rating
+    )
 
 @app.route("/dashboardrunner")
 @login_required
 def dashboardrunner():
-    return redirect(url_for('runnerhome'))
+    user = current_user()
+    if user.user_type != "runner":
+        return redirect(url_for('home_page'))
+    
+    # Stats logic
+    completed_count = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").count()
+    active_count = ActiveErrand.query.filter_by(runner_id=user.id, status="ongoing").count()
+    
+    # Earnings logic
+    today = datetime.utcnow().date()
+    today_errands = ActiveErrand.query.filter(
+        ActiveErrand.runner_id == user.id,
+        ActiveErrand.status == "completed",
+        db.func.date(ActiveErrand.end_time) == today
+    ).all()
+    today_earnings = sum(errand.errand.price_estimate for errand in today_errands)
+    
+    # Available errands
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    runner_city = getattr(runner_profile, 'city', '')
+    if runner_city:
+        available_errands = Errand.query.filter(
+            Errand.status == "pending",
+            Errand.pickup_location.ilike(f"%{runner_city}%")
+        ).all()
+    else:
+        available_errands = Errand.query.filter_by(status="pending").all()
+    
+    # Notifications
+    notifications = Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).limit(5).all()
+    
+    # Ratings
+    ratings = Rating.query.filter_by(to_user_id=user.id).all()
+    avg_rating = sum(r.rating for r in ratings) / len(ratings) if ratings else 0
+    
+    # Weekly earnings (mock data for chart)
+    weekly_earnings = []
+    for i in range(7):
+        date = today - timedelta(days=6-i)
+        day_errands = ActiveErrand.query.filter(
+            ActiveErrand.runner_id == user.id,
+            ActiveErrand.status == "completed",
+            db.func.date(ActiveErrand.end_time) == date
+        ).all()
+        earnings = sum(errand.errand.price_estimate for errand in day_errands)
+        weekly_earnings.append({"day": date.strftime('%a'), "earnings": earnings})
+
+    return render_template("runnerdashboard.html", 
+                         user=user, 
+                         available_errands=available_errands,
+                         completed_count=completed_count,
+                         active_count=active_count,
+                         today_earnings=today_earnings,
+                         notifications=notifications,
+                         weekly_earnings=weekly_earnings,
+                         avg_rating=avg_rating)
+
+@app.route("/runnercompleted")
+@login_required
+def runnercompleted():
+    user = current_user()
+    if user.user_type != "runner":
+        return redirect(url_for('home_page'))
+    # Fetch completed errands for this runner
+    completed_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").all()
+    return render_template("runnercompleted.html", user=user, completed_errands=completed_errands)
+
+@app.route("/runneravailable_errands")
+@login_required
+def runneravailable_errands():
+    user = current_user()
+    if user.user_type != "runner":
+        return redirect(url_for('home_page'))
+    
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    runner_city = getattr(runner_profile, 'city', '')
+
+    if runner_city:
+        available_errands = Errand.query.filter(
+            Errand.status == "pending",
+            Errand.pickup_location.ilike(f"%{runner_city}%")
+        ).all()
+    else:
+        available_errands = Errand.query.filter_by(status="pending").all()
+
+    available_errands_data = []
+    for errand in available_errands:
+        available_errands_data.append({
+            "errand": serialize_errand(errand),
+            "client": serialize_user(errand.client)
+        })
+
+    return render_template("runneravailable_errands.html", user=user, available_errands=available_errands_data)
+
+@app.route("/runnerhistory")
+@login_required
+def runnerhistory():
+    user = current_user()
+    if user.user_type != "runner":
+        return redirect(url_for('home_page'))
+    
+    # Fetch all active errands for this runner
+    active_errands = ActiveErrand.query.filter_by(runner_id=user.id).order_by(ActiveErrand.id.desc()).all()
+    
+    total_orders = len(active_errands)
+    total_amount = sum(ae.errand.price_estimate for ae in active_errands if ae.status == "completed")
+    completed_orders = len([ae for ae in active_errands if ae.status == "completed"])
+    
+    return render_template("runnerhistory.html", 
+                         user=user, 
+                         orders=active_errands, 
+                         total_orders=total_orders, 
+                         total_amount=total_amount, 
+                         completed_orders=completed_orders)
+
+@app.route("/runnerwallet")
+@login_required
+def runnerwallet():
+    user = current_user()
+    if user.user_type != "runner":
+        return redirect(url_for('home_page'))
+    
+    # Simplified wallet logic
+    completed_errands = ActiveErrand.query.filter_by(runner_id=user.id, status="completed").all()
+    total_balance = sum(errand.errand.price_estimate for errand in completed_errands)
+    available_balance = total_balance # Simplified
+    pending_balance = 0.0
+    
+    # Transactions would normally come from a Transaction model, which doesn't seem to exist yet
+    # We can pass an empty list or mock some from completed errands
+    transactions = [] 
+    
+    return render_template("runnerwallet.html", 
+                         user=user, 
+                         total_balance=total_balance, 
+                         available_balance=available_balance, 
+                         pending_balance=pending_balance,
+                         transactions=transactions)
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    user = current_user()
+    if user.user_type == "runner":
+        return redirect(url_for('runnerhome'))
+    return render_template("dashboard_client.html", user=user)
+
+@app.route("/order_history")
+@login_required
+def order_history():
+    user = current_user()
+    # Fetch orders for this user
+    orders = Errand.query.filter_by(client_id=user.id).order_by(Errand.created_at.desc()).all()
+    
+    # Calculate counts for stats
+    total_orders = len(orders)
+    pending_count = Errand.query.filter_by(client_id=user.id, status="pending").count()
+    completed_count = Errand.query.filter_by(client_id=user.id, status="completed").count()
+    
+    return render_template("order_history.html", 
+                         user=user, 
+                         orders=orders, 
+                         total_orders=total_orders,
+                         pending_count=pending_count,
+                         completed_count=completed_count,
+                         now=datetime.utcnow())
+
+@app.route("/settings")
+@login_required
+def settings():
+    user = current_user()
+    return render_template("settings.html", user=user)
+
+@app.route("/map_view")
+@login_required
+def map_view():
+    user = current_user()
+    return render_template("map_view.html", user=user)
+
+@app.route("/notifications")
+@login_required
+def notifications():
+    user = current_user()
+    notifications_list = Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).all()
+    return render_template("notifications.html", user=user, notifications=notifications_list)
+
+@app.route("/ratings")
+@login_required
+def ratings():
+    user = current_user()
+    ratings_list = Rating.query.filter_by(to_user_id=user.id).all()
+    return render_template("ratings.html", user=user, ratings=ratings_list)
+
+@app.route("/profile")
+@login_required
+def profile():
+    user = current_user()
+    return render_template("profile.html", user=user)
+
+@app.route("/wallet")
+@login_required
+def wallet():
+    user = current_user()
+    return render_template("wallet.html", user=user)
+
+@app.route("/completed")
+@login_required
+def completed():
+    user = current_user()
+    return render_template("completed.html", user=user)
 
 @app.route("/terms")
+@login_required
 def terms():
-    return render_template("terms.html")
+    user = current_user()
+    return render_template("terms.html", user=user, current_date=datetime.utcnow())
+
+@app.route("/privacy")
+@login_required
+def privacy():
+    user = current_user()
+    return render_template("Privacy.html", user=user)
+
+@app.route("/help")
+@login_required
+def help_support():
+    user = current_user()
+    return render_template("help.html", user=user)
+
+@app.route("/personal_info")
+@login_required
+def personal_info():
+    user = current_user()
+    return render_template("personal_info.html", user=user)
+
+@app.route("/privacy_security")
+@login_required
+def privacy_security():
+    user = current_user()
+    return render_template("Privacy.html", user=user)
+
+@app.route("/rate_app")
+@login_required
+def rate_app():
+    user = current_user()
+    return render_template("rate.html", user=user)
 
 # ============================================================================
 # ERRAND ROUTES
 # ============================================================================
+
+@app.route("/create_grocery_errand", methods=["GET", "POST"])
+@login_required
+def create_grocery_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Grocery")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("grocery.html", user=user)
+
+@app.route("/create_food_delivery_errand", methods=["GET", "POST"])
+@login_required
+def create_food_delivery_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Food Delivery")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("food_delivery.html", user=user)
+
+@app.route("/create_bill_payment_errand", methods=["GET", "POST"])
+@login_required
+def create_bill_payment_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Bill Payment")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("bill_payments.html", user=user)
+
+@app.route("/create_package_delivery_errand", methods=["GET", "POST"])
+@login_required
+def create_package_delivery_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Package Delivery")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("package_delivery.html", user=user)
+
+@app.route("/create_gadget_service_errand", methods=["GET", "POST"])
+@login_required
+def create_gadget_service_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Gadget Service")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("gadget_service.html", user=user)
+
+@app.route("/create_collections_errand", methods=["GET", "POST"])
+@login_required
+def create_collections_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Collections")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("Collections.html", user=user)
+
+@app.route("/create_ticket_booking_errand", methods=["GET", "POST"])
+@login_required
+def create_ticket_booking_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Ticket Booking")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("ticket_booking.html", user=user)
+
+@app.route("/create_spare_parts_errand", methods=["GET", "POST"])
+@login_required
+def create_spare_parts_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Spare Parts")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("spare_parts.html", user=user)
+
+@app.route("/create_gas_delivery_errand", methods=["GET", "POST"])
+@login_required
+def create_gas_delivery_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Gas Delivery")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("gas_delivery.html", user=user)
+
+@app.route("/create_other_service_errand", methods=["GET", "POST"])
+@login_required
+def create_other_service_errand():
+    user = current_user()
+    if request.method == "POST":
+        errand = create_basic_errand(user, "Other Service")
+        return redirect(url_for('available_runners', errand_id=errand.id))
+    return render_template("other.html", user=user)
+
+@app.route("/purchase_page")
+@login_required
+def purchase_page():
+    user = current_user()
+    return render_template("purchase.html", user=user)
+
+@app.route("/property_page")
+@login_required
+def property_page():
+    user = current_user()
+    return render_template("property.html", user=user)
+
+@app.route("/create_purchase_errand", methods=["POST"])
+@login_required
+def create_purchase_errand():
+    user = current_user()
+    store_name = request.form.get("store_name")
+    store_location = request.form.get("store_location")
+    delivery_address = request.form.get("delivery_address")
+    delivery_time = request.form.get("delivery_time")
+    specific_time = request.form.get("specific_time")
+    delivery_instructions = request.form.get("delivery_instructions")
+    budget_limit = request.form.get("budget_limit")
+    estimated_weight = request.form.get("estimated_weight")
+
+    pickup_lat = request.form.get("pickup_lat")
+    pickup_lon = request.form.get("pickup_lon")
+    dropoff_lat = request.form.get("dropoff_lat")
+    dropoff_lon = request.form.get("dropoff_lon")
+
+    items = []
+    item_names = request.form.getlist("items[]")
+    quantities = request.form.getlist("quantities[]")
+    brands = request.form.getlist("brands[]")
+    prices = request.form.getlist("prices[]")
+    for index, name in enumerate(item_names):
+        name = (name or "").strip()
+        if not name:
+            continue
+        items.append({
+            "name": name,
+            "quantity": quantities[index] if index < len(quantities) else "",
+            "brand": brands[index] if index < len(brands) else "",
+            "price": prices[index] if index < len(prices) else ""
+        })
+
+    distance = 0
+    if pickup_lat and dropoff_lat:
+        distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
+
+    weight_value = estimated_weight or "0"
+    fee = calculate_minimum_fee(distance, weight_value, "car", datetime.now())
+    selected_delivery_time = specific_time if delivery_time == "specific" and specific_time else delivery_time
+
+    details = {
+        "store_name": store_name,
+        "store_location": store_location,
+        "delivery_address": delivery_address,
+        "delivery_time": delivery_time,
+        "specific_time": specific_time,
+        "delivery_instructions": delivery_instructions,
+        "budget_limit": budget_limit,
+        "items": items
+    }
+
+    errand = Errand(
+        client_id=user.id,
+        type="Purchase",
+        pickup_location=store_location,
+        delivery_location=delivery_address,
+        weight=weight_value,
+        delivery_time=selected_delivery_time,
+        details=json.dumps(details),
+        price_estimate=fee,
+        calculated_minimum_fee=fee,
+        status="pending"
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return redirect(url_for('available_runners', errand_id=errand.id))
+
+@app.route("/create_property_errand", methods=["POST"])
+@login_required
+def create_property_errand():
+    user = current_user()
+    store_name = request.form.get("store_name")
+    store_location = request.form.get("store_location")
+    collection_location = request.form.get("collection_location")
+    collection_contact = request.form.get("collection_contact")
+    collection_instructions = request.form.get("collection_instructions")
+    delivery_address = request.form.get("delivery_address")
+    delivery_location = request.form.get("delivery_location")
+    delivery_time = request.form.get("delivery_time")
+    specific_time = request.form.get("specific_time")
+    delivery_instructions = request.form.get("delivery_instructions")
+    special_instructions = request.form.get("special_instructions")
+    budget_limit = request.form.get("budget_limit")
+    estimated_weight = request.form.get("estimated_weight")
+    dimensions = request.form.get("dimensions")
+    item_condition = request.form.get("item_condition")
+    assembly_required = request.form.get("assembly_required")
+    item_substitutions = request.form.get("item_substitutions")
+    receipt_required = request.form.get("receipt_required")
+    payment_method = request.form.get("payment_method")
+    service_price = request.form.get("service_price")
+    contact_number = request.form.get("contact_number")
+    distance_value = request.form.get("distance")
+
+    pickup_lat = request.form.get("pickup_lat")
+    pickup_lon = request.form.get("pickup_lon")
+    dropoff_lat = request.form.get("dropoff_lat")
+    dropoff_lon = request.form.get("dropoff_lon")
+
+    items = []
+    item_names = request.form.getlist("items[]")
+    quantities = request.form.getlist("quantities[]")
+    brands = request.form.getlist("brands[]")
+    prices = request.form.getlist("prices[]")
+    for index, name in enumerate(item_names):
+        name = (name or "").strip()
+        if not name:
+            continue
+        items.append({
+            "name": name,
+            "quantity": quantities[index] if index < len(quantities) else "",
+            "brand": brands[index] if index < len(brands) else "",
+            "price": prices[index] if index < len(prices) else ""
+        })
+
+    service_type = "collect-deliver" if collection_location else "buy-deliver"
+    pickup_location = store_location if service_type == "buy-deliver" else collection_location
+
+    distance = 0
+    if distance_value:
+        try:
+            distance = float(distance_value)
+        except ValueError:
+            distance = 0
+    elif pickup_lat and dropoff_lat:
+        distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
+
+    weight_value = estimated_weight or "0"
+    fee = calculate_minimum_fee(distance, weight_value, "car", datetime.now())
+    selected_delivery_time = specific_time if delivery_time == "specific" and specific_time else delivery_time
+
+    details = {
+        "service_type": service_type,
+        "store_name": store_name,
+        "store_location": store_location,
+        "collection_location": collection_location,
+        "collection_contact": collection_contact,
+        "collection_instructions": collection_instructions,
+        "delivery_address": delivery_address,
+        "delivery_location": delivery_location,
+        "delivery_time": delivery_time,
+        "specific_time": specific_time,
+        "delivery_instructions": delivery_instructions,
+        "special_instructions": special_instructions,
+        "budget_limit": budget_limit,
+        "dimensions": dimensions,
+        "item_condition": item_condition,
+        "assembly_required": assembly_required,
+        "item_substitutions": item_substitutions,
+        "receipt_required": receipt_required,
+        "payment_method": payment_method,
+        "service_price": service_price,
+        "contact_number": contact_number,
+        "items": items
+    }
+
+    errand = Errand(
+        client_id=user.id,
+        type="Property",
+        pickup_location=pickup_location,
+        delivery_location=delivery_address,
+        weight=weight_value,
+        delivery_time=selected_delivery_time,
+        details=json.dumps(details),
+        price_estimate=fee,
+        calculated_minimum_fee=fee,
+        status="pending"
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return redirect(url_for('available_runners', errand_id=errand.id))
 
 @app.route("/create_errand", methods=["GET", "POST"])
 @login_required
@@ -434,7 +990,12 @@ def create_errand():
             type="General",
             pickup_location=pickup,
             delivery_location=dropoff,
-            weight=weight,
+            pickup_latitude=float(pickup_lat) if pickup_lat else None,
+            pickup_longitude=float(pickup_lon) if pickup_lon else None,
+            dropoff_latitude=float(dropoff_lat) if dropoff_lat else None,
+            dropoff_longitude=float(dropoff_lon) if dropoff_lon else None,
+            distance_km=distance,
+            weight_kg=weight,
             details=details,
             price_estimate=fee,
             calculated_minimum_fee=fee,
@@ -447,189 +1008,9 @@ def create_errand():
         
     return render_template("create_errand.html", user=user)
 
-
-@app.route("/order_history")
+@app.route("/runner_register", methods=["GET", "POST"])
 @login_required
-def order_history():
-    user = current_user()
-    user_errands = (
-        Errand.query.filter_by(client_id=user.id)
-        .order_by(Errand.created_at.desc())
-        .all()
-    )
-    total_orders = len(user_errands)
-    pending_count = sum(1 for e in user_errands if e.status == "pending")
-    completed_count = sum(1 for e in user_errands if e.status == "completed")
-    can_delete = False
-    return render_template(
-        "order_history.html",
-        user=user,
-        errands=user_errands,
-        total_orders=total_orders,
-        pending_count=pending_count,
-        completed_count=completed_count,
-        can_delete=can_delete,
-    )
-
-
-@app.route("/wallet")
-@login_required
-def wallet():
-    user = current_user()
-    return render_template("wallet.html", user=user)
-
-
-@app.route("/client/completed")
-@login_required
-def completed():
-    user = current_user()
-    completed_errands = ActiveErrand.query.join(Errand).filter(
-        Errand.client_id == user.id,
-        ActiveErrand.status == "completed"
-    ).order_by(ActiveErrand.created_at.desc()).all()
-
-    ratings = Rating.query.join(Errand).filter(Errand.client_id == user.id).all()
-    avg = round(sum(r.rating for r in ratings) / len(ratings), 1) if ratings else 0
-    user_rating = {"found": False}
-    runner = None
-    return render_template(
-        "completed.html",
-        user=user,
-        completed_errands=completed_errands,
-        average_rating=avg,
-        user_rating=user_rating,
-        runner=runner,
-    )
-
-
-@app.route("/purchase")
-@login_required
-def purchase_page():
-    return render_template("purchase.html", user=current_user())
-
-
-@app.route("/property")
-@login_required
-def property_page():
-    return render_template("property.html", user=current_user())
-
-
-@app.route("/service/grocery", methods=["GET", "POST"])
-@login_required
-def create_grocery_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Grocery Shopping")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("grocery.html", user=user)
-
-
-@app.route("/service/food-delivery", methods=["GET", "POST"])
-@login_required
-def create_food_delivery_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Food Delivery")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("food_delivery.html", user=user)
-
-
-@app.route("/service/bill-payment", methods=["GET", "POST"])
-@login_required
-def create_bill_payment_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Bill Payment")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("bill_payments.html", user=user)
-
-
-@app.route("/service/package-delivery", methods=["GET", "POST"])
-@login_required
-def create_package_delivery_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Package Delivery")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("package_delivery.html", user=user)
-
-
-@app.route("/service/gadget-service", methods=["GET", "POST"])
-@login_required
-def create_gadget_service_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Gadget Service")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("gadget_service.html", user=user)
-
-
-@app.route("/service/collections", methods=["GET", "POST"])
-@login_required
-def create_collections_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Collections")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("Collections.html", user=user)
-
-
-@app.route("/service/ticket-booking", methods=["GET", "POST"])
-@login_required
-def create_ticket_booking_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Ticket Booking")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("ticket_booking.html", user=user)
-
-
-@app.route("/service/spare-parts", methods=["GET", "POST"])
-@login_required
-def create_spare_parts_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Spare Parts")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("spare_parts.html", user=user)
-
-
-@app.route("/service/gas-delivery", methods=["GET", "POST"])
-@login_required
-def create_gas_delivery_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Gas Delivery")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("gas_delivery.html", user=user)
-
-
-@app.route("/service/other", methods=["GET", "POST"])
-@login_required
-def create_other_service_errand():
-    user = current_user()
-    if request.method == "POST":
-        errand = _build_service_errand(user, "Other Service")
-        return redirect(url_for("available_runners", errand_id=errand.id))
-    return render_template("other.html", user=user)
-
-
-@app.route("/service/purchase", methods=["POST"])
-@login_required
-def create_purchase_errand():
-    errand = _build_service_errand(current_user(), "General Purchasing")
-    return redirect(url_for("available_runners", errand_id=errand.id))
-
-
-@app.route("/service/property", methods=["POST"])
-@login_required
-def create_property_errand():
-    errand = _build_service_errand(current_user(), "Property Purchase")
-    return redirect(url_for("available_runners", errand_id=errand.id))
-
-@app.route("/runner_signup", methods=["GET", "POST"])
-@login_required
-def runner_signup():
+def runner_register():
     user = current_user()
     if request.method == "POST":
         # Handle file uploads
@@ -639,10 +1020,17 @@ def runner_signup():
             filename = secure_filename(profile_photo.filename)
             profile_photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
+        full_name = request.form.get("full_name")
+        phone_number = request.form.get("phone_number")
+        if full_name:
+            user.fullname = full_name
+        if phone_number:
+            user.phone = phone_number
+
         profile = RunnerProfile(
             user_id=user.id,
-            full_name=request.form.get("full_name"),
-            phone_number=request.form.get("phone_number"),
+            full_name=full_name,
+            phone_number=phone_number,
             national_id_number=request.form.get("national_id_number"),
             vehicle_type=request.form.get("vehicle_type"),
             vehicle_registration_number=request.form.get("vehicle_registration_number"),
@@ -658,143 +1046,7 @@ def runner_signup():
         flash("Registration successful!", "success")
         return redirect(url_for('runnerhome'))
         
-    return render_template("runner_signup.html", user=user)
-
-@app.route('/runner/profile')
-def runnerprofile():
-    user_id = session.get('user_id')
-    if not user_id:
-        return "Not logged in", 401
-    user = User.query.get(user_id)
-    completed_count = db.session.query(func.count(Errand.id))\
-        .join(ActiveErrand, ActiveErrand.errand_id == Errand.id)\
-        .filter(
-            ActiveErrand.runner_id == user_id,
-            Errand.status == 'completed'
-        ).scalar()
-    active_count = db.session.query(func.count(Errand.id))\
-        .join(ActiveErrand, ActiveErrand.errand_id == Errand.id)\
-        .filter(
-            ActiveErrand.runner_id == user_id,
-            Errand.status == 'accepted'
-        ).scalar()
-    total_earnings = db.session.query(
-        func.coalesce(func.sum(Errand.agreed_price), 0)
-    ).join(ActiveErrand, ActiveErrand.errand_id == Errand.id)\
-     .filter(
-        ActiveErrand.runner_id == user_id,
-        Errand.status == 'completed'
-    ).scalar()
-    avg_rating = db.session.query(
-        func.coalesce(func.avg(Rating.rating), 0)
-    ).join(Errand, Rating.errand_id == Errand.id)\
-     .join(ActiveErrand, ActiveErrand.errand_id == Errand.id)\
-     .filter(ActiveErrand.runner_id == user_id)\
-     .scalar()
-    runner_profile = RunnerProfile.query.filter_by(user_id=user_id).first()
-    return render_template(
-        "runnerprofile.html",
-        user=user,
-        runner_profile=runner_profile,
-        completed_count=completed_count,
-        active_count=active_count,
-        avg_rating=avg_rating,
-        total_earnings=total_earnings
-    )
-
-@app.route("/runner/completed")
-@login_required
-def runnercompleted():
-    user = current_user()
-    if user.user_type != "runner":
-        return redirect(url_for("home_page"))
-    completed_errands = (
-        db.session.query(ActiveErrand)
-        .join(Errand, ActiveErrand.errand_id == Errand.id)
-        .filter(
-            ActiveErrand.runner_id == user.id,
-            ActiveErrand.status == "completed"
-        )
-        .all()
-    )
-    total_completed = len(completed_errands)
-    total_earnings = sum(
-        e.errand.agreed_price or e.errand.price_estimate or 0
-        for e in completed_errands
-    )
-    ratings = (
-        db.session.query(Rating.rating)
-        .join(Errand, Rating.errand_id == Errand.id)
-        .join(ActiveErrand, ActiveErrand.errand_id == Errand.id)
-        .filter(ActiveErrand.runner_id == user.id)
-        .all()
-    )
-    rating_values = [r[0] for r in ratings if r[0] is not None]
-    average_rating = round(sum(rating_values) / len(rating_values), 1) if rating_values else 0
-    return render_template(
-        "runnercompleted.html",
-        user=user,
-        completed_errands=completed_errands,
-        total_completed=total_completed,
-        total_earnings=total_earnings,
-        average_rating=average_rating
-    )
-
-@app.route("/runner/available-errands")
-@login_required
-def runneravailable_errands():
-    user = current_user()
-    if user.user_type != "runner":
-        return redirect(url_for("home_page"))
-    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
-    runner_city = getattr(runner_profile, "city", "")
-    if runner_city:
-        errands = Errand.query.filter(
-            Errand.status == "pending",
-            Errand.pickup_location.ilike(f"%{runner_city}%")
-        ).all()
-    else:
-        errands = Errand.query.filter_by(status="pending").all()
-    clean_errands = []
-    for e in errands:
-        clean_errands.append({
-            "id": int(e.id) if e.id else 0,
-            "type": e.type or "",
-            "pickup_location": e.pickup_location or "",
-            "delivery_location": e.delivery_location or "",
-            "price": float(e.agreed_price if e.agreed_price is not None else (e.price_estimate or 0)),
-            "status": e.status or "pending"
-        })
-    return render_template(
-        "runneravailable_errands.html",
-        user=user,
-        errands=clean_errands
-    )
-
-@app.route("/runner/history")
-@login_required
-def runnerhistory():
-    user = current_user()
-
-    if user.user_type != "runner":
-        return redirect(url_for("home_page"))
-
-    # Get ALL errands linked to this runner (completed + ongoing)
-    errands = ActiveErrand.query.filter_by(
-        runner_id=user.id
-    ).order_by(ActiveErrand.start_time.desc()).all()
-
-    return render_template(
-        "runnerhistory.html",
-        user=user,
-        errands=errands
-    )
-
-@app.route('/runner/wallet')
-@login_required
-def runnerwallet():
-    user = current_user()
-    return render_template("runnerwallet.html", user=user)
+    return render_template("runner_register.html", user=user)
 
 @app.route("/available_runners/<int:errand_id>")
 @login_required
@@ -804,9 +1056,181 @@ def available_runners(errand_id):
     
     # Simple matching logic: all available runners
     runners = RunnerProfile.query.filter_by(is_available=True).all()
-    
-    return render_template("available_runners.html", user=user, errand=errand, runners=runners)
 
+    runners_data = []
+    for profile in runners:
+        runner_user = profile.user
+        completed_errands = ActiveErrand.query.filter_by(runner_id=profile.user_id, status="completed").count()
+        total_errands = ActiveErrand.query.filter_by(runner_id=profile.user_id).count()
+        runners_data.append({
+            "user": serialize_user(runner_user),
+            "runner_profile": serialize_runner_profile(profile),
+            "avg_rating": runner_user.average_rating if runner_user else 0,
+            "completed_errands": completed_errands,
+            "total_errands": total_errands
+        })
+    
+    return render_template("available_runners.html", user=user, errand=errand, runners=runners_data)
+
+# RUNNER SETTINGS ROUTES (NEW)
+
+@app.route("/runnersettings")
+@login_required
+def runnersettings():
+    """Main settings page for runners"""
+    user = current_user()
+    if user.user_type != "runner":
+        flash("This page is for runners only", "warning")
+        return redirect(url_for("home_page"))
+    return render_template("runnersettings.html", user=user)
+
+
+@app.route("/runnerpersonal", methods=["GET", "POST"])
+@login_required
+def runnerpersonal():
+    """Update email and phone number"""
+    user = current_user()
+    if user.user_type != "runner":
+        flash("This page is for runners only", "warning")
+        return redirect(url_for("home_page"))
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        if email:
+            user.email = email
+        if phone:
+            user.phone = phone
+        db.session.commit()
+        flash("Contact information updated successfully.", "success")
+        return redirect(url_for("runnerpersonal"))
+
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    return render_template("runnerpersonal.html", user=user, runner_profile=runner_profile)
+
+
+@app.route("/runnerbank", methods=["GET", "POST"])
+@login_required
+def runnerbank():
+    """Errand packages & payout details"""
+    user = current_user()
+    if user.user_type != "runner":
+        flash("This page is for runners only", "warning")
+        return redirect(url_for("home_page"))
+
+    if request.method == "POST":
+        # Handle purchase of errand package (if coming from top‑up form)
+        if request.form.get("action") == "buy_package":
+            # In a real app, you would process payment and update errand balance.
+            # Here we just flash a success message.
+            errands_bought = request.form.get("errands_bought", 0)
+            flash(f"Successfully purchased {errands_bought} errands.", "success")
+            return redirect(url_for("runnerbank"))
+
+        # Handle payout details update
+        payout_method = request.form.get("payout_method")
+        account_number = request.form.get("account_number")
+        account_name = request.form.get("account_name")
+        bank_name = request.form.get("bank_name")
+
+        # In production, you would update these fields in the database
+        flash("Payout information saved.", "success")
+        return redirect(url_for("runnerbank"))
+
+    # For GET, we need some stats to display
+    remaining_errands = getattr(user, 'errands', 5)  # temporary – you'll add this field to User model
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+
+    return render_template("runnerbank.html",
+                           user=user,
+                           remaining_errands=remaining_errands,
+                           runner_profile=runner_profile)
+
+
+@app.route("/runnerpasswords", methods=["GET", "POST"])
+@login_required
+def runnerpasswords():
+    """Change password"""
+    user = current_user()
+    if request.method == "POST":
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not check_password_hash(user.password_hash, current_password):
+            flash("Current password is incorrect.", "danger")
+        elif new_password != confirm_password:
+            flash("New passwords do not match.", "danger")
+        elif len(new_password) < 6:
+            flash("Password must be at least 6 characters.", "danger")
+        else:
+            user.password_hash = generate_password_hash(new_password)
+            db.session.commit()
+            flash("Password updated successfully.", "success")
+            return redirect(url_for("runnerpasswords"))
+
+    return render_template("runnerpasswords.html", user=user)
+
+
+@app.route("/runnerprivacy")
+@login_required
+def runnerprivacy():
+    """Privacy & security page (static)"""
+    user = current_user()
+    return render_template("runnerprivacy.html", user=user)
+
+
+@app.route("/runnerhelp", methods=["GET", "POST"])
+@login_required
+def runnerhelp():
+    """Help & support contact form"""
+    user = current_user()
+    if request.method == "POST":
+        subject = request.form.get("subject")
+        message = request.form.get("message")
+        # In production, send email or log the request
+        flash("Your message has been sent. We'll get back to you soon.", "success")
+        return redirect(url_for("runnerhelp"))
+    return render_template("runnerhelp.html", user=user)
+
+
+@app.route("/runnerguideline")
+@login_required
+def runnerguideline():
+    """Runner guidelines (read‑only)"""
+    user = current_user()
+    return render_template("runnerguideline.html", user=user)
+
+
+@app.route("/runnerfaqs")
+@login_required
+def runnerfaqs():
+    """FAQ page for runners"""
+    user = current_user()
+    return render_template("runnerfaqs.html", user=user)
+
+
+@app.route("/runnerrate", methods=["GET", "POST"])
+@login_required
+def runnerrate():
+    """Rate ErrandGo"""
+    user = current_user()
+    if request.method == "POST":
+        # Handle feedback submission
+        rating = request.form.get("rating")
+        feedback = request.form.get("feedback")
+        # In production, store in AppFeedback model
+        flash("Thank you for your feedback!", "success")
+        return redirect(url_for("runnerrate"))
+    return render_template("runnerrate.html", user=user)
+
+
+# ============================================================================
+# END OF NEW RUNNER SETTINGS ROUTES
+# ============================================================================
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
 # ============================================================
 # CHAT & TRACKING ROUTES (NEW)
 # ============================================================
@@ -887,15 +1311,6 @@ def send_message():
             "sender_id": message.sender_id,
             "created_at": message.created_at.strftime("%H:%M")
         }
-    })
-
-
-@app.route("/api/health")
-def api_health():
-    return jsonify({
-        "ok": True,
-        "service": "errandconnect",
-        "timestamp": datetime.utcnow().isoformat() + "Z"
     })
 
 @app.route("/api/update_tracking", methods=["POST"])

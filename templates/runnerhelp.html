@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="help-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Help & Support</h1>
+            </div>
+            <a href="{{ url_for('settings') }}" class="back-btn" aria-label="Back to settings">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Quick Help -->
+        <section class="help-section">
+            <div class="help-card">
+                <div class="help-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>How can we help you?</h3>
+                <p>Find answers to common runner questions or contact our support team.</p>
+            </div>
+        </section>
+
+        <!-- Contact Options -->
+        <section class="help-section">
+            <h3 class="section-title">📞 Contact Runner Support</h3>
+            <div class="contact-grid">
+                <button class="contact-card" onclick="location.href='mailto:runners@errandgo.com'">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4>Email</h4>
+                    <p>runners@errandgo.com</p>
+                    <span class="contact-time">Response: within 12h</span>
+                </button>
+
+                <button class="contact-card" onclick="window.open('tel:+263779103900')">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h4>Phone</h4>
+                    <p>+263 779-103-900</p>
+                    <span class="contact-time">Daily, 7AM-8PM</span>
+                </button>
+
+                <button class="contact-card" onclick="window.open('https://chat.errandgo.com/runner', '_blank')">
+                    <div class="contact-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <h4>Live Chat</h4>
+                    <p>Instant help</p>
+                    <span class="contact-time">Online now</span>
+                </button>
+
+                <button class="contact-card" onclick="location.href='{{ url_for('runnerguideline') }}'">
+                    <div class="contact-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h4>Runner Guide</h4>
+                    <p>Best practices</p>
+                    <span class="contact-time">Always available</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Quick Fixes for Runners -->
+        <section class="help-section">
+            <h3 class="section-title">🔧 Quick Fixes</h3>
+            <div class="quick-fixes">
+                <div class="fix-card">
+                    <div class="fix-icon">📱</div>
+                    <div class="fix-content">
+                        <h4>App Not Working?</h4>
+                        <p>1) Restart app 2) Check internet 3) Update to latest version 4) Ensure GPS is enabled.</p>
+                    </div>
+                </div>
+
+                <div class="fix-card">
+                    <div class="fix-icon">💳</div>
+                    <div class="fix-content">
+                        <h4>Payout Delays?</h4>
+                        <p>Check: 1) Payout method is correct 2) Minimum payout reached 3) Weekly payout schedule.</p>
+                    </div>
+                </div>
+
+                <div class="fix-card">
+                    <div class="fix-icon">📍</div>
+                    <div class="fix-content">
+                        <h4>Location Issues?</h4>
+                        <p>Enable: 1) GPS 2) Location permission always 3) Restart device 4) Reinstall if persists.</p>
+                    </div>
+                </div>
+
+                <div class="fix-card">
+                    <div class="fix-icon">🛵</div>
+                    <div class="fix-content">
+                        <h4>Can't Accept Errands?</h4>
+                        <p>Check: 1) Errand balance >0 2) Availability ON 3) App is updated 4) No active job limit reached.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Report Issues -->
+        <section class="help-section">
+            <div class="report-card">
+                <h3>Report an Issue</h3>
+                <p>Found a bug or have a suggestion? We'd love to hear from you.</p>
+
+                <div class="report-actions">
+                    <button class="btn-primary" onclick="location.href='mailto:runnerbugs@errandgo.com?subject=Runner App Bug'">
+                        <i class="fas fa-bug"></i>
+                        Report Bug
+                    </button>
+                    <button class="btn-outline" onclick="location.href='mailto:ideas@errandgo.com?subject=Runner Feature Request'">
+                        <i class="fas fa-lightbulb"></i>
+                        Suggest Feature
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency -->
+        <section class="help-section">
+            <div class="emergency-card">
+                <div class="emergency-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>⚠️ Emergency Contact</h3>
+                <p>For urgent safety concerns during an active delivery:</p>
+                <button class="emergency-btn" onclick="window.open('tel:999')">
+                    <i class="fas fa-phone"></i>
+                    Call Emergency Services: 999
+                </button>
+                <small>Only use for genuine emergencies</small>
+            </div>
+        </section>
+    </main>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #66BB6A;
+    --primary-dark: #388E3C;
+    --primary-50: #E8F5E8;
+    --surface: #FFFFFF;
+    --background: #F8FDF8;
+    --text-primary: #1A331A;
+    --text-secondary: #666666;
+    --border: #E0E0E0;
+    --border-light: #F0F0F0;
+    --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+}
+
+/* Base mobile resets */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;               /* prevents accidental text selection */
+}
+
+body {
+    margin: 0;
+    touch-action: manipulation;      /* disables double-tap zoom on the whole page */
+}
+
+#help-page {
+    min-height: 100vh;
+    background: var(--background);
+    padding-bottom: 20px;
+}
+
+.mobile-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    padding: 8px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.logo h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.back-btn {
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    transition: background 0.2s;
+    text-decoration: none;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;                /* comfortable tap area */
+}
+
+.back-btn:active {
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.mobile-main {
+    padding: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.help-section {
+    margin-bottom: 24px;
+}
+
+.help-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+}
+
+.help-icon {
+    font-size: 40px;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+.help-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.help-card p {
+    color: var(--text-secondary);
+    line-height: 1.4;
+    font-size: 0.9rem;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    padding-left: 4px;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.contact-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 16px 12px;
+    border: 2px solid var(--border-light);
+    box-shadow: var(--shadow);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 130px;                /* enough tap area */
+    touch-action: manipulation;
+    outline: none;
+    font-family: inherit;
+    color: inherit;
+    width: 100%;
+}
+
+.contact-card:active {
+    transform: scale(0.97);
+    background: var(--primary-50);
+    border-color: var(--primary-color);
+}
+
+.contact-icon {
+    font-size: 26px;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.contact-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.contact-card p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0 0 6px;
+    word-break: break-word;
+}
+
+.contact-time {
+    font-size: 0.7rem;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.quick-fixes {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.fix-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.fix-card:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.fix-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.fix-content {
+    flex: 1;
+}
+
+.fix-content h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.fix-content p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.report-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+}
+
+.report-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.report-card p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.report-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-primary,
+.btn-outline,
+.emergency-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-height: 48px;                 /* 48dp tap target */
+    touch-action: manipulation;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:active {
+    background: var(--primary-dark);
+    transform: scale(0.98);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline:active {
+    background: var(--primary-50);
+    transform: scale(0.98);
+}
+
+.emergency-card {
+    background: #FFF3E0;
+    border: 2px solid #FF9800;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+}
+
+.emergency-icon {
+    font-size: 40px;
+    color: #FF9800;
+    margin-bottom: 12px;
+}
+
+.emergency-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #E65100;
+    margin-bottom: 8px;
+}
+
+.emergency-card p {
+    color: #666666;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.emergency-btn {
+    background: #FF9800;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.emergency-btn:active {
+    background: #F57C00;
+    transform: scale(0.98);
+}
+
+.emergency-card small {
+    font-size: 0.7rem;
+    color: #666666;
+    display: block;
+}
+
+/* Responsive grid collapse */
+@media (max-width: 480px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .logo h1 {
+        font-size: 1rem;
+    }
+
+    .contact-card {
+        min-height: auto;             /* let height be flexible on small screens */
+        padding: 14px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevent double-tap zoom on all interactive elements
+    const touchElements = document.querySelectorAll('button, .contact-card');
+    touchElements.forEach(el => {
+        el.addEventListener('touchstart', function(e) {
+            e.preventDefault();        // stops double-tap to zoom
+            this.click();              // manually trigger click
+        });
+    });
+
+    // Emergency button confirmation
+    const emergencyBtn = document.querySelector('.emergency-btn');
+    if (emergencyBtn) {
+        emergencyBtn.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to call emergency services? Only use for genuine emergencies.')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

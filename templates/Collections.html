@@ -38,21 +38,17 @@
             min-height: 100vh;
             padding: 0;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Mobile-friendly container */
         .container {
             width: 100%;
             max-width: 100%;
             margin: 0;
             background: white;
             min-height: 100vh;
-            position: relative;
         }
 
-        /* Fixed Service Bar for Mobile */
+        /* Smaller top bar */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -61,28 +57,28 @@
             z-index: 1000;
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 12px 15px;
+            padding: 6px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 60px;
+            height: 48px;
             border-bottom: 1px solid #e0e0e0;
         }
 
         .service-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex: 1;
             min-width: 0;
         }
 
         .service-icon {
-            font-size: 20px;
+            font-size: 18px;
             background: var(--gradient);
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -90,103 +86,42 @@
             flex-shrink: 0;
         }
 
-        .service-text {
-            min-width: 0;
-        }
-
         .service-text h3 {
-            color: var(--primary-dark);
-            margin: 0;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .service-text p {
-            color: var(--dark);
-            margin: 0;
-            font-size: 11px;
-            opacity: 0.8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: none;
         }
 
         .estimated-fee-display {
             background: var(--gradient);
             color: white;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: var(--radius);
             font-weight: 600;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-            min-width: 100px;
+            font-size: 11px;
+            min-width: 85px;
             text-align: center;
-            flex-shrink: 0;
-            margin-left: 10px;
         }
 
         .fee-amount {
-            font-size: 16px;
-            font-weight: 700;
-            display: block;
-            line-height: 1.2;
-        }
-
-        /* NEW: Service Price and Phone Number Row */
-        .service-phone-row {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .service-phone-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-            min-width: 0;
-        }
-
-        /* VIEW MAP BUTTON */
-        .view-map-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            padding: 14px;
-            cursor: pointer;
-            font-weight: 600;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            width: 100%;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-            transition: var(--transition);
+            font-weight: 700;
         }
 
-        .view-map-btn:active {
-            background: var(--primary-dark);
-            transform: scale(0.98);
-        }
-
-        /* Main content area */
         .content-wrapper {
-            padding-top: 70px;
+            padding-top: 58px;
             padding-bottom: 20px;
         }
 
-        /* Mobile Header */
         .mobile-header {
             background: var(--gradient);
             color: white;
-            padding: 20px 15px;
+            padding: 12px 15px;
             text-align: center;
         }
 
@@ -194,39 +129,107 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 4px;
         }
 
         .logo-icon {
             background: rgba(255, 255, 255, 0.2);
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 20px;
+            margin-bottom: 2px;
         }
 
         .service-tag {
-            display: inline-block;
             background: rgba(255, 255, 255, 0.2);
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 15px;
-            font-size: 11px;
-            backdrop-filter: blur(10px);
-            margin-top: 2px;
+            font-size: 10px;
         }
 
-        /* Form Section */
+        /* Map styles */
+        #map {
+            height: 280px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .map-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .map-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .map-btn.active.dropoff {
+            background: #2196F3;
+        }
+        .map-hint {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            display: none;
+        }
+        /* Route info bar */
+        .route-info-bar {
+            background: white;
+            border-radius: 12px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9e9e9;
+        }
+        .route-info-item {
+            flex: 1;
+            text-align: center;
+        }
+        .route-info-label {
+            font-size: 9px;
+            color: #777;
+            text-transform: uppercase;
+        }
+        .route-info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .route-info-value small {
+            font-size: 9px;
+        }
+
         .form-section {
             padding: 15px;
         }
@@ -235,8 +238,7 @@
             height: 3px;
             background: #e0e0e0;
             border-radius: 2px;
-            margin: 20px 0;
-            overflow: hidden;
+            margin: 15px 0 20px;
         }
 
         .progress {
@@ -249,30 +251,23 @@
 
         h2 {
             font-size: 16px;
-            margin: 20px 0 15px;
+            margin: 15px 0 12px;
             color: var(--primary-dark);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        h2 i {
-            color: var(--primary);
-            font-size: 14px;
-        }
-
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-weight: 600;
-            color: var(--dark);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .input-with-icon {
@@ -286,442 +281,165 @@
             transform: translateY(-50%);
             color: var(--primary);
             font-size: 14px;
-            z-index: 1;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 14px 14px 14px 40px;
+            padding: 12px 12px 12px 38px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 15px;
-            transition: var(--transition);
+            font-size: 14px;
             background: white;
-            -webkit-appearance: none;
-            appearance: none;
-            touch-action: manipulation;
         }
 
-        select {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding-right: 40px;
+        textarea {
+            padding: 12px;
         }
 
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
-        }
-
-        /* Service Type Selector */
+        /* Service type selector */
         .service-type-selector {
             display: grid;
             grid-template-columns: 1fr;
             gap: 10px;
             margin-top: 10px;
         }
-
         .service-type {
             border: 2px solid #e0e0e0;
             border-radius: var(--radius);
-            padding: 15px;
+            padding: 12px;
             cursor: pointer;
-            transition: var(--transition);
             position: relative;
         }
-
-        .service-type:hover {
-            border-color: var(--primary-light);
-        }
-
         .service-type.active {
             border-color: var(--primary);
-            background: rgba(76, 175, 80, 0.05);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+            background: rgba(76,175,80,0.05);
         }
-
         .service-type-header {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 8px;
         }
-
         .service-type-icon {
-            font-size: 24px;
-            color: var(--primary);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 50%;
-        }
-
-        .service-type-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--primary-dark);
-        }
-
-        .service-type-description {
-            font-size: 13px;
-            color: var(--dark);
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-
-        .service-type-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--accent);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* Collection Items */
-        .collection-item {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: var(--light);
-            border-radius: var(--radius);
-            border: 1px solid #e0e0e0;
-        }
-
-        .collection-row {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .collection-row .input-with-icon {
-            flex: 1;
-        }
-
-        .item-actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 5px;
-        }
-
-        .remove-item {
-            background: var(--accent);
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-            transition: var(--transition);
-        }
-
-        .remove-item:active {
-            background: var(--accent-dark);
-            transform: scale(0.95);
-        }
-
-        .add-item {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            width: 100%;
-            transition: var(--transition);
-        }
-
-        .add-item:active {
-            background: var(--primary-dark);
-            transform: scale(0.98);
-        }
-
-        /* Collection Details Grid */
-        .collection-details-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        /* Collection Information Row */
-        .collection-row-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        /* File Upload */
-        .file-upload-wrapper {
-            position: relative;
-        }
-
-        .file-upload-input {
-            width: 100%;
-            padding: 14px 14px 14px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: var(--transition);
-            background: white;
-            cursor: pointer;
-        }
-
-        .file-upload-input:hover {
-            border-color: var(--primary);
-        }
-
-        .file-upload-text {
-            color: var(--dark);
-            opacity: 0.8;
-        }
-
-        .file-size-note {
-            font-size: 11px;
-            color: #666;
-            margin-top: 4px;
-            display: block;
-            text-align: center;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .file-name {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 11px;
-            color: var(--primary-dark);
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            background: rgba(76, 175, 80, 0.1);
-            padding: 3px 8px;
-            border-radius: 12px;
-        }
-
-        /* Collection Method Indicator */
-        .collection-method-indicator {
-            background: var(--light);
-            border: 1px solid #e0e0e0;
-            border-radius: var(--radius);
-            padding: 12px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .collection-method-icon {
             font-size: 20px;
-            color: var(--primary);
             width: 36px;
             height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(76,175,80,0.1);
             border-radius: 50%;
-            flex-shrink: 0;
         }
-
-        .collection-method-text h4 {
-            margin: 0;
-            font-size: 14px;
-            color: var(--primary-dark);
-        }
-
-        .collection-method-text p {
-            margin: 2px 0 0;
-            font-size: 12px;
-            color: var(--dark);
-            opacity: 0.8;
-        }
-
-        /* Submit Button */
-        .submit-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            padding: 16px;
-            font-size: 16px;
+        .service-type-title {
             font-weight: 600;
-            cursor: pointer;
-            width: 100%;
+        }
+        .service-type-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+
+        /* Collection items */
+        .collection-item {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-            touch-action: manipulation;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
         }
-
-        .submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Section Divider */
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--primary-light) 50%, transparent 100%);
-            margin: 25px 0;
-        }
-
-        /* Info Tip */
-        .info-tip {
-            background: rgba(76, 175, 80, 0.1);
-            border-left: 3px solid var(--primary);
-            padding: 10px 12px;
-            margin: 12px 0;
-            border-radius: 0 var(--radius) var(--radius) 0;
-            font-size: 12px;
-            color: var(--dark);
+        .collection-row {
             display: flex;
-            align-items: flex-start;
             gap: 8px;
         }
-
-        .info-tip i {
-            color: var(--primary);
-            margin-top: 2px;
+        .collection-row .input-with-icon {
+            flex: 1;
+        }
+        .item-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .remove-item {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .add-item {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
-        /* Item Type Selector */
+        /* Collection details grid */
+        .collection-details-grid, .collection-row-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .collection-row-grid {
+            margin-bottom: 20px;
+        }
+
+        /* Item type selector */
         .item-type-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-top: 10px;
         }
-
         .item-type {
             border: 2px solid #e0e0e0;
             border-radius: var(--radius);
-            padding: 12px;
+            padding: 8px;
             text-align: center;
             cursor: pointer;
-            transition: var(--transition);
+            font-size: 12px;
         }
-
-        .item-type:hover {
-            border-color: var(--primary-light);
-        }
-
         .item-type.active {
             border-color: var(--primary);
-            background: rgba(76, 175, 80, 0.05);
+            background: rgba(76,175,80,0.1);
         }
-
         .item-type i {
-            font-size: 20px;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        .item-type span {
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 18px;
             display: block;
+            margin-bottom: 4px;
         }
 
-        /* Location Suggestions */
-        .location-suggestions {
-            margin-top: 10px;
-        }
-
-        .location-suggestion-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .location-tag {
-            background: var(--light);
-            border: 1px solid var(--primary-light);
-            border-radius: 15px;
-            padding: 6px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .location-tag:hover {
-            background: var(--primary-light);
-            color: white;
-        }
-
-        /* Expanding Inputs */
-        .expanding-input {
-            transition: all 0.3s ease;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            margin-top: 0;
-        }
-
-        .expanding-input.expanded {
-            max-height: 200px;
-            opacity: 1;
-            margin-top: 10px;
-        }
-
-        /* Toggle Switch */
+        /* Toggle switch */
         .toggle-switch {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
             margin: 15px 0;
         }
-
-        .toggle-label {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
         .switch {
             position: relative;
             display: inline-block;
             width: 50px;
             height: 24px;
         }
-
         .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
         .slider {
             position: absolute;
             cursor: pointer;
@@ -730,10 +448,8 @@
             right: 0;
             bottom: 0;
             background-color: #ccc;
-            transition: .4s;
             border-radius: 34px;
         }
-
         .slider:before {
             position: absolute;
             content: "";
@@ -742,357 +458,135 @@
             left: 4px;
             bottom: 4px;
             background-color: white;
-            transition: .4s;
             border-radius: 50%;
+            transition: .4s;
         }
-
         input:checked + .slider {
-            background-color: var(--primary);
+            background-color: var(--success);
         }
-
         input:checked + .slider:before {
             transform: translateX(26px);
         }
 
-        /* MAP MODAL - Mobile Optimized */
-        .map-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .map-selection-controls {
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .selection-btn {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: all 0.2s;
-        }
-
-        .selection-btn.active {
-            border-color: var(--primary);
-            background: rgba(76, 175, 80, 0.1);
-            color: var(--primary-dark);
-        }
-
-        .selection-btn i {
-            font-size: 14px;
-        }
-
-        .map-content {
-            background: white;
-            border-radius: var(--radius);
-            width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+        /* File upload */
+        .file-upload-wrapper {
             position: relative;
         }
-            flex-direction: column;
+        .file-upload-input {
+            width: 100%;
+            padding: 12px 12px 12px 38px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .file-name {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: var(--primary-dark);
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgba(76,175,80,0.1);
+            padding: 2px 6px;
+            border-radius: 12px;
         }
 
-        .map-header {
+        /* Collection method indicator */
+        .collection-method-indicator {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        /* Submit button */
+        .submit-btn {
             background: var(--gradient);
             color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .map-header h3 {
-            margin: 0;
-            font-size: 16px;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
         }
 
-        .close-map {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .section-divider {
+            margin: 20px 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
         }
 
-        .map-placeholder {
-            padding: 30px 15px;
-            text-align: center;
-            background: #f5f5f5;
+        .info-tip {
+            background: rgba(76,175,80,0.1);
+            border-left: 3px solid var(--primary);
+            padding: 8px 12px;
+            font-size: 11px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .expanding-input {
+            max-height: 0;
+            overflow: hidden;
+            transition: 0.3s;
+            opacity: 0;
+        }
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 8px;
+        }
+
+        .service-phone-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .service-phone-row .form-group {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
+            margin-bottom: 0;
         }
 
-        .map-placeholder i {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .map-placeholder h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-
-        .map-placeholder p {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .map-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            padding: 15px;
-            background: var(--light);
-            border-top: 1px solid #e0e0e0;
-            flex-shrink: 0;
-        }
-
-        .info-item {
-            text-align: center;
-        }
-
-        .info-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 4px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: var(--dark);
-        }
-
-        /* iOS Safe Areas */
-        @supports (padding: max(0px)) {
-            .fixed-service-bar {
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-                padding-top: max(12px, env(safe-area-inset-top));
-                height: calc(60px + env(safe-area-inset-top));
-            }
-
-            .content-wrapper {
-                padding-top: calc(70px + env(safe-area-inset-top));
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            }
-
-            .mobile-header, .form-section {
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-            }
-
-            .submit-btn {
-                margin-bottom: max(20px, env(safe-area-inset-bottom));
-            }
-
-            .map-modal {
-                padding: max(15px, env(safe-area-inset-left));
-            }
-        }
-
-        /* Larger screens */
         @media (min-width: 768px) {
-            body {
-                padding: 10px;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                min-height: 100vh;
-            }
-
-            .container {
-                max-width: 600px;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-                margin: 0 auto;
-            }
-
-            .fixed-service-bar {
-                border-radius: var(--radius) var(--radius) 0 0;
-            }
-
-            .service-type-selector {
-                grid-template-columns: 1fr;
-            }
-
-            .item-type-selector {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .collection-row-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .collection-details-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .collection-item {
-                flex-direction: row;
-                align-items: center;
-            }
-
-            .collection-row {
-                flex: 1;
-            }
-
-            .item-actions {
-                margin-top: 0;
-                margin-left: 10px;
-            }
-
-            /* Service Phone Row for larger screens */
-            .service-phone-row {
-                gap: 15px;
-            }
-
-            .map-info {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
+            body { padding: 10px; display: flex; justify-content: center; }
+            .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
+            .collection-details-grid, .collection-row-grid { grid-template-columns: 1fr 1fr; }
+            .collection-item { flex-direction: row; align-items: center; }
+            .collection-row { flex: 1; }
+            .item-actions { margin-left: 10px; }
+            .item-type-selector { grid-template-columns: repeat(3, 1fr); }
         }
-
-        /* Very small screens */
         @media (max-width: 320px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            h2 {
-                font-size: 15px;
-            }
-
-            input, select, textarea {
-                font-size: 14px;
-                padding: 12px 12px 12px 36px;
-            }
-
-            .estimated-fee-display {
-                min-width: 90px;
-                font-size: 11px;
-                padding: 5px 8px;
-            }
-
-            .fee-amount {
-                font-size: 14px;
-            }
-
-            .item-type-selector {
-                grid-template-columns: 1fr;
-            }
-
-            /* Service Phone Row for very small screens */
-            .service-phone-row {
-                gap: 8px;
-            }
-
-            .service-phone-row .input-with-icon i {
-                font-size: 12px;
-                left: 8px;
-            }
-
-            .service-phone-row input {
-                padding-left: 32px;
-                padding-right: 8px;
-                font-size: 13px;
-            }
-
-            .map-info {
-                grid-template-columns: 1fr 1fr;
-            }
+            .route-info-value { font-size: 11px; }
+            .map-btn { font-size: 11px; padding: 8px; }
+            .service-phone-row { gap: 8px; }
+            .item-type-selector { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Fixed Service Bar for Mobile -->
     <div class="fixed-service-bar">
         <div class="service-info">
-            <div class="service-icon">
-                <i class="fas fa-box-open"></i>
-            </div>
-            <div class="service-text">
-                <h3>Collection Service</h3>
-                <p>We'll collect items for you</p>
-            </div>
+            <div class="service-icon"><i class="fas fa-box-open"></i></div>
+            <div class="service-text"><h3>Collection Service</h3><p>We'll collect items for you</p></div>
         </div>
         <div class="estimated-fee-display">
-            <span>Estimated:</span>
+            <span>Est.</span>
             <span id="estimated_fee" class="fee-amount">$0.00</span>
-        </div>
-    </div>
-
-    <!-- Map Modal -->
-    <div id="mapModal" class="map-modal">
-        <div class="map-content">
-            <div class="map-header">
-                <h3><i class="fas fa-map-marked-alt"></i> Select Locations</h3>
-                <button class="close-map" onclick="closeMap()">×</button>
-            </div>
-            
-            <div class="map-selection-controls">
-                <button type="button" id="select-pickup-btn" class="selection-btn active" onclick="setSelectionMode('pickup')">
-                    <i class="fas fa-box"></i> Collection Point
-                </button>
-                <button type="button" id="select-dropoff-btn" class="selection-btn" onclick="setSelectionMode('dropoff')">
-                    <i class="fas fa-home"></i> Delivery Point
-                </button>
-            </div>
-
-            <div id="map" style="height: 400px; width: 100%; z-index: 1;"></div>
-            <div class="map-info">
-                <div class="info-item">
-                    <div class="info-value" id="mapDistance">0 km</div>
-                    <div class="info-label">Distance</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-value" id="mapTime">0 min</div>
-                    <div class="info-label">Est. Time</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-value" id="mapDeliveryMethod">-</div>
-                    <div class="info-label">Delivery Method</div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1100,271 +594,171 @@
         <div class="content-wrapper">
             <div class="mobile-header">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-box-open"></i>
-                    </div>
-                    <div>
-                        <h1>ErrandConnect</h1>
-                        <div class="service-tag">Collection Service</div>
-                    </div>
+                    <div class="logo-icon"><i class="fas fa-box-open"></i></div>
+                    <div><h1>ErrandConnect</h1><div class="service-tag">Collection Service</div></div>
                 </div>
             </div>
 
             <div class="form-section">
-                <div class="progress-bar">
-                    <div class="progress"></div>
+                <div class="progress-bar"><div class="progress"></div></div>
+
+                <!-- INLINE MAP SECTION -->
+                <div class="map-wrapper">
+                    <div class="map-controls">
+                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-map-marker-alt"></i> Set Collection</button>
+                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+                    </div>
+                    <div id="mapHint" class="map-hint">Tap map to set location</div>
+                    <div id="map"></div>
+
+                    <div class="route-info-bar" id="routeInfoBar">
+                        <div class="route-info-item">
+                            <div class="route-info-label">Distance</div>
+                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Time</div>
+                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Fee</div>
+                            <div class="route-info-value" id="infoFee">$0.00</div>
+                        </div>
+                    </div>
                 </div>
 
                 <form method="post" action="{{ url_for('create_collections_errand') }}" id="collectionsForm">
-                    <!-- Hidden coordinate fields -->
+                    <!-- Hidden map coordinate fields -->
                     <input type="hidden" id="pickup_lat" name="pickup_lat">
                     <input type="hidden" id="pickup_lon" name="pickup_lon">
                     <input type="hidden" id="dropoff_lat" name="dropoff_lat">
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
 
-                    <!-- Service Type Selection -->
+                    <!-- Collection Type -->
                     <h2><i class="fas fa-cogs"></i> Collection Type</h2>
                     <div class="service-type-selector">
                         <div class="service-type active" onclick="selectServiceType('package', this)">
-                            <div class="service-type-header">
-                                <div class="service-type-icon">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                                <div class="service-type-title">Package Collection</div>
-                            </div>
-                            <div class="service-type-description">
-                                Collect packages, parcels, or envelopes from various locations
-                            </div>
+                            <div class="service-type-header"><div class="service-type-icon"><i class="fas fa-box"></i></div><div class="service-type-title">Package Collection</div></div>
+                            <div class="service-type-description">Collect packages, parcels, or envelopes</div>
                             <div class="service-type-badge">Most Common</div>
                         </div>
-
                         <div class="service-type" onclick="selectServiceType('document', this)">
-                            <div class="service-type-header">
-                                <div class="service-type-icon">
-                                    <i class="fas fa-file-contract"></i>
-                                </div>
-                                <div class="service-type-title">Document Collection</div>
-                            </div>
-                            <div class="service-type-description">
-                                Collect important documents, paperwork, or files
-                            </div>
+                            <div class="service-type-header"><div class="service-type-icon"><i class="fas fa-file-contract"></i></div><div class="service-type-title">Document Collection</div></div>
+                            <div class="service-type-description">Collect important documents, paperwork</div>
                         </div>
-
                         <div class="service-type" onclick="selectServiceType('item', this)">
-                            <div class="service-type-header">
-                                <div class="service-type-icon">
-                                    <i class="fas fa-shopping-bag"></i>
-                                </div>
-                                <div class="service-type-title">Item Collection</div>
-                            </div>
-                            <div class="service-type-description">
-                                Collect purchased items, goods, or products
-                            </div>
+                            <div class="service-type-header"><div class="service-type-icon"><i class="fas fa-shopping-bag"></i></div><div class="service-type-title">Item Collection</div></div>
+                            <div class="service-type-description">Collect purchased items, goods, or products</div>
                         </div>
                     </div>
 
                     <div class="section-divider"></div>
 
-                    <!-- Collection Information -->
-                    <h2><i class="fas fa-map-marker-alt"></i> Collection Details</h2>
+                    <!-- ========== COLLECTION/DELIVERY DETAILS (combined) ========== -->
+                    <h2><i class="fas fa-map-marker-alt"></i> Collection/Delivery Details</h2>
 
+                    <!-- Collection Address -->
+                    <div class="form-group">
+                        <label for="collection_address">Collection Address</label>
+                        <div class="input-with-icon"><i class="fas fa-map-pin"></i><input type="text" id="collection_address" name="collection_address" placeholder="Full address for collection" required readonly onfocus="this.removeAttribute('readonly')"></div>
+                        <div class="location-suggestions"><div class="location-suggestion-tags">
+                        </div></div>
+                    </div>
+
+                    <!-- Collection Contact -->
                     <div class="collection-row-grid">
-                        <div class="form-group">
-                            <label for="collection_address">Collection Address</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-map-pin"></i>
-                                <input type="text" id="collection_address" name="collection_address" placeholder="Full address for collection" required oninput="updateEstimatedFee(); updateProgress()">
-                            </div>
-                            <div class="location-suggestions">
-                                <div class="location-suggestion-tags">
-                                    <span class="location-tag" onclick="setCollectionAddress('Office Building')">Office Building</span>
-                                    <span class="location-tag" onclick="setCollectionAddress('Residential Address')">Residential</span>
-                                    <span class="location-tag" onclick="setCollectionAddress('Post Office')">Post Office</span>
-                                    <span class="location-tag" onclick="setCollectionAddress('Courier Depot')">Courier Depot</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="form-group">
                             <label for="collection_contact">Collection Contact</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="collection_contact" name="collection_contact" placeholder="Name of contact person" required oninput="updateProgress()">
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-user"></i><input type="text" id="collection_contact" name="collection_contact" placeholder="Name of contact person" required></div>
                         </div>
-                    </div>
-
-                    <div class="collection-row-grid">
                         <div class="form-group">
                             <label for="collection_phone">Contact Phone</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel" id="collection_phone" name="collection_phone" placeholder="Contact phone number" required oninput="updateProgress()">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="collection_time">Collection Time Window</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-clock"></i>
-                                <select id="collection_time" name="collection_time" onchange="toggleSpecificCollectionTime()">
-                                    <option value="anytime">Anytime today</option>
-                                    <option value="morning">Morning (8AM-12PM)</option>
-                                    <option value="afternoon">Afternoon (12PM-5PM)</option>
-                                    <option value="evening">Evening (5PM-9PM)</option>
-                                    <option value="specific">Specific time</option>
-                                </select>
-                            </div>
+                            <div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="collection_phone" name="collection_phone" placeholder="Contact phone number" required></div>
                         </div>
                     </div>
 
-                    <div id="specific_collection_time_input" class="expanding-input">
-                        <div class="input-with-icon">
-                            <i class="fas fa-clock"></i>
-                            <input type="text" id="specific_collection_time" name="specific_collection_time" placeholder="Enter time (e.g., 2:30 PM)" oninput="updateEstimatedFee(); updateProgress()">
-                        </div>
-                    </div>
-
+                    <!-- Collection Time -->
                     <div class="form-group">
-                        <label for="collection_instructions">Collection Instructions</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-clipboard-list"></i>
-                            <textarea id="collection_instructions" name="collection_instructions" rows="2" placeholder="Special instructions for collection..." oninput="updateProgress()"></textarea>
-                        </div>
+                        <label for="collection_time">Collection Time Window</label>
+                        <div class="input-with-icon"><i class="fas fa-clock"></i><select id="collection_time" name="collection_time" onchange="toggleSpecificCollectionTime()"><option value="anytime">Anytime today</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div>
                     </div>
+                    <div id="specific_collection_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_collection_time" name="specific_collection_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
+
+                    <!-- Collection Instructions -->
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="collection_instructions" name="collection_instructions" rows="2" placeholder="Special instructions for collection..."></textarea></div></div>
+
+                    <!-- Delivery Address -->
+                    <div class="form-group">
+                        <label for="delivery_address">Delivery Address</label>
+                        <div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Where should we deliver?" required readonly onfocus="this.removeAttribute('readonly')"></div>
+                    </div>
+
+                    <!-- Delivery Time -->
+                    <div class="form-group">
+                        <label for="delivery_time">Delivery Time Window</label>
+                        <div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificDeliveryTime()"><option value="anytime">Anytime today</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div>
+                    </div>
+                    <div id="specific_delivery_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_delivery_time" name="specific_delivery_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
+
+                    <!-- Delivery Method Indicator -->
+                    <div id="deliveryMethodIndicator" class="collection-method-indicator" style="display: none;">
+                        <div class="collection-method-icon"><i id="deliveryMethodIcon" class="fas fa-truck"></i></div>
+                        <div class="collection-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating based on items and distance...</p></div>
+                    </div>
+
+                    <!-- Delivery Instructions -->
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions (gate code, leave at door, etc.)"></textarea></div></div>
 
                     <div class="section-divider"></div>
 
                     <!-- Items to Collect -->
                     <h2><i class="fas fa-list-check"></i> Items to Collect</h2>
+                    <div class="info-tip"><i class="fas fa-info-circle"></i> List all items that need to be collected. Include descriptions, quantities, and any special handling requirements.</div>
+                    <div id="items-container">
+                        <div class="collection-item">
+                            <div class="collection-row">
+                                <div class="input-with-icon" style="flex:2;"><i class="fas fa-box"></i><input type="text" name="items[]" placeholder="Item description" required></div>
+                                <div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div>
+                            </div>
+                            <div class="collection-row">
+                                <div class="input-with-icon" style="flex:1;"><i class="fas fa-ruler-combined"></i><input type="text" name="sizes[]" placeholder="Size/Dimensions"></div>
+                                <div class="input-with-icon" style="flex:1;"><i class="fas fa-weight-hanging"></i><input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0"></div>
+                            </div>
+                            <div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
 
-                    <div class="form-group">
-                        <label>Collection Items</label>
-                        <div class="info-tip">
-                            <i class="fas fa-info-circle"></i> List all items that need to be collected. Include descriptions, quantities, and any special handling requirements.
-                        </div>
-                        <div id="items-container">
-                            <div class="collection-item">
-                                <div class="collection-row">
-                                    <div class="input-with-icon" style="flex: 2;">
-                                        <i class="fas fa-box"></i>
-                                        <input type="text" name="items[]" placeholder="Item description" required oninput="updateEstimatedFee(); updateProgress()">
-                                    </div>
-                                    <div class="input-with-icon" style="flex: 1;">
-                                        <i class="fas fa-hashtag"></i>
-                                        <input type="text" name="quantities[]" placeholder="Qty" required oninput="updateEstimatedFee(); updateProgress()">
-                                    </div>
-                                </div>
-                                <div class="collection-row">
-                                    <div class="input-with-icon" style="flex: 1;">
-                                        <i class="fas fa-ruler-combined"></i>
-                                        <input type="text" name="sizes[]" placeholder="Size/Dimensions" oninput="updateEstimatedFee(); updateProgress()">
-                                    </div>
-                                    <div class="input-with-icon" style="flex: 1;">
-                                        <i class="fas fa-weight-hanging"></i>
-                                        <input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0" oninput="updateEstimatedFee(); updateProgress()">
-                                    </div>
-                                </div>
-                                <div class="item-actions">
-                                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="add-item" onclick="addItem()">
-                            <i class="fas fa-plus"></i> Add Another Item
-                        </button>
-
-                        <div class="collection-details-grid">
-                            <div class="input-with-icon">
-                                <i class="fas fa-boxes"></i>
-                                <select id="item_condition" name="item_condition" oninput="updateProgress()">
-                                    <option value="">Item Condition</option>
-                                    <option value="new">New/Sealed</option>
-                                    <option value="used_good">Used - Good</option>
-                                    <option value="used_fair">Used - Fair</option>
-                                    <option value="fragile">Fragile</option>
-                                    <option value="perishable">Perishable</option>
-                                </select>
-                            </div>
-                            <div class="input-with-icon">
-                                <i class="fas fa-tag"></i>
-                                <input type="text" id="tracking_number" name="tracking_number" placeholder="Tracking # (optional)" oninput="updateProgress()">
-                            </div>
-                            <div class="input-with-icon">
-                                <i class="fas fa-dollar-sign"></i>
-                                <input type="number" id="estimated_value" name="estimated_value" placeholder="Estimated value ($)" step="0.01" min="0" oninput="updateEstimatedFee(); updateProgress()">
-                            </div>
-                            <div class="input-with-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <select id="handling_requirements" name="handling_requirements" oninput="updateEstimatedFee(); updateProgress()">
-                                    <option value="standard">Standard Handling</option>
-                                    <option value="careful">Careful Handling</option>
-                                    <option value="special">Special Requirements</option>
-                                </select>
-                            </div>
-                        </div>
+                    <div class="collection-details-grid">
+                        <div class="input-with-icon"><i class="fas fa-boxes"></i><select id="item_condition" name="item_condition"><option value="">Item Condition</option><option value="new">New/Sealed</option><option value="used_good">Used - Good</option><option value="used_fair">Used - Fair</option><option value="fragile">Fragile</option><option value="perishable">Perishable</option></select></div>
+                        <div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="tracking_number" name="tracking_number" placeholder="Tracking # (optional)"></div>
+                        <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="estimated_value" name="estimated_value" placeholder="Estimated value ($)" step="0.01" min="0"></div>
+                        <div class="input-with-icon"><i class="fas fa-exclamation-triangle"></i><select id="handling_requirements" name="handling_requirements"><option value="standard">Standard Handling</option><option value="careful">Careful Handling</option><option value="special">Special Requirements</option></select></div>
                     </div>
 
                     <!-- Item Type -->
                     <div class="form-group">
                         <label>Item Type</label>
                         <div class="item-type-selector">
-                            <div class="item-type active" onclick="selectItemType('package', this)">
-                                <i class="fas fa-box"></i>
-                                <span>Package</span>
-                            </div>
-                            <div class="item-type" onclick="selectItemType('document', this)">
-                                <i class="fas fa-file-alt"></i>
-                                <span>Documents</span>
-                            </div>
-                            <div class="item-type" onclick="selectItemType('electronics', this)">
-                                <i class="fas fa-laptop"></i>
-                                <span>Electronics</span>
-                            </div>
-                            <div class="item-type" onclick="selectItemType('clothing', this)">
-                                <i class="fas fa-tshirt"></i>
-                                <span>Clothing</span>
-                            </div>
-                            <div class="item-type" onclick="selectItemType('fragile', this)">
-                                <i class="fas fa-glass-whiskey"></i>
-                                <span>Fragile</span>
-                            </div>
-                            <div class="item-type" onclick="selectItemType('other', this)">
-                                <i class="fas fa-box-open"></i>
-                                <span>Other</span>
-                            </div>
+                            <div class="item-type active" onclick="selectItemType('package', this)"><i class="fas fa-box"></i><span>Package</span></div>
+                            <div class="item-type" onclick="selectItemType('document', this)"><i class="fas fa-file-alt"></i><span>Documents</span></div>
+                            <div class="item-type" onclick="selectItemType('electronics', this)"><i class="fas fa-laptop"></i><span>Electronics</span></div>
+                            <div class="item-type" onclick="selectItemType('clothing', this)"><i class="fas fa-tshirt"></i><span>Clothing</span></div>
+                            <div class="item-type" onclick="selectItemType('fragile', this)"><i class="fas fa-glass-whiskey"></i><span>Fragile</span></div>
+                            <div class="item-type" onclick="selectItemType('other', this)"><i class="fas fa-box-open"></i><span>Other</span></div>
                         </div>
                     </div>
 
                     <!-- Special Requirements -->
-                    <div class="toggle-switch">
-                        <div class="toggle-label">Signature Required</div>
-                        <label class="switch">
-                            <input type="checkbox" id="signature_required" name="signature_required" onchange="updateEstimatedFee()">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                    <div class="toggle-switch">
-                        <div class="toggle-label">ID Verification Required</div>
-                        <label class="switch">
-                            <input type="checkbox" id="id_verification" name="id_verification" onchange="updateEstimatedFee()">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
+                    <div class="toggle-switch"><div class="toggle-label">Signature Required</div><label class="switch"><input type="checkbox" id="signature_required" name="signature_required"><span class="slider"></span></label></div>
+                    <div class="toggle-switch"><div class="toggle-label">ID Verification Required</div><label class="switch"><input type="checkbox" id="id_verification" name="id_verification"><span class="slider"></span></label></div>
 
                     <!-- Reference Documents -->
                     <div class="form-group">
                         <label>Reference Documents (Optional)</label>
-                        <div class="info-tip">
-                            <i class="fas fa-lightbulb"></i> Upload photos of items, receipts, or any reference documents
-                        </div>
+                        <div class="info-tip"><i class="fas fa-lightbulb"></i> Upload photos of items, receipts, or any reference documents</div>
                         <div class="file-upload-wrapper">
-                            <div class="file-upload-input" onclick="document.getElementById('file_input').click()">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <span class="file-upload-text">Upload reference photos/documents</span>
-                                <div id="file_name" class="file-name"></div>
-                            </div>
+                            <div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload reference photos/documents</span><div id="file_name" class="file-name"></div></div>
                             <input type="file" id="file_input" class="file-input" accept="image/*,.pdf,.doc,.docx" onchange="displayFileName(this)" multiple>
                             <span class="file-size-note">Max 5 files, 10MB each</span>
                         </div>
@@ -1372,937 +766,309 @@
 
                     <div class="section-divider"></div>
 
-                    <!-- Delivery Information -->
-                    <h2><i class="fas fa-truck"></i> Delivery Information</h2>
-
-                    <div class="collection-row-grid">
-                        <div class="form-group">
-                            <label for="delivery_address">Delivery Address</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-home"></i>
-                                <input type="text" id="delivery_address" name="delivery_address" placeholder="Where should we deliver?" required oninput="updateEstimatedFee(); updateProgress()">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="delivery_time">Delivery Time Window</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-clock"></i>
-                                <select id="delivery_time" name="delivery_time" onchange="toggleSpecificDeliveryTime()">
-                                    <option value="anytime">Anytime today</option>
-                                    <option value="morning">Morning (8AM-12PM)</option>
-                                    <option value="afternoon">Afternoon (12PM-5PM)</option>
-                                    <option value="evening">Evening (5PM-9PM)</option>
-                                    <option value="specific">Specific time</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- VIEW MAP BUTTON - Added right after Delivery Address field -->
-                    <button type="button" class="view-map-btn" onclick="showMap()">
-                        <i class="fas fa-map-marked-alt"></i> View Route Map
-                    </button>
-
-                    <div id="specific_delivery_time_input" class="expanding-input">
-                        <div class="input-with-icon">
-                            <i class="fas fa-clock"></i>
-                            <input type="text" id="specific_delivery_time" name="specific_delivery_time" placeholder="Enter time (e.g., 2:30 PM)" oninput="updateEstimatedFee(); updateProgress()">
-                        </div>
-                    </div>
-
-                    <!-- Delivery Method Indicator -->
-                    <div id="deliveryMethodIndicator" class="collection-method-indicator" style="display: none;">
-                        <div class="collection-method-icon">
-                            <i id="deliveryMethodIcon" class="fas fa-truck"></i>
-                        </div>
-                        <div class="collection-method-text">
-                            <h4 id="deliveryMethodTitle">Delivery Method</h4>
-                            <p id="deliveryMethodDescription">Calculating based on items and distance...</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="delivery_instructions">Delivery Instructions</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-clipboard-list"></i>
-                            <textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions (gate code, leave at door, etc.)" oninput="updateProgress()"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="section-divider"></div>
-
                     <!-- Payment & Preferences -->
                     <h2><i class="fas fa-credit-card"></i> Payment & Preferences</h2>
-
                     <div class="collection-row-grid">
-                        <div class="form-group">
-                            <label for="payment_method">Payment Method</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-credit-card"></i>
-                                <select id="payment_method" name="payment_method" oninput="updateProgress()">
-                                    <option value="cash">Cash</option>
-                                    <option value="card_on_delivery">Card on Delivery</option>
-                                    <option value="prepaid">Prepaid Online</option>
-                                    <option value="mobile">Mobile Payment</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="receipt_required">Receipt Required?</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-receipt"></i>
-                                <select id="receipt_required" name="receipt_required" oninput="updateProgress()">
-                                    <option value="yes">Yes, provide receipt</option>
-                                    <option value="photo">Photo of receipt</option>
-                                    <option value="no">Not required</option>
-                                </select>
-                            </div>
-                        </div>
+                        <div class="form-group"><label for="payment_method">Payment Method</label><div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash</option><option value="card_on_delivery">Card on Delivery</option><option value="prepaid">Prepaid Online</option><option value="mobile">Mobile Payment</option></select></div></div>
+                        <div class="form-group"><label for="receipt_required">Receipt Required?</label><div class="input-with-icon"><i class="fas fa-receipt"></i><select id="receipt_required" name="receipt_required"><option value="yes">Yes, provide receipt</option><option value="photo">Photo of receipt</option><option value="no">Not required</option></select></div></div>
                     </div>
 
                     <div class="section-divider"></div>
 
                     <!-- Additional Information -->
                     <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-comment-alt"></i><textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any other important details or special requirements..."></textarea></div></div>
 
-                    <div class="form-group">
-                        <div class="input-with-icon">
-                            <i class="fas fa-comment-alt"></i>
-                            <textarea id="special_instructions" name="special_instructions" rows="4" placeholder="Any other important details or special requirements..." oninput="updateEstimatedFee(); updateProgress()"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- MODIFIED: Contact and Pricing - NOW LAST BEFORE SUBMIT BUTTON -->
                     <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-dollar-sign"></i> Contact and Pricing</h2>
-
+                    <!-- Contact & Pricing -->
+                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
                     <div class="service-phone-row">
-                        <!-- Service Price -->
-                        <div class="form-group">
-                            <label for="service_price">Service Price ($)</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-hand-holding-usd"></i>
-                                <input type="number" id="service_price" name="service_price"
-                                       placeholder="Your price"
-                                       step="0.01" min="0.50"
-                                       inputmode="decimal" required>
-                            </div>
-                        </div>
-
-                        <!-- Phone Number -->
-                        <div class="form-group">
-                            <label for="phone_number">Phone Number</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel" id="phone_number" name="phone_number"
-                                       placeholder="Phone number" required>
-                            </div>
-                        </div>
+                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
+                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
                     </div>
 
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-paper-plane"></i> Submit Collection Request
-                    </button>
+                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Collection Request</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Global variables for map
-        let map, marker1, marker2, polyline;
-        let selectionMode = 'pickup'; // 'pickup' or 'dropoff'
+        // ========== MAP LOGIC ==========
+        let map, pickupMarker, dropoffMarker, routeLine;
+        let selectionMode = 'pickup';
 
-        // Global variables
-        let selectedServiceType = 'package';
-        let selectedItemType = 'package';
-        let signatureRequired = false;
-        let idVerification = false;
-        let totalItems = 1;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize form
-            initializeForm();
-
-            // Set up form event listeners
-            setupEventListeners();
-
-            // Close modal on outside click
-            document.getElementById('mapModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeMap();
-                }
+        function initMap() {
+            map = L.map('map').setView([-1.2921, 36.8219], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+            document.getElementById('mapHint').style.display = 'block';
+            map.on('click', e => {
+                if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
+                else setDropoffLocation(e.latlng.lat, e.latlng.lng);
+                if (navigator.vibrate) navigator.vibrate(50);
             });
-
-            // Close modal on ESC key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeMap();
-                }
-            });
-
-            // Update fee initially
-            updateEstimatedFee();
-            
-            // Initialize map if modal is opened
-            initMap();
-        });
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    let { latitude, longitude } = pos.coords;
+                    map.setView([latitude, longitude], 13);
+                    if (!pickupMarker) setPickupLocation(latitude, longitude);
+                });
+            }
+        }
 
         function setSelectionMode(mode) {
             selectionMode = mode;
-            document.getElementById('select-pickup-btn').classList.toggle('active', mode === 'pickup');
-            document.getElementById('select-dropoff-btn').classList.toggle('active', mode === 'dropoff');
+            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
+            p.classList.toggle('active', mode === 'pickup');
+            d.classList.toggle('active', mode === 'dropoff');
+            d.classList.toggle('dropoff', mode === 'dropoff');
+            hint.textContent = mode === 'pickup' ? "Tap map to set Collection address" : "Tap map to set Delivery address";
+            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
+            hint.style.display = 'block';
         }
 
-        function initMap() {
-            if (!map) {
-                map = L.map('map').setView([-17.8216, 31.0492], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+        function setPickupLocation(lat, lng) {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-map-marker-alt'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Collection");
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'collection_address');
+            updateRoute();
+            if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
+        }
 
-                map.on('click', function(e) {
-                    const { lat, lng } = e.latlng;
-                    
-                    if (selectionMode === 'pickup') {
-                        document.getElementById('pickup_lat').value = lat;
-                        document.getElementById('pickup_lon').value = lng;
-                        if (marker1) map.removeLayer(marker1);
-                        marker1 = L.marker([lat, lng], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('Collection Point').openPopup();
-                        
-                        // After setting collection, automatically switch to delivery mode
-                        setSelectionMode('dropoff');
-                        reverseGeocode(lat, lng, function(address) {
-                            if (address) {
-                                document.getElementById('collection_address').value = address;
-                            }
-                        });
-                    } else {
-                        document.getElementById('dropoff_lat').value = lat;
-                        document.getElementById('dropoff_lon').value = lng;
-                        if (marker2) map.removeLayer(marker2);
-                        marker2 = L.marker([lat, lng], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('Delivery Point').openPopup();
-
-                        reverseGeocode(lat, lng, function(address) {
-                            if (address) {
-                                document.getElementById('delivery_address').value = address;
-                            }
-                        });
-                    }
-
-                    updateRoute();
-                    updateEstimatedFee();
-                });
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        const currentLat = position.coords.latitude;
-                        const currentLng = position.coords.longitude;
-                        map.setView([currentLat, currentLng], 13);
-                        if (!document.getElementById('pickup_lat').value) {
-                            document.getElementById('pickup_lat').value = currentLat;
-                            document.getElementById('pickup_lon').value = currentLng;
-                            if (marker1) map.removeLayer(marker1);
-                            marker1 = L.marker([currentLat, currentLng], {
-                                icon: L.icon({
-                                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                    iconSize: [25, 41],
-                                    iconAnchor: [12, 41],
-                                    popupAnchor: [1, -34],
-                                    shadowSize: [41, 41]
-                                })
-                            }).addTo(map).bindPopup('Collection Point').openPopup();
-                            reverseGeocode(currentLat, currentLng, function(address) {
-                                if (address) {
-                                    document.getElementById('collection_address').value = address;
-                                }
-                            });
-                        }
-                    });
-                }
-            }
+        function setDropoffLocation(lat, lng) {
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'delivery_address');
+            updateRoute();
         }
 
         function updateRoute() {
-            if (marker1 && marker2) {
-                const start = marker1.getLatLng();
-                const end = marker2.getLatLng();
-                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
-                fetch(routeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.routes && data.routes.length) {
-                            const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                            if (polyline) map.removeLayer(polyline);
-                            polyline = L.polyline(coords, {color: '#4CAF50', weight: 3, opacity: 0.7}).addTo(map);
-                            map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                        } else {
-                            const latlngs = [start, end];
-                            if (polyline) map.removeLayer(polyline);
-                            polyline = L.polyline(latlngs, {color: '#4CAF50', weight: 3, opacity: 0.7}).addTo(map);
-                            map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                        }
-                    })
-                    .catch(() => {
-                        const latlngs = [start, end];
-                        if (polyline) map.removeLayer(polyline);
-                        polyline = L.polyline(latlngs, {color: '#4CAF50', weight: 3, opacity: 0.7}).addTo(map);
-                        map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-                    });
+            if (pickupMarker && dropoffMarker) {
+                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
+                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
+                    .then(res => res.json()).then(data => {
+                        if (data.routes?.length) {
+                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                            if (routeLine) map.removeLayer(routeLine);
+                            routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
+                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+                            let distKm = data.routes[0].distance / 1000;
+                            updateUIwithDistance(distKm);
+                        } else fallbackDistance(p, d);
+                    }).catch(() => fallbackDistance(p, d));
             }
         }
 
-        function reverseGeocode(lat, lng, callback) {
+        function fallbackDistance(p, d) {
+            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
+            updateUIwithDistance(dist);
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function reverseGeocode(lat, lng, inputId) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.display_name) {
-                        callback(data.display_name);
-                    } else {
-                        callback('');
-                    }
-                })
-                .catch(() => callback(''));
+                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
+                .catch(()=>{});
         }
 
-        function initializeForm() {
-            // Set default service type
-            selectServiceType('package', document.querySelector('.service-type'));
+        // ========== FEE & INFO BAR (collection pricing) ==========
+        function updateUIwithDistance(distKm) {
+            let distanceFee = 0;
+            if (distKm <= 2) distanceFee = 2.50;
+            else if (distKm <= 10) distanceFee = 4.00;
+            else if (distKm <= 25) distanceFee = 6.50;
+            else if (distKm <= 50) distanceFee = 9.00;
+            else distanceFee = 12.00;
 
-            // Set default item type
-            selectItemType('package', document.querySelector('.item-type'));
+            let serviceTypeFee = { package:5.00, document:3.00, item:6.00 }[selectedServiceType] || 5.00;
+            let itemTypeFee = { package:2.00, document:1.00, electronics:5.00, clothing:1.50, fragile:8.00, other:3.00 }[selectedItemType] || 3.00;
+            let weightFee = 0;
+            document.querySelectorAll('input[name="weights[]"]').forEach(inp => { let w = parseFloat(inp.value) || 0; weightFee += w; });
+            if (weightFee > 0) {
+                if (weightFee <= 10) weightFee = 1.00;
+                else if (weightFee <= 25) weightFee = 2.50;
+                else if (weightFee <= 50) weightFee = 4.00;
+                else if (weightFee <= 100) weightFee = 7.00;
+                else weightFee = 10.00;
+            } else weightFee = 0;
 
-            // Update progress bar
-            document.querySelectorAll('input, select, textarea').forEach(input => {
-                input.addEventListener('input', updateProgress);
-                input.addEventListener('change', updateProgress);
-            });
+            let itemCount = document.querySelectorAll('input[name="items[]"]').length;
+            let itemCountFee = itemCount * 1.50;
+
+            let specialFee = 0;
+            if (document.getElementById('signature_required').checked) specialFee += 2.00;
+            if (document.getElementById('id_verification').checked) specialFee += 3.00;
+            let handling = document.getElementById('handling_requirements').value;
+            if (handling === 'careful') specialFee += 3.00;
+            if (handling === 'special') specialFee += 5.00;
+            let condition = document.getElementById('item_condition').value;
+            if (condition === 'fragile') specialFee += 4.00;
+            if (condition === 'perishable') specialFee += 6.00;
+
+            let timeFee = 0;
+            let collTime = document.getElementById('collection_time').value;
+            let delTime = document.getElementById('delivery_time').value;
+            if (collTime === 'specific' && document.getElementById('specific_collection_time').value) timeFee += 2.00;
+            else if (collTime === 'morning' || collTime === 'evening') timeFee += 1.50;
+            if (delTime === 'specific' && document.getElementById('specific_delivery_time').value) timeFee += 2.00;
+            else if (delTime === 'morning' || delTime === 'evening') timeFee += 1.50;
+
+            let valueFee = Math.min((parseFloat(document.getElementById('estimated_value').value) || 0) * 0.02, 10);
+
+            let total = Math.min(Math.max(distanceFee + serviceTypeFee + itemTypeFee + weightFee + itemCountFee + specialFee + timeFee + valueFee, 5.00), 100.00);
+            let estMinutes = Math.round(distKm * 3);
+
+            document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+            document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
+            document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
+            document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
+
+            let method = getDeliveryMethod();
+            updateDeliveryMethod(method);
         }
 
-        function setupEventListeners() {
-            // Update fee when inputs change
-            const feeInputs = ['collection_address', 'delivery_address', 'collection_time', 'delivery_time',
-                              'specific_collection_time', 'specific_delivery_time', 'estimated_value',
-                              'handling_requirements', 'special_instructions'];
-
-            feeInputs.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('input', updateEstimatedFee);
-                    element.addEventListener('change', updateEstimatedFee);
-                }
-            });
-
-            // Item weight and size changes
-            document.addEventListener('input', function(e) {
-                if (e.target.name === 'weights[]' || e.target.name === 'sizes[]') {
-                    updateEstimatedFee();
-                }
-            });
-
-            // Signature and ID verification toggles
-            document.getElementById('signature_required').addEventListener('change', function() {
-                signatureRequired = this.checked;
-                updateEstimatedFee();
-            });
-
-            document.getElementById('id_verification').addEventListener('change', function() {
-                idVerification = this.checked;
-                updateEstimatedFee();
-            });
-
-            // Form submission
-            document.getElementById('collectionsForm').addEventListener('submit', handleFormSubmit);
-        }
-
-        // Service Type Selection
-        function selectServiceType(type, element) {
-            selectedServiceType = type;
-
-            // Remove active class from all service types
-            document.querySelectorAll('.service-type').forEach(el => {
-                el.classList.remove('active');
-            });
-
-            // Add active class to selected type
-            element.classList.add('active');
-
-            updateEstimatedFee();
-            updateProgress();
-        }
-
-        // Item Type Selection
-        function selectItemType(type, element) {
-            selectedItemType = type;
-
-            // Remove active class from all item types
-            document.querySelectorAll('.item-type').forEach(el => {
-                el.classList.remove('active');
-            });
-
-            // Add active class to selected type
-            element.classList.add('active');
-
-            updateEstimatedFee();
-            updateProgress();
-        }
-
-        function setCollectionAddress(address) {
-            document.getElementById('collection_address').value = address;
-            document.getElementById('collection_address').focus();
-            updateEstimatedFee();
-            updateProgress();
-        }
-
-        // Toggle specific collection time input
-        function toggleSpecificCollectionTime() {
-            const specificInput = document.getElementById('specific_collection_time_input');
-            if (document.getElementById('collection_time').value === 'specific') {
-                specificInput.classList.add('expanded');
-                setTimeout(() => document.getElementById('specific_collection_time')?.focus(), 300);
-            } else {
-                specificInput.classList.remove('expanded');
-            }
-            updateEstimatedFee();
-        }
-
-        // Toggle specific delivery time input
-        function toggleSpecificDeliveryTime() {
-            const specificInput = document.getElementById('specific_delivery_time_input');
-            if (document.getElementById('delivery_time').value === 'specific') {
-                specificInput.classList.add('expanded');
-                setTimeout(() => document.getElementById('specific_delivery_time')?.focus(), 300);
-            } else {
-                specificInput.classList.remove('expanded');
-            }
-            updateEstimatedFee();
-        }
-
-        // Distance calculation - FROM COLLECTION ADDRESS TO DELIVERY ADDRESS
-        function calculateDistance() {
-            const lat1 = parseFloat(document.getElementById('pickup_lat').value);
-            const lon1 = parseFloat(document.getElementById('pickup_lon').value);
-            const lat2 = parseFloat(document.getElementById('dropoff_lat').value);
-            const lon2 = parseFloat(document.getElementById('dropoff_lon').value);
-
-            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
-                // Fallback to text-based simulation if coordinates aren't set
-                const collectionAddress = document.getElementById('collection_address').value;
-                const deliveryAddress = document.getElementById('delivery_address').value;
-
-                if (collectionAddress && deliveryAddress) {
-                    const collectionLength = collectionAddress.length;
-                    const deliveryLength = deliveryAddress.length;
-                    const baseDistance = 0.5 + (Math.abs(collectionLength - deliveryLength) / 100);
-                    const randomFactor = 0.5 + (Math.random() * 3);
-                    return parseFloat(Math.min(baseDistance * randomFactor, 50).toFixed(2));
-                }
-                return 0;
-            }
-
-            // Haversine formula
-            const R = 6371; // km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const d = R * c;
-            return parseFloat(d.toFixed(2));
-        }
-
-        // Calculate distance fee for collections
-        function calculateDistanceFee(distance) {
-            if (distance <= 0) return 0;
-
-            const distanceKm = parseFloat(distance);
-
-            // Collection pricing structure:
-            // 0-2km: $2.50
-            // 2.01-10km: $4.00
-            // 10.01-25km: $6.50
-            // 25.01-50km: $9.00
-            // 50.01km+: $12.00
-
-            if (distanceKm <= 2) {
-                return 2.50;
-            } else if (distanceKm <= 10) {
-                return 4.00;
-            } else if (distanceKm <= 25) {
-                return 6.50;
-            } else if (distanceKm <= 50) {
-                return 9.00;
-            } else {
-                return 12.00;
-            }
-        }
-
-        // Determine delivery method based on items
         function getDeliveryMethod() {
-            const items = document.querySelectorAll('input[name="weights[]"]');
             let totalWeight = 0;
-            let hasFragile = false;
-
-            items.forEach(input => {
-                const weight = parseFloat(input.value) || 0;
-                totalWeight += weight;
-            });
-
-            // Check if any item is marked as fragile
-            const itemCondition = document.getElementById('item_condition').value;
-            hasFragile = itemCondition === 'fragile';
-
-            // Check item type
-            const isDocuments = selectedItemType === 'document';
-            const isElectronics = selectedItemType === 'electronics';
-            const isFragileType = selectedItemType === 'fragile';
-
-            if (totalWeight <= 10 && !hasFragile && !isElectronics && !isFragileType) {
-                return {
-                    method: 'bike',
-                    title: 'Bike Delivery',
-                    description: 'Suitable for light items and documents',
-                    icon: 'fas fa-bicycle',
-                    color: '#4CAF50'
-                };
-            } else if (totalWeight <= 50) {
-                return {
-                    method: 'vehicle',
-                    title: 'Vehicle Delivery',
-                    description: 'Requires vehicle for medium-sized items',
-                    icon: 'fas fa-car',
-                    color: '#FF9800'
-                };
-            } else {
-                return {
-                    method: 'van',
-                    title: 'Van Required',
-                    description: 'Large or heavy items require van delivery',
-                    icon: 'fas fa-truck',
-                    color: '#f44336'
-                };
-            }
-        }
-
-        // Calculate service type fee
-        function calculateServiceTypeFee() {
-            const fees = {
-                'package': 5.00,
-                'document': 3.00,
-                'item': 6.00
-            };
-            return fees[selectedServiceType] || 5.00;
-        }
-
-        // Calculate item type complexity fee
-        function calculateItemTypeFee() {
-            const fees = {
-                'package': 2.00,
-                'document': 1.00,
-                'electronics': 5.00,
-                'clothing': 1.50,
-                'fragile': 8.00,
-                'other': 3.00
-            };
-            return fees[selectedItemType] || 3.00;
-        }
-
-        // Calculate weight fee
-        function calculateWeightFee() {
-            const items = document.querySelectorAll('input[name="weights[]"]');
-            let totalWeight = 0;
-
-            items.forEach(input => {
-                const weight = parseFloat(input.value) || 0;
-                totalWeight += weight;
-            });
-
-            if (totalWeight <= 0) return 0;
-
-            // Weight fee structure (in lbs)
-            if (totalWeight <= 10) return 1.00;
-            if (totalWeight <= 25) return 2.50;
-            if (totalWeight <= 50) return 4.00;
-            if (totalWeight <= 100) return 7.00;
-            return 10.00;
-        }
-
-        // Calculate item count fee
-        function calculateItemCountFee() {
-            const items = document.querySelectorAll('input[name="items[]"]');
-            let itemCount = 0;
-
-            items.forEach(item => {
-                if (item.value.trim()) itemCount++;
-            });
-
-            return itemCount * 1.50; // $1.50 per additional item
-        }
-
-        // Calculate special requirements fee
-        function calculateSpecialRequirementsFee() {
-            let fee = 0;
-
-            // Signature requirement
-            if (signatureRequired) fee += 2.00;
-
-            // ID verification
-            if (idVerification) fee += 3.00;
-
-            // Handling requirements
-            const handling = document.getElementById('handling_requirements').value;
-            if (handling === 'careful') fee += 3.00;
-            if (handling === 'special') fee += 5.00;
-
-            // Item condition
-            const condition = document.getElementById('item_condition').value;
-            if (condition === 'fragile') fee += 4.00;
-            if (condition === 'perishable') fee += 6.00;
-
-            return fee;
-        }
-
-        // Calculate time fee
-        function calculateTimeFee() {
-            const collectionTime = document.getElementById('collection_time').value;
-            const deliveryTime = document.getElementById('delivery_time').value;
-            let fee = 0;
-
-            // Collection time fees
-            if (collectionTime === 'specific') {
-                const specificTime = document.getElementById('specific_collection_time').value;
-                if (specificTime) fee += 2.00;
-            } else if (collectionTime === 'morning' || collectionTime === 'evening') {
-                fee += 1.50;
-            }
-
-            // Delivery time fees
-            if (deliveryTime === 'specific') {
-                const specificTime = document.getElementById('specific_delivery_time').value;
-                if (specificTime) fee += 2.00;
-            } else if (deliveryTime === 'morning' || deliveryTime === 'evening') {
-                fee += 1.50;
-            }
-
-            return fee;
-        }
-
-        // Calculate value fee (percentage of item value)
-        function calculateValueFee() {
-            const estimatedValue = parseFloat(document.getElementById('estimated_value').value) || 0;
-            if (estimatedValue <= 0) return 0;
-
-            // 2% of item value, max $10
-            const valueFee = estimatedValue * 0.02;
-            return Math.min(valueFee, 10.00);
-        }
-
-        // MAP FUNCTIONS - SHOWS ROUTE FROM COLLECTION TO DELIVERY
-        function showMap() {
-            document.getElementById('mapModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-
-            // Initialize map if not done
-            initMap();
-
-            // Force map resize
-            setTimeout(() => {
-                map.invalidateSize();
-                if (marker1 && marker2) {
-                    updateRoute();
-                }
-            }, 200);
-
-            // Update details
-            updateMapDetails(calculateDistance());
-        }
-
-        function closeMap() {
-            document.getElementById('mapModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        function updateMapDetails(distance) {
-            const estimatedTime = Math.round(distance * 3);
-            const deliveryMethod = getDeliveryMethod();
-
-            document.getElementById('mapDistance').textContent = distance + ' km';
-            document.getElementById('mapTime').textContent = estimatedTime + ' min';
-            document.getElementById('mapDeliveryMethod').textContent = deliveryMethod.title;
-        }
-
-        // Update estimated fee
-        function updateEstimatedFee() {
-            const distance = calculateDistance();
-            const distanceFee = calculateDistanceFee(distance);
-            const serviceTypeFee = calculateServiceTypeFee();
-            const itemTypeFee = calculateItemTypeFee();
-            const weightFee = calculateWeightFee();
-            const itemCountFee = calculateItemCountFee();
-            const specialRequirementsFee = calculateSpecialRequirementsFee();
-            const timeFee = calculateTimeFee();
-            const valueFee = calculateValueFee();
-
-            // Total fee calculation
-            let totalFee = distanceFee + serviceTypeFee + itemTypeFee + weightFee +
-                          itemCountFee + specialRequirementsFee + timeFee + valueFee;
-
-            // Minimum fee of $5, maximum of $100
-            totalFee = Math.min(Math.max(totalFee, 5.00), 100.00);
-
-            // Update display
-            const feeElement = document.getElementById('estimated_fee');
-            feeElement.textContent = '$' + totalFee.toFixed(2);
-
-            // Update delivery method indicator
-            const deliveryMethod = getDeliveryMethod();
-            updateDeliveryMethod(deliveryMethod);
-
-            // Update map if open
-            if (document.getElementById('mapModal').style.display === 'flex') {
-                updateMapDetails(distance);
-            }
-
-            // Visual feedback
-            feeElement.style.transform = 'scale(1.1)';
-            setTimeout(() => feeElement.style.transform = 'scale(1)', 300);
+            document.querySelectorAll('input[name="weights[]"]').forEach(inp => { totalWeight += parseFloat(inp.value) || 0; });
+            let fragile = document.getElementById('item_condition').value === 'fragile' || selectedItemType === 'fragile';
+            let electronics = selectedItemType === 'electronics';
+            if (totalWeight <= 10 && !fragile && !electronics) return { title: 'Bike Delivery', icon: 'fas fa-bicycle', description: 'Suitable for light items and documents', color: '#4CAF50' };
+            if (totalWeight <= 50) return { title: 'Vehicle Delivery', icon: 'fas fa-car', description: 'Requires vehicle for medium-sized items', color: '#FF9800' };
+            return { title: 'Van Required', icon: 'fas fa-truck', description: 'Large or heavy items require van delivery', color: '#f44336' };
         }
 
         function updateDeliveryMethod(method) {
-            const indicator = document.getElementById('deliveryMethodIndicator');
-
+            let indicator = document.getElementById('deliveryMethodIndicator');
             if (method) {
                 indicator.style.display = 'flex';
                 document.getElementById('deliveryMethodIcon').className = method.icon;
-                document.getElementById('deliveryMethodTitle').textContent = method.title;
-                document.getElementById('deliveryMethodDescription').textContent = method.description;
+                document.getElementById('deliveryMethodTitle').innerText = method.title;
+                document.getElementById('deliveryMethodDescription').innerText = method.description;
                 indicator.style.borderLeft = `3px solid ${method.color}`;
-            } else {
-                indicator.style.display = 'none';
-            }
+            } else indicator.style.display = 'none';
         }
 
-        // File upload
-        function displayFileName(input) {
-            const fileNameDisplay = document.getElementById('file_name');
-            if (input.files.length > 0) {
-                if (input.files.length > 5) {
-                    alert('Maximum 5 files allowed. Only the first 5 will be uploaded.');
-                }
-                const fileNames = Array.from(input.files).slice(0, 5).map(f => f.name).join(', ');
-                fileNameDisplay.textContent = input.files.length > 1 ? `${input.files.length} files` : fileNames;
-                fileNameDisplay.style.transform = 'scale(1.05)';
-                setTimeout(() => fileNameDisplay.style.transform = 'scale(1)', 300);
-            } else {
-                fileNameDisplay.textContent = '';
-            }
+        // Listeners for fee recalculation
+        document.getElementById('collection_time').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('delivery_time').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('signature_required').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('id_verification').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('handling_requirements').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('item_condition').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('estimated_value').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.querySelectorAll('input[name="weights[]"]').forEach(inp => inp.addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); }));
+
+        // ========== UI HELPERS ==========
+        let selectedServiceType = 'package';
+        let selectedItemType = 'package';
+
+        function selectServiceType(type, element) {
+            document.querySelectorAll('.service-type').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            selectedServiceType = type;
+            if (pickupMarker && dropoffMarker) updateRoute();
         }
 
-        // Collection items management
+        function selectItemType(type, element) {
+            document.querySelectorAll('.item-type').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            selectedItemType = type;
+            if (pickupMarker && dropoffMarker) updateRoute();
+        }
+
+        function setCollectionAddress(addr) {
+            document.getElementById('collection_address').value = addr;
+        }
+
+        function toggleSpecificCollectionTime() {
+            let div = document.getElementById('specific_collection_time_input');
+            if (document.getElementById('collection_time').value === 'specific') div.classList.add('expanded');
+            else div.classList.remove('expanded');
+        }
+
+        function toggleSpecificDeliveryTime() {
+            let div = document.getElementById('specific_delivery_time_input');
+            if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded');
+            else div.classList.remove('expanded');
+        }
+
         function addItem() {
-            totalItems++;
-            const container = document.getElementById('items-container');
-            const newItem = document.createElement('div');
-            newItem.className = 'collection-item';
-            newItem.innerHTML = `
-                <div class="collection-row">
-                    <div class="input-with-icon" style="flex: 2;">
-                        <i class="fas fa-box"></i>
-                        <input type="text" name="items[]" placeholder="Item description" required oninput="updateEstimatedFee(); updateProgress()">
-                    </div>
-                    <div class="input-with-icon" style="flex: 1;">
-                        <i class="fas fa-hashtag"></i>
-                        <input type="text" name="quantities[]" placeholder="Qty" required oninput="updateEstimatedFee(); updateProgress()">
-                    </div>
-                </div>
-                <div class="collection-row">
-                    <div class="input-with-icon" style="flex: 1;">
-                        <i class="fas fa-ruler-combined"></i>
-                        <input type="text" name="sizes[]" placeholder="Size/Dimensions" oninput="updateEstimatedFee(); updateProgress()">
-                    </div>
-                    <div class="input-with-icon" style="flex: 1;">
-                        <i class="fas fa-weight-hanging"></i>
-                        <input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0" oninput="updateEstimatedFee(); updateProgress()">
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
-                </div>
-            `;
+            let container = document.getElementById('items-container');
+            let newItem = document.createElement('div'); newItem.className = 'collection-item';
+            newItem.innerHTML = `<div class="collection-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-box"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="collection-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-ruler-combined"></i><input type="text" name="sizes[]" placeholder="Size/Dimensions"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-weight-hanging"></i><input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;
             container.appendChild(newItem);
-
-            // Animate
-            newItem.style.opacity = '0';
-            newItem.style.transform = 'translateY(10px)';
-            setTimeout(() => {
-                newItem.style.transition = 'all 0.3s ease';
-                newItem.style.opacity = '1';
-                newItem.style.transform = 'translateY(0)';
-            }, 10);
-
-            // Focus on new item
-            setTimeout(() => {
-                newItem.querySelector('input[name="items[]"]').focus();
-            }, 300);
-
-            updateEstimatedFee();
-            updateProgress();
+            totalItems++;
+            setTimeout(() => newItem.querySelector('input')?.focus(), 100);
+            if (pickupMarker && dropoffMarker) updateRoute();
         }
 
-        function removeItem(button) {
-            const item = button.closest('.collection-item');
-            item.style.transition = 'all 0.3s ease';
-            item.style.opacity = '0';
-            item.style.transform = 'translateY(-10px)';
-            setTimeout(() => {
-                item.remove();
-                totalItems--;
-                updateEstimatedFee();
-                updateProgress();
-            }, 300);
+        function removeItem(btn) {
+            btn.closest('.collection-item')?.remove();
+            totalItems--;
+            if (pickupMarker && dropoffMarker) updateRoute();
         }
 
-        // Progress bar
+        function displayFileName(input) {
+            let nameSpan = document.getElementById('file_name');
+            if (input.files.length) nameSpan.innerText = input.files.length > 1 ? `${input.files.length} files` : input.files[0].name;
+            else nameSpan.innerText = '';
+        }
+
         function updateProgress() {
-            const inputs = document.querySelectorAll('input, select, textarea');
-            let filled = 0;
+            let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length;
+            let total = document.querySelectorAll('input,select,textarea').length;
+            document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%';
+        }
+        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
 
-            inputs.forEach(input => {
-                if (input.value && input.type !== 'hidden' && input.type !== 'file') {
-                    filled++;
-                }
+        function initAutoSliding() {
+            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
+                const check = () => {
+                    inp.classList.remove('sliding-text');
+                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
+                        inp.classList.add('sliding-text');
+                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
+                    }
+                };
+                inp.addEventListener('input', () => setTimeout(check, 100));
+                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
+                inp.addEventListener('blur', () => { if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running'; });
+                setTimeout(check, 300);
             });
-
-            const progress = Math.min((filled / inputs.length) * 100, 100);
-            document.querySelector('.progress').style.width = `${progress}%`;
+            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
         }
 
-        // Form validation and submission
-        function handleFormSubmit(e) {
-            // Prevent default form submission for demo
-            if (e) e.preventDefault();
+        // Form validation
+        document.getElementById('collectionsForm').addEventListener('submit', function(e) {
+            if (!document.getElementById('collection_address').value.trim()) { alert('Please set collection address on map.'); e.preventDefault(); return false; }
+            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
+            if (!document.getElementById('collection_contact').value.trim()) { alert('Enter collection contact name.'); e.preventDefault(); return false; }
+            if (!document.getElementById('collection_phone').value.trim()) { alert('Enter collection phone number.'); e.preventDefault(); return false; }
+            let hasItem = false;
+            document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+            if (!hasItem) { alert('Add at least one item.'); e.preventDefault(); return false; }
+            let price = parseFloat(document.getElementById('service_price').value);
+            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
+            if (!document.getElementById('phone_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
+        });
 
-            // Validate required fields
-            const collectionAddress = document.getElementById('collection_address').value.trim();
-            const collectionContact = document.getElementById('collection_contact').value.trim();
-            const collectionPhone = document.getElementById('collection_phone').value.trim();
-            const deliveryAddress = document.getElementById('delivery_address').value.trim();
-            const servicePrice = document.getElementById('service_price').value.trim();
-            const phoneNumber = document.getElementById('phone_number').value.trim();
-            const items = document.querySelectorAll('input[name="items[]"]');
-
-            // Collection time validation
-            const collectionTime = document.getElementById('collection_time').value;
-            if (collectionTime === 'specific') {
-                const specificTime = document.getElementById('specific_collection_time').value.trim();
-                if (!specificTime) {
-                    alert('Please enter a specific collection time.');
-                    document.getElementById('specific_collection_time').focus();
-                    return false;
-                }
-            }
-
-            // Delivery time validation
-            const deliveryTime = document.getElementById('delivery_time').value;
-            if (deliveryTime === 'specific') {
-                const specificTime = document.getElementById('specific_delivery_time').value.trim();
-                if (!specificTime) {
-                    alert('Please enter a specific delivery time.');
-                    document.getElementById('specific_delivery_time').focus();
-                    return false;
-                }
-            }
-
-            let hasItems = false;
-            items.forEach(item => {
-                if (item.value.trim()) hasItems = true;
-            });
-
-            // Check all required fields
-            if (!collectionAddress || !collectionContact || !collectionPhone ||
-                !deliveryAddress || !hasItems || !servicePrice || !phoneNumber) {
-                alert('Please fill in all required fields.');
-                return false;
-            }
-
-            // Validate service price
-            const servicePriceNum = parseFloat(servicePrice);
-            if (servicePriceNum < 0.50) {
-                alert('Service price must be at least $0.50.');
-                document.getElementById('service_price').focus();
-                return false;
-            }
-
-            // Show summary
-            const distance = calculateDistance();
-            const estimatedFee = document.getElementById('estimated_fee').textContent;
-            const deliveryMethod = getDeliveryMethod();
-            const estimatedValue = document.getElementById('estimated_value').value || 'Not specified';
-
-            const summary = `
-✅ Collection request created!
-
-📦 Service Type: ${selectedServiceType.charAt(0).toUpperCase() + selectedServiceType.slice(1)}
-📍 Collection: ${collectionAddress}
-🚚 Delivery: ${deliveryAddress}
-📏 Distance: ${distance} km
-📦 Items: ${totalItems} item(s)
-💰 Estimated Value: $${estimatedValue}
-🚚 Delivery Method: ${deliveryMethod.title}
-💵 Estimated Service Fee: ${estimatedFee}
-💰 Your Service Price: $${servicePriceNum.toFixed(2)}
-📱 Phone: ${phoneNumber}
-
-Our collection agent will contact you shortly to confirm details.
-
-Thank you for using ErrandConnect!
-            `;
-
-            alert(summary);
-
-            // In a real app, you would submit the form here
-            // this.submit();
-
-            // For demo purposes, show success message
-            showSuccess();
-        }
-
-        function showSuccess() {
-            const submitBtn = document.querySelector('.submit-btn');
-            const originalHTML = submitBtn.innerHTML;
-
-            submitBtn.innerHTML = '<i class="fas fa-check"></i> Request Submitted!';
-            submitBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)';
-
-            setTimeout(() => {
-                submitBtn.innerHTML = originalHTML;
-                submitBtn.style.background = 'var(--gradient)';
-            }, 3000);
-        }
+        window.onload = function() {
+            initMap();
+            initAutoSliding();
+            updateProgress();
+        };
     </script>
 </body>
 </html>

@@ -1,0 +1,636 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="errand-bank-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <a href="{{ url_for('settings') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Errands & Payments</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Errand Balance Card -->
+        <section class="balance-card">
+            <div class="balance-info">
+                <span class="balance-label">Available Errands</span>
+                <span class="balance-value">{{ remaining_errands if remaining_errands else 5 }}</span>
+            </div>
+            <div class="balance-footer">
+                <span>New accounts start with 5 free errands</span>
+            </div>
+        </section>
+
+        <!-- Bonus Section -->
+        <section class="info-section bonus-section">
+            <h3 class="section-title">🎁 Earn Free Errands</h3>
+            <ul class="bonus-list">
+                <li>
+                    <i class="fas fa-star"></i>
+                    <span><strong>5 consecutive 5‑star ratings</strong> → 3 free errands</span>
+                </li>
+                <li>
+                    <i class="fas fa-user-friends"></i>
+                    <span><strong>Refer a friend</strong> who completes 5 errands → both get 2 free errands</span>
+                </li>
+                <li>
+                    <i class="fas fa-calendar-check"></i>
+                    <span><strong>Weekly streak:</strong> complete 10 errands in a week → 1 free errand</span>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Low Balance Alert -->
+        <section class="info-section">
+            <h3 class="section-title">🔔 Low Balance Alert</h3>
+            <div class="alert-settings">
+                <label for="threshold" class="form-label">Notify me when errands fall below</label>
+                <div class="threshold-input">
+                    <input type="number" id="threshold" name="threshold" class="form-input"
+                           value="{{ user.notification_threshold if user.notification_threshold else 3 }}"
+                           min="1" max="50" placeholder="e.g., 3">
+                    <button class="btn-outline-small" id="save-threshold">Save</button>
+                </div>
+                <small class="form-note">We'll remind you to top up before you run out.</small>
+            </div>
+        </section>
+
+        <!-- Buy Errand Packages -->
+        <section class="info-section">
+            <h3 class="section-title">📦 Top Up Errands</h3>
+            <p class="section-description">Choose a package to continue accepting jobs.</p>
+            <div class="package-grid">
+                <div class="package-card" data-price="3" data-errands="5">
+                    <span class="package-errands">5 Errands</span>
+                    <span class="package-price">$3</span>
+                </div>
+                <div class="package-card" data-price="5" data-errands="8">
+                    <span class="package-errands">8 Errands</span>
+                    <span class="package-price">$5</span>
+                </div>
+                <div class="package-card" data-price="10" data-errands="15">
+                    <span class="package-errands">15 Errands</span>
+                    <span class="package-price">$10</span>
+                </div>
+                <div class="package-card" data-price="12" data-errands="18">
+                    <span class="package-errands">18 Errands</span>
+                    <span class="package-price">$12</span>
+                </div>
+                <div class="package-card featured" data-price="15" data-errands="25">
+                    <span class="package-errands">25 Errands</span>
+                    <span class="package-price">$15</span>
+                    <span class="badge">Best Value</span>
+                </div>
+            </div>
+
+            <!-- Selected Package & Payment -->
+            <div id="selected-package" class="selected-package" style="display: none;">
+                <h4>Selected: <span id="selected-name"></span></h4>
+                <p>Price: <strong>$<span id="selected-price"></span></strong></p>
+
+                <label for="payment-method" class="form-label required">Payment Method</label>
+                <select id="payment-method" class="form-input">
+                    <option value="" disabled selected>-- Choose payment method --</option>
+                    <option value="bank">Bank Transfer</option>
+                    <option value="ecocash">EcoCash</option>
+                    <option value="innbucks">InnBucks</option>
+                    <option value="mukuru">Mukuru</option>
+                    <option value="onemoney">OneMoney</option>
+                    <option value="visa">Visa / Mastercard</option>
+                </select>
+
+                <!-- Dynamic payment details -->
+                <div id="payment-details" class="payment-details" style="display: none;">
+                    <!-- Bank fields -->
+                    <div id="detail-bank" class="detail-group" style="display: none;">
+                        <label for="bank-account" class="form-label">Account Number</label>
+                        <input type="text" id="bank-account" class="form-input" placeholder="Enter account number">
+                        <label for="bank-name" class="form-label">Bank Name</label>
+                        <input type="text" id="bank-name" class="form-input" placeholder="Bank name">
+                    </div>
+                    <!-- Mobile money fields (EcoCash, InnBucks, Mukuru, OneMoney) -->
+                    <div id="detail-mobile" class="detail-group" style="display: none;">
+                        <label for="mobile-number" class="form-label">Mobile Number</label>
+                        <input type="tel" id="mobile-number" class="form-input" placeholder="+263 7XX XXX XXX">
+                        <label for="mobile-name" class="form-label">Account Name</label>
+                        <input type="text" id="mobile-name" class="form-input" placeholder="Your name">
+                    </div>
+                    <!-- Visa/Mastercard fields -->
+                    <div id="detail-card" class="detail-group" style="display: none;">
+                        <label for="card-number" class="form-label">Card Number</label>
+                        <input type="text" id="card-number" class="form-input" placeholder="1234 5678 9012 3456">
+                        <div class="card-row">
+                            <div class="card-col">
+                                <label for="card-expiry" class="form-label">Expiry</label>
+                                <input type="text" id="card-expiry" class="form-input" placeholder="MM/YY">
+                            </div>
+                            <div class="card-col">
+                                <label for="card-cvc" class="form-label">CVC</label>
+                                <input type="text" id="card-cvc" class="form-input" placeholder="123">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="confirm-purchase">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+        </section>
+
+        <!-- Payout Method Section -->
+        <section class="info-section">
+            <h3 class="section-title">🏦 Payout Details</h3>
+            <form id="payout-form" class="info-form" method="POST" action="{{ url_for('runnerbank') }}">
+                <div class="form-group">
+                    <label for="payout_method" class="form-label">Payout Method</label>
+                    <select id="payout_method" name="payout_method" class="form-input">
+                        <option value="bank" {% if user.payout_method == 'bank' %}selected{% endif %}>Bank Account</option>
+                        <option value="mobile_money" {% if user.payout_method == 'mobile_money' %}selected{% endif %}>Mobile Money</option>
+                        <option value="paypal" {% if user.payout_method == 'paypal' %}selected{% endif %}>PayPal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="account_number" class="form-label">Account Number / Phone</label>
+                    <input type="text" id="account_number" name="account_number" class="form-input"
+                           value="{{ user.account_number if user else '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="account_name" class="form-label">Account Name</label>
+                    <input type="text" id="account_name" name="account_name" class="form-input"
+                           value="{{ user.account_name if user else '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="bank_name" class="form-label">Bank / Provider Name</label>
+                    <input type="text" id="bank_name" name="bank_name" class="form-input"
+                           value="{{ user.bank_name if user else '' }}">
+                </div>
+                <button type="submit" class="btn-primary">Save Payout Info</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Purchase Successful!</h3>
+            <p id="modal-message"></p>
+            <button class="btn-primary modal-close" onclick="closeModal()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4CAF50;
+        --primary-light: #66BB6A;
+        --primary-dark: #388E3C;
+        --primary-50: #E8F5E8;
+        --surface: #FFFFFF;
+        --background: #F8FDF8;
+        --text-primary: #1A331A;
+        --text-secondary: #666666;
+        --text-light: #888888;
+        --border: #E0E0E0;
+        --border-light: #F0F0F0;
+        --shadow: 0 2px 12px rgba(76,175,80,0.08);
+        --success: #4CAF50;
+        --error: #F44336;
+    }
+
+    * { box-sizing: border-box; }
+
+    #errand-bank-page {
+        min-height: 100vh;
+        background: var(--background);
+        padding-bottom: 20px;
+    }
+
+    .mobile-header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-light);
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        display: flex; align-items: center;
+    }
+
+    .header-content {
+        display: flex; align-items: center; width: 100%; gap: 12px;
+    }
+
+    .back-btn {
+        color: var(--text-secondary);
+        padding: 8px; border-radius: 10px;
+        transition: 0.2s; text-decoration: none; font-size: 1.2rem;
+    }
+
+    .back-btn:active {
+        background: var(--primary-50);
+        color: var(--primary-color);
+    }
+
+    .logo {
+        display: flex; align-items: center; gap: 10px; flex: 1;
+    }
+
+    .logo-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        padding: 8px; border-radius: 10px; color: white;
+        display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+
+    .logo h1 {
+        font-size: 1.1rem; font-weight: 600; color: var(--text-primary);
+        white-space: nowrap;
+    }
+
+    .mobile-main {
+        padding: 20px;
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    /* Balance Card */
+    .balance-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 16px;
+        padding: 20px;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+    }
+
+    .balance-info {
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .balance-label {
+        font-size: 1rem; font-weight: 500;
+    }
+
+    .balance-value {
+        font-size: 2.5rem; font-weight: 700;
+    }
+
+    .balance-footer {
+        font-size: 0.8rem; opacity: 0.8; margin-top: 8px;
+    }
+
+    /* Bonus Section */
+    .bonus-list {
+        list-style: none; padding: 0; margin: 0;
+    }
+
+    .bonus-list li {
+        display: flex; align-items: flex-start; gap: 10px;
+        padding: 12px 0; border-bottom: 1px solid var(--border-light);
+        font-size: 0.95rem; color: var(--text-primary);
+    }
+
+    .bonus-list li:last-child {
+        border-bottom: none;
+    }
+
+    .bonus-list i {
+        color: var(--primary-color); font-size: 1.1rem; margin-top: 2px; width: 20px;
+    }
+
+    /* Info Section */
+    .info-section {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 18px; font-weight: 600;
+        color: var(--text-primary); margin-bottom: 16px; padding-left: 8px;
+    }
+
+    .section-description {
+        color: var(--text-secondary); margin-bottom: 16px; font-size: 0.95rem;
+    }
+
+    /* Package Grid */
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .package-card {
+        background: var(--background);
+        border: 2px solid var(--border-light);
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        position: relative;
+    }
+
+    .package-card:active {
+        transform: scale(0.98);
+    }
+
+    .package-card.selected {
+        border-color: var(--primary-color);
+        background: var(--primary-50);
+    }
+
+    .package-card.featured {
+        border-color: var(--primary-light);
+    }
+
+    .package-errands {
+        display: block; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);
+    }
+
+    .package-price {
+        display: block; font-size: 1.3rem; font-weight: 700; color: var(--primary-dark); margin: 4px 0;
+    }
+
+    .badge {
+        position: absolute; top: -8px; right: -8px;
+        background: var(--primary-color);
+        color: white; font-size: 0.7rem; font-weight: 600;
+        padding: 2px 8px; border-radius: 10px;
+    }
+
+    /* Selected Package & Payment */
+    .selected-package {
+        background: var(--primary-50);
+        border-radius: 12px; padding: 16px; margin-top: 16px;
+    }
+
+    .selected-package h4 {
+        margin: 0 0 8px; color: var(--text-primary);
+    }
+
+    .form-label {
+        font-size: 14px; font-weight: 600; color: var(--text-primary); display: block; margin: 12px 0 6px;
+    }
+
+    .form-label.required::after {
+        content: " *"; color: var(--error);
+    }
+
+    .form-input {
+        width: 100%; padding: 14px; border: 2px solid var(--border);
+        border-radius: 12px; font-size: 16px; background: var(--surface);
+        transition: 0.2s; margin-bottom: 12px;
+    }
+
+    .form-input:focus {
+        border-color: var(--primary-color); outline: none;
+    }
+
+    select.form-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 40px;
+    }
+
+    .form-note {
+        font-size: 12px; color: var(--text-light); margin-top: 4px;
+    }
+
+    .threshold-input {
+        display: flex; gap: 10px; align-items: center;
+    }
+
+    .threshold-input .form-input {
+        flex: 1; margin-bottom: 0;
+    }
+
+    .btn-outline-small {
+        padding: 14px 16px;
+        background: transparent;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        font-weight: 600; font-size: 0.9rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-outline-small:active {
+        background: var(--background);
+    }
+
+    .btn-primary {
+        width: 100%; padding: 16px; background: var(--primary-color);
+        border: none; border-radius: 12px; color: white;
+        font-size: 16px; font-weight: 600;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        cursor: pointer; transition: 0.2s; margin-top: 8px;
+    }
+
+    .btn-primary:active {
+        background: var(--primary-dark);
+    }
+
+    /* Payment details */
+    .payment-details {
+        margin-top: 8px;
+    }
+
+    .detail-group {
+        margin-bottom: 8px;
+    }
+
+    .card-row {
+        display: flex; gap: 10px;
+    }
+
+    .card-col {
+        flex: 1;
+    }
+
+    /* Payout Form */
+    .info-form {
+        display: flex; flex-direction: column; gap: 16px;
+    }
+
+    .form-group {
+        display: flex; flex-direction: column; gap: 4px;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5); z-index: 1000;
+        align-items: center; justify-content: center; padding: 20px;
+    }
+
+    .modal-content {
+        background: var(--surface); border-radius: 20px; padding: 32px;
+        text-align: center; max-width: 400px; width: 100%;
+        animation: modalSlide 0.3s ease;
+    }
+
+    @keyframes modalSlide {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-icon {
+        font-size: 64px; color: var(--primary-color); margin-bottom: 20px;
+    }
+
+    .modal-content h3 {
+        font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;
+    }
+
+    .modal-content p {
+        color: var(--text-secondary); margin-bottom: 20px;
+    }
+
+    .modal-close {
+        width: 100%;
+    }
+
+    @media (max-width: 480px) {
+        .package-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Package selection
+        const packageCards = document.querySelectorAll('.package-card');
+        const selectedDiv = document.getElementById('selected-package');
+        const selectedName = document.getElementById('selected-name');
+        const selectedPrice = document.getElementById('selected-price');
+        const confirmBtn = document.getElementById('confirm-purchase');
+        const paymentMethod = document.getElementById('payment-method');
+        const paymentDetails = document.getElementById('payment-details');
+        const detailBank = document.getElementById('detail-bank');
+        const detailMobile = document.getElementById('detail-mobile');
+        const detailCard = document.getElementById('detail-card');
+        let selectedPackage = null;
+
+        packageCards.forEach(card => {
+            card.addEventListener('click', function() {
+                packageCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPackage = this;
+                selectedName.textContent = this.dataset.errands + ' Errands';
+                selectedPrice.textContent = this.dataset.price;
+                selectedDiv.style.display = 'block';
+                // Reset payment details
+                paymentMethod.value = '';
+                paymentDetails.style.display = 'none';
+                detailBank.style.display = 'none';
+                detailMobile.style.display = 'none';
+                detailCard.style.display = 'none';
+            });
+        });
+
+        // Show/hide payment details based on selected method
+        paymentMethod.addEventListener('change', function() {
+            const method = this.value;
+            paymentDetails.style.display = 'block';
+            detailBank.style.display = method === 'bank' ? 'block' : 'none';
+            detailMobile.style.display = ['ecocash', 'innbucks', 'mukuru', 'onemoney'].includes(method) ? 'block' : 'none';
+            detailCard.style.display = method === 'visa' ? 'block' : 'none';
+        });
+
+        // Confirm purchase simulation
+        confirmBtn.addEventListener('click', function() {
+            if (!selectedPackage) {
+                alert('Please select a package.');
+                return;
+            }
+            if (!paymentMethod.value) {
+                alert('Please choose a payment method.');
+                return;
+            }
+            // Basic validation for filled fields (example)
+            if (paymentMethod.value === 'bank') {
+                if (!document.getElementById('bank-account').value || !document.getElementById('bank-name').value) {
+                    alert('Please enter bank account details.');
+                    return;
+                }
+            } else if (['ecocash', 'innbucks', 'mukuru', 'onemoney'].includes(paymentMethod.value)) {
+                if (!document.getElementById('mobile-number').value || !document.getElementById('mobile-name').value) {
+                    alert('Please enter mobile money details.');
+                    return;
+                }
+            } else if (paymentMethod.value === 'visa') {
+                if (!document.getElementById('card-number').value || !document.getElementById('card-expiry').value || !document.getElementById('card-cvc').value) {
+                    alert('Please enter card details.');
+                    return;
+                }
+            }
+
+            const errands = selectedPackage.dataset.errands;
+            const price = selectedPackage.dataset.price;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            confirmBtn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('modal-message').innerHTML = `You purchased <strong>${errands} Errands</strong> for <strong>$${price}</strong>. Your balance has been updated.`;
+                document.getElementById('success-modal').style.display = 'flex';
+                const balanceSpan = document.querySelector('.balance-value');
+                if (balanceSpan) {
+                    balanceSpan.textContent = parseInt(balanceSpan.textContent) + parseInt(errands);
+                }
+                // Reset form
+                selectedPackage.classList.remove('selected');
+                selectedDiv.style.display = 'none';
+                paymentMethod.value = '';
+                paymentDetails.style.display = 'none';
+                confirmBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buy Now';
+                confirmBtn.disabled = false;
+            }, 1000);
+        });
+
+        // Save notification threshold
+        const saveThresholdBtn = document.getElementById('save-threshold');
+        const thresholdInput = document.getElementById('threshold');
+        saveThresholdBtn.addEventListener('click', function() {
+            const val = thresholdInput.value;
+            if (!val || val < 1) {
+                alert('Please enter a valid number.');
+                return;
+            }
+            saveThresholdBtn.textContent = 'Saving...';
+            setTimeout(() => {
+                saveThresholdBtn.textContent = 'Saved ✓';
+                setTimeout(() => { saveThresholdBtn.textContent = 'Save'; }, 1500);
+            }, 500);
+        });
+
+        // Modal close
+        window.closeModal = function() {
+            document.getElementById('success-modal').style.display = 'none';
+        };
+        document.getElementById('success-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    });
+</script>
+{% endblock %}

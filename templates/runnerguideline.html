@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="guidelines-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Runner Guidelines</h1>
+            </div>
+            <a href="{{ url_for('settings') }}" class="back-btn" aria-label="Back to settings">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Introduction -->
+        <section class="guideline-section">
+            <div class="intro-card">
+                <div class="intro-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3>How ErrandGo Works for Runners</h3>
+                <p>Follow these steps and rules to earn safely and keep a high rating.</p>
+            </div>
+        </section>
+
+        <!-- Step‑by‑Step Guide -->
+        <section class="guideline-section">
+            <h3 class="section-title">🔄 Step‑by‑Step Process</h3>
+            <div class="steps-card">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Accept an Errand</h4>
+                        <p>When a new job appears, review the details and tap <strong>Accept</strong>. You can also enable Auto‑Accept in Settings.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Share Your Location</h4>
+                        <p>The sender may request your live location. Keep <strong>Location Services</strong> on to allow them to track the delivery.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Pick Up & Deliver</h4>
+                        <p>Collect the item (or purchase it if needed – see below). Deliver within the agreed time and always handle packages with care.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Mark as Delivered</h4>
+                        <p>Once the client receives the item, tap <strong>Mark as Completed</strong> in the app. The client will then confirm receipt.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment & Purchases -->
+        <section class="guideline-section">
+            <h3 class="section-title">💰 Payments & Purchases</h3>
+            <div class="info-card">
+                <div class="info-item">
+                    <i class="fas fa-shopping-cart info-icon"></i>
+                    <div class="info-content">
+                        <h4>Buying Items on Behalf of Client</h4>
+                        <p>If the errand requires buying goods, use your own money. The total (cost of goods + your service fee) will be reimbursed upon delivery. Keep the receipt!</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-hand-holding-usd info-icon"></i>
+                    <div class="info-content">
+                        <h4>Getting Paid</h4>
+                        <p>The client pays the full amount (item price + delivery fee) when you hand over the package. If the client <strong>refuses to pay</strong>, do not argue. Report the issue immediately using the app.</p>
+                    </div>
+                </div>
+                <div class="info-item highlight">
+                    <i class="fas fa-shield-alt info-icon"></i>
+                    <div class="info-content">
+                        <h4>ErrandGo Protects You</h4>
+                        <p>If you report a non‑paying client, ErrandGo will pay you the full amount you are owed within <strong>24 hours</strong>. You never lose your money.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Important Rules -->
+        <section class="guideline-section">
+            <h3 class="section-title">⚠️ Important Rules & Tips</h3>
+            <div class="tips-list">
+                <div class="tip-item">
+                    <div class="tip-icon">✅</div>
+                    <div class="tip-text">Always confirm the errand details (pickup, drop‑off, special requests) before starting.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">📱</div>
+                    <div class="tip-text">Use in‑app chat for all communication – never share personal numbers.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">🚫</div>
+                    <div class="tip-text">Never open or tamper with sealed packages.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">🕒</div>
+                    <div class="tip-text">Notify the sender immediately if you’re delayed.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">💬</div>
+                    <div class="tip-text">Stay polite – even in difficult situations. Report problems, don’t confront.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">⭐</div>
+                    <div class="tip-text">High ratings lead to more job offers and free errand bonuses!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Client Confirmation -->
+        <section class="guideline-section">
+            <h3 class="section-title">🤝 Client Confirmation</h3>
+            <div class="highlight-card">
+                <p>After you mark the errand as <strong>Completed</strong>, the client will receive a notification to <strong>confirm delivery</strong>. Both confirmations ensure the job is closed and payment is released.</p>
+            </div>
+        </section>
+
+        <!-- Final Note -->
+        <div class="final-note">
+            <p>By following these guidelines you help keep ErrandGo safe and reliable for everyone.</p>
+        </div>
+    </main>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4CAF50;
+        --primary-light: #66BB6A;
+        --primary-dark: #388E3C;
+        --primary-50: #E8F5E8;
+        --surface: #FFFFFF;
+        --background: #F8FDF8;
+        --text-primary: #1A331A;
+        --text-secondary: #666666;
+        --border: #E0E0E0;
+        --border-light: #F0F0F0;
+        --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+    }
+
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    body {
+        margin: 0;
+        touch-action: manipulation;
+    }
+
+    #guidelines-page {
+        min-height: 100vh;
+        background: var(--background);
+        padding-bottom: 20px;
+    }
+
+    .mobile-header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-light);
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .logo-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        padding: 8px;
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
+
+    .back-btn {
+        color: var(--text-secondary);
+        padding: 8px;
+        border-radius: 10px;
+        transition: background 0.2s;
+        text-decoration: none;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .back-btn:active {
+        background: var(--primary-50);
+        color: var(--primary-color);
+    }
+
+    .mobile-main {
+        padding: 16px;
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .guideline-section {
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        padding-left: 4px;
+    }
+
+    .intro-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+    }
+
+    .intro-icon {
+        font-size: 40px;
+        color: var(--primary-color);
+        margin-bottom: 12px;
+    }
+
+    .intro-card h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .intro-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .steps-card {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+        padding: 16px;
+    }
+
+    .step-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .step-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        background: var(--primary-50);
+        color: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .step-content h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 4px;
+    }
+
+    .step-content p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .info-card {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-item.highlight {
+        background: var(--primary-50);
+    }
+
+    .info-icon {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+        margin-top: 2px;
+    }
+
+    .info-content h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 4px;
+    }
+
+    .info-content p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .tips-list {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+        padding: 12px 16px;
+    }
+
+    .tip-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .tip-item:last-child {
+        border-bottom: none;
+    }
+
+    .tip-icon {
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .tip-text {
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        line-height: 1.4;
+    }
+
+    .highlight-card {
+        background: var(--primary-50);
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid var(--primary-light);
+    }
+
+    .highlight-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        line-height: 1.5;
+    }
+
+    .final-note {
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+    }
+
+    @media (max-width: 480px) {
+        .logo h1 {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Prevent double-tap zoom on buttons
+    document.querySelectorAll('button, .back-btn').forEach(el => {
+        el.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="faq-page" class="page">
+    <header class="mobile-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h1>Runner FAQs</h1>
+            </div>
+            <a href="{{ url_for('settings') }}" class="back-btn" aria-label="Back to settings">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="mobile-main">
+        <!-- Introduction -->
+        <section class="faq-section">
+            <div class="intro-card">
+                <div class="intro-icon"><i class="fas fa-question-circle"></i></div>
+                <h3>Frequently Asked Questions</h3>
+                <p>Quick answers to the most common runner questions.</p>
+            </div>
+        </section>
+
+        <!-- FAQ List -->
+        <section class="faq-section">
+            <div class="faq-list">
+                <!-- Question 1 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>How do I accept an errand?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>When a new job appears in your dashboard, tap <strong>Accept</strong> within the time limit. You can also enable <strong>Auto‑Accept</strong> in Settings to automatically take eligible jobs.</p>
+                    </div>
+                </details>
+
+                <!-- Question 2 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>How do I get paid?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>The client pays when you deliver. If the errand required you to purchase goods, you will be reimbursed the item cost <strong>plus your delivery fee</strong>. If the client refuses to pay, report it immediately – ErrandGo will pay you within <strong>24 hours</strong>.</p>
+                    </div>
+                </details>
+
+                <!-- Question 3 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>Can I cancel an accepted job?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Yes, but only before you mark yourself as <strong>“On the way”</strong>. Frequent cancellations may lower your rating and affect job offers.</p>
+                    </div>
+                </details>
+
+                <!-- Question 4 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>What if the sender is unreachable?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Use the in‑app chat. If they don’t respond within a reasonable time, tap <strong>“Client Not Responding”</strong> in the errand screen and wait for further instructions. Do not leave the package unattended.</p>
+                    </div>
+                </details>
+
+                <!-- Question 5 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>Should I buy items with my own money?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Yes, if the errand requires purchasing goods. Keep the receipt! You’ll get your money back (item cost + delivery fee) when you hand over the items.</p>
+                    </div>
+                </details>
+
+                <!-- Question 6 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>Do I need to share my location?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>It’s recommended. If the client requests it, you must enable <strong>Location Services</strong> so they can track the delivery in real time. You can manage this in your phone’s settings.</p>
+                    </div>
+                </details>
+
+                <!-- Question 7 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>Why do I need a high rating?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Runners with high ratings get <strong>more job offers</strong> and can earn free errands (e.g., 5 consecutive 5‑star ratings = 3 free errands).</p>
+                    </div>
+                </details>
+
+                <!-- Question 8 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>How do I update my vehicle information?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Go to <strong>Settings → Personal & Vehicle Info</strong>. Vehicle type and plate can only be changed by contacting support if needed.</p>
+                    </div>
+                </details>
+
+                <!-- Question 9 -->
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>What should I do if I feel unsafe?</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Your safety comes first. If you feel threatened, leave the area and immediately call the emergency number in the Help section. Report the incident to ErrandGo afterwards.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Ask a Question -->
+        <section class="faq-section">
+            <div class="ask-card">
+                <h3>💬 Ask a Question</h3>
+                <p>Didn’t find your answer? Send us your question and we’ll get back to you.</p>
+                <form id="ask-form" class="ask-form">
+                    <div class="form-group">
+                        <label for="ask-name">Your Name</label>
+                        <input type="text" id="ask-name" class="form-input" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ask-question">Your Question</label>
+                        <textarea id="ask-question" class="form-input" rows="3" placeholder="Type your question here..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>How should we reply?</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="reply-method" value="chat" checked>
+                                <span>In‑app Chat</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reply-method" value="sms">
+                                <span>SMS</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reply-method" value="whatsapp">
+                                <span>WhatsApp</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="reply-method" value="email">
+                                <span>Email</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Send Question</button>
+                </form>
+                <!-- Confirmation message (hidden by default) -->
+                <div id="ask-confirmation" class="confirmation-msg" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Your question has been sent! We’ll reply via your chosen method.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Still need help -->
+        <div class="help-note">
+            <p>Can’t find what you need? <a href="{{ url_for('runnerhelp') }}">Contact Runner Support</a></p>
+        </div>
+    </main>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4CAF50;
+        --primary-light: #66BB6A;
+        --primary-dark: #388E3C;
+        --primary-50: #E8F5E8;
+        --surface: #FFFFFF;
+        --background: #F8FDF8;
+        --text-primary: #1A331A;
+        --text-secondary: #666666;
+        --border: #E0E0E0;
+        --border-light: #F0F0F0;
+        --shadow: 0 2px 12px rgba(76, 175, 80, 0.08);
+    }
+
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    body {
+        margin: 0;
+        touch-action: manipulation;
+    }
+
+    #faq-page {
+        min-height: 100vh;
+        background: var(--background);
+        padding-bottom: 20px;
+    }
+
+    .mobile-header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-light);
+        padding: 12px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .logo-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        padding: 8px;
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+    }
+    .logo h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
+    .back-btn {
+        color: var(--text-secondary);
+        padding: 8px;
+        border-radius: 10px;
+        transition: background 0.2s;
+        text-decoration: none;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+    .back-btn:active {
+        background: var(--primary-50);
+        color: var(--primary-color);
+    }
+
+    .mobile-main {
+        padding: 16px;
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .faq-section {
+        margin-bottom: 24px;
+    }
+
+    .intro-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+    }
+    .intro-icon {
+        font-size: 40px;
+        color: var(--primary-color);
+        margin-bottom: 12px;
+    }
+    .intro-card h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+    .intro-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .faq-list {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .faq-item {
+        border-bottom: 1px solid var(--border-light);
+    }
+    .faq-item:last-child {
+        border-bottom: none;
+    }
+
+    .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        cursor: pointer;
+        list-style: none;
+        transition: background 0.2s;
+        min-height: 48px;
+    }
+    .faq-question::-webkit-details-marker {
+        display: none;
+    }
+    .faq-question:active {
+        background: var(--primary-50);
+    }
+
+    .faq-question .arrow {
+        transition: transform 0.2s ease;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    details[open] .faq-question .arrow {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        padding: 0 16px 18px;
+    }
+    .faq-answer p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Ask a Question card */
+    .ask-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow);
+    }
+    .ask-card h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+    .ask-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+
+    .ask-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 16px;                /* prevents iOS zoom */
+        background: var(--surface);
+        transition: border 0.2s;
+    }
+    .form-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+    textarea.form-input {
+        resize: vertical;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+    .radio-option input[type="radio"] {
+        accent-color: var(--primary-color);
+        width: 16px;
+        height: 16px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 16px;
+        background: var(--primary-color);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+        min-height: 48px;
+    }
+    .btn-primary:active {
+        background: var(--primary-dark);
+    }
+
+    .confirmation-msg {
+        text-align: center;
+        background: var(--primary-50);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 12px;
+        color: var(--primary-dark);
+        font-size: 0.9rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    .confirmation-msg i {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .help-note {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .help-note a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    @media (max-width: 480px) {
+        .logo h1 {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Accordion behavior: only one FAQ open at a time
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('toggle', function() {
+            if (this.open) {
+                document.querySelectorAll('.faq-item').forEach(other => {
+                    if (other !== this) other.open = false;
+                });
+            }
+        });
+    });
+
+    // Handle Ask Question form submission
+    const askForm = document.getElementById('ask-form');
+    const confirmation = document.getElementById('ask-confirmation');
+    askForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Simulate sending
+        const name = document.getElementById('ask-name').value;
+        const question = document.getElementById('ask-question').value;
+        const method = document.querySelector('input[name="reply-method"]:checked').value;
+        console.log('Question from', name, ':', question, 'Reply via:', method);
+        // Show confirmation, hide form
+        askForm.style.display = 'none';
+        confirmation.style.display = 'flex';
+    });
+
+    // Prevent double-tap zoom on buttons/back
+    document.querySelectorAll('button, .back-btn').forEach(el => {
+        el.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+    });
+</script>
+{% endblock %}

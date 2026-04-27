@@ -25,7 +25,7 @@
 
                     <div class="hero-stats">
                         <!-- Active Tasks Card - Now clickable -->
-                        <div class="stat-card" onclick="window.location.href='{{ url_for('runnerhistory') }}'" style="cursor: pointer;">
+                        <div class="stat-card" onclick="window.location.href='{{ url_for('order_history') }}'" style="cursor: pointer;">
                             <div class="stat-icon client">
                                 <i class="fas fa-tasks"></i>
                             </div>
@@ -198,7 +198,7 @@
             <span class="nav-emoji">📚</span>
             <span>History</span>
         </a>
-        <!-- Changed Profile to Settings with settings icon -->
+
         <a href="{{ url_for('settings') }}" class="nav-item">
             <span class="nav-emoji">⚙️</span>
             <span>Settings</span>
