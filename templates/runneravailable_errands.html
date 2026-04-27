@@ -128,7 +128,7 @@
             font-weight: 500;
             font-size: 13px;
             white-space: nowrap;
-            overflow: hidden;
+            overflow-y: auto;
             text-overflow: ellipsis;
             max-width: 140px;
             color: var(--text-secondary);
@@ -317,7 +317,7 @@
             border: 1px solid #000000; /* BLACK BORDER LINE ADDED */
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
-            overflow: hidden;
+            overflow-y: auto;
             position: relative;
             -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
             width: 100%; /* Ensure full width on mobile */
@@ -1290,7 +1290,7 @@
             // Ensure page container is scrollable
             const page = document.getElementById('available-errands-page');
             if (page) {
-                page.style.overflowY = 'auto';
+                page.style.overflow-y = 'auto';
                 page.style.height = 'auto';
             }
 

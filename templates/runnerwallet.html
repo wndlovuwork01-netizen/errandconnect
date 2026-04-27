@@ -278,7 +278,7 @@ body {
     box-shadow: var(--shadow);
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .wallet-card:active {
@@ -769,7 +769,7 @@ body {
     align-items: center;
     border: 1px solid var(--border);
     border-radius: 6px;
-    overflow: hidden;
+    overflow-y: auto;
     border: 1px solid #000000;
 }
 
@@ -1437,7 +1437,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ensure page container is scrollable
     const page = document.getElementById('wallet-page');
     if (page) {
-        page.style.overflowY = 'auto';
+        page.style.overflow-y = 'auto';
         page.style.height = 'auto';
     }
 
