@@ -686,6 +686,10 @@ def terms():
     user = current_user()
     return render_template("terms.html", user=user, current_date=datetime.utcnow())
 
+@app.route("/runner/terms")
+def runnerterms():
+    return render_template("runnerterms.html")
+
 @app.route("/privacy")
 @login_required
 def privacy():
