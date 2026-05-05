@@ -47,7 +47,6 @@
             min-height: 100vh;
         }
 
-        /* Smaller top bar */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -154,7 +153,6 @@
             font-size: 10px;
         }
 
-        /* Map styles */
         #map {
             height: 280px;
             width: 100%;
@@ -198,7 +196,6 @@
             text-align: center;
             display: none;
         }
-        /* Route info bar */
         .route-info-bar {
             background: white;
             border-radius: 12px;
@@ -380,6 +377,14 @@
             gap: 12px;
             margin-bottom: 20px;
         }
+        .service-phone-row {
+            display: flex;
+            gap: 12px;
+        }
+        .service-phone-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
         .file-upload-wrapper {
             position: relative;
         }
@@ -497,7 +502,6 @@
             <div class="form-section">
                 <div class="progress-bar"><div class="progress"></div></div>
 
-                <!-- INLINE MAP SECTION -->
                 <div class="map-wrapper">
                     <div class="map-controls">
                         <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-store"></i> Set Store</button>
@@ -505,31 +509,20 @@
                     </div>
                     <div id="mapHint" class="map-hint">Tap map to set location</div>
                     <div id="map"></div>
-
                     <div class="route-info-bar" id="routeInfoBar">
-                        <div class="route-info-item">
-                            <div class="route-info-label">Distance</div>
-                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
-                        </div>
-                        <div class="route-info-item">
-                            <div class="route-info-label">Est. Time</div>
-                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
-                        </div>
-                        <div class="route-info-item">
-                            <div class="route-info-label">Est. Fee</div>
-                            <div class="route-info-value" id="infoFee">$0.00</div>
-                        </div>
+                        <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
+                        <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
+                        <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
                     </div>
                 </div>
 
-                <form method="post" action="{{ url_for('purchase_page') }}" id="purchaseForm">
-                    <!-- Hidden map coordinate fields -->
+                <form method="post" action="{{ url_for('create_purchase_errand') }}" id="purchaseForm">
                     <input type="hidden" id="pickup_lat" name="pickup_lat">
                     <input type="hidden" id="pickup_lon" name="pickup_lon">
                     <input type="hidden" id="dropoff_lat" name="dropoff_lat">
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
 
-                    <!-- Purchase Type -->
                     <h2><i class="fas fa-tags"></i> Purchase Type</h2>
                     <div class="purchase-type-selector">
                         <div class="purchase-type active" data-type="retail" onclick="selectPurchaseType(this, 'retail')"><i class="fas fa-store"></i><span>Retail Store</span></div>
@@ -537,126 +530,36 @@
                         <div class="purchase-type" data-type="other" onclick="selectPurchaseType(this, 'other')"><i class="fas fa-box"></i><span>Other Items</span></div>
                     </div>
 
-                    <!-- ========== PICKUP/DELIVERY LOCATION (reorganized) ========== -->
                     <h2><i class="fas fa-map-marker-alt"></i> Pickup/Delivery Location</h2>
-
-                    <!-- Store / Business Name -->
-                    <div class="form-group">
-                        <label for="store_preference">Store / Business Name</label>
-                        <div class="input-with-icon"><i class="fas fa-store-alt"></i><input type="text" id="store_name" name="store_name" placeholder="Where should we purchase from?" required></div>
-                        <div class="store-suggestions"><div class="store-suggestion-tags">
-                            <span class="store-tag" onclick="setStoreName('Walmart')">Walmart</span>
-                            <span class="store-tag" onclick="setStoreName('Target')">Target</span>
-                            <span class="store-tag" onclick="setStoreName('CVS Pharmacy')">CVS</span>
-                            <span class="store-tag" onclick="setStoreName('Walgreens')">Walgreens</span>
-                            <span class="store-tag" onclick="setStoreName('Best Buy')">Best Buy</span>
-                            <span class="store-tag" onclick="setStoreName('Home Depot')">Home Depot</span>
-                        </div></div>
-                    </div>
-
-                    <!-- Store Address (map‑selectable) -->
-                    <div class="form-group">
-                        <label for="store_location">Store Address</label>
-                        <div class="input-with-icon"><i class="fas fa-map-pin"></i><input type="text" id="store_location" name="store_location" placeholder="Enter store address" required readonly onfocus="this.removeAttribute('readonly')"></div>
-                    </div>
-
-                    <!-- Delivery Address (moved here) -->
-                    <div class="form-group">
-                        <label for="delivery_address">Delivery Address</label>
-                        <div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div>
-                    </div>
-
-                    <!-- Delivery Time (moved here) -->
-                    <div class="delivery-row">
-                        <div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div>
-                    </div>
+                    <div class="form-group"><label for="store_name">Store / Business Name</label><div class="input-with-icon"><i class="fas fa-store-alt"></i><input type="text" id="store_name" name="store_name" placeholder="Where should we purchase from?" required></div><div class="store-suggestions"><div class="store-suggestion-tags"><span class="store-tag" onclick="setStoreName('Walmart')">Walmart</span><span class="store-tag" onclick="setStoreName('Target')">Target</span><span class="store-tag" onclick="setStoreName('CVS Pharmacy')">CVS</span><span class="store-tag" onclick="setStoreName('Walgreens')">Walgreens</span><span class="store-tag" onclick="setStoreName('Best Buy')">Best Buy</span><span class="store-tag" onclick="setStoreName('Home Depot')">Home Depot</span></div></div></div>
+                    <div class="form-group"><label for="store_location">Store Address</label><div class="input-with-icon"><i class="fas fa-map-pin"></i><input type="text" id="store_location" name="store_location" placeholder="Enter store address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
+                    <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
+                    <div class="delivery-row"><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
                     <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
-
-                    <!-- Delivery Method Indicator -->
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
-                        <div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div>
-                        <div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div>
-                    </div>
-
-                    <!-- Delivery Instructions (moved here) -->
+                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div></div>
                     <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions (gate code, leave at door, etc.)"></textarea></div></div>
-
                     <div class="section-divider"></div>
 
-                    <!-- ========== WHAT TO PURCHASE ========== -->
                     <h2><i class="fas fa-list-check"></i> What to Purchase</h2>
-
-                    <div class="form-group">
-                        <label>Purchase Items</label>
-                        <div class="info-tip"><i class="fas fa-info-circle"></i> Be as specific as possible. Include brand, size, color, etc.</div>
-                        <div id="items-container">
-                            <div class="purchase-item">
-                                <div class="purchase-row">
-                                    <div class="input-with-icon" style="flex:2;"><i class="fas fa-cube"></i><input type="text" name="items[]" placeholder="Item description" required></div>
-                                    <div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div>
-                                </div>
-                                <div class="purchase-row">
-                                    <div class="input-with-icon" style="flex:1;"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand/SKU (optional)"></div>
-                                    <div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0"></div>
-                                </div>
-                                <div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>
-                            </div>
-                        </div>
-                        <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
-
-                        <div class="budget-weight-row">
-                            <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Maximum budget ($)" step="0.01" min="0"></div>
-                            <div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Estimated weight (lbs)" step="0.1" min="0"></div>
-                        </div>
-                    </div>
-
-                    <!-- Reference Images -->
-                    <div class="form-group">
-                        <label>Reference Images (Optional)</label>
-                        <div class="info-tip"><i class="fas fa-lightbulb"></i> Upload photos of the item or similar items for reference</div>
-                        <div class="file-upload-wrapper">
-                            <div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload reference photos</span><div id="file_name" class="file-name"></div></div>
-                            <input type="file" id="file_input" class="file-input" accept="image/*,.pdf" onchange="displayFileName(this)" multiple>
-                            <span class="file-size-note">Max 3 files, 10MB each</span>
-                        </div>
-                    </div>
-
+                    <div class="form-group"><label>Purchase Items</label><div class="info-tip"><i class="fas fa-info-circle"></i> Be as specific as possible. Include brand, size, color, etc.</div><div id="items-container"><div class="purchase-item"><div class="purchase-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-cube"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="purchase-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand/SKU (optional)"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div></div><button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button><div class="budget-weight-row"><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Maximum budget ($)" step="0.01" min="0"></div><div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Estimated weight (lbs)" step="0.1" min="0"></div></div></div>
+                    <div class="form-group"><label>Reference Images (Optional)</label><div class="info-tip"><i class="fas fa-lightbulb"></i> Upload photos of the item or similar items for reference</div><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload reference photos</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" name="reference_photos" accept="image/*,.pdf" onchange="displayFileName(this)" multiple></div></div>
                     <div class="section-divider"></div>
 
-                    <!-- ========== PURCHASE PREFERENCES ========== -->
                     <h2><i class="fas fa-sliders-h"></i> Purchase Preferences</h2>
-
-                    <div class="form-group">
-                        <label for="item_substitutions">If Item Unavailable</label>
-                        <div class="input-with-icon"><i class="fas fa-exchange-alt"></i><select id="item_substitutions" name="item_substitutions" onchange="toggleSpecificAlternativeInput()"><option value="contact">Contact me for alternatives</option><option value="similar">Choose similar item (same brand)</option><option value="skip">Skip item entirely</option><option value="specific">Use specific alternative</option></select></div>
-                        <div id="specific_alternative_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="specific_alternative" name="specific_alternative" placeholder="Enter specific alternative"></div></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="receipt_required">Receipt Handling</label>
-                        <div class="input-with-icon"><i class="fas fa-receipt"></i><select id="receipt_required" name="receipt_required"><option value="include">Include with delivery</option><option value="photo">Send photo of receipt</option><option value="no">No receipt needed</option></select></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="payment_method">Payment Method</label>
-                        <div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash (reimbursed)</option><option value="runner_card">Runner's card (reimbursed)</option><option value="prepaid">I will prepay online</option></select></div>
-                    </div>
-
+                    <div class="form-group"><label for="item_substitutions">If Item Unavailable</label><div class="input-with-icon"><i class="fas fa-exchange-alt"></i><select id="item_substitutions" name="item_substitutions" onchange="toggleSpecificAlternativeInput()"><option value="contact">Contact me for alternatives</option><option value="similar">Choose similar item (same brand)</option><option value="skip">Skip item entirely</option><option value="specific">Use specific alternative</option></select></div><div id="specific_alternative_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="specific_alternative" name="specific_alternative" placeholder="Enter specific alternative"></div></div></div>
+                    <div class="form-group"><label for="receipt_required">Receipt Handling</label><div class="input-with-icon"><i class="fas fa-receipt"></i><select id="receipt_required" name="receipt_required"><option value="include">Include with delivery</option><option value="photo">Send photo of receipt</option><option value="no">No receipt needed</option></select></div></div>
+                    <div class="form-group"><label for="payment_method">Payment Method</label><div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash (reimbursed)</option><option value="runner_card">Runner's card (reimbursed)</option><option value="prepaid">I will prepay online</option></select></div></div>
                     <div class="section-divider"></div>
 
-                    <!-- ========== ADDITIONAL INFORMATION ========== -->
                     <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
                     <div class="form-group"><div class="input-with-icon"><i class="fas fa-comment-alt"></i><textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any other important details about your purchase..."></textarea></div></div>
-
                     <div class="section-divider"></div>
 
-                    <!-- ========== CONTACT & PRICING ========== -->
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-                    <div class="collection-row">
-                        <div><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.75" required></div></div>
-                        <div><label>Your Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="contact_number" name="contact_number" placeholder="Your phone number" required></div></div>
+                    <div class="service-phone-row">
+                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.75" required></div></div>
+                        <div class="form-group"><label>Your Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="contact_number" name="contact_number" placeholder="Your phone number" required></div></div>
                     </div>
-
                     <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Purchase Request</button>
                 </form>
             </div>
@@ -665,7 +568,6 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ========== MAP LOGIC ==========
         let map, pickupMarker, dropoffMarker, routeLine;
         let selectionMode = 'pickup';
 
@@ -700,21 +602,17 @@
 
         function setPickupLocation(lat, lng) {
             if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-store'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Store");
-            document.getElementById('pickup_lat').value = lat;
-            document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'store_location');
-            updateRoute();
+            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-store'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Store");
+            document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'store_location'); updateRoute();
             if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
         }
 
         function setDropoffLocation(lat, lng) {
             if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
-            document.getElementById('dropoff_lat').value = lat;
-            document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address');
-            updateRoute();
+            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
+            document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'delivery_address'); updateRoute();
         }
 
         function updateRoute() {
@@ -727,91 +625,38 @@
                             if (routeLine) map.removeLayer(routeLine);
                             routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
                             map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
-                            let distKm = data.routes[0].distance / 1000;
-                            updateUIwithDistance(distKm);
+                            updateUIwithDistance(data.routes[0].distance / 1000);
                         } else fallbackDistance(p, d);
                     }).catch(() => fallbackDistance(p, d));
             }
         }
 
-        function fallbackDistance(p, d) {
-            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
-            updateUIwithDistance(dist);
-        }
+        function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
+        function haversine(lat1, lon1, lat2, lon2) { const R = 6371; let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180; let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
+        function reverseGeocode(lat, lng, inputId) { fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; }).catch(()=>{}); }
 
-        function haversine(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        function reverseGeocode(lat, lng, inputId) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
-                .catch(()=>{});
-        }
-
-        // ========== FEE & INFO BAR ==========
         function updateUIwithDistance(distKm) {
             let distanceFee = 0;
-            if (distKm <= 0.5) distanceFee = 1.00;
-            else if (distKm <= 3) distanceFee = 1.75;
-            else if (distKm <= 10) distanceFee = 2.50;
-            else if (distKm <= 20) distanceFee = 3.50;
-            else distanceFee = 4.50;
-
+            if (distKm <= 0.5) distanceFee = 1.00; else if (distKm <= 3) distanceFee = 1.75; else if (distKm <= 10) distanceFee = 2.50; else if (distKm <= 20) distanceFee = 3.50; else distanceFee = 4.50;
             let timeFee = getTimeFee();
             let weightFee = getWeightFee();
             let complexityFee = getComplexityFee();
             let totalItemValue = 0;
-            document.querySelectorAll('input[name="prices[]"]').forEach(input => {
-                let price = parseFloat(input.value) || 0;
-                let qty = 1;
-                let qtyInput = input.closest('.purchase-item')?.querySelector('input[name="quantities[]"]');
-                if (qtyInput) qty = parseFloat(qtyInput.value) || 1;
-                totalItemValue += price * qty;
-            });
+            document.querySelectorAll('input[name="prices[]"]').forEach(input => { let price = parseFloat(input.value) || 0; let qty = 1; let qtyInput = input.closest('.purchase-item')?.querySelector('input[name="quantities[]"]'); if (qtyInput) qty = parseFloat(qtyInput.value) || 1; totalItemValue += price * qty; });
             let serviceFee = Math.min(Math.max(totalItemValue * 0.1, 1), 10);
             let total = Math.max(distanceFee + timeFee + weightFee + complexityFee + serviceFee, 3.00);
             let estMinutes = Math.round(distKm * 4);
-
             document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+            document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
             document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
             document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
-
             updateDeliveryMethod(distKm);
         }
 
-        function getTimeFee() {
-            let dt = document.getElementById('delivery_time').value;
-            let st = document.getElementById('specific_time').value;
-            if (dt === 'asap') return 3.00;
-            if (dt === 'morning') return 2.50;
-            if (dt === 'afternoon') return 2.00;
-            if (dt === 'evening') return 2.75;
-            if (dt === 'specific') {
-                if (st && st.match(/(7|8|9|10|11):\d{2}\s*PM/i)) return 3.50;
-                return 2.75;
-            }
-            return 0;
-        }
-
-        function getWeightFee() {
-            let weight = parseFloat(document.getElementById('estimated_weight').value) || 0;
-            if (weight <= 10) return 1.00;
-            if (weight <= 25) return 1.75;
-            if (weight <= 50) return 2.50;
-            return 3.50;
-        }
-
-        function getComplexityFee() {
-            let type = selectedPurchaseType;
-            if (type === 'pharmacy') return 2.00;
-            if (type === 'other') return 1.50;
-            return 0.50;
-        }
+        function getTimeFee() { let dt = document.getElementById('delivery_time').value, st = document.getElementById('specific_time').value; if (dt === 'asap') return 3.00; if (dt === 'morning') return 2.50; if (dt === 'afternoon') return 2.00; if (dt === 'evening') return 2.75; if (dt === 'specific') { if (st && st.match(/(7|8|9|10|11):\d{2}\s*PM/i)) return 3.50; return 2.75; } return 0; }
+        function getWeightFee() { let weight = parseFloat(document.getElementById('estimated_weight').value) || 0; if (weight <= 10) return 1.00; if (weight <= 25) return 1.75; if (weight <= 50) return 2.50; return 3.50; }
+        function getComplexityFee() { if (selectedPurchaseType === 'pharmacy') return 2.00; if (selectedPurchaseType === 'other') return 1.50; return 0.50; }
 
         function updateDeliveryMethod(distKm) {
             let indicator = document.getElementById('deliveryMethodIndicator');
@@ -819,85 +664,37 @@
             let method = { title: 'Vehicle Required', icon: 'fas fa-car', description: 'Requires vehicle delivery' };
             if (distKm <= 2 && weight <= 15) method = { title: 'Runner on Foot', icon: 'fas fa-walking', description: 'Can be walked' };
             else if (distKm <= 10 && weight <= 40) method = { title: 'Bike Delivery', icon: 'fas fa-bicycle', description: 'Requires bike' };
-            if (distKm > 0) {
-                indicator.style.display = 'flex';
-                document.getElementById('deliveryMethodIcon').className = method.icon;
-                document.getElementById('deliveryMethodTitle').innerText = method.title;
-                document.getElementById('deliveryMethodDescription').innerText = method.description;
-            } else indicator.style.display = 'none';
+            if (distKm > 0) { indicator.style.display = 'flex'; document.getElementById('deliveryMethodIcon').className = method.icon; document.getElementById('deliveryMethodTitle').innerText = method.title; document.getElementById('deliveryMethodDescription').innerText = method.description; } else indicator.style.display = 'none';
         }
 
-        // Listeners
         document.getElementById('delivery_time').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('specific_time').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('estimated_weight').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.addEventListener('input', function(e) {
-            if (e.target.name === 'prices[]' && pickupMarker && dropoffMarker) updateRoute();
-        });
+        document.addEventListener('input', function(e) { if (e.target.name === 'prices[]' && pickupMarker && dropoffMarker) updateRoute(); });
 
-        // ========== PURCHASE TYPE & UI HELPERS ==========
         let selectedPurchaseType = 'retail';
-
-        function selectPurchaseType(el, type) {
-            document.querySelectorAll('.purchase-type').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            selectedPurchaseType = type;
-            updateStoreSuggestions(type);
-            if (pickupMarker && dropoffMarker) updateRoute();
-        }
-
-        function updateStoreSuggestions(type) {
-            let suggestions = [];
-            if (type === 'retail') suggestions = ['Walmart', 'Target', 'Best Buy', 'Home Depot', 'Costco', 'Lowe\'s'];
-            else if (type === 'pharmacy') suggestions = ['CVS Pharmacy', 'Walgreens', 'Rite Aid', 'Local Pharmacy'];
-            else suggestions = ['Specific Address', 'Online Pickup', 'Local Business', 'Specialty Store'];
-            document.querySelector('.store-suggestion-tags').innerHTML = suggestions.map(s => `<span class="store-tag" onclick="setStoreName('${s}')">${s}</span>`).join('');
-        }
-
-        function setStoreName(name) {
-            document.getElementById('store_name').value = name;
-        }
-
-        function toggleSpecificAlternativeInput() {
-            let div = document.getElementById('specific_alternative_input');
-            if (document.getElementById('item_substitutions').value === 'specific') div.classList.add('expanded');
-            else div.classList.remove('expanded');
-        }
-
-        function toggleSpecificTimeInput() {
-            let div = document.getElementById('specific_time_input');
-            if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded');
-            else div.classList.remove('expanded');
-        }
-
-        function addItem() {
-            let container = document.getElementById('items-container');
-            let newItem = document.createElement('div'); newItem.className = 'purchase-item';
-            newItem.innerHTML = `<div class="purchase-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-cube"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="purchase-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand/SKU (optional)"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;
-            container.appendChild(newItem);
-            setTimeout(() => newItem.querySelector('input')?.focus(), 100);
-        }
-
+        function selectPurchaseType(el, type) { document.querySelectorAll('.purchase-type').forEach(i => i.classList.remove('active')); el.classList.add('active'); selectedPurchaseType = type; updateStoreSuggestions(type); if (pickupMarker && dropoffMarker) updateRoute(); }
+        function updateStoreSuggestions(type) { let suggestions = type === 'retail' ? ['Walmart','Target','Best Buy','Home Depot','Costco','Lowe\'s'] : type === 'pharmacy' ? ['CVS Pharmacy','Walgreens','Rite Aid','Local Pharmacy'] : ['Specific Address','Online Pickup','Local Business','Specialty Store']; document.querySelector('.store-suggestion-tags').innerHTML = suggestions.map(s => `<span class="store-tag" onclick="setStoreName('${s}')">${s}</span>`).join(''); }
+        function setStoreName(name) { document.getElementById('store_name').value = name; }
+        function toggleSpecificAlternativeInput() { let div = document.getElementById('specific_alternative_input'); if (document.getElementById('item_substitutions').value === 'specific') div.classList.add('expanded'); else div.classList.remove('expanded'); }
+        function toggleSpecificTimeInput() { let div = document.getElementById('specific_time_input'); if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded'); else div.classList.remove('expanded'); }
+        function addItem() { let container = document.getElementById('items-container'); let newItem = document.createElement('div'); newItem.className = 'purchase-item'; newItem.innerHTML = `<div class="purchase-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-cube"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="purchase-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand/SKU (optional)"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`; container.appendChild(newItem); setTimeout(() => newItem.querySelector('input')?.focus(), 100); }
         function removeItem(btn) { btn.closest('.purchase-item')?.remove(); }
         function displayFileName(input) { document.getElementById('file_name').innerText = input.files[0]?.name || ''; }
-        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; let total = document.querySelectorAll('input,select,textarea').length; document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%'; }
+        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%'; }
         document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
 
-        // Form validation (allows actual submission)
         document.getElementById('purchaseForm').addEventListener('submit', function(e) {
             if (!document.getElementById('store_name').value.trim()) { alert('Please enter store name.'); e.preventDefault(); return false; }
             if (!document.getElementById('store_location').value.trim()) { alert('Please set store address on map.'); e.preventDefault(); return false; }
             if (!document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
-            if (!document.querySelector('input[name="items[]"]')?.value) { alert('Add at least one item.'); e.preventDefault(); return false; }
+            let hasItem = false; document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+            if (!hasItem) { alert('Add at least one item.'); e.preventDefault(); return false; }
             if (parseFloat(document.getElementById('service_price').value) < 0.75) { alert('Service price must be at least $0.75'); e.preventDefault(); return false; }
             if (!document.getElementById('contact_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
-            // If all valid, form submits to purchase_page
         });
 
-        window.onload = function() {
-            initMap();
-            updateProgress();
-        };
+        window.onload = function() { initMap(); updateProgress(); };
     </script>
 </body>
 </html>

@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* ====== styles (same as previous version – kept for brevity) ====== */
         :root {
             --primary: #4CAF50;
             --primary-light: #66BB6A;
@@ -436,7 +435,6 @@
             font-size: 12px;
             width: 100%;
         }
-        /* Location control (like Google Maps) */
         .leaflet-control-locate {
             background-color: white;
             border-radius: 4px;
@@ -520,6 +518,8 @@
                     <input type="hidden" id="pickup_lon" name="pickup_lon">
                     <input type="hidden" id="dropoff_lat" name="dropoff_lat">
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    <!-- ========== NEW: Estimated Fee Hidden Field ========== -->
+                    <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
 
                     <h2><i class="fas fa-store"></i> Store / Delivery Information</h2>
                     <div class="form-group">
@@ -544,7 +544,7 @@
                         <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
                         <div class="budget-weight-row"><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Max budget ($)" step="0.01" min="0"></div><div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Est. weight (kg)" step="0.1" min="0"></div></div>
                     </div>
-                    <div class="form-group"><label>Upload Shopping List (Optional)</label><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload shopping list or photos</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" accept="image/*,.pdf" onchange="displayFileName(this)"><span class="file-size-note">Max file size: 10MB</span></div></div>
+                    <div class="form-group"><label>Upload Shopping List (Optional)</label><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload shopping list or photos</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" name="shopping_list" accept="image/*,.pdf" onchange="displayFileName(this)"><span class="file-size-note">Max file size: 10MB</span></div></div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-sliders-h"></i> Preferences</h2>
@@ -584,15 +584,10 @@
             bus: '#FFC107', law: '#3F51B5', butcher: '#D32F2F', default: '#888888'
         };
 
-        // Map store names to dropdown values
         const storeMapping = {
-            'walmart': 'walmart',
-            'kroger': 'kroger',
-            'target': 'target',
-            'whole foods': 'whole_foods',
-            'whole foods market': 'whole_foods',
-            'local grocery': 'local',
-            'local supermarket': 'local'
+            'walmart': 'walmart', 'kroger': 'kroger', 'target': 'target',
+            'whole foods': 'whole_foods', 'whole foods market': 'whole_foods',
+            'local grocery': 'local', 'local supermarket': 'local'
         };
 
         function getIconForType(tags) {
@@ -618,25 +613,17 @@
             return { color: iconColors.default, icon: 'fas fa-map-marker-alt' };
         }
 
-        // Helper to set the store dropdown and address
         function setStoreFromNameAndAddress(name, address) {
             const select = document.getElementById('store_preference');
             const otherInput = document.getElementById('other_store_input');
             const otherNameField = document.getElementById('other_store_name');
             const storeLocationField = document.getElementById('store_location');
-
-            // Try to match known stores (case-insensitive)
             let matched = false;
             const lowerName = name.toLowerCase();
             for (let [key, value] of Object.entries(storeMapping)) {
-                if (lowerName.includes(key)) {
-                    select.value = value;
-                    matched = true;
-                    break;
-                }
+                if (lowerName.includes(key)) { select.value = value; matched = true; break; }
             }
             if (!matched) {
-                // If it's a supermarket but not matched, set to "local"
                 if (name.toLowerCase().includes('supermarket') || name.toLowerCase().includes('grocery')) {
                     select.value = 'local';
                 } else {
@@ -645,7 +632,6 @@
                     otherNameField.value = name;
                 }
             } else {
-                // If matched and not "other", ensure other input is hidden
                 otherInput.classList.remove('expanded');
                 otherNameField.value = '';
             }
@@ -658,22 +644,7 @@
             const southWest = bounds.getSouthWest();
             const northEast = bounds.getNorthEast();
             const bbox = `${southWest.lng},${southWest.lat},${northEast.lng},${northEast.lat}`;
-
-            const query = `
-                [out:json];
-                (
-                    node["shop"~"supermarket|grocery|convenience|department_store|electronics|mobile_phone|liquor|clothes|furniture|hardware|butcher"](${bbox});
-                    node["amenity"~"restaurant|cafe|fast_food|bar|pub|nightclub|fuel|bank|bus_station|place_of_worship|lawyer"](${bbox});
-                    node["office"~"lawyer"](${bbox});
-                    way["shop"~"supermarket|grocery|convenience|department_store|electronics|liquor|butcher"](${bbox});
-                    way["amenity"~"restaurant|cafe|fast_food|bar|pub|fuel|bank|lawyer"](${bbox});
-                    node["building"](${bbox});
-                    way["building"](${bbox});
-                );
-                out body;
-                >;
-                out skel qt;
-            `;
+            const query = `[out:json];(node["shop"~"supermarket|grocery|convenience|department_store|electronics|mobile_phone|liquor|clothes|furniture|hardware|butcher"](${bbox});node["amenity"~"restaurant|cafe|fast_food|bar|pub|nightclub|fuel|bank|bus_station|place_of_worship|lawyer"](${bbox});node["office"~"lawyer"](${bbox});way["shop"~"supermarket|grocery|convenience|department_store|electronics|liquor|butcher"](${bbox});way["amenity"~"restaurant|cafe|fast_food|bar|pub|fuel|bank|lawyer"](${bbox});node["building"](${bbox});way["building"](${bbox}););out body;>;out skel qt;`;
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
             try {
                 const response = await fetch(url);
@@ -687,296 +658,152 @@
                     if (el.type === 'node') { lat = el.lat; lon = el.lon; }
                     else if (el.type === 'way' && el.center) { lat = el.center.lat; lon = el.center.lon; }
                     else continue;
-                    const id = el.id;
-                    if (seen.has(id)) continue;
-                    seen.add(id);
+                    if (seen.has(el.id)) continue;
+                    seen.add(el.id);
                     let name = el.tags?.name || '';
                     if (!name) continue;
                     let typeInfo = getIconForType(el.tags);
-                    let markerHtml = `<div style="background-color:${typeInfo.color}; width:26px; height:26px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 2px 5px rgba(0,0,0,0.3);"><i class="${typeInfo.icon}" style="font-size:12px;"></i></div>`;
-                    let marker = L.marker([lat, lon], {
-                        icon: L.divIcon({ html: markerHtml, iconSize: [26,26], iconAnchor: [13,26], popupAnchor: [0,-13] })
-                    }).addTo(map);
+                    let markerHtml = `<div style="background-color:${typeInfo.color};width:26px;height:26px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"><i class="${typeInfo.icon}" style="font-size:12px;"></i></div>`;
+                    let marker = L.marker([lat, lon], {icon:L.divIcon({html:markerHtml,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-13]})}).addTo(map);
                     let address = el.tags?.['addr:full'] || el.tags?.['addr:street'] || '';
-                    let popupContent = `<strong>${name}</strong><br>${address}<br><button class="shop-select-btn" data-lat="${lat}" data-lng="${lon}" data-name="${name.replace(/'/g, "\\'")}" data-addr="${address.replace(/'/g, "\\'")}" data-shop="${el.tags?.shop || ''}">Select this place</button>`;
+                    let popupContent = `<strong>${name}</strong><br>${address}<br><button class="shop-select-btn" data-lat="${lat}" data-lng="${lon}" data-name="${name.replace(/'/g,"\\'")}" data-addr="${address.replace(/'/g,"\\'")}" data-shop="${el.tags?.shop||''}">Select this place</button>`;
                     marker.bindPopup(popupContent);
-                    marker.on('popupopen', function() {
-                        document.querySelector('.shop-select-btn')?.addEventListener('click', function(e) {
-                            let lat = parseFloat(this.dataset.lat);
-                            let lng = parseFloat(this.dataset.lng);
-                            let name = this.dataset.name;
-                            let addr = this.dataset.addr;
-                            // Auto-fill store preference and address
-                            setStoreFromNameAndAddress(name, addr);
-                            // Also set the map pickup marker
-                            setPickupLocation(lat, lng);
+                    marker.on('popupopen', function(){
+                        document.querySelector('.shop-select-btn')?.addEventListener('click',function(e){
+                            setStoreFromNameAndAddress(this.dataset.name,this.dataset.addr);
+                            setPickupLocation(parseFloat(this.dataset.lat),parseFloat(this.dataset.lng));
                             map.closePopup();
                         });
                     });
                     newMarkers.push(marker);
                 }
-                shopMarkers.forEach(m => map.removeLayer(m));
+                shopMarkers.forEach(m=>map.removeLayer(m));
                 shopMarkers = newMarkers;
-            } catch (err) {
-                console.warn('POI fetch failed', err);
-            }
+            } catch(err){console.warn('POI fetch failed',err);}
         }
 
-        // Add location control button (below zoom)
-        function addLocationControl() {
-            const controlDiv = L.DomUtil.create('div', 'leaflet-control-locate');
-            const link = L.DomUtil.create('a', '', controlDiv);
-            link.href = '#';
-            link.title = 'Go to my current location';
-            link.onclick = function(e) {
-                e.preventDefault();
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const { latitude, longitude } = position.coords;
-                            map.setView([latitude, longitude], 15);
-                            fetchPOIsInViewport();
-                            // Optional: add a temporary marker
-                            L.marker([latitude, longitude], { icon: L.divIcon({ html: '<div style="background-color:#2196F3; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize: [20,20], iconAnchor: [10,10] }) }).addTo(map).bindPopup("You are here").openPopup();
-                        },
-                        (error) => {
-                            alert('Unable to get your location. Please check location permissions.');
-                        }
-                    );
-                } else {
-                    alert('Geolocation not supported by your browser.');
-                }
-                return false;
-            };
+        function addLocationControl(){
+            const controlDiv = L.DomUtil.create('div','leaflet-control-locate');
+            const link = L.DomUtil.create('a','',controlDiv);
+            link.href='#';link.title='Go to my current location';
+            link.onclick=function(e){e.preventDefault();
+                if(navigator.geolocation){navigator.geolocation.getCurrentPosition((position)=>{const{latitude,longitude}=position.coords;map.setView([latitude,longitude],15);fetchPOIsInViewport();L.marker([latitude,longitude],{icon:L.divIcon({html:'<div style="background-color:#2196F3;width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',iconSize:[20,20],iconAnchor:[10,10]})}).addTo(map).bindPopup("You are here").openPopup();},(error)=>{alert('Unable to get your location.');});}else{alert('Geolocation not supported.');}return false;};
             return controlDiv;
         }
 
-        function initMap() {
-            map = L.map('map').setView([0, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
-            document.getElementById('mapHint').style.display = 'block';
-
-            map.on('click', e => {
-                if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
-                else setDropoffLocation(e.latlng.lat, e.latlng.lng);
-                if (navigator.vibrate) navigator.vibrate(50);
-            });
-
-            // Add location control below zoom buttons
-            const locationControl = addLocationControl();
-            // Insert it after the zoom control (which is typically at top-left)
-            const zoomControl = document.querySelector('.leaflet-control-zoom');
-            if (zoomControl && zoomControl.parentNode) {
-                zoomControl.parentNode.insertBefore(locationControl, zoomControl.nextSibling);
-            } else {
-                map.getContainer().appendChild(locationControl);
-            }
-
-            map.on('moveend', function() {
-                if (fetchTimeout) clearTimeout(fetchTimeout);
-                fetchTimeout = setTimeout(() => {
-                    fetchPOIsInViewport();
-                }, 500);
-            });
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        map.setView([latitude, longitude], 12);
-                        if (!pickupMarker) setPickupLocation(latitude, longitude);
-                        fetchPOIsInViewport();
-                    },
-                    (error) => {
-                        console.warn('Geolocation error:', error);
-                        map.setView([-1.2921, 36.8219], 12);
-                        fetchPOIsInViewport();
-                    }
-                );
-            } else {
-                map.setView([-1.2921, 36.8219], 12);
-                fetchPOIsInViewport();
-            }
+        function initMap(){
+            map=L.map('map').setView([0,0],2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
+            document.getElementById('mapHint').style.display='block';
+            map.on('click',e=>{if(selectionMode==='pickup')setPickupLocation(e.latlng.lat,e.latlng.lng);else setDropoffLocation(e.latlng.lat,e.latlng.lng);if(navigator.vibrate)navigator.vibrate(50);});
+            const locationControl=addLocationControl();
+            const zoomControl=document.querySelector('.leaflet-control-zoom');
+            if(zoomControl&&zoomControl.parentNode){zoomControl.parentNode.insertBefore(locationControl,zoomControl.nextSibling);}else{map.getContainer().appendChild(locationControl);}
+            map.on('moveend',function(){if(fetchTimeout)clearTimeout(fetchTimeout);fetchTimeout=setTimeout(()=>{fetchPOIsInViewport();},500);});
+            if(navigator.geolocation){navigator.geolocation.getCurrentPosition((position)=>{const{latitude,longitude}=position.coords;map.setView([latitude,longitude],12);if(!pickupMarker)setPickupLocation(latitude,longitude);fetchPOIsInViewport();},(error)=>{console.warn('Geolocation error:',error);map.setView([-1.2921,36.8219],12);fetchPOIsInViewport();});}else{map.setView([-1.2921,36.8219],12);fetchPOIsInViewport();}
         }
 
-        function setSelectionMode(mode) {
-            selectionMode = mode;
-            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
-            p.classList.toggle('active', mode === 'pickup');
-            d.classList.toggle('active', mode === 'dropoff');
-            d.classList.toggle('dropoff', mode === 'dropoff');
-            hint.textContent = mode === 'pickup' ? "Tap map to set Store" : "Tap map to set Delivery";
-            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
-            hint.style.display = 'block';
+        function setSelectionMode(mode){
+            selectionMode=mode;
+            let p=document.getElementById('selectPickupBtn'),d=document.getElementById('selectDropoffBtn'),hint=document.getElementById('mapHint');
+            p.classList.toggle('active',mode==='pickup');d.classList.toggle('active',mode==='dropoff');d.classList.toggle('dropoff',mode==='dropoff');
+            hint.textContent=mode==='pickup'?"Tap map to set Store":"Tap map to set Delivery";
+            hint.style.background=mode==='pickup'?"rgba(76,175,80,0.9)":"rgba(33,150,243,0.9)";hint.style.display='block';
         }
 
-        function setPickupLocation(lat, lng) {
-            if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-store'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Store");
-            document.getElementById('pickup_lat').value = lat;
-            document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'store_location');
-            updateRoute();
-            if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
+        function setPickupLocation(lat,lng){
+            if(pickupMarker)map.removeLayer(pickupMarker);
+            pickupMarker=L.marker([lat,lng],{icon:L.divIcon({html:"<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-store'></i></div>",iconSize:[28,28],iconAnchor:[14,28]})}).addTo(map).bindPopup("Store");
+            document.getElementById('pickup_lat').value=lat;document.getElementById('pickup_lon').value=lng;
+            reverseGeocode(lat,lng,'store_location');updateRoute();
+            if(!dropoffMarker)setTimeout(()=>setSelectionMode('dropoff'),1000);
         }
 
-        function setDropoffLocation(lat, lng) {
-            if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
-            document.getElementById('dropoff_lat').value = lat;
-            document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address');
-            updateRoute();
+        function setDropoffLocation(lat,lng){
+            if(dropoffMarker)map.removeLayer(dropoffMarker);
+            dropoffMarker=L.marker([lat,lng],{icon:L.divIcon({html:"<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>",iconSize:[28,28],iconAnchor:[14,28]})}).addTo(map).bindPopup("Delivery");
+            document.getElementById('dropoff_lat').value=lat;document.getElementById('dropoff_lon').value=lng;
+            reverseGeocode(lat,lng,'delivery_address');updateRoute();
         }
 
-        function updateRoute() {
-            if (pickupMarker && dropoffMarker) {
-                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
+        function updateRoute(){
+            if(pickupMarker&&dropoffMarker){
+                let p=pickupMarker.getLatLng(),d=dropoffMarker.getLatLng();
                 fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
-                    .then(res => res.json()).then(data => {
-                        if (data.routes?.length) {
-                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                            if (routeLine) map.removeLayer(routeLine);
-                            routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
-                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
-                            let distKm = data.routes[0].distance / 1000;
-                            updateUIwithDistance(distKm);
-                        } else fallbackDistance(p, d);
-                    }).catch(() => fallbackDistance(p, d));
+                .then(res=>res.json()).then(data=>{if(data.routes?.length){let coords=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);if(routeLine)map.removeLayer(routeLine);routeLine=L.polyline(coords,{color:'#4CAF50',weight:4}).addTo(map);map.fitBounds(routeLine.getBounds(),{padding:[30,30]});updateUIwithDistance(data.routes[0].distance/1000);}else fallbackDistance(p,d);}).catch(()=>fallbackDistance(p,d));
             }
         }
 
-        function fallbackDistance(p, d) {
-            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
-            updateUIwithDistance(dist);
-        }
-
-        function haversine(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        function reverseGeocode(lat, lng, inputId) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
-                .catch(()=>{});
-        }
+        function fallbackDistance(p,d){updateUIwithDistance(haversine(p.lat,p.lng,d.lat,d.lng));}
+        function haversine(lat1,lon1,lat2,lon2){const R=6371;let dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;let a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+        function reverseGeocode(lat,lng,inputId){fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r=>r.json()).then(data=>{if(data.display_name)document.getElementById(inputId).value=data.display_name;}).catch(()=>{});}
 
         // ========== FEE & INFO BAR ==========
-        function updateUIwithDistance(distKm) {
-            let distanceFee = 0;
-            if (distKm <= 0.1) distanceFee = 0.75;
-            else if (distKm <= 1.5) distanceFee = 1.25;
-            else if (distKm <= 4.99) distanceFee = 2.25;
-            else if (distKm <= 15) distanceFee = 2.75;
-            else distanceFee = 3.25;
-            let timeFee = calculateTimeFee();
-            let weightFee = calculateWeightFee();
-            let total = Math.max(distanceFee + timeFee + weightFee, 0.75);
-            let estMinutes = Math.round(distKm * 5);
-            document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
-            document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
-            document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
-            document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
+        function updateUIwithDistance(distKm){
+            let distanceFee=0;
+            if(distKm<=0.1)distanceFee=0.75;else if(distKm<=1.5)distanceFee=1.25;else if(distKm<=4.99)distanceFee=2.25;else if(distKm<=15)distanceFee=2.75;else distanceFee=3.25;
+            let timeFee=calculateTimeFee();let weightFee=calculateWeightFee();
+            let total=Math.max(distanceFee+timeFee+weightFee,0.75);
+            let estMinutes=Math.round(distKm*5);
+            document.getElementById('estimated_fee').innerText='$'+total.toFixed(2);
+            // ========== UPDATE HIDDEN FIELD FOR BACKEND ==========
+            document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
+            document.getElementById('infoDistance').innerHTML=distKm.toFixed(1)+' <small>km</small>';
+            document.getElementById('infoTime').innerHTML=estMinutes+' <small>min</small>';
+            document.getElementById('infoFee').innerText='$'+total.toFixed(2);
             updateDeliveryMethod(distKm);
         }
 
-        function calculateTimeFee() {
-            let dt = document.getElementById('delivery_time').value;
-            let st = document.getElementById('specific_time').value;
-            if (dt === 'asap') return 2.50;
-            if (dt === 'morning') return 2.00;
-            if (dt === 'afternoon') return 1.50;
-            if (dt === 'evening' || dt === 'specific') {
-                if (st) {
-                    let match = st.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-                    if (match) {
-                        let h = parseInt(match[1]);
-                        let period = match[3]?.toUpperCase();
-                        if (period === 'PM' && h < 12) h += 12;
-                        if (period === 'AM' && h === 12) h = 0;
-                        if (h > 19 || (h === 19 && parseInt(match[2]) > 15)) return 3.00;
-                        return 2.50;
-                    }
-                }
-                return 2.50;
-            }
-            return 0;
+        function calculateTimeFee(){
+            let dt=document.getElementById('delivery_time').value,st=document.getElementById('specific_time').value;
+            if(dt==='asap')return 2.50;if(dt==='morning')return 2.00;if(dt==='afternoon')return 1.50;
+            if(dt==='evening'||dt==='specific'){if(st){let match=st.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);if(match){let h=parseInt(match[1]),period=match[3]?.toUpperCase();if(period==='PM'&&h<12)h+=12;if(period==='AM'&&h===12)h=0;if(h>19||(h===19&&parseInt(match[2])>15))return 3.00;return 2.50;}}return 2.50;}return 0;
         }
 
-        function calculateWeightFee() {
-            let weight = parseFloat(document.getElementById('estimated_weight').value) || 0;
-            if (weight <= 0) return 0;
-            if (weight <= 5) return 0.50;
-            if (weight <= 10) return 1.00;
-            if (weight <= 20) return 2.00;
-            return 3.00;
+        function calculateWeightFee(){
+            let weight=parseFloat(document.getElementById('estimated_weight').value)||0;
+            if(weight<=0)return 0;if(weight<=5)return 0.50;if(weight<=10)return 1.00;if(weight<=20)return 2.00;return 3.00;
         }
 
-        function updateDeliveryMethod(distKm) {
-            let indicator = document.getElementById('deliveryMethodIndicator');
-            let weight = parseFloat(document.getElementById('estimated_weight').value) || 0;
-            let method = { title: 'Car Required', icon: 'fas fa-car', description: 'Requires car delivery' };
-            if (distKm <= 1.5 && weight <= 5) method = { title: 'Runner on Foot', icon: 'fas fa-walking', description: 'Can be delivered by runners walking' };
-            else if (distKm <= 8 && weight <= 20) method = { title: 'Bike Delivery', icon: 'fas fa-bicycle', description: 'Requires bike delivery' };
-            if (distKm > 0) {
-                indicator.style.display = 'flex';
-                document.getElementById('deliveryMethodIcon').className = method.icon;
-                document.getElementById('deliveryMethodTitle').innerText = method.title;
-                document.getElementById('deliveryMethodDescription').innerText = method.description;
-            } else indicator.style.display = 'none';
+        function updateDeliveryMethod(distKm){
+            let indicator=document.getElementById('deliveryMethodIndicator'),weight=parseFloat(document.getElementById('estimated_weight').value)||0;
+            let method={title:'Car Required',icon:'fas fa-car',description:'Requires car delivery'};
+            if(distKm<=1.5&&weight<=5)method={title:'Runner on Foot',icon:'fas fa-walking',description:'Can be delivered by runners walking'};
+            else if(distKm<=8&&weight<=20)method={title:'Bike Delivery',icon:'fas fa-bicycle',description:'Requires bike delivery'};
+            if(distKm>0){indicator.style.display='flex';document.getElementById('deliveryMethodIcon').className=method.icon;document.getElementById('deliveryMethodTitle').innerText=method.title;document.getElementById('deliveryMethodDescription').innerText=method.description;}else indicator.style.display='none';
         }
 
-        document.getElementById('delivery_time').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.getElementById('specific_time').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.getElementById('estimated_weight').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
+        document.getElementById('delivery_time').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
+        document.getElementById('specific_time').addEventListener('input',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
+        document.getElementById('estimated_weight').addEventListener('input',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
 
         // ========== UI HELPERS ==========
-        function toggleOtherStoreInput() { let div = document.getElementById('other_store_input'); if (document.getElementById('store_preference').value === 'other') div.classList.add('expanded'); else div.classList.remove('expanded'); }
-        function toggleSpecificTimeInput() { let div = document.getElementById('specific_time_input'); if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded'); else div.classList.remove('expanded'); }
-        function addItem() { let container = document.getElementById('items-container'); let newItem = document.createElement('div'); newItem.className = 'grocery-item'; newItem.innerHTML = `<div class="grocery-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`; container.appendChild(newItem); setTimeout(() => newItem.querySelector('input')?.focus(), 100); }
-        function removeItem(btn) { btn.closest('.grocery-item')?.remove(); }
-        function displayFileName(input) { document.getElementById('file_name').innerText = input.files[0]?.name || ''; }
-        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; let total = document.querySelectorAll('input,select,textarea').length; document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%'; }
-        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
+        function toggleOtherStoreInput(){let div=document.getElementById('other_store_input');if(document.getElementById('store_preference').value==='other')div.classList.add('expanded');else div.classList.remove('expanded');}
+        function toggleSpecificTimeInput(){let div=document.getElementById('specific_time_input');if(document.getElementById('delivery_time').value==='specific')div.classList.add('expanded');else div.classList.remove('expanded');}
+        function addItem(){let container=document.getElementById('items-container');let newItem=document.createElement('div');newItem.className='grocery-item';newItem.innerHTML=`<div class="grocery-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;container.appendChild(newItem);setTimeout(()=>newItem.querySelector('input')?.focus(),100);}
+        function removeItem(btn){btn.closest('.grocery-item')?.remove();}
+        function displayFileName(input){document.getElementById('file_name').innerText=input.files[0]?.name||'';}
+        function updateProgress(){let filled=Array.from(document.querySelectorAll('input,select,textarea')).filter(i=>i.value&&i.type!='hidden').length;let total=document.querySelectorAll('input,select,textarea').length;document.querySelector('.progress').style.width=Math.min((filled/total)*100,100)+'%';}
+        document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',updateProgress));
 
-        document.getElementById('groceryForm').addEventListener('submit', function(e) {
-            let storePref = document.getElementById('store_preference').value;
-            if (!storePref) { alert('Please select a store.'); e.preventDefault(); return false; }
-            if (storePref === 'other' && !document.getElementById('other_store_name').value.trim()) { alert('Please specify store name.'); e.preventDefault(); return false; }
-            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set a delivery address on the map.'); e.preventDefault(); return false; }
-            let hasItem = false; document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
-            if (!hasItem) { alert('Please add at least one grocery item.'); e.preventDefault(); return false; }
-            let price = parseFloat(document.getElementById('service_price').value);
-            if (isNaN(price) || price < 0.75) { alert('Service price must be at least $0.75.'); e.preventDefault(); return false; }
-            if (!document.getElementById('phone_number').value.trim()) { alert('Please enter your phone number.'); e.preventDefault(); return false; }
-            alert('Grocery errand created successfully! (Demo)');
+        document.getElementById('groceryForm').addEventListener('submit',function(e){
+            let storePref=document.getElementById('store_preference').value;
+            if(!storePref){alert('Please select a store.');e.preventDefault();return false;}
+            if(storePref==='other'&&!document.getElementById('other_store_name').value.trim()){alert('Please specify store name.');e.preventDefault();return false;}
+            if(!document.getElementById('delivery_address').value.trim()){alert('Please set a delivery address on the map.');e.preventDefault();return false;}
+            let hasItem=false;document.querySelectorAll('input[name="items[]"]').forEach(i=>{if(i.value.trim())hasItem=true;});
+            if(!hasItem){alert('Please add at least one grocery item.');e.preventDefault();return false;}
+            let price=parseFloat(document.getElementById('service_price').value);
+            if(isNaN(price)||price<0.75){alert('Service price must be at least $0.75.');e.preventDefault();return false;}
+            if(!document.getElementById('phone_number').value.trim()){alert('Please enter your phone number.');e.preventDefault();return false;}
         });
 
-        function initAutoSliding() {
-            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
-                const check = () => {
-                    inp.classList.remove('sliding-text');
-                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
-                        inp.classList.add('sliding-text');
-                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
-                    }
-                };
-                inp.addEventListener('input', () => setTimeout(check, 100));
-                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
-                inp.addEventListener('blur', () => { if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running'; });
-                setTimeout(check, 300);
-            });
-            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
+        function initAutoSliding(){
+            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp=>{const check=()=>{inp.classList.remove('sliding-text');if(inp.scrollWidth>inp.clientWidth&&inp.value.trim()!==''){inp.classList.add('sliding-text');inp.style.animationDuration=Math.max(10,inp.value.length/2)+'s';}};inp.addEventListener('input',()=>setTimeout(check,100));inp.addEventListener('focus',()=>inp.style.animationPlayState='paused');inp.addEventListener('blur',()=>{if(inp.classList.contains('sliding-text'))inp.style.animationPlayState='running';});setTimeout(check,300);});
+            window.addEventListener('resize',()=>document.querySelectorAll('input.sliding-text').forEach(i=>i.classList.remove('sliding-text')));
         }
 
-        window.onload = function() {
-            initMap();
-            initAutoSliding();
-            updateProgress();
-        };
+        window.onload=function(){initMap();initAutoSliding();updateProgress();};
     </script>
 </body>
 </html>

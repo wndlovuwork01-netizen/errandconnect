@@ -128,7 +128,7 @@
             font-weight: 500;
             font-size: 13px;
             white-space: nowrap;
-            overflow-y: auto;
+            overflow: hidden;
             text-overflow: ellipsis;
             max-width: 140px;
             color: var(--text-secondary);
@@ -317,7 +317,7 @@
             border: 1px solid #000000; /* BLACK BORDER LINE ADDED */
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
-            overflow-y: auto;
+            overflow: hidden;
             position: relative;
             -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
             width: 100%; /* Ensure full width on mobile */
@@ -1181,13 +1181,13 @@
                 <div class="user-menu">
                     <span class="welcome-text">Welcome, {{ user.fullname if user else 'Runner' }}! 👋</span>
                     <div class="user-actions">
-                    <a href="{{ url_for('runnerprofile') }}" class="btn-icon">
-                        <i class="fas fa-user"></i>
-                    </a>
-                    <a href="{{ url_for('logout') }}" class="btn-icon">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
-                </div>
+                        <button class="btn-icon">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <button class="btn-icon">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -1231,7 +1231,7 @@
                         <i class="fas fa-dollar-sign"></i>
                         High Paying
                     </button>
-                    <button class="action-btn outline" onclick="window.location.href='{{ url_for('runnercompleted') }}'">
+                    <button class="action-btn outline">
                         <i class="fas fa-history"></i>
                         View Completed
                     </button>
@@ -1260,19 +1260,19 @@
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <a href="{{ url_for('runnerhome') }}" class="nav-item">
+            <a href="#" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="{{ url_for('runnercompleted') }}" class="nav-item">
+            <a href="#" class="nav-item">
                 <i class="fas fa-check-circle"></i>
                 <span>Completed</span>
             </a>
-            <a href="{{ url_for('runneravailable_errands') }}" class="nav-item active">
+            <a href="#" class="nav-item active">
                 <i class="fas fa-list"></i>
                 <span>Errands</span>
             </a>
-            <a href="{{ url_for('runnerprofile') }}" class="nav-item">
+            <a href="#" class="nav-item">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
@@ -1290,7 +1290,7 @@
             // Ensure page container is scrollable
             const page = document.getElementById('available-errands-page');
             if (page) {
-                page.style.overflow-y = 'auto';
+                page.style.overflowY = 'auto';
                 page.style.height = 'auto';
             }
 
@@ -1864,13 +1864,7 @@
         }
 
         function getDirections(errandId) {
-            const errand = errands.find(e => e.id === errandId);
-            if (errand) {
-                const destination = encodeURIComponent(errand.delivery);
-                const pickup = encodeURIComponent(errand.pickup);
-                const url = `https://www.google.com/maps/dir/?api=1&origin=${pickup}&destination=${destination}&travelmode=driving`;
-                window.open(url, '_blank');
-            }
+            alert('Directions would open in your maps application.');
         }
 
         function notInterested(errandId) {

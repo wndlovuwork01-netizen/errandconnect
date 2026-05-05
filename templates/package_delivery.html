@@ -8,431 +8,78 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         :root {
-            --primary: #4CAF50;
-            --primary-light: #66BB6A;
-            --primary-dark: #388E3C;
-            --secondary: #2E7D32;
-            --accent: #FF9800;
-            --success: #8BC34A;
-            --light: #f8fdf8;
-            --dark: #1A331A;
+            --primary: #4CAF50; --primary-light: #66BB6A; --primary-dark: #388E3C; --secondary: #2E7D32;
+            --accent: #FF9800; --success: #8BC34A; --light: #f8fdf8; --dark: #1A331A;
             --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
-            --radius: 10px;
-            --transition: all 0.2s ease;
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15); --radius: 10px; --transition: all 0.2s ease;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: var(--light);
-            color: var(--dark);
-            line-height: 1.5;
-            min-height: 100vh;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 100%;
-            margin: 0;
-            background: white;
-            min-height: 100vh;
-        }
-
-        /* Smaller top bar */
-        .fixed-service-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 6px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 48px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .service-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .service-icon {
-            font-size: 18px;
-            background: var(--gradient);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .service-text h3 {
-            font-size: 13px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .service-text p {
-            display: none;
-        }
-
-        .estimated-fee-display {
-            background: var(--gradient);
-            color: white;
-            padding: 4px 10px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            font-size: 11px;
-            min-width: 85px;
-            text-align: center;
-        }
-
-        .fee-amount {
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .content-wrapper {
-            padding-top: 58px;
-            padding-bottom: 20px;
-        }
-
-        .mobile-header {
-            background: var(--gradient);
-            color: white;
-            padding: 12px 15px;
-            text-align: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .logo-icon {
-            background: rgba(255, 255, 255, 0.2);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
-
-        .service-tag {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 15px;
-            font-size: 10px;
-        }
-
-        /* Map styles */
-        #map {
-            height: 280px;
-            width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .map-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .map-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #f0f0f0;
-            color: #666;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 13px;
-        }
-        .map-btn.active {
-            background: #4CAF50;
-            color: white;
-        }
-        .map-btn.active.dropoff {
-            background: #2196F3;
-        }
-        .map-hint {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 8px;
-            text-align: center;
-            display: none;
-        }
-        /* Route info bar */
-        .route-info-bar {
-            background: white;
-            border-radius: 12px;
-            margin-top: 12px;
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e9e9e9;
-        }
-        .route-info-item {
-            flex: 1;
-            text-align: center;
-        }
-        .route-info-label {
-            font-size: 9px;
-            color: #777;
-            text-transform: uppercase;
-        }
-        .route-info-value {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--primary-dark);
-        }
-        .route-info-value small {
-            font-size: 9px;
-        }
-
-        .form-section {
-            padding: 15px;
-        }
-
-        .progress-bar {
-            height: 3px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin: 15px 0 20px;
-        }
-
-        .progress {
-            height: 100%;
-            background: var(--gradient);
-            width: 25%;
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        h2 {
-            font-size: 16px;
-            margin: 15px 0 12px;
-            color: var(--primary-dark);
-            padding-bottom: 6px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            gap: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .input-with-icon {
-            position: relative;
-        }
-
-        .input-with-icon i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-            font-size: 14px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 12px 12px 38px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-        }
-
-        textarea {
-            padding: 12px;
-        }
-
-        /* Dimension grid */
-        .dimension-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .dimension-item {
-            background: var(--light);
-            padding: 10px;
-            border-radius: var(--radius);
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-        .dimension-item label {
-            font-size: 11px;
-        }
-        .dimension-item input {
-            padding: 8px;
-            text-align: center;
-        }
-
-        /* Preference grid */
-        .preference-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .preference-item {
-            background: var(--light);
-            padding: 10px;
-            border-radius: var(--radius);
-            border: 1px solid #e0e0e0;
-        }
-
-        /* Value display */
-        .value-display {
-            background: var(--gradient);
-            color: white;
-            padding: 12px;
-            border-radius: var(--radius);
-            margin: 15px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Delivery method indicator */
-        .delivery-method-indicator {
-            background: var(--light);
-            border-radius: var(--radius);
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        /* Submit button */
-        .submit-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            padding: 14px;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .section-divider {
-            margin: 20px 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
-        }
-
-        .info-tip {
-            background: rgba(76,175,80,0.1);
-            border-left: 3px solid var(--primary);
-            padding: 8px 12px;
-            font-size: 11px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .service-phone-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .service-phone-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        @media (min-width: 768px) {
-            body { padding: 10px; display: flex; justify-content: center; }
-            .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
-            .preference-grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 320px) {
-            .dimension-grid { grid-template-columns: 1fr; }
-            .route-info-value { font-size: 11px; }
-            .map-btn { font-size: 11px; padding: 8px; }
-            .service-phone-row { gap: 8px; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--light); color: var(--dark); line-height: 1.5; min-height: 100vh; padding: 0; overflow-x: hidden; }
+        .container { width: 100%; max-width: 100%; margin: 0; background: white; min-height: 100vh; }
+        .fixed-service-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); padding: 6px 15px; display: flex; justify-content: space-between; align-items: center; height: 48px; border-bottom: 1px solid #e0e0e0; }
+        .service-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+        .service-icon { font-size: 18px; background: var(--gradient); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .service-text h3 { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .service-text p { display: none; }
+        .estimated-fee-display { background: var(--gradient); color: white; padding: 4px 10px; border-radius: var(--radius); font-weight: 600; font-size: 11px; min-width: 85px; text-align: center; }
+        .fee-amount { font-size: 14px; font-weight: 700; }
+        .content-wrapper { padding-top: 58px; padding-bottom: 20px; }
+        .mobile-header { background: var(--gradient); color: white; padding: 12px 15px; text-align: center; }
+        .logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
+        .logo-icon { background: rgba(255, 255, 255, 0.2); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        h1 { font-size: 20px; margin-bottom: 2px; }
+        .service-tag { background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 15px; font-size: 10px; }
+        #map { height: 280px; width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .map-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+        .map-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: #666; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; }
+        .map-btn.active { background: #4CAF50; color: white; }
+        .map-btn.active.dropoff { background: #2196F3; }
+        .map-hint { background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 8px; text-align: center; display: none; }
+        .route-info-bar { background: white; border-radius: 12px; margin-top: 12px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #e9e9e9; }
+        .route-info-item { flex: 1; text-align: center; }
+        .route-info-label { font-size: 9px; color: #777; text-transform: uppercase; }
+        .route-info-value { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+        .route-info-value small { font-size: 9px; }
+        .form-section { padding: 15px; }
+        .progress-bar { height: 3px; background: #e0e0e0; border-radius: 2px; margin: 15px 0 20px; }
+        .progress { height: 100%; background: var(--gradient); width: 25%; border-radius: 2px; transition: width 0.3s ease; }
+        h2 { font-size: 16px; margin: 15px 0 12px; color: var(--primary-dark); padding-bottom: 6px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .input-with-icon { position: relative; }
+        .input-with-icon i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px 12px 12px 38px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: white; }
+        textarea { padding: 12px; }
+        .dimension-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .dimension-item { background: var(--light); padding: 10px; border-radius: var(--radius); border: 1px solid #e0e0e0; text-align: center; }
+        .dimension-item label { font-size: 11px; }
+        .dimension-item input { padding: 8px; text-align: center; }
+        .preference-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 8px; }
+        .preference-item { background: var(--light); padding: 10px; border-radius: var(--radius); border: 1px solid #e0e0e0; }
+        .value-display { background: var(--gradient); color: white; padding: 12px; border-radius: var(--radius); margin: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        .delivery-method-indicator { background: var(--light); border-radius: var(--radius); padding: 10px; display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+        .submit-btn { background: var(--gradient); color: white; border: none; border-radius: var(--radius); padding: 14px; font-weight: 600; width: 100%; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .section-divider { margin: 20px 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary-light), transparent); }
+        .info-tip { background: rgba(76,175,80,0.1); border-left: 3px solid var(--primary); padding: 8px 12px; font-size: 11px; margin: 10px 0; border-radius: 0 8px 8px 0; }
+        .service-phone-row { display: flex; gap: 12px; margin-bottom: 20px; }
+        .service-phone-row .form-group { flex: 1; margin-bottom: 0; }
+        @media (min-width: 768px) { body { padding: 10px; display: flex; justify-content: center; } .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); } .preference-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 320px) { .dimension-grid { grid-template-columns: 1fr; } .route-info-value { font-size: 11px; } .map-btn { font-size: 11px; padding: 8px; } .service-phone-row { gap: 8px; } }
     </style>
 </head>
 <body>
     <div class="fixed-service-bar">
-        <div class="service-info">
-            <div class="service-icon"><i class="fas fa-box"></i></div>
-            <div class="service-text"><h3>Package Delivery</h3><p>Safe delivery</p></div>
-        </div>
-        <div class="estimated-fee-display">
-            <span>Est.</span>
-            <span id="estimated_fee" class="fee-amount">$0.00</span>
-        </div>
+        <div class="service-info"><div class="service-icon"><i class="fas fa-box"></i></div><div class="service-text"><h3>Package Delivery</h3><p>Safe delivery</p></div></div>
+        <div class="estimated-fee-display"><span>Est.</span><span id="estimated_fee" class="fee-amount">$0.00</span></div>
     </div>
 
     <div class="container">
         <div class="content-wrapper">
-            <div class="mobile-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fas fa-box"></i></div>
-                    <div><h1>ErrandConnect</h1><div class="service-tag">Package Delivery</div></div>
-                </div>
-            </div>
+            <div class="mobile-header"><div class="logo"><div class="logo-icon"><i class="fas fa-box"></i></div><div><h1>ErrandConnect</h1><div class="service-tag">Package Delivery</div></div></div></div>
 
             <div class="form-section">
                 <div class="progress-bar"><div class="progress"></div></div>
 
-                <!-- INLINE MAP SECTION -->
                 <div class="map-wrapper">
                     <div class="map-controls">
                         <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-map-marker-alt"></i> Set Pickup</button>
@@ -440,129 +87,43 @@
                     </div>
                     <div id="mapHint" class="map-hint">Tap map to set location</div>
                     <div id="map"></div>
-
                     <div class="route-info-bar" id="routeInfoBar">
-                        <div class="route-info-item">
-                            <div class="route-info-label">Distance</div>
-                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
-                        </div>
-                        <div class="route-info-item">
-                            <div class="route-info-label">Est. Time</div>
-                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
-                        </div>
-                        <div class="route-info-item">
-                            <div class="route-info-label">Est. Fee</div>
-                            <div class="route-info-value" id="infoFee">$0.00</div>
-                        </div>
+                        <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
+                        <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
+                        <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
                     </div>
                 </div>
 
                 <form method="post" action="{{ url_for('create_package_delivery_errand') }}" id="packageDeliveryForm">
-                    <!-- Hidden map coordinate fields -->
                     <input type="hidden" id="pickup_lat" name="pickup_lat">
                     <input type="hidden" id="pickup_lon" name="pickup_lon">
                     <input type="hidden" id="dropoff_lat" name="dropoff_lat">
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
 
                     <h2><i class="fas fa-box-open"></i> Package Information</h2>
-
-                    <div class="form-group">
-                        <div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="package_description" name="package_description" placeholder="What are you sending?" required></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Package Dimensions (cm)</label>
-                        <div class="info-tip"><i class="fas fa-info-circle"></i> Accurate dimensions help calculate delivery options</div>
-                        <div class="dimension-grid">
-                            <div class="dimension-item"><label>Length</label><input type="number" name="length" placeholder="0" step="0.1" min="0"></div>
-                            <div class="dimension-item"><label>Width</label><input type="number" name="width" placeholder="0" step="0.1" min="0"></div>
-                            <div class="dimension-item"><label>Height</label><input type="number" name="height" placeholder="0" step="0.1" min="0"></div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="weight" name="weight" placeholder="Weight (kg)" step="0.1" min="0" required></div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="contents_description" name="contents_description" rows="2" placeholder="Detailed description of contents..." required></textarea>
-                    </div>
-
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="package_description" name="package_description" placeholder="What are you sending?" required></div></div>
+                    <div class="form-group"><label>Package Dimensions (cm)</label><div class="info-tip"><i class="fas fa-info-circle"></i> Accurate dimensions help calculate delivery options</div><div class="dimension-grid"><div class="dimension-item"><label>Length</label><input type="number" name="length" placeholder="0" step="0.1" min="0"></div><div class="dimension-item"><label>Width</label><input type="number" name="width" placeholder="0" step="0.1" min="0"></div><div class="dimension-item"><label>Height</label><input type="number" name="height" placeholder="0" step="0.1" min="0"></div></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="weight" name="weight" placeholder="Weight (kg)" step="0.1" min="0" required></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="contents_description" name="contents_description" rows="2" placeholder="Detailed description of contents..." required></textarea></div></div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-shield-alt"></i> Package Safety & Value</h2>
-
-                    <div class="preference-grid">
-                        <div class="preference-item">
-                            <label for="fragile_items">Fragile Items?</label>
-                            <div class="input-with-icon"><i class="fas fa-glass-cheers"></i><select id="fragile_items" name="fragile_items" required><option value="no">No fragile items</option><option value="yes">Contains fragile items</option><option value="very_fragile">Very fragile</option></select></div>
-                        </div>
-                        <div class="preference-item">
-                            <label for="insurance_required">Insurance</label>
-                            <div class="input-with-icon"><i class="fas fa-shield-alt"></i><select id="insurance_required" name="insurance_required"><option value="no">No insurance</option><option value="basic">Basic insurance</option><option value="full">Full value insurance</option></select></div>
-                        </div>
-                    </div>
-
-                    <div class="value-display">
-                        <div class="value-label">Declared Value:</div>
-                        <div class="value-amount">$<span id="value_display">0.00</span></div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="estimated_value" name="estimated_value" placeholder="Package value for insurance" step="0.01" min="0"></div>
-                    </div>
-
+                    <div class="preference-grid"><div class="preference-item"><label for="fragile_items">Fragile Items?</label><div class="input-with-icon"><i class="fas fa-glass-cheers"></i><select id="fragile_items" name="fragile_items" required><option value="no">No fragile items</option><option value="yes">Contains fragile items</option><option value="very_fragile">Very fragile</option></select></div></div><div class="preference-item"><label for="insurance_required">Insurance</label><div class="input-with-icon"><i class="fas fa-shield-alt"></i><select id="insurance_required" name="insurance_required"><option value="no">No insurance</option><option value="basic">Basic insurance</option><option value="full">Full value insurance</option></select></div></div></div>
+                    <div class="value-display"><div class="value-label">Declared Value:</div><div class="value-amount">$<span id="value_display">0.00</span></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="estimated_value" name="estimated_value" placeholder="Package value for insurance" step="0.01" min="0"></div></div>
                     <div class="section-divider"></div>
 
-                    <!-- ========== PICKUP & DELIVERY INFORMATION (combined) ========== -->
                     <h2><i class="fas fa-route"></i> Pickup & Delivery Information</h2>
-
-                    <!-- Pickup address -->
-                    <div class="form-group">
-                        <div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="pickup_address" name="pickup_address" placeholder="Pickup address" required readonly onfocus="this.removeAttribute('readonly')"></div>
-                    </div>
-
-                    <!-- Delivery address -->
-                    <div class="form-group">
-                        <div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div>
-                    </div>
-
-                    <!-- Delivery speed and packaging (side by side) -->
-                    <div class="preference-grid">
-                        <div class="preference-item">
-                            <label for="delivery_timeframe">Delivery Speed</label>
-                            <div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_timeframe" name="delivery_timeframe" required><option value="express">Express (same day)</option><option value="next_day">Next day</option><option value="2_day">2-day delivery</option><option value="standard">Standard (3-5 days)</option></select></div>
-                        </div>
-                        <div class="preference-item">
-                            <label for="packaging_requirements">Packaging</label>
-                            <div class="input-with-icon"><i class="fas fa-box"></i><select id="packaging_requirements" name="packaging_requirements"><option value="standard">Standard packaging</option><option value="bubble_wrap">Bubble wrap</option><option value="double_box">Double boxing</option><option value="waterproof">Waterproof</option></select></div>
-                        </div>
-                    </div>
-
-                    <!-- Delivery Method Indicator -->
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
-                        <div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-bicycle"></i></div>
-                        <div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div>
-                    </div>
-
-                    <!-- Signature and proof of delivery -->
-                    <div class="preference-grid">
-                        <div class="preference-item">
-                            <label for="signature_required">Signature Required</label>
-                            <div class="input-with-icon"><i class="fas fa-signature"></i><select id="signature_required" name="signature_required" required><option value="no">No signature</option><option value="yes">Signature required</option><option value="adult_signature">Adult signature</option></select></div>
-                        </div>
-                        <div class="preference-item">
-                            <label for="proof_of_delivery">Proof of Delivery</label>
-                            <div class="input-with-icon"><i class="fas fa-camera"></i><select id="proof_of_delivery" name="proof_of_delivery"><option value="none">No proof needed</option><option value="photo">Photo proof</option><option value="signature">Signature proof</option><option value="both">Photo & signature</option></select></div>
-                        </div>
-                    </div>
-
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="pickup_address" name="pickup_address" placeholder="Pickup address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
+                    <div class="preference-grid"><div class="preference-item"><label for="delivery_timeframe">Delivery Speed</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_timeframe" name="delivery_timeframe" required><option value="express">Express (same day)</option><option value="next_day">Next day</option><option value="2_day">2-day delivery</option><option value="standard">Standard (3-5 days)</option></select></div></div><div class="preference-item"><label for="packaging_requirements">Packaging</label><div class="input-with-icon"><i class="fas fa-box"></i><select id="packaging_requirements" name="packaging_requirements"><option value="standard">Standard packaging</option><option value="bubble_wrap">Bubble wrap</option><option value="double_box">Double boxing</option><option value="waterproof">Waterproof</option></select></div></div></div>
+                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-bicycle"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div></div>
+                    <div class="preference-grid"><div class="preference-item"><label for="signature_required">Signature Required</label><div class="input-with-icon"><i class="fas fa-signature"></i><select id="signature_required" name="signature_required" required><option value="no">No signature</option><option value="yes">Signature required</option><option value="adult_signature">Adult signature</option></select></div></div><div class="preference-item"><label for="proof_of_delivery">Proof of Delivery</label><div class="input-with-icon"><i class="fas fa-camera"></i><select id="proof_of_delivery" name="proof_of_delivery"><option value="none">No proof needed</option><option value="photo">Photo proof</option><option value="signature">Signature proof</option><option value="both">Photo & signature</option></select></div></div></div>
                     <div class="section-divider"></div>
-
                     <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
                     <div class="form-group"><div class="input-with-icon"><i class="fas fa-hands-helping"></i><textarea id="special_handling" name="special_handling" rows="2" placeholder="Special handling instructions..."></textarea></div></div>
                     <div class="form-group"><div class="input-with-icon"><i class="fas fa-comment-alt"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Specific delivery instructions..."></textarea></div></div>
-
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
@@ -570,7 +131,6 @@
                         <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
                         <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
                     </div>
-
                     <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Package Delivery</button>
                 </form>
             </div>
@@ -579,247 +139,61 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ========== MAP LOGIC ==========
-        let map, pickupMarker, dropoffMarker, routeLine;
-        let selectionMode = 'pickup';
+        let map, pickupMarker, dropoffMarker, routeLine, selectionMode = 'pickup';
+        function initMap() { map = L.map('map').setView([-1.2921, 36.8219], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map); document.getElementById('mapHint').style.display = 'block'; map.on('click', e => { if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng); else setDropoffLocation(e.latlng.lat, e.latlng.lng); if (navigator.vibrate) navigator.vibrate(50); }); if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { map.setView([pos.coords.latitude, pos.coords.longitude], 13); if (!pickupMarker) setPickupLocation(pos.coords.latitude, pos.coords.longitude); }); } }
+        function setSelectionMode(mode) { selectionMode = mode; let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint'); p.classList.toggle('active', mode === 'pickup'); d.classList.toggle('active', mode === 'dropoff'); d.classList.toggle('dropoff', mode === 'dropoff'); hint.textContent = mode === 'pickup' ? "Tap map to set Pickup location" : "Tap map to set Delivery address"; hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)"; hint.style.display = 'block'; }
+        function setPickupLocation(lat, lng) { if (pickupMarker) map.removeLayer(pickupMarker); pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-map-marker-alt'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Pickup"); document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng; reverseGeocode(lat, lng, 'pickup_address'); updateRoute(); if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000); }
+        function setDropoffLocation(lat, lng) { if (dropoffMarker) map.removeLayer(dropoffMarker); dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery"); document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng; reverseGeocode(lat, lng, 'delivery_address'); updateRoute(); }
+        function updateRoute() { if (pickupMarker && dropoffMarker) { let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng(); fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`).then(res => res.json()).then(data => { if (data.routes?.length) { let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]); if (routeLine) map.removeLayer(routeLine); routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map); map.fitBounds(routeLine.getBounds(), { padding: [30,30] }); updateUIwithDistance(data.routes[0].distance / 1000); } }).catch(() => fallbackDistance(p, d)); } }
+        function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
+        function haversine(lat1, lon1, lat2, lon2) { const R = 6371; let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180; let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
+        function reverseGeocode(lat, lng, inputId) { fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; }); }
 
-        function initMap() {
-            map = L.map('map').setView([-1.2921, 36.8219], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
-            document.getElementById('mapHint').style.display = 'block';
-            map.on('click', e => {
-                if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
-                else setDropoffLocation(e.latlng.lat, e.latlng.lng);
-                if (navigator.vibrate) navigator.vibrate(50);
-            });
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    let { latitude, longitude } = pos.coords;
-                    map.setView([latitude, longitude], 13);
-                    if (!pickupMarker) setPickupLocation(latitude, longitude);
-                });
-            }
-        }
-
-        function setSelectionMode(mode) {
-            selectionMode = mode;
-            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
-            p.classList.toggle('active', mode === 'pickup');
-            d.classList.toggle('active', mode === 'dropoff');
-            d.classList.toggle('dropoff', mode === 'dropoff');
-            hint.textContent = mode === 'pickup' ? "Tap map to set Pickup location" : "Tap map to set Delivery address";
-            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
-            hint.style.display = 'block';
-        }
-
-        function setPickupLocation(lat, lng) {
-            if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-map-marker-alt'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Pickup");
-            document.getElementById('pickup_lat').value = lat;
-            document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'pickup_address');
-            updateRoute();
-            if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
-        }
-
-        function setDropoffLocation(lat, lng) {
-            if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
-            document.getElementById('dropoff_lat').value = lat;
-            document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address');
-            updateRoute();
-        }
-
-        function updateRoute() {
-            if (pickupMarker && dropoffMarker) {
-                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
-                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
-                    .then(res => res.json()).then(data => {
-                        if (data.routes?.length) {
-                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                            if (routeLine) map.removeLayer(routeLine);
-                            routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
-                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
-                            let distKm = data.routes[0].distance / 1000;
-                            updateUIwithDistance(distKm);
-                        } else fallbackDistance(p, d);
-                    }).catch(() => fallbackDistance(p, d));
-            }
-        }
-
-        function fallbackDistance(p, d) {
-            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
-            updateUIwithDistance(dist);
-        }
-
-        function haversine(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        function reverseGeocode(lat, lng, inputId) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
-                .catch(()=>{});
-        }
-
-        // ========== FEE & INFO BAR ==========
         function updateUIwithDistance(distKm) {
-            let base = 1.50;
-            let sizeFee = calculateSizeFee();
-            let distanceFee = calculateDistanceFee(distKm);
-            let timeFee = getTimeFee();
-            let additional = calculateAdditionalFees();
+            let base = 1.50, sizeFee = calculateSizeFee(), distanceFee = calculateDistanceFee(distKm), timeFee = getTimeFee(), additional = calculateAdditionalFees();
             let total = Math.max(base + sizeFee + distanceFee + timeFee + additional, 1.50);
             let estMinutes = Math.round(distKm * 3);
-
             document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+            document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
             document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
             document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
-
-            let volume = calculateVolume();
-            let weight = parseFloat(document.getElementById('weight').value) || 0;
-            updateDeliveryMethod(volume, weight, distKm);
+            updateDeliveryMethod(calculateVolume(), parseFloat(document.getElementById('weight').value) || 0, distKm);
         }
 
-        function calculateVolume() {
-            let l = parseFloat(document.querySelector('input[name="length"]').value) || 0;
-            let w = parseFloat(document.querySelector('input[name="width"]').value) || 0;
-            let h = parseFloat(document.querySelector('input[name="height"]').value) || 0;
-            return (l * w * h) / 1000000;
-        }
+        function calculateVolume() { let l = parseFloat(document.querySelector('input[name="length"]').value) || 0, w = parseFloat(document.querySelector('input[name="width"]').value) || 0, h = parseFloat(document.querySelector('input[name="height"]').value) || 0; return (l * w * h) / 1000000; }
+        function calculateSizeFee() { let vol = calculateVolume(), w = parseFloat(document.getElementById('weight').value) || 0; if (vol <= 0.01 && w <= 1) return 2.00; if (vol <= 0.05 && w <= 5) return 3.50; if (vol <= 0.2 && w <= 10) return 5.00; if (vol <= 0.5 && w <= 20) return 7.50; return 10.00; }
+        function calculateDistanceFee(dist) { if (dist <= 0.5) return 0; if (dist <= 1) return 0.50; if (dist <= 2) return 1.00; if (dist <= 5) return 2.50; if (dist <= 10) return 4.00; if (dist <= 20) return 6.00; if (dist <= 50) return 10.00; return 15.00; }
+        function getTimeFee() { let tf = document.getElementById('delivery_timeframe').value; if (tf === 'express') return 8.00; if (tf === 'next_day') return 5.00; if (tf === '2_day') return 3.00; return 0; }
+        function calculateAdditionalFees() { let fees = 0; let frag = document.getElementById('fragile_items').value; if (frag === 'yes') fees += 2.00; if (frag === 'very_fragile') fees += 4.00; let pack = document.getElementById('packaging_requirements').value; if (pack === 'bubble_wrap') fees += 1.50; if (pack === 'double_box') fees += 3.00; if (pack === 'waterproof') fees += 2.50; let sig = document.getElementById('signature_required').value; if (sig === 'yes') fees += 1.00; if (sig === 'adult_signature') fees += 2.00; let proof = document.getElementById('proof_of_delivery').value; if (proof === 'photo') fees += 1.00; if (proof === 'signature') fees += 0.50; if (proof === 'both') fees += 1.50; let ins = document.getElementById('insurance_required').value; let val = parseFloat(document.getElementById('estimated_value').value) || 0; if (ins === 'basic' && val > 0) fees += val * 0.02; if (ins === 'full' && val > 0) fees += val * 0.05; return fees; }
+        function updateDeliveryMethod(vol, weight, dist) { let indicator = document.getElementById('deliveryMethodIndicator'), method = { title: 'Vehicle Required', icon: 'fas fa-truck', description: 'Requires car/van' }; if (vol <= 0.1 && weight <= 5 && dist <= 5) method = { title: 'Runner on Foot', icon: 'fas fa-walking', description: 'Can be walked' }; else if (vol <= 0.5 && weight <= 20 && dist <= 20) method = { title: 'Bike Delivery', icon: 'fas fa-bicycle', description: 'Requires bike' }; if (vol > 0 && weight > 0 && dist > 0) { indicator.style.display = 'flex'; document.getElementById('deliveryMethodIcon').className = method.icon; document.getElementById('deliveryMethodTitle').innerText = method.title; document.getElementById('deliveryMethodDescription').innerText = method.description; } else indicator.style.display = 'none'; }
 
-        function calculateSizeFee() {
-            let vol = calculateVolume();
-            let w = parseFloat(document.getElementById('weight').value) || 0;
-            if (vol <= 0.01 && w <= 1) return 2.00;
-            if (vol <= 0.05 && w <= 5) return 3.50;
-            if (vol <= 0.2 && w <= 10) return 5.00;
-            if (vol <= 0.5 && w <= 20) return 7.50;
-            return 10.00;
-        }
-
-        function calculateDistanceFee(dist) {
-            if (dist <= 0.5) return 0;
-            if (dist <= 1) return 0.50;
-            if (dist <= 2) return 1.00;
-            if (dist <= 5) return 2.50;
-            if (dist <= 10) return 4.00;
-            if (dist <= 20) return 6.00;
-            if (dist <= 50) return 10.00;
-            return 15.00;
-        }
-
-        function getTimeFee() {
-            let tf = document.getElementById('delivery_timeframe').value;
-            if (tf === 'express') return 8.00;
-            if (tf === 'next_day') return 5.00;
-            if (tf === '2_day') return 3.00;
-            return 0;
-        }
-
-        function calculateAdditionalFees() {
-            let fees = 0;
-            let frag = document.getElementById('fragile_items').value;
-            if (frag === 'yes') fees += 2.00;
-            if (frag === 'very_fragile') fees += 4.00;
-            let pack = document.getElementById('packaging_requirements').value;
-            if (pack === 'bubble_wrap') fees += 1.50;
-            if (pack === 'double_box') fees += 3.00;
-            if (pack === 'waterproof') fees += 2.50;
-            let sig = document.getElementById('signature_required').value;
-            if (sig === 'yes') fees += 1.00;
-            if (sig === 'adult_signature') fees += 2.00;
-            let proof = document.getElementById('proof_of_delivery').value;
-            if (proof === 'photo') fees += 1.00;
-            if (proof === 'signature') fees += 0.50;
-            if (proof === 'both') fees += 1.50;
-            let ins = document.getElementById('insurance_required').value;
-            let val = parseFloat(document.getElementById('estimated_value').value) || 0;
-            if (ins === 'basic' && val > 0) fees += val * 0.02;
-            if (ins === 'full' && val > 0) fees += val * 0.05;
-            return fees;
-        }
-
-        function updateDeliveryMethod(vol, weight, dist) {
-            let indicator = document.getElementById('deliveryMethodIndicator');
-            let method = { title: 'Vehicle Required', icon: 'fas fa-truck', description: 'Requires car/van' };
-            if (vol <= 0.1 && weight <= 5 && dist <= 5) method = { title: 'Runner on Foot', icon: 'fas fa-walking', description: 'Can be walked' };
-            else if (vol <= 0.5 && weight <= 20 && dist <= 20) method = { title: 'Bike Delivery', icon: 'fas fa-bicycle', description: 'Requires bike' };
-            if (vol > 0 && weight > 0 && dist > 0) {
-                indicator.style.display = 'flex';
-                document.getElementById('deliveryMethodIcon').className = method.icon;
-                document.getElementById('deliveryMethodTitle').innerText = method.title;
-                document.getElementById('deliveryMethodDescription').innerText = method.description;
-            } else indicator.style.display = 'none';
-        }
-
-        // Listeners
         document.getElementById('delivery_timeframe').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('fragile_items').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('insurance_required').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.getElementById('estimated_value').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('weight').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.querySelectorAll('input[name="length"], input[name="width"], input[name="height"]').forEach(inp => {
-            inp.addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        });
+        document.querySelectorAll('input[name="length"], input[name="width"], input[name="height"]').forEach(inp => { inp.addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); }); });
         document.getElementById('packaging_requirements').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('signature_required').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
         document.getElementById('proof_of_delivery').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
 
-        function updateValueDisplay() {
-            let val = document.getElementById('estimated_value').value || 0;
-            document.getElementById('value_display').innerText = parseFloat(val).toFixed(2);
-            if(pickupMarker && dropoffMarker) updateRoute();
-        }
+        function updateValueDisplay() { document.getElementById('value_display').innerText = (parseFloat(document.getElementById('estimated_value').value) || 0).toFixed(2); if(pickupMarker && dropoffMarker) updateRoute(); }
         document.getElementById('estimated_value').addEventListener('input', updateValueDisplay);
 
-        function updateProgress() {
-            let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length;
-            let total = document.querySelectorAll('input,select,textarea').length;
-            document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%';
-        }
+        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%'; }
         document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
-
-        function initAutoSliding() {
-            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
-                const check = () => {
-                    inp.classList.remove('sliding-text');
-                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
-                        inp.classList.add('sliding-text');
-                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
-                    }
-                };
-                inp.addEventListener('input', () => setTimeout(check, 100));
-                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
-                inp.addEventListener('blur', () => { if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running'; });
-                setTimeout(check, 300);
-            });
-            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
-        }
 
         document.getElementById('packageDeliveryForm').addEventListener('submit', function(e) {
             if (!document.getElementById('pickup_address').value.trim()) { alert('Please set pickup address on map.'); e.preventDefault(); return false; }
             if (!document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
             if (!document.getElementById('package_description').value.trim()) { alert('Enter package description.'); e.preventDefault(); return false; }
-            let w = parseFloat(document.getElementById('weight').value);
-            if (isNaN(w) || w <= 0) { alert('Enter valid weight.'); e.preventDefault(); return false; }
+            let w = parseFloat(document.getElementById('weight').value); if (isNaN(w) || w <= 0) { alert('Enter valid weight.'); e.preventDefault(); return false; }
             if (!document.getElementById('contents_description').value.trim()) { alert('Describe contents.'); e.preventDefault(); return false; }
-            let price = parseFloat(document.getElementById('service_price').value);
-            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
+            let price = parseFloat(document.getElementById('service_price').value); if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
             if (!document.getElementById('phone_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
         });
 
-        window.onload = function() {
-            initMap();
-            initAutoSliding();
-            updateProgress();
-            updateValueDisplay();
-        };
+        window.onload = function() { initMap(); updateProgress(); updateValueDisplay(); };
     </script>
 </body>
 </html>

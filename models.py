@@ -31,7 +31,7 @@ class User(db.Model):
 
     @property
     def average_rating(self):
-        from models import Rating  # Import here to avoid circular import
+        from models import Rating
         ratings = Rating.query.filter_by(to_user_id=self.id).all()
         if not ratings:
             return 0
@@ -72,7 +72,7 @@ class RunnerProfile(db.Model):
 
 
 # ============================================================
-# ERRAND MODEL
+# ERRAND MODEL - FIXED with all missing columns
 # ============================================================
 class Errand(db.Model):
     __tablename__ = "errands"
@@ -86,11 +86,23 @@ class Errand(db.Model):
     delivery_time = db.Column(db.String(50))
     details = db.Column(db.Text)
     price_estimate = db.Column(db.Float)
-    agreed_price = db.Column(db.Float)  # Final agreed price
+    agreed_price = db.Column(db.Float)
     calculated_minimum_fee = db.Column(db.Float)
-    status = db.Column(db.String(50), default="pending")  # pending, accepted, completed, cancelled
+    status = db.Column(db.String(50), default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # -- MISSING COLUMNS ADDED --
+    pickup_latitude = db.Column(db.Float)
+    pickup_longitude = db.Column(db.Float)
+    dropoff_latitude = db.Column(db.Float)
+    dropoff_longitude = db.Column(db.Float)
+    distance_km = db.Column(db.Float)
+    weight_kg = db.Column(db.String(50))
+    expires_at = db.Column(db.DateTime)
+    hard_deadline = db.Column(db.DateTime)
+    # ---------------------------
+
+    # Relationships
     client = db.relationship("User", back_populates="errands")
     negotiations = db.relationship("Negotiation", back_populates="errand", lazy=True)
     active_errand = db.relationship("ActiveErrand", back_populates="errand", uselist=False)
@@ -111,7 +123,7 @@ class Negotiation(db.Model):
     errand_id = db.Column(db.Integer, db.ForeignKey("errands.id"), nullable=False)
     runner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     offer_price = db.Column(db.Float)
-    status = db.Column(db.String(50), default="pending")  # pending, accepted, rejected
+    status = db.Column(db.String(50), default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     errand = db.relationship("Errand", back_populates="negotiations")
@@ -173,8 +185,8 @@ class ActiveErrand(db.Model):
     runner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime, nullable=True)
-    estimated_duration = db.Column(db.String(100)) # e.g. "15 mins"
-    status = db.Column(db.String(50))  # ongoing, completed, cancelled
+    estimated_duration = db.Column(db.String(100))
+    status = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     errand = db.relationship("Errand", back_populates="active_errand")
@@ -194,7 +206,7 @@ class Rating(db.Model):
     errand_id = db.Column(db.Integer, db.ForeignKey("errands.id"), nullable=False)
     from_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     to_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
+    rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -221,15 +233,15 @@ class Notification(db.Model):
 
 
 # ============================================================
-# APP FEEDBACK MODEL - NEWLY ADDED
+# APP FEEDBACK MODEL
 # ============================================================
 class AppFeedback(db.Model):
     __tablename__ = "app_feedbacks"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
-    feedback_type = db.Column(db.String(50))  # general, bug, suggestion, service, app
+    rating = db.Column(db.Integer, nullable=False)
+    feedback_type = db.Column(db.String(50))
     feedback = db.Column(db.Text, nullable=False)
     suggestions = db.Column(db.Text)
     contact_permission = db.Column(db.Boolean, default=False)

@@ -42,7 +42,6 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-info">
-                    <!-- FIXED: Now uses pending_count from view function -->
                     <span class="stat-count">{{ pending_count }}</span>
                     <span class="stat-label">Pending</span>
                 </div>
@@ -52,14 +51,13 @@
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-info">
-                    <!-- FIXED: Now uses completed_count from view function -->
                     <span class="stat-count">{{ completed_count }}</span>
                     <span class="stat-label">Completed</span>
                 </div>
             </div>
         </div>
 
-        <!-- Filter Tabs - UPDATED: Removed Ongoing tab -->
+        <!-- Filter Tabs -->
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">All</button>
             <button class="filter-tab" data-filter="pending">Pending</button>
@@ -249,7 +247,15 @@
                             <p>{{ e.details or 'No additional details provided' }}</p>
                         </div>
 
+                        <!-- ========== FIXED ACTION BUTTONS ========== -->
                         <div class="action-buttons">
+                            {% if e.status == 'pending' %}
+                            <button class="create-btn primary" onclick="location.href='{{ url_for('available_runners', errand_id=e.id) }}'">
+                                <i class="fas fa-redo"></i>
+                                Resend Errand
+                            </button>
+                            {% endif %}
+
                             {% if e.status == 'completed' %}
                                 {% set can_delete = e.created_at and (now - e.created_at).days > 7 %}
                                 <button class="btn-danger" onclick="deleteErrand({{ e.id }})" {% if not can_delete %}disabled title="Can only delete after 7 days"{% endif %}>
@@ -258,6 +264,7 @@
                                 </button>
                             {% endif %}
                         </div>
+                        <!-- ===================================================== -->
                     </div>
                 </div>
                 {% endfor %}
@@ -1064,19 +1071,15 @@ function toggleErrandDetails(errandId) {
 // Delete errand function
 function deleteErrand(errandId) {
     if (confirm('Are you sure you want to delete this errand? This action cannot be undone.')) {
-        // Show loading state
         const deleteBtn = document.querySelector(`#expanded-${errandId} .btn-danger`);
         const originalText = deleteBtn.innerHTML;
         deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
         deleteBtn.disabled = true;
 
-        // Simulate API call
         setTimeout(() => {
             alert(`Errand #${errandId} has been deleted.`);
             // In a real app, you would redirect or reload the page
             // window.location.reload();
-
-            // For now, just revert the button
             deleteBtn.innerHTML = originalText;
             deleteBtn.disabled = false;
         }, 1000);

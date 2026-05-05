@@ -47,7 +47,6 @@
             min-height: 100vh;
         }
 
-        /* Smaller top bar */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -92,9 +91,7 @@
             text-overflow: ellipsis;
         }
 
-        .service-text p {
-            display: none;
-        }
+        .service-text p { display: none; }
 
         .estimated-fee-display {
             background: var(--gradient);
@@ -107,15 +104,9 @@
             text-align: center;
         }
 
-        .fee-amount {
-            font-size: 14px;
-            font-weight: 700;
-        }
+        .fee-amount { font-size: 14px; font-weight: 700; }
 
-        .content-wrapper {
-            padding-top: 58px;
-            padding-bottom: 20px;
-        }
+        .content-wrapper { padding-top: 58px; padding-bottom: 20px; }
 
         .mobile-header {
             background: var(--gradient);
@@ -124,336 +115,57 @@
             text-align: center;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
+        .logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
+        .logo-icon { background: rgba(255, 255, 255, 0.2); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        h1 { font-size: 20px; margin-bottom: 2px; }
+        .service-tag { background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 15px; font-size: 10px; }
 
-        .logo-icon {
-            background: rgba(255, 255, 255, 0.2);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        #map { height: 280px; width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .map-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+        .map-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: #666; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; }
+        .map-btn.active { background: #4CAF50; color: white; }
+        .map-btn.active.dropoff { background: #2196F3; }
+        .map-hint { background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 8px; text-align: center; display: none; }
+        .route-info-bar { background: white; border-radius: 12px; margin-top: 12px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #e9e9e9; }
+        .route-info-item { flex: 1; text-align: center; }
+        .route-info-label { font-size: 9px; color: #777; text-transform: uppercase; }
+        .route-info-value { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+        .route-info-value small { font-size: 9px; }
 
-        h1 {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
+        .form-section { padding: 15px; }
+        .progress-bar { height: 3px; background: #e0e0e0; border-radius: 2px; margin: 15px 0 20px; }
+        .progress { height: 100%; background: var(--gradient); width: 25%; border-radius: 2px; transition: width 0.3s ease; }
+        h2 { font-size: 16px; margin: 15px 0 12px; color: var(--primary-dark); padding-bottom: 6px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .input-with-icon { position: relative; }
+        .input-with-icon i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px 12px 12px 38px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: white; }
+        textarea { padding: 12px; }
+        .preference-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 8px; }
+        .preference-item { background: var(--light); padding: 10px; border-radius: var(--radius); border: 1px solid #e0e0e0; }
+        .food-item { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 10px; background: var(--light); border-radius: var(--radius); border: 1px solid #e0e0e0; }
+        .food-row { display: flex; gap: 8px; }
+        .food-row .input-with-icon { flex: 1; }
+        .item-actions { display: flex; justify-content: flex-end; }
+        .remove-item { background: var(--accent); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; }
+        .add-item { background: var(--primary); color: white; padding: 10px; border-radius: var(--radius); cursor: pointer; width: 100%; margin-bottom: 12px; font-weight: 600; }
+        .budget-payment-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+        .service-phone-row { display: flex; gap: 12px; }
+        .service-phone-row .form-group { flex: 1; margin-bottom: 0; }
+        .file-upload-wrapper { position: relative; }
+        .file-upload-input { width: 100%; padding: 12px 12px 12px 38px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; position: relative; }
+        .file-name { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--primary-dark); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(76,175,80,0.1); padding: 2px 6px; border-radius: 12px; }
+        .delivery-method-indicator { background: var(--light); border-radius: var(--radius); padding: 10px; display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+        .submit-btn { background: var(--gradient); color: white; border: none; border-radius: var(--radius); padding: 14px; font-weight: 600; width: 100%; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .section-divider { margin: 20px 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary-light), transparent); }
+        .info-tip { background: rgba(76,175,80,0.1); border-left: 3px solid var(--primary); padding: 8px 12px; font-size: 11px; margin: 10px 0; border-radius: 0 8px 8px 0; }
+        .expanding-input { max-height: 0; overflow: hidden; transition: 0.3s; opacity: 0; }
+        .expanding-input.expanded { max-height: 80px; opacity: 1; margin-top: 8px; }
+        .restaurant-type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+        .restaurant-type-item { background: var(--light); border: 2px solid #e0e0e0; border-radius: var(--radius); padding: 8px; text-align: center; cursor: pointer; font-size: 12px; }
+        .restaurant-type-item.active { border-color: var(--primary); background: rgba(76,175,80,0.1); }
 
-        .service-tag {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 15px;
-            font-size: 10px;
-        }
-
-        /* Map styles */
-        #map {
-            height: 280px;
-            width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .map-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .map-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #f0f0f0;
-            color: #666;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 13px;
-        }
-        .map-btn.active {
-            background: #4CAF50;
-            color: white;
-        }
-        .map-btn.active.dropoff {
-            background: #2196F3;
-        }
-        .map-hint {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 8px;
-            text-align: center;
-            display: none;
-        }
-        .route-info-bar {
-            background: white;
-            border-radius: 12px;
-            margin-top: 12px;
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e9e9e9;
-        }
-        .route-info-item {
-            flex: 1;
-            text-align: center;
-        }
-        .route-info-label {
-            font-size: 9px;
-            color: #777;
-            text-transform: uppercase;
-        }
-        .route-info-value {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--primary-dark);
-        }
-        .route-info-value small {
-            font-size: 9px;
-        }
-
-        .form-section {
-            padding: 15px;
-        }
-
-        .progress-bar {
-            height: 3px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin: 15px 0 20px;
-        }
-
-        .progress {
-            height: 100%;
-            background: var(--gradient);
-            width: 25%;
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        h2 {
-            font-size: 16px;
-            margin: 15px 0 12px;
-            color: var(--primary-dark);
-            padding-bottom: 6px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            gap: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .input-with-icon {
-            position: relative;
-        }
-
-        .input-with-icon i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-            font-size: 14px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 12px 12px 38px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-        }
-
-        textarea {
-            padding: 12px;
-        }
-
-        .preference-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .preference-item {
-            background: var(--light);
-            padding: 10px;
-            border-radius: var(--radius);
-            border: 1px solid #e0e0e0;
-        }
-        .food-item {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-            padding: 10px;
-            background: var(--light);
-            border-radius: var(--radius);
-            border: 1px solid #e0e0e0;
-        }
-        .food-row {
-            display: flex;
-            gap: 8px;
-        }
-        .food-row .input-with-icon {
-            flex: 1;
-        }
-        .item-actions {
-            display: flex;
-            justify-content: flex-end;
-        }
-        .remove-item {
-            background: var(--accent);
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .add-item {
-            background: var(--primary);
-            color: white;
-            padding: 10px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        .budget-payment-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-top: 12px;
-        }
-        .service-phone-row {
-            display: flex;
-            gap: 12px;
-        }
-        .service-phone-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-        .file-upload-wrapper {
-            position: relative;
-        }
-        .file-upload-input {
-            width: 100%;
-            padding: 12px 12px 12px 38px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            position: relative;
-        }
-        .file-name {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 10px;
-            color: var(--primary-dark);
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            background: rgba(76,175,80,0.1);
-            padding: 2px 6px;
-            border-radius: 12px;
-        }
-        .delivery-method-indicator {
-            background: var(--light);
-            border-radius: var(--radius);
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .submit-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            padding: 14px;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .section-divider {
-            margin: 20px 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
-        }
-        .info-tip {
-            background: rgba(76,175,80,0.1);
-            border-left: 3px solid var(--primary);
-            padding: 8px 12px;
-            font-size: 11px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        .expanding-input {
-            max-height: 0;
-            overflow: hidden;
-            transition: 0.3s;
-            opacity: 0;
-        }
-        .expanding-input.expanded {
-            max-height: 80px;
-            opacity: 1;
-            margin-top: 8px;
-        }
-        .restaurant-type-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .restaurant-type-item {
-            background: var(--light);
-            border: 2px solid #e0e0e0;
-            border-radius: var(--radius);
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .restaurant-type-item.active {
-            border-color: var(--primary);
-            background: rgba(76,175,80,0.1);
-        }
         @media (min-width: 768px) {
             body { padding: 10px; display: flex; justify-content: center; }
             .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -502,20 +214,10 @@
                     </div>
                     <div id="mapHint" class="map-hint">Tap map to set location</div>
                     <div id="map"></div>
-
                     <div class="route-info-bar" id="routeInfoBar">
-                        <div class="route-info-item">
-                            <div class="route-info-label">Distance</div>
-                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
-                        </div>
-                        <div class="route-info-item">
-                            <div class="route-info-label">Est. Time</div>
-                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
-                        </div>
-                        <div class="route-info-item">
-                            <div class="route-info-label">Est. Fee</div>
-                            <div class="route-info-value" id="infoFee">$0.00</div>
-                        </div>
+                        <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
+                        <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
+                        <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
                     </div>
                 </div>
 
@@ -524,10 +226,10 @@
                     <input type="hidden" id="pickup_lon" name="pickup_lon">
                     <input type="hidden" id="dropoff_lat" name="dropoff_lat">
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+                    <!-- ========== NEW: Estimated Fee Hidden Field ========== -->
+                    <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
 
                     <h2><i class="fas fa-store"></i> Restaurant / Delivery Information</h2>
-
-                    <!-- 1. Restaurant Type (click to change preferred list) -->
                     <div class="form-group">
                         <label>Restaurant Type</label>
                         <div class="restaurant-type-grid">
@@ -538,83 +240,45 @@
                         </div>
                         <input type="hidden" id="restaurant_type" name="restaurant_type" value="fast_food">
                     </div>
-
-                    <!-- 2. Preferred Restaurant (dynamic dropdown) -->
                     <div class="form-group">
                         <label for="restaurant_preference">Preferred Restaurant</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-utensils"></i>
-                            <select id="restaurant_preference" name="restaurant_preference" required onchange="toggleOtherRestaurantInput()">
-                                <!-- Options will be populated by JavaScript -->
-                            </select>
-                        </div>
-                        <div id="other_restaurant_input" class="expanding-input">
-                            <div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_restaurant_name" placeholder="Restaurant name"></div>
-                        </div>
+                        <div class="input-with-icon"><i class="fas fa-utensils"></i><select id="restaurant_preference" name="restaurant_preference" required onchange="toggleOtherRestaurantInput()"></select></div>
+                        <div id="other_restaurant_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_restaurant_name" name="other_restaurant_name" placeholder="Restaurant name"></div></div>
                     </div>
-
-                    <!-- 3. Restaurant Address -->
-                    <div class="form-group">
-                        <label for="restaurant_location">Restaurant Address</label>
-                        <div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="restaurant_location" name="restaurant_location" readonly onfocus="this.removeAttribute('readonly')"></div>
-                    </div>
-
-                    <!-- 4. Delivery Address -->
-                    <div class="form-group">
-                        <label for="delivery_address">Delivery Address</label>
-                        <div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" required readonly onfocus="this.removeAttribute('readonly')"></div>
-                    </div>
-
-                    <!-- 5. Delivery Time -->
-                    <div class="form-group">
-                        <label for="delivery_time">Delivery Time</label>
-                        <div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="specific">Specific time</option></select></div>
-                        <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" placeholder="e.g., 2:30 PM"></div></div>
-                    </div>
-
-                    <!-- Delivery Method Indicator -->
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
-                        <div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div>
-                        <div class="delivery-method-text"><h4 id="deliveryMethodTitle">Method</h4><p id="deliveryMethodDescription">--</p></div>
-                    </div>
-
-                    <!-- Special Instructions -->
-                    <div class="form-group">
-                        <label for="delivery_instructions">Special Delivery Instructions</label>
-                        <div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" rows="2" placeholder="Gate code, buzzer, etc."></textarea></div>
-                    </div>
-
+                    <div class="form-group"><label for="restaurant_location">Restaurant Address</label><div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="restaurant_location" name="restaurant_location" readonly onfocus="this.removeAttribute('readonly')"></div></div>
+                    <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
+                    <div class="form-group"><label for="delivery_time">Delivery Time</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="specific">Specific time</option></select></div></div>
+                    <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="e.g., 2:30 PM"></div></div>
+                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Method</h4><p id="deliveryMethodDescription">--</p></div></div>
+                    <div class="form-group"><label for="delivery_instructions">Special Delivery Instructions</label><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Gate code, buzzer, etc."></textarea></div></div>
                     <div class="section-divider"></div>
+
                     <h2><i class="fas fa-list-alt"></i> Order Details</h2>
                     <div id="items-container">
-                        <div class="food-item">
-                            <div class="food-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-hamburger"></i><input type="text" name="items[]" placeholder="Food item" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div>
-                            <div class="food-row"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><input type="text" name="instructions[]" placeholder="Special instructions"></div></div>
-                            <div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>
-                        </div>
+                        <div class="food-item"><div class="food-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-hamburger"></i><input type="text" name="items[]" placeholder="Food item" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="food-row"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><input type="text" name="instructions[]" placeholder="Special instructions"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div>
                     </div>
                     <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
                     <div class="budget-payment-row">
-                        <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" placeholder="Order budget ($)" step="0.01"></div>
-                        <div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method"><option value="cash">Cash on Delivery</option><option value="card">Card</option><option value="mobile">Mobile Payment</option></select></div>
+                        <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Order budget ($)" step="0.01"></div>
+                        <div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash on Delivery</option><option value="card">Card</option><option value="mobile">Mobile Payment</option></select></div>
                     </div>
-                    <div class="form-group"><label>Upload Menu (optional)</label><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload screenshot</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" accept="image/*,.pdf" onchange="displayFileName(this)"></div></div>
-
+                    <div class="form-group"><label>Upload Menu (optional)</label><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload screenshot</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" name="menu_photo" accept="image/*,.pdf" onchange="displayFileName(this)"></div></div>
                     <div class="section-divider"></div>
+
                     <h2><i class="fas fa-sliders-h"></i> Preferences</h2>
                     <div class="preference-grid">
-                        <div class="preference-item"><label>Food Temp</label><select id="temperature_preference"><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option></select></div>
-                        <div class="preference-item"><label>Packaging</label><select id="packaging_preference"><option value="eco_friendly">Eco-friendly</option><option value="secure">Secure</option></select></div>
-                        <div class="preference-item"><label>Utensils</label><select id="utensils_required"><option value="yes">Yes</option><option value="no">No</option></select></div>
-                        <div class="preference-item"><label>Contactless</label><select id="contactless_delivery"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                        <div class="preference-item"><label>Food Temp</label><select id="temperature_preference" name="temperature_preference"><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option></select></div>
+                        <div class="preference-item"><label>Packaging</label><select id="packaging_preference" name="packaging_preference"><option value="eco_friendly">Eco-friendly</option><option value="secure">Secure</option></select></div>
+                        <div class="preference-item"><label>Utensils</label><select id="utensils_required" name="utensils_required"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                        <div class="preference-item"><label>Contactless</label><select id="contactless_delivery" name="contactless_delivery"><option value="yes">Yes</option><option value="no">No</option></select></div>
                     </div>
-                    <div class="input-with-icon"><i class="fas fa-heart"></i><input type="text" id="dietary_restrictions" placeholder="Allergies / restrictions"></div>
-
+                    <div class="input-with-icon"><i class="fas fa-heart"></i><input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="Allergies / restrictions"></div>
                     <div class="section-divider"></div>
+
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
                     <div class="service-phone-row">
-                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" step="0.01" min="0.50" required></div></div>
-                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" required></div></div>
+                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" step="0.01" min="0.50" required></div></div>
+                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" required></div></div>
                     </div>
                     <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Order</button>
                 </form>
@@ -624,65 +288,41 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ========== RESTAURANT LISTS BY TYPE ==========
         const restaurantLists = {
             fast_food: [
-                { value: "mcdonalds", name: "McDonald's" },
-                { value: "kfc", name: "KFC" },
-                { value: "burger_king", name: "Burger King" },
-                { value: "wendys", name: "Wendy's" },
-                { value: "taco_bell", name: "Taco Bell" },
-                { value: "subway", name: "Subway" },
-                { value: "dominos", name: "Domino's Pizza" },
-                { value: "pizza_hut", name: "Pizza Hut" },
-                { value: "local", name: "Local Fast Food" },
-                { value: "other", name: "Other" }
+                { value: "mcdonalds", name: "McDonald's" }, { value: "kfc", name: "KFC" },
+                { value: "burger_king", name: "Burger King" }, { value: "wendys", name: "Wendy's" },
+                { value: "taco_bell", name: "Taco Bell" }, { value: "subway", name: "Subway" },
+                { value: "dominos", name: "Domino's Pizza" }, { value: "pizza_hut", name: "Pizza Hut" },
+                { value: "local", name: "Local Fast Food" }, { value: "other", name: "Other" }
             ],
             casual: [
-                { value: "chilis", name: "Chili's" },
-                { value: "applebees", name: "Applebee's" },
-                { value: "olive_garden", name: "Olive Garden" },
-                { value: "texas_roadhouse", name: "Texas Roadhouse" },
-                { value: "outback", name: "Outback Steakhouse" },
-                { value: "red_lobster", name: "Red Lobster" },
-                { value: "local_casual", name: "Local Casual Dining" },
-                { value: "other", name: "Other" }
+                { value: "chilis", name: "Chili's" }, { value: "applebees", name: "Applebee's" },
+                { value: "olive_garden", name: "Olive Garden" }, { value: "texas_roadhouse", name: "Texas Roadhouse" },
+                { value: "outback", name: "Outback Steakhouse" }, { value: "red_lobster", name: "Red Lobster" },
+                { value: "local_casual", name: "Local Casual Dining" }, { value: "other", name: "Other" }
             ],
             fine_dining: [
-                { value: "ruth_chris", name: "Ruth's Chris" },
-                { value: "capital_grille", name: "Capital Grille" },
-                { value: "flemings", name: "Fleming's" },
-                { value: "morton", name: "Morton's" },
-                { value: "local_fine", name: "Local Fine Dining" },
-                { value: "other", name: "Other" }
+                { value: "ruth_chris", name: "Ruth's Chris" }, { value: "capital_grille", name: "Capital Grille" },
+                { value: "flemings", name: "Fleming's" }, { value: "morton", name: "Morton's" },
+                { value: "local_fine", name: "Local Fine Dining" }, { value: "other", name: "Other" }
             ],
             cafe: [
-                { value: "starbucks", name: "Starbucks" },
-                { value: "dunkin", name: "Dunkin'" },
-                { value: "panera", name: "Panera Bread" },
-                { value: "costa", name: "Costa Coffee" },
-                { value: "local_cafe", name: "Local Café" },
-                { value: "other", name: "Other" }
+                { value: "starbucks", name: "Starbucks" }, { value: "dunkin", name: "Dunkin'" },
+                { value: "panera", name: "Panera Bread" }, { value: "costa", name: "Costa Coffee" },
+                { value: "local_cafe", name: "Local Café" }, { value: "other", name: "Other" }
             ]
         };
 
-        // Function to update the preferred restaurant dropdown based on type
-        function updateRestaurantDropdown(restaurantType) {
+        function updateRestaurantDropdown(type) {
             const select = document.getElementById('restaurant_preference');
-            const list = restaurantLists[restaurantType] || restaurantLists.fast_food;
+            const list = restaurantLists[type] || restaurantLists.fast_food;
             select.innerHTML = '<option value="">Select a restaurant</option>';
-            list.forEach(rest => {
-                const option = document.createElement('option');
-                option.value = rest.value;
-                option.textContent = rest.name;
-                select.appendChild(option);
-            });
-            // Reset other restaurant input
+            list.forEach(r => { const o = document.createElement('option'); o.value = r.value; o.textContent = r.name; select.appendChild(o); });
             document.getElementById('other_restaurant_name').value = '';
             document.getElementById('other_restaurant_input').classList.remove('expanded');
         }
 
-        // ========== MAP LOGIC (same as before) ==========
         let map, pickupMarker, dropoffMarker, routeLine;
         let selectionMode = 'pickup';
 
@@ -697,9 +337,8 @@
             });
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
-                    let { latitude, longitude } = pos.coords;
-                    map.setView([latitude, longitude], 13);
-                    if (!pickupMarker) setPickupLocation(latitude, longitude);
+                    map.setView([pos.coords.latitude, pos.coords.longitude], 13);
+                    if (!pickupMarker) setPickupLocation(pos.coords.latitude, pos.coords.longitude);
                 });
             }
         }
@@ -707,31 +346,24 @@
         function setSelectionMode(mode) {
             selectionMode = mode;
             let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
-            p.classList.toggle('active', mode === 'pickup');
-            d.classList.toggle('active', mode === 'dropoff');
-            d.classList.toggle('dropoff', mode === 'dropoff');
+            p.classList.toggle('active', mode === 'pickup'); d.classList.toggle('active', mode === 'dropoff'); d.classList.toggle('dropoff', mode === 'dropoff');
             hint.textContent = mode === 'pickup' ? "Tap map to set Restaurant" : "Tap map to set Delivery";
-            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
-            hint.style.display = 'block';
+            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)"; hint.style.display = 'block';
         }
 
         function setPickupLocation(lat, lng) {
             if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-utensils'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Restaurant");
-            document.getElementById('pickup_lat').value = lat;
-            document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'restaurant_location');
-            updateRoute();
+            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-utensils'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Restaurant");
+            document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'restaurant_location'); updateRoute();
             if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
         }
 
         function setDropoffLocation(lat, lng) {
             if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3; width:28px; height:28px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
-            document.getElementById('dropoff_lat').value = lat;
-            document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address');
-            updateRoute();
+            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
+            document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'delivery_address'); updateRoute();
         }
 
         function updateRoute() {
@@ -744,159 +376,58 @@
                             if (routeLine) map.removeLayer(routeLine);
                             routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
                             map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
-                            let distKm = data.routes[0].distance / 1000;
-                            updateUIwithDistance(distKm);
+                            updateUIwithDistance(data.routes[0].distance / 1000);
                         } else fallbackDistance(p, d);
                     }).catch(() => fallbackDistance(p, d));
             }
         }
 
-        function fallbackDistance(p, d) {
-            let dist = haversine(p.lat, p.lng, d.lat, d.lng);
-            updateUIwithDistance(dist);
-        }
+        function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
+        function haversine(lat1, lon1, lat2, lon2) { const R = 6371; let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180; let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
+        function reverseGeocode(lat, lng, inputId) { fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; }).catch(()=>{}); }
 
-        function haversine(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-            let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        function reverseGeocode(lat, lng, inputId) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; })
-                .catch(()=>{});
-        }
-
-        // ========== FEE & INFO BAR ==========
         function updateUIwithDistance(distKm) {
             let distanceFee = 0;
-            if (distKm <= 0.1) distanceFee = 0.50;
-            else if (distKm <= 1.5) distanceFee = 1.00;
-            else if (distKm <= 4.99) distanceFee = 2.00;
-            else if (distKm <= 15) distanceFee = 2.50;
-            else distanceFee = 3.00;
-            let timeFee = getTimeFee();
-            let restaurantPremium = getRestaurantPremium();
-            let total = Math.max(distanceFee + timeFee + restaurantPremium, 0.50);
-            let estMinutes = Math.round(distKm * 4);
-
+            if (distKm <= 0.1) distanceFee = 0.50; else if (distKm <= 1.5) distanceFee = 1.00; else if (distKm <= 4.99) distanceFee = 2.00; else if (distKm <= 15) distanceFee = 2.50; else distanceFee = 3.00;
+            let total = Math.max(distanceFee + getTimeFee() + getRestaurantPremium(), 0.50);
             document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+            document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
-            document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
+            document.getElementById('infoTime').innerHTML = Math.round(distKm * 4) + ' <small>min</small>';
             document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
-
-            let methodText = (distKm <= 1.5) ? '🚶 Foot' : '🚲 Bike/Car';
-            updateDeliveryMethod(distKm, methodText);
+            updateDeliveryMethod(distKm, distKm <= 1.5 ? '🚶 Foot' : '🚲 Bike/Car');
         }
 
-        function getTimeFee() {
-            let dt = document.getElementById('delivery_time').value;
-            let st = document.getElementById('specific_time').value;
-            if (dt === 'asap') return 2.00;
-            if (dt === 'morning') return 1.50;
-            if (dt === 'afternoon') return 1.00;
-            if (dt === 'evening') return 2.00;
-            if (dt === 'specific') {
-                if (st && st.match(/(7|8|9|10|11):\d{2}\s*PM/i)) return 2.50;
-                return 2.00;
-            }
-            return 0;
-        }
-
-        function getRestaurantPremium() {
-            let type = document.getElementById('restaurant_type').value;
-            return { fast_food:0, casual:1.00, fine_dining:2.50, cafe:0.50 }[type] || 0;
-        }
+        function getTimeFee() { let dt = document.getElementById('delivery_time').value, st = document.getElementById('specific_time').value; if (dt === 'asap') return 2.00; if (dt === 'morning') return 1.50; if (dt === 'afternoon') return 1.00; if (dt === 'evening') return 2.00; if (dt === 'specific') { if (st && st.match(/(7|8|9|10|11):\d{2}\s*PM/i)) return 2.50; return 2.00; } return 0; }
+        function getRestaurantPremium() { let type = document.getElementById('restaurant_type').value; return { fast_food:0, casual:1.00, fine_dining:2.50, cafe:0.50 }[type] || 0; }
 
         function updateDeliveryMethod(distKm, methodText) {
             let indicator = document.getElementById('deliveryMethodIndicator');
-            let method = { title: methodText, icon: distKm <= 1.5 ? 'fas fa-walking' : 'fas fa-bicycle', description: distKm <= 1.5 ? 'Can be walked' : 'Requires vehicle' };
-            if (distKm > 0) {
-                indicator.style.display = 'flex';
-                document.getElementById('deliveryMethodIcon').className = method.icon;
-                document.getElementById('deliveryMethodTitle').innerText = method.title;
-                document.getElementById('deliveryMethodDescription').innerText = method.description;
-            } else indicator.style.display = 'none';
+            if (distKm > 0) { indicator.style.display = 'flex'; document.getElementById('deliveryMethodIcon').className = distKm <= 1.5 ? 'fas fa-walking' : 'fas fa-bicycle'; document.getElementById('deliveryMethodTitle').innerText = methodText; document.getElementById('deliveryMethodDescription').innerText = distKm <= 1.5 ? 'Can be walked' : 'Requires vehicle'; } else indicator.style.display = 'none';
         }
 
-        // ========== RESTAURANT TYPE SELECTOR (updates dropdown and premium) ==========
-        function selectRestaurantType(element, type) {
-            document.querySelectorAll('.restaurant-type-item').forEach(i => i.classList.remove('active'));
-            element.classList.add('active');
-            document.getElementById('restaurant_type').value = type;
-            updateRestaurantDropdown(type);
-            if (pickupMarker && dropoffMarker) updateRoute(); // recalc premium
-        }
-
-        // ========== OTHER UI HELPERS ==========
-        function toggleOtherRestaurantInput() {
-            let div = document.getElementById('other_restaurant_input');
-            if (document.getElementById('restaurant_preference').value === 'other') div.classList.add('expanded');
-            else div.classList.remove('expanded');
-        }
-
-        function toggleSpecificTimeInput() {
-            let div = document.getElementById('specific_time_input');
-            if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded');
-            else div.classList.remove('expanded');
-        }
-
-        function addItem() {
-            let container = document.getElementById('items-container');
-            let newItem = document.createElement('div'); newItem.className = 'food-item';
-            newItem.innerHTML = `<div class="food-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-hamburger"></i><input type="text" name="items[]" placeholder="Food item" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="food-row"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><input type="text" name="instructions[]" placeholder="Special instructions"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;
-            container.appendChild(newItem);
-            setTimeout(() => newItem.querySelector('input')?.focus(), 100);
-        }
-
+        function selectRestaurantType(element, type) { document.querySelectorAll('.restaurant-type-item').forEach(i => i.classList.remove('active')); element.classList.add('active'); document.getElementById('restaurant_type').value = type; updateRestaurantDropdown(type); if (pickupMarker && dropoffMarker) updateRoute(); }
+        function toggleOtherRestaurantInput() { let div = document.getElementById('other_restaurant_input'); if (document.getElementById('restaurant_preference').value === 'other') div.classList.add('expanded'); else div.classList.remove('expanded'); }
+        function toggleSpecificTimeInput() { let div = document.getElementById('specific_time_input'); if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded'); else div.classList.remove('expanded'); }
+        function addItem() { let c = document.getElementById('items-container'); let n = document.createElement('div'); n.className = 'food-item'; n.innerHTML = `<div class="food-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-hamburger"></i><input type="text" name="items[]" placeholder="Food item" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="food-row"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><input type="text" name="instructions[]" placeholder="Special instructions"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`; c.appendChild(n); setTimeout(() => n.querySelector('input')?.focus(), 100); }
         function removeItem(btn) { btn.closest('.food-item')?.remove(); }
         function displayFileName(input) { document.getElementById('file_name').innerText = input.files[0]?.name || ''; }
-        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; let total = document.querySelectorAll('input,select,textarea').length; document.querySelector('.progress').style.width = Math.min((filled/total)*100,100)+'%'; }
+        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%'; }
         document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
 
-        // Form validation
         document.getElementById('foodDeliveryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
             const restPref = document.getElementById('restaurant_preference').value;
-            if (!restPref) { alert('Please select a restaurant.'); return false; }
-            if (restPref === 'other' && !document.getElementById('other_restaurant_name').value.trim()) { alert('Please specify restaurant name.'); return false; }
-            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set a delivery address on the map.'); return false; }
-            let hasItem = false;
-            document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
-            if (!hasItem) { alert('Please add at least one food item.'); return false; }
+            if (!restPref) { alert('Please select a restaurant.'); e.preventDefault(); return false; }
+            if (restPref === 'other' && !document.getElementById('other_restaurant_name').value.trim()) { alert('Please specify restaurant name.'); e.preventDefault(); return false; }
+            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set a delivery address on the map.'); e.preventDefault(); return false; }
+            let hasItem = false; document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+            if (!hasItem) { alert('Please add at least one food item.'); e.preventDefault(); return false; }
             const price = parseFloat(document.getElementById('service_price').value);
-            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); return false; }
-            if (!document.getElementById('phone_number').value.trim()) { alert('Please enter your phone number.'); return false; }
-            alert('Food delivery order created! (Demo)');
+            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
+            if (!document.getElementById('phone_number').value.trim()) { alert('Please enter your phone number.'); e.preventDefault(); return false; }
         });
 
-        // Auto-sliding text (simplified)
-        function initAutoSliding() {
-            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
-                const check = () => {
-                    inp.classList.remove('sliding-text');
-                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
-                        inp.classList.add('sliding-text');
-                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
-                    }
-                };
-                inp.addEventListener('input', () => setTimeout(check, 100));
-                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
-                inp.addEventListener('blur', () => { if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running'; });
-                setTimeout(check, 300);
-            });
-            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
-        }
-
-        window.onload = function() {
-            initMap();
-            initAutoSliding();
-            updateProgress();
-            // Initialize restaurant dropdown with default type (fast_food)
-            updateRestaurantDropdown('fast_food');
-        };
+        window.onload = function() { initMap(); updateProgress(); updateRestaurantDropdown('fast_food'); };
     </script>
 </body>
 </html>
