@@ -42,22 +42,23 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+        html {
+    width: 100%;
+    overflow-x: hidden;
+}
 
-        body {
-            background-color: var(--background);
-            color: var(--text-primary);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overscroll-behavior-y: none;
-        }
+body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-overflow-scrolling: touch;
+}
 
         #available-errands-page {
             min-height: 100vh;
@@ -1280,650 +1281,598 @@
     </div>
 
     <script>
-        // Mobile optimization code
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fix scrolling issues
-            document.body.style.overflow = 'auto';
-            document.body.style.height = 'auto';
-            document.body.style.minHeight = '100vh';
+    // Mobile optimization code
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.style.overflow = 'auto';
+        document.body.style.height = 'auto';
+        document.body.style.minHeight = '100vh';
 
-            // Ensure page container is scrollable
-            const page = document.getElementById('available-errands-page');
-            if (page) {
-                page.style.overflowY = 'auto';
-                page.style.height = 'auto';
+        const page = document.getElementById('available-errands-page');
+        if (page) {
+            page.style.overflowY = 'auto';
+            page.style.height = 'auto';
+        }
+
+        let lastClickTime = 0;
+        document.addEventListener('click', function(e) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < 300) {
+                e.preventDefault();
             }
+            lastClickTime = currentTime;
+        }, true);
 
-            // Prevent accidental double-clicks on mobile
-            let lastClickTime = 0;
-            document.addEventListener('click', function(e) {
-                const currentTime = new Date().getTime();
-                if (currentTime - lastClickTime < 300) {
-                    e.preventDefault();
-                }
-                lastClickTime = currentTime;
-            }, true);
-
-            // Handle orientation changes
-            window.addEventListener('orientationchange', function() {
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                }, 100);
-            });
-
-            // Add safe area support
-            const style = document.createElement('style');
-            style.textContent = `
-                @supports (padding: max(0px)) {
-                    .main-header {
-                        padding-top: max(12px, env(safe-area-inset-top));
-                    }
-                    .bottom-nav {
-                        padding-bottom: max(10px, env(safe-area-inset-bottom));
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // Initialize the page
-            console.log('Mobile app initialized');
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => { window.scrollTo(0, 0); }, 100);
         });
 
-        // Get real errands data passed from Flask
-        const realErrands = {{ available_errands | tojson | safe }};
+        const style = document.createElement('style');
+        style.textContent = `
+            @supports (padding: max(0px)) {
+                .main-header {
+                    padding-top: max(12px, env(safe-area-inset-top));
+                }
+                .bottom-nav {
+                    padding-bottom: max(10px, env(safe-area-inset-bottom));
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
-        // Transform the data to match the expected format
-        let errands = realErrands.map(errandData => {
-            const errand = errandData.errand;
-            const client = errandData.client;
+        console.log('Mobile app initialized');
+    });
 
-            return {
-                id: errand.id,
-                type: errand.type,
-                clientPrice: errand.price_estimate || 0,
-                estimatedCost: errand.price_estimate ? errand.price_estimate * 0.8 : 0, // 80% of client price as estimated cost
-                runnerPrice: null, // Will be set when runner submits offer
-                distance: 2.5, // Placeholder - will be replaced with Google Maps later
-                date: errand.created_at ? new Date(errand.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                pickup: errand.pickup_location || 'Not specified',
-                delivery: errand.delivery_location || 'Not specified',
-                time: errand.delivery_time || 'Flexible',
-                description: errand.details || errand.type,
-                weight: errand.weight || 'Standard',
-                instructions: errand.details || 'No special instructions',
-                client: client ? client.fullname : 'Anonymous',
-                rating: "4.5/5", // Placeholder - can be calculated from client ratings
-                reviews: 15, // Placeholder
-                status: "available",
-                selectedRunner: null,
-                bids: [],
-                buttonState: "submit",
-                acceptedAt: null,
-                expiresAt: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
-            };
+    // ========== REAL DATA ==========
+    const realErrands = {{ available_errands | tojson | safe }};
+
+    let errands = realErrands.map(errandData => {
+        const errand = errandData.errand;
+        const client = errandData.client;
+
+        return {
+            id: errand.id,
+            type: errand.type,
+            clientPrice: errand.price_estimate || 0,
+            estimatedCost: errand.calculated_minimum_fee ?? (errand.price_estimate || 0),
+            distance: errand.distance_km ?? 0,
+            date: errand.created_at ? new Date(errand.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            pickup: errand.pickup_location || 'Not specified',
+            delivery: errand.delivery_location || 'Not specified',
+            time: errand.delivery_time || 'Flexible',
+            description: errand.details || errand.type,
+            weight: errand.weight || 'Standard',
+            instructions: errand.details || 'No special instructions',
+            client: client ? client.fullname : 'Anonymous',
+            rating: "4.5/5",
+            reviews: 15,
+            status: "available",
+            selectedRunner: null,
+            bids: [],
+            buttonState: "submit",
+            acceptedAt: null,
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 min
+        };
+    });
+
+    const errandIcons = {
+        'grocery shopping': 'shopping-basket',
+        'food delivery': 'utensils',
+        'bill payments': 'file-invoice-dollar',
+        'package delivery': 'box',
+        'gadget services': 'laptop',
+        'collections': 'box-open',
+        'ticket booking': 'ticket-alt',
+        'spare parts': 'cog',
+        'gas delivery': 'gas-pump',
+        'other services': 'tasks'
+    };
+
+    const currentRunner = {
+        id: '{{ user.id if user else "0" }}',
+        name: '{{ user.fullname if user else "Runner" }}',
+        rating: '4.8/5'
+    };
+
+    // ========== PAGE INIT ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        checkExpiredErrands();
+        renderErrands();
+        updateStats();
+        setInterval(checkExpiredErrands, 30000);
+        setInterval(updateCountdownTimers, 1000);
+    });
+
+    function checkExpiredErrands() {
+        const now = new Date();
+        let hasChanges = false;
+        errands.forEach(errand => {
+            if (errand.status === 'available' && errand.expiresAt && errand.expiresAt < now) {
+                errand.status = 'expired';
+                hasChanges = true;
+            }
         });
-
-        // Simple icon mapping
-        const errandIcons = {
-            'grocery shopping': 'shopping-basket',
-            'food delivery': 'utensils',
-            'bill payments': 'file-invoice-dollar',
-            'package delivery': 'box',
-            'gadget services': 'laptop',
-            'collections': 'box-open',
-            'ticket booking': 'ticket-alt',
-            'spare parts': 'cog',
-            'gas delivery': 'gas-pump',
-            'other services': 'tasks'
-        };
-
-        // Current runner (simulated)
-        const currentRunner = {
-            id: 'runner_{{ user.id if user else "123" }}',
-            name: '{{ user.fullname if user else "Runner" }}',
-            rating: '4.8/5'
-        };
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            checkExpiredErrands();
+        if (hasChanges) {
+            errands = errands.filter(errand => errand.status !== 'expired');
             renderErrands();
             updateStats();
+        }
+    }
 
-            // Check for expired errands every 30 seconds
-            setInterval(checkExpiredErrands, 30000);
+    function updateCountdownTimers() {
+        const expiryElements = document.querySelectorAll('.expiry-time');
+        expiryElements.forEach(element => {
+            const errandId = parseInt(element.closest('.errand-card').querySelector('.order-id').textContent.replace('#EC-', ''));
+            const errand = errands.find(e => e.id === errandId);
+            if (errand && errand.expiresAt) {
+                const timeRemaining = getTimeRemaining(errand.expiresAt);
+                element.innerHTML = `<i class="fas fa-clock"></i> ${timeRemaining}`;
+            }
+        });
+    }
 
-            // Update countdown timers every second
-            setInterval(updateCountdownTimers, 1000);
+    function renderErrands() {
+        const errandsList = document.getElementById('errandsList');
+        errandsList.innerHTML = '';
+
+        const visibleErrands = errands.filter(errand => {
+            if (errand.status === 'expired') return false;
+            if (errand.status === 'accepted' && errand.selectedRunner !== currentRunner.id) return false;
+            return true;
         });
 
-        // Check for expired errands and remove them
-        function checkExpiredErrands() {
-            const now = new Date();
-            let hasChanges = false;
+        if (visibleErrands.length === 0) {
+            errandsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>No Errands Available</h3>
+                    <p>Check back later for new errands in your area</p>
+                    <div class="empty-actions">
+                        <button class="btn-primary" onclick="refreshErrands()">
+                            <i class="fas fa-sync"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
 
-            errands.forEach(errand => {
-                if (errand.status === 'available' && errand.expiresAt && errand.expiresAt < now) {
-                    errand.status = 'expired';
-                    hasChanges = true;
-                }
-            });
+        visibleErrands.forEach(errand => {
+            const iconName = errandIcons[errand.type.toLowerCase()] || 'tasks';
+            const statusInfo = getStatusInfo(errand);
 
-            if (hasChanges) {
-                errands = errands.filter(errand => errand.status !== 'expired');
-                renderErrands();
-                updateStats();
+            const errandCard = document.createElement('div');
+            errandCard.className = 'errand-card';
+            errandCard.setAttribute('data-type', errand.type.toLowerCase());
+            errandCard.setAttribute('data-distance', errand.distance);
+            errandCard.setAttribute('data-price', errand.clientPrice);
+            errandCard.setAttribute('data-date', errand.date);
+            errandCard.setAttribute('data-status', errand.status);
+
+            let buttonContent = '';
+            let buttonClass = 'btn-primary';
+            let buttonOnclick = `submitRunnerBid(${errand.id})`;
+
+            switch(errand.buttonState) {
+                case 'submit':
+                    buttonContent = '<i class="fas fa-bolt"></i> Submit Price & Accept';
+                    buttonClass = 'btn-primary';
+                    break;
+                case 'pending':
+                    buttonContent = '<i class="fas fa-clock"></i> Waiting for client...';
+                    buttonClass = 'btn-pending';
+                    buttonOnclick = '';
+                    break;
+                case 'accept-chat':
+                    buttonContent = '<i class="fas fa-check"></i> Accept & Chat';
+                    buttonClass = 'btn-accept-chat';
+                    buttonOnclick = `navigateToChat(${errand.id})`;
+                    break;
             }
-        }
 
-        // Update countdown timers in real-time
-        function updateCountdownTimers() {
-            const expiryElements = document.querySelectorAll('.expiry-time');
-            expiryElements.forEach(element => {
-                const errandId = parseInt(element.closest('.errand-card').querySelector('.order-id').textContent.replace('#EC-', ''));
-                const errand = errands.find(e => e.id === errandId);
-
-                if (errand && errand.expiresAt) {
-                    const timeRemaining = getTimeRemaining(errand.expiresAt);
-                    element.innerHTML = `<i class="fas fa-clock"></i> ${timeRemaining}`;
-                }
-            });
-        }
-
-        // Render errands to the page
-        function renderErrands() {
-            const errandsList = document.getElementById('errandsList');
-            errandsList.innerHTML = '';
-
-            // Filter out expired and accepted errands
-            const visibleErrands = errands.filter(errand => {
-                if (errand.status === 'expired') return false;
-                if (errand.status === 'accepted' && errand.selectedRunner !== currentRunner.id) return false;
-                return true;
-            });
-
-            if (visibleErrands.length === 0) {
-                errandsList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h3>No Errands Available</h3>
-                        <p>Check back later for new errands in your area</p>
-                        <div class="empty-actions">
-                            <button class="btn-primary" onclick="refreshErrands()">
-                                <i class="fas fa-sync"></i>
-                                Refresh
-                            </button>
+            errandCard.innerHTML = `
+                <!-- Compact View -->
+                <div class="compact-view">
+                    <div class="card-main">
+                        <div class="service-info">
+                            <div class="service-icon" data-errand-type="${errand.type.toLowerCase()}">
+                                <i class="fas fa-${iconName}"></i>
+                            </div>
+                            <div class="service-details">
+                                <h3>${errand.type}
+                                    <span class="errand-status ${statusInfo.class}">
+                                        <i class="fas fa-${statusInfo.icon}"></i>
+                                        ${statusInfo.text}
+                                    </span>
+                                </h3>
+                                <div class="meta-info">
+                                    <span class="order-id">#EC-${errand.id}</span>
+                                    <span class="post-date">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        ${formatDate(errand.date)}
+                                    </span>
+                                    <span class="expiry-time">
+                                        <i class="fas fa-clock"></i>
+                                        ${getTimeRemaining(errand.expiresAt)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quick-stats">
+                            <div class="earnings">
+                                <span class="amount">$${errand.clientPrice.toFixed(2)}</span>
+                                <span class="label">Client's Price</span>
+                                ${errand.runnerPrice ? `
+                                    <div class="runner-price-display">
+                                        <span class="runner-price-label">Your Bid:</span>
+                                        <span class="runner-price-value">$${errand.runnerPrice.toFixed(2)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="estimated-cost">
+                                <span class="estimated-value">$${errand.estimatedCost.toFixed(2)}</span>
+                                <span class="label">Est. Cost</span>
+                            </div>
+                            <div class="distance">
+                                <span class="distance-value">${(errand.distance || 0).toFixed(2)} km</span>
+                                <span class="label">Distance</span>
+                            </div>
                         </div>
                     </div>
-                `;
-                return;
-            }
+                    <button class="view-details-btn" onclick="toggleErrandDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                        View Details
+                    </button>
+                </div>
 
-            visibleErrands.forEach(errand => {
-                const iconName = errandIcons[errand.type.toLowerCase()] || 'tasks';
-                const statusInfo = getStatusInfo(errand);
-
-                const errandCard = document.createElement('div');
-                errandCard.className = 'errand-card';
-                errandCard.setAttribute('data-type', errand.type.toLowerCase());
-                errandCard.setAttribute('data-distance', errand.distance);
-                errandCard.setAttribute('data-price', errand.clientPrice);
-                errandCard.setAttribute('data-date', errand.date);
-                errandCard.setAttribute('data-status', errand.status);
-
-                // Determine button content based on state
-                let buttonContent = '';
-                let buttonClass = 'btn-primary';
-                let buttonOnclick = `submitPriceAndAccept(${errand.id})`;
-
-                switch(errand.buttonState) {
-                    case 'submit':
-                        buttonContent = '<i class="fas fa-bolt"></i> Submit Price & Accept';
-                        buttonClass = 'btn-primary';
-                        break;
-                    case 'pending':
-                        buttonContent = '<i class="fas fa-clock"></i> Waiting for client...';
-                        buttonClass = 'btn-pending';
-                        buttonOnclick = '';
-                        break;
-                    case 'accept-chat':
-                        buttonContent = '<i class="fas fa-check"></i> Accept & Chat';
-                        buttonClass = 'btn-accept-chat';
-                        buttonOnclick = `navigateToChat(${errand.id})`;
-                        break;
-                }
-
-                errandCard.innerHTML = `
-                    <!-- Compact View -->
-                    <div class="compact-view">
-                        <div class="card-main">
-                            <div class="service-info">
-                                <div class="service-icon" data-errand-type="${errand.type.toLowerCase()}">
-                                    <i class="fas fa-${iconName}"></i>
-                                </div>
-                                <div class="service-details">
-                                    <h3>${errand.type}
-                                        <span class="errand-status ${statusInfo.class}">
-                                            <i class="fas fa-${statusInfo.icon}"></i>
-                                            ${statusInfo.text}
-                                        </span>
-                                    </h3>
-                                    <div class="meta-info">
-                                        <span class="order-id">#EC-${errand.id}</span>
-                                        <span class="post-date">
-                                            <i class="fas fa-calendar-plus"></i>
-                                            ${formatDate(errand.date)}
-                                        </span>
-                                        <span class="expiry-time">
-                                            <i class="fas fa-clock"></i>
-                                            ${getTimeRemaining(errand.expiresAt)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="quick-stats">
-                                <div class="earnings">
-                                    <span class="amount">$${errand.clientPrice.toFixed(2)}</span>
-                                    <span class="label">Client's Price</span>
-                                    ${errand.runnerPrice ? `
-                                        <div class="runner-price-display">
-                                            <span class="runner-price-label">Your Bid:</span>
-                                            <span class="runner-price-value">$${errand.runnerPrice.toFixed(2)}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div class="estimated-cost">
-                                    <span class="estimated-value">$${errand.estimatedCost.toFixed(2)}</span>
-                                    <span class="label">Est. Cost</span>
-                                </div>
-                                <div class="distance">
-                                    <span class="distance-value">${errand.distance} km</span>
-                                    <span class="label">Distance</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="toggleErrandDetails(this)">
-                            <i class="fas fa-chevron-down"></i>
-                            View Details
+                <!-- Expanded View -->
+                <div class="expanded-view" style="display: none;">
+                    <div class="hide-details-container">
+                        <button class="hide-details-btn" onclick="toggleErrandDetails(this)">
+                            <i class="fas fa-chevron-up"></i>
+                            Hide Details
                         </button>
                     </div>
 
-                    <!-- Expanded View -->
-                    <div class="expanded-view" style="display: none;">
-                        <div class="hide-details-container">
-                            <button class="hide-details-btn" onclick="toggleErrandDetails(this)">
-                                <i class="fas fa-chevron-up"></i>
-                                Hide Details
-                            </button>
-                        </div>
-
-                        <div class="details-grid">
-                            <div class="detail-column">
-                                <h4>Delivery Information</h4>
-                                <div class="detail-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <div class="detail-content">
-                                        <strong>Pickup:</strong>
-                                        <span>${errand.pickup}</span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-map-marker"></i>
-                                    <div class="detail-content">
-                                        <strong>Delivery:</strong>
-                                        <span>${errand.delivery}</span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-clock"></i>
-                                    <div class="detail-content">
-                                        <strong>Estimated Time:</strong>
-                                        <span>${errand.time}</span>
-                                    </div>
+                    <div class="details-grid">
+                        <div class="detail-column">
+                            <h4>Delivery Information</h4>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="detail-content">
+                                    <strong>Pickup:</strong>
+                                    <span>${errand.pickup}</span>
                                 </div>
                             </div>
-
-                            <div class="detail-column">
-                                <h4>Errand Details</h4>
-                                <div class="detail-item">
-                                    <i class="fas fa-list-alt"></i>
-                                    <div class="detail-content">
-                                        <strong>Description:</strong>
-                                        <span>${errand.description}</span>
-                                    </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker"></i>
+                                <div class="detail-content">
+                                    <strong>Delivery:</strong>
+                                    <span>${errand.delivery}</span>
                                 </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-weight"></i>
-                                    <div class="detail-content">
-                                        <strong>Weight/Size:</strong>
-                                        <span>${errand.weight}</span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-comment"></i>
-                                    <div class="detail-content">
-                                        <strong>Instructions:</strong>
-                                        <span>${errand.instructions}</span>
-                                    </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <div class="detail-content">
+                                    <strong>Estimated Time:</strong>
+                                    <span>${errand.time}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="price-proposal-section">
-                            <h4>Submit Your Price</h4>
-                            <div class="price-input-group">
-                                <label for="price-${errand.id}">Your Proposed Price:</label>
-                                <div style="display: flex; gap: 6px; align-items: center; flex: 1;">
-                                    <span style="font-weight: bold; color: var(--primary-color);">$</span>
-                                    <input type="number"
-                                           id="price-${errand.id}"
-                                           class="price-input"
-                                           placeholder="Enter your price"
-                                           min="1"
-                                           step="0.01"
-                                           value="${errand.runnerPrice || ''}"
-                                           ${errand.buttonState !== 'submit' ? 'disabled' : ''}>
+                        <div class="detail-column">
+                            <h4>Errand Details</h4>
+                            <div class="detail-item">
+                                <i class="fas fa-list-alt"></i>
+                                <div class="detail-content">
+                                    <strong>Description:</strong>
+                                    <span>${errand.description}</span>
                                 </div>
                             </div>
-                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px;">
-                                <i class="fas fa-info-circle"></i>
-                                Client's initial price: <strong>$${errand.clientPrice.toFixed(2)}</strong> •
-                                Estimated cost: <strong>$${errand.estimatedCost.toFixed(2)}</strong> •
-                                <span style="color: #757575;">
-                                    <i class="fas fa-clock"></i> ${getTimeRemaining(errand.expiresAt)}
-                                </span>
+                            <div class="detail-item">
+                                <i class="fas fa-weight"></i>
+                                <div class="detail-content">
+                                    <strong>Weight/Size:</strong>
+                                    <span>${errand.weight}</span>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="errand-description">
-                            <h4>Client Information</h4>
-                            <p>
-                                <strong>Client:</strong> ${errand.client} •
-                                <strong>Rating:</strong> ${errand.rating} (${errand.reviews} reviews) •
-                                <strong>Status:</strong> <span style="color: var(--primary-color);">Verified User</span>
-                            </p>
-                        </div>
-
-                        <div class="action-buttons">
-                            <button class="${buttonClass}" onclick="${buttonOnclick}" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
-                                ${buttonContent}
-                            </button>
-                            <button class="btn-outline" onclick="startChat(${errand.id})" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
-                                <i class="fas fa-comments"></i>
-                                Chat First
-                            </button>
-                            <button class="btn-outline" onclick="getDirections(${errand.id})">
-                                <i class="fas fa-directions"></i>
-                                Get Directions
-                            </button>
-                            <button class="btn-not-interested" onclick="notInterested(${errand.id})" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
-                                <i class="fas fa-times"></i>
-                                Not Interested
-                            </button>
+                            <div class="detail-item">
+                                <i class="fas fa-comment"></i>
+                                <div class="detail-content">
+                                    <strong>Instructions:</strong>
+                                    <span>${errand.instructions}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                `;
 
-                errandsList.appendChild(errandCard);
-            });
+                    <div class="price-proposal-section">
+                        <h4>Submit Your Price</h4>
+                        <div class="price-input-group">
+                            <label for="price-${errand.id}">Your Proposed Price:</label>
+                            <div style="display: flex; gap: 6px; align-items: center; flex: 1;">
+                                <span style="font-weight: bold; color: var(--primary-color);">$</span>
+                                <input type="number"
+                                       id="price-${errand.id}"
+                                       class="price-input"
+                                       placeholder="Enter your price"
+                                       min="1"
+                                       step="0.01"
+                                       value="${errand.runnerPrice || ''}"
+                                       ${errand.buttonState !== 'submit' ? 'disabled' : ''}>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px;">
+                            <i class="fas fa-info-circle"></i>
+                            Client's initial price: <strong>$${errand.clientPrice.toFixed(2)}</strong> •
+                            Estimated cost: <strong>$${errand.estimatedCost.toFixed(2)}</strong> •
+                            <span style="color: #757575;">
+                                <i class="fas fa-clock"></i> ${getTimeRemaining(errand.expiresAt)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="errand-description">
+                        <h4>Client Information</h4>
+                        <p>
+                            <strong>Client:</strong> ${errand.client} •
+                            <strong>Rating:</strong> ${errand.rating} (${errand.reviews} reviews) •
+                            <strong>Status:</strong> <span style="color: var(--primary-color);">Verified User</span>
+                        </p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="${buttonClass}" onclick="${buttonOnclick}" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
+                            ${buttonContent}
+                        </button>
+                        <button class="btn-outline" onclick="getDirections(${errand.id})">
+                            <i class="fas fa-directions"></i>
+                            Get Directions
+                        </button>
+                        <button class="btn-not-interested" onclick="notInterested(${errand.id})" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
+                            <i class="fas fa-times"></i>
+                            Not Interested
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            errandsList.appendChild(errandCard);
+        });
+    }
+
+    // ========== HELPERS ==========
+    function getTimeRemaining(expiresAt) {
+        const now = new Date();
+        const diff = expiresAt - now;
+        if (diff <= 0) return 'Expired';
+        const minutes = Math.floor(diff / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        return `${minutes}m ${seconds}s`;
+    }
+
+    function getStatusInfo(errand) {
+        switch(errand.status) {
+            case 'available':
+                return { class: 'status-green', icon: 'circle', text: 'Available' };
+            case 'negotiating':
+                return { class: 'status-amber', icon: 'clock', text: 'In Discussion' };
+            case 'accepted':
+                return { class: 'status-red', icon: 'check-circle', text: 'Accepted' };
+            case 'expired':
+                return { class: 'status-red', icon: 'exclamation-triangle', text: 'Expired' };
+            default:
+                return { class: 'status-green', icon: 'circle', text: 'Available' };
+        }
+    }
+
+    function formatDate(dateString) {
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', options);
+    }
+
+    function updateStats() {
+        const availableCount = errands.filter(e => e.status === 'available').length;
+        document.getElementById('availableCount').textContent = availableCount;
+        const nearbyCount = errands.filter(errand => errand.distance <= 5 && errand.status === 'available').length;
+        document.getElementById('nearbyCount').textContent = nearbyCount;
+        const totalEarnings = errands.filter(e => e.status === 'available').reduce((sum, errand) => sum + errand.clientPrice, 0);
+        document.getElementById('potentialEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
+    }
+
+    // ========== NEW: REAL BID SUBMISSION & POLLING ==========
+    function submitRunnerBid(errandId) {
+        const priceInput = document.getElementById(`price-${errandId}`);
+        const proposedPrice = parseFloat(priceInput.value);
+
+        if (!proposedPrice || proposedPrice <= 0) {
+            alert('Please enter a valid price');
+            return;
         }
 
-        // Get time remaining until expiration
-        function getTimeRemaining(expiresAt) {
-            const now = new Date();
-            const diff = expiresAt - now;
+        if (!confirm(`Submit price of $${proposedPrice.toFixed(2)}?`)) return;
 
-            if (diff <= 0) return 'Expired';
-
-            const minutes = Math.floor(diff / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            return `${minutes}m ${seconds}s`;
-        }
-
-        // Get status information for display
-        function getStatusInfo(errand) {
-            switch(errand.status) {
-                case 'available':
-                    return {
-                        class: 'status-green',
-                        icon: 'circle',
-                        text: 'Available'
-                    };
-                case 'negotiating':
-                    return {
-                        class: 'status-amber',
-                        icon: 'clock',
-                        text: 'In Discussion'
-                    };
-                case 'accepted':
-                    return {
-                        class: 'status-red',
-                        icon: 'check-circle',
-                        text: 'Accepted'
-                    };
-                case 'expired':
-                    return {
-                        class: 'status-red',
-                        icon: 'exclamation-triangle',
-                        text: 'Expired'
-                    };
-                default:
-                    return {
-                        class: 'status-green',
-                        icon: 'circle',
-                        text: 'Available'
-                    };
-            }
-        }
-
-        // Format date for display
-        function formatDate(dateString) {
-            const options = { month: 'short', day: 'numeric', year: 'numeric' };
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', options);
-        }
-
-        // Update statistics - Changed nearby calculation to 5km
-        function updateStats() {
-            const availableCount = errands.filter(e => e.status === 'available').length;
-            document.getElementById('availableCount').textContent = availableCount;
-
-            const nearbyCount = errands.filter(errand => errand.distance <= 5 && errand.status === 'available').length;
-            document.getElementById('nearbyCount').textContent = nearbyCount;
-
-            const totalEarnings = errands.filter(e => e.status === 'available').reduce((sum, errand) => sum + errand.clientPrice, 0);
-            document.getElementById('potentialEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
-        }
-
-        // Submit price and accept errand
-        function submitPriceAndAccept(errandId) {
-            const priceInput = document.getElementById(`price-${errandId}`);
-            const proposedPrice = parseFloat(priceInput.value);
-
-            if (!proposedPrice || proposedPrice <= 0) {
-                alert('Please enter a valid price');
-                return;
-            }
-
-            if (confirm(`Submit price of $${proposedPrice.toFixed(2)} and accept this errand?`)) {
+        // POST to backend
+        fetch('/api/runner_offer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                errand_id: errandId,
+                offer_price: proposedPrice
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
                 const errandIndex = errands.findIndex(e => e.id === errandId);
                 if (errandIndex !== -1) {
                     errands[errandIndex].runnerPrice = proposedPrice;
                     errands[errandIndex].status = 'negotiating';
-                    errands[errandIndex].selectedRunner = currentRunner.id;
                     errands[errandIndex].buttonState = 'pending';
-                    errands[errandIndex].bids.push({
-                        runnerId: currentRunner.id,
-                        runnerName: currentRunner.name,
-                        price: proposedPrice,
-                        timestamp: new Date()
-                    });
-
                     renderErrands();
-
-                    setTimeout(() => {
-                        errands[errandIndex].buttonState = 'accept-chat';
-                        errands[errandIndex].status = 'accepted';
-                        renderErrands();
-                        updateStats();
-                        alert('Client has accepted your price! You can now accept the errand and start chatting.');
-                    }, 3000);
+                    // Start polling for client acceptance
+                    pollForClientAcceptance(errandId);
                 }
-            }
-        }
-
-        // Navigate to chat page
-        function navigateToChat(errandId) {
-            const errand = errands.find(e => e.id === errandId);
-            if (errand && errand.runnerPrice) {
-                const params = new URLSearchParams({
-                    role: 'runner',
-                    errand_id: errandId,
-                    runner_price: errand.runnerPrice,
-                    errand_title: errand.type,
-                    client_price: errand.clientPrice,
-                    action: 'accepted',
-                    runner_name: currentRunner.name
-                });
-
-                window.location.href = `Errandfinal.html?${params.toString()}`;
             } else {
-                alert('Please submit a price first.');
+                alert('Failed to submit offer. Please try again.');
+            }
+        })
+        .catch(() => {
+            alert('Network error. Please try again.');
+        });
+    }
+
+    function pollForClientAcceptance(errandId) {
+        const interval = setInterval(() => {
+            fetch(`/api/check_client_acceptance?errand_id=${errandId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.accepted) {
+                        clearInterval(interval);
+                        const errand = errands.find(e => e.id === errandId);
+                        if (errand) {
+                            errand.status = 'accepted';
+                            errand.buttonState = 'accept-chat';
+                            // Update the price to the agreed one just in case
+                            if (data.agreed_price) {
+                                errand.runnerPrice = data.agreed_price;
+                            }
+                            renderErrands();
+                            updateStats();
+                            alert('Client has accepted your offer! You can now proceed to chat.');
+                        }
+                    }
+                })
+                .catch(() => {});
+        }, 5000); // poll every 5 seconds
+    }
+
+    // ========== CHAT NAVIGATION ==========
+    function navigateToChat(errandId) {
+        const errand = errands.find(e => e.id === errandId);
+        if (!errand || !errand.runnerPrice) {
+            alert('Please submit a price first.');
+            return;
+        }
+        const params = new URLSearchParams({
+            role: 'runner',
+            errand_id: errandId,
+            runner_price: errand.runnerPrice,
+            errand_title: errand.type,
+            client_price: errand.clientPrice,
+            action: 'accepted',
+            runner_name: currentRunner.name
+        });
+        window.location.href = `Errandfinal.html?${params.toString()}`;
+    }
+
+    function startChat(errandId) {
+        const errand = errands.find(e => e.id === errandId);
+        const priceInput = document.getElementById(`price-${errandId}`);
+        const proposedPrice = priceInput.value ? parseFloat(priceInput.value) : null;
+
+        const params = new URLSearchParams({
+            role: 'runner',
+            errand_id: errandId,
+            errand_title: errand.type,
+            client_price: errand.clientPrice,
+            action: 'chat_first',
+            runner_name: currentRunner.name
+        });
+        if (proposedPrice) params.append('runner_price', proposedPrice);
+
+        window.location.href = `Errandfinal.html?${params.toString()}`;
+    }
+
+    function toggleErrandDetails(button) {
+        const card = button.closest('.errand-card');
+        const compactView = card.querySelector('.compact-view');
+        const expandedView = card.querySelector('.expanded-view');
+        const viewDetailsBtn = card.querySelector('.view-details-btn');
+
+        if (expandedView.style.display === 'none') {
+            expandedView.style.display = 'block';
+            viewDetailsBtn.style.display = 'none';
+        } else {
+            expandedView.style.display = 'none';
+            viewDetailsBtn.style.display = 'flex';
+        }
+    }
+
+    function sortErrands(sortBy) {
+        const container = document.querySelector('.errands-list');
+        const cards = Array.from(container.querySelectorAll('.errand-card'));
+        cards.sort((a, b) => {
+            const aPrice = parseFloat(a.getAttribute('data-price'));
+            const bPrice = parseFloat(b.getAttribute('data-price'));
+            const aDistance = parseFloat(a.getAttribute('data-distance'));
+            const bDistance = parseFloat(b.getAttribute('data-distance'));
+            const aDate = new Date(a.getAttribute('data-date'));
+            const bDate = new Date(b.getAttribute('data-date'));
+            switch(sortBy) {
+                case 'newest': return bDate - aDate;
+                case 'closest': return aDistance - bDistance;
+                case 'highest_price': return bPrice - aPrice;
+                case 'lowest_price': return aPrice - bPrice;
+                default: return 0;
+            }
+        });
+        cards.forEach(card => container.appendChild(card));
+    }
+
+    function contactClient(clientId) {
+        alert('Contact feature would open a chat with the client.');
+    }
+
+    function getDirections(errandId) {
+        alert('Directions would open in your maps application.');
+    }
+
+    function notInterested(errandId) {
+        if (confirm('Are you sure you\'re not interested in this errand? It will be removed from your available list.')) {
+            const index = errands.findIndex(errand => errand.id === errandId);
+            if (index !== -1) {
+                errands.splice(index, 1);
+                renderErrands();
+                updateStats();
+                alert('Errand removed from your available list.');
             }
         }
+    }
 
-        // Start chat function
-        function startChat(errandId) {
-            const errand = errands.find(e => e.id === errandId);
-            const priceInput = document.getElementById(`price-${errandId}`);
-            const proposedPrice = priceInput.value ? parseFloat(priceInput.value) : null;
+    function refreshErrands() {
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+        button.disabled = true;
+        setTimeout(() => {
+            checkExpiredErrands();
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+            alert('Errands list refreshed!');
+        }, 1500);
+    }
 
-            const params = new URLSearchParams({
-                role: 'runner',
-                errand_id: errandId,
-                errand_title: errand.type,
-                client_price: errand.clientPrice,
-                action: 'chat_first',
-                runner_name: currentRunner.name
-            });
+    function updateLocation() {
+        alert('Location update feature would open here.');
+    }
 
-            if (proposedPrice) {
-                params.append('runner_price', proposedPrice);
-            }
+    function filterByDistance(type) {
+        const cards = document.querySelectorAll('.errand-card');
+        cards.forEach(card => {
+            const distance = parseFloat(card.getAttribute('data-distance'));
+            card.style.display = (type === 'near' && distance <= 5) || type === 'all' ? 'block' : 'none';
+        });
+    }
 
-            window.location.href = `Errandfinal.html?${params.toString()}`;
-        }
-
-        function toggleErrandDetails(button) {
-            const card = button.closest('.errand-card');
-            const compactView = card.querySelector('.compact-view');
-            const expandedView = card.querySelector('.expanded-view');
-            const viewDetailsBtn = card.querySelector('.view-details-btn');
-
-            if (expandedView.style.display === 'none') {
-                expandedView.style.display = 'block';
-                viewDetailsBtn.style.display = 'none';
-            } else {
-                expandedView.style.display = 'none';
-                viewDetailsBtn.style.display = 'flex';
-            }
-        }
-
-        function sortErrands(sortBy) {
-            const container = document.querySelector('.errands-list');
-            const cards = Array.from(container.querySelectorAll('.errand-card'));
-
-            cards.sort((a, b) => {
-                const aPrice = parseFloat(a.getAttribute('data-price'));
-                const bPrice = parseFloat(b.getAttribute('data-price'));
-                const aDistance = parseFloat(a.getAttribute('data-distance'));
-                const bDistance = parseFloat(b.getAttribute('data-distance'));
-                const aDate = new Date(a.getAttribute('data-date'));
-                const bDate = new Date(b.getAttribute('data-date'));
-
-                switch(sortBy) {
-                    case 'newest':
-                        return bDate - aDate;
-                    case 'closest':
-                        return aDistance - bDistance;
-                    case 'highest_price':
-                        return bPrice - aPrice;
-                    case 'lowest_price':
-                        return aPrice - bPrice;
-                    default:
-                        return 0;
-                }
-            });
-
-            cards.forEach(card => container.appendChild(card));
-        }
-
-        function contactClient(clientId) {
-            alert('Contact feature would open a chat with the client.');
-        }
-
-        function getDirections(errandId) {
-            alert('Directions would open in your maps application.');
-        }
-
-        function notInterested(errandId) {
-            if (confirm('Are you sure you\'re not interested in this errand? It will be removed from your available list.')) {
-                const index = errands.findIndex(errand => errand.id === errandId);
-                if (index !== -1) {
-                    errands.splice(index, 1);
-                    renderErrands();
-                    updateStats();
-                    alert('Errand removed from your available list.');
-                }
-            }
-        }
-
-        function refreshErrands() {
-            const button = event.target.closest('button');
-            const originalHTML = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-            button.disabled = true;
-
-            setTimeout(() => {
-                checkExpiredErrands();
-                button.innerHTML = originalHTML;
-                button.disabled = false;
-                alert('Errands list refreshed!');
-            }, 1500);
-        }
-
-        function updateLocation() {
-            alert('Location update feature would open here.');
-        }
-
-        function filterByDistance(type) {
-            const cards = document.querySelectorAll('.errand-card');
-            cards.forEach(card => {
-                const distance = parseFloat(card.getAttribute('data-distance'));
-                if (type === 'near' && distance <= 5) {
-                    card.style.display = 'block';
-                } else if (type === 'all') {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function filterByPrice(type) {
-            const cards = document.querySelectorAll('.errand-card');
-            cards.forEach(card => {
-                const price = parseFloat(card.getAttribute('data-price'));
-                if (type === 'high' && price >= 20) {
-                    card.style.display = 'block';
-                } else if (type === 'all') {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-    </script>
+    function filterByPrice(type) {
+        const cards = document.querySelectorAll('.errand-card');
+        cards.forEach(card => {
+            const price = parseFloat(card.getAttribute('data-price'));
+            card.style.display = (type === 'high' && price >= 20) || type === 'all' ? 'block' : 'none';
+        });
+    }
+</script>
 </body>
 </html>

@@ -520,6 +520,7 @@
                     <input type="hidden" id="dropoff_lon" name="dropoff_lon">
                     <!-- ========== NEW: Estimated Fee Hidden Field ========== -->
                     <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
+                    <input type="hidden" id="distance_km_hidden" name="distance_km">
 
                     <h2><i class="fas fa-store"></i> Store / Delivery Information</h2>
                     <div class="form-group">
@@ -746,6 +747,7 @@
             let total=Math.max(distanceFee+timeFee+weightFee,0.75);
             let estMinutes=Math.round(distKm*5);
             document.getElementById('estimated_fee').innerText='$'+total.toFixed(2);
+            document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
             // ========== UPDATE HIDDEN FIELD FOR BACKEND ==========
             document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('infoDistance').innerHTML=distKm.toFixed(1)+' <small>km</small>';

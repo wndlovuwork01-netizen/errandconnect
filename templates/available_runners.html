@@ -242,16 +242,19 @@
             z-index: 50;
         }
 
+        /* ---------- NEW RUNNER CARD LAYOUT ---------- */
         .runner-strip {
             background: white;
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             margin-bottom: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border: 1px solid #e8f5e8;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: 55px 1fr auto;
+            grid-template-rows: auto auto auto;
+            gap: 4px 12px;
+            align-items: center;
             touch-action: manipulation;
         }
 
@@ -260,17 +263,13 @@
             transition: transform 0.1s ease;
         }
 
-        .runner-strip-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-        }
-
+        /* Avatar (spans rows 1 and 2) */
         .runner-avatar {
-            width: 50px;
-            height: 50px;
-            min-width: 50px;
+            grid-row: 1 / 3;
+            grid-column: 1;
+            position: relative;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background: linear-gradient(135deg, #28a745, #20c997);
             display: flex;
@@ -279,20 +278,28 @@
             color: white;
             font-size: 1.2rem;
             font-weight: bold;
-            position: relative;
+            overflow: visible;
         }
 
-        .runner-profile-image {
-            width: 100%;
-            height: 100%;
+        .runner-avatar img,
+        .runner-avatar .avatar-placeholder {
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             object-fit: cover;
+            background: #e0e0e0;
+            color: #555;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
         }
 
         .online-indicator {
             position: absolute;
-            bottom: 2px;
-            right: 2px;
+            bottom: 1px;
+            right: 1px;
             width: 12px;
             height: 12px;
             background: #4CAF50;
@@ -300,120 +307,100 @@
             border-radius: 50%;
         }
 
-        .runner-main-info {
-            flex: 1;
+        /* Row 1: Name, Rating, Online Status */
+        .row1 {
+            grid-column: 2 / 4;
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            text-align: left;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        .runner-name-rating {
+        .name-rating {
             display: flex;
             flex-direction: column;
-            gap: 4px;
         }
 
         .runner-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #2e7d32;
-        }
-
-        .rating {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #ff6b00;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 15px;
+            color: #222;
         }
 
-        .runner-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: #666;
-            width: 100%;
+        .runner-rating {
+            font-size: 12px;
+            color: #FF9800;
+            margin-top: 2px;
         }
 
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px;
-            background: #f8fff9;
-            border-radius: 8px;
+        .online-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+            background: #E8F5E9;
+            color: #2E7D32;
         }
 
-        .vehicle-type {
-            background: #e8f5e8;
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #2e7d32;
+        .online-badge.status-offline {
+            background: #FFEBEE;
+            color: #C62828;
         }
 
-        .distance-indicator {
-            background: #e3f2fd;
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1976d2;
-        }
-
-        .runner-price-section {
+        /* Row 2: Distance, Vehicle Type, Bid/Service Fee */
+        .row2 {
+            grid-column: 2 / 4;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
-            padding-top: 10px;
-            border-top: 1px solid #e8f5e8;
         }
 
-        .runner-price {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #28a745;
-            text-align: left;
+        .info-group {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: #555;
         }
 
-        .price-label {
-            font-size: 0.75rem;
-            color: #666;
-            font-weight: normal;
-            display: block;
-        }
-
-        .runner-actions {
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
+        .info-group span {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            text-align: center;
-            width: 100%;
-            min-height: 48px;
+            gap: 4px;
+        }
+
+        .service-fee {
+            font-weight: 600;
+            font-size: 14px;
+            color: #28a745;
+            white-space: nowrap;
+        }
+
+        .no-bid {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Row 3: City, Completion Rate, Select Button */
+        .row3 {
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
         }
 
         .select-btn {
+            padding: 6px 18px;
             background: #28a745;
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .select-btn:active {
@@ -431,44 +418,14 @@
             color: white;
         }
 
-        .chat-btn:active {
-            background: #0056b3;
-            transform: scale(0.98);
-        }
-
         .pending-btn {
             background: #ffc107;
             color: #212529;
         }
 
-        .pending-btn:active {
-            background: #e0a800;
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .status-online {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-
-        .status-busy {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-offline {
-            background: #f8d7da;
-            color: #721c24;
+        .selected-runner {
+            border: 2px solid #28a745;
+            background: #f8fff9;
         }
 
         .no-runners-state {
@@ -496,11 +453,6 @@
         .no-runners-state p {
             max-width: 300px;
             margin: 0 auto;
-        }
-
-        .selected-runner {
-            border: 2px solid #28a745;
-            background: #f8fff9;
         }
 
         .navigation {
@@ -533,13 +485,12 @@
             .est-fee-box { min-width: 65px; padding: 6px 10px; }
             .est-fee-value { font-size: 1rem; }
             .location-row { font-size: 0.75rem; }
-            .runner-details { grid-template-columns: 1fr; }
-            .btn { padding: 12px 16px; font-size: 0.95rem; }
+            .info-group { gap: 8px; font-size: 12px; }
+            .select-btn { padding: 5px 14px; font-size: 13px; }
         }
 
         @media (min-width: 481px) and (max-width: 768px) {
-            .runner-details { grid-template-columns: repeat(3, 1fr); }
-            .runner-strip { padding: 18px; }
+            .runner-strip { padding: 15px; }
             .filter-select { font-size: 15px; padding: 12px 15px; }
         }
 
@@ -547,9 +498,6 @@
             .container { max-width: 800px; margin: 20px auto; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: auto; }
             .header { border-radius: 15px 15px 0 0; position: relative; }
             .navigation { border-radius: 0 0 15px 15px; position: relative; }
-            .runner-strip { flex-direction: row; align-items: center; gap: 15px; }
-            .runner-price-section { flex-direction: column; align-items: flex-end; padding: 0; border: none; min-width: 100px; }
-            .runner-actions { min-width: 100px; }
         }
 
         .btn, .runner-strip { user-select: none; -webkit-user-select: none; }
@@ -706,38 +654,51 @@
                 strip.dataset.name = runner.name.toLowerCase();
                 strip.dataset.distance = runner.distance || '~';
                 strip.dataset.price = runner.price || '0';
-                const statusClass = `status-${runner.status}`;
+
+                const statusClass = runner.status === 'online' ? 'status-online' : 'status-offline';
                 const statusText = runner.status === 'online' ? 'Online' : 'Offline';
+
                 strip.innerHTML = `
-                    <div class="runner-strip-header">
-                        <div class="runner-avatar">
-                            ${runner.profileImage ? `<img src="${runner.profileImage}" alt="${runner.name}" class="runner-profile-image">` : runner.avatar}
-                            ${runner.is_online ? '<div class="online-indicator"></div>' : ''}
+                    <!-- Profile picture (spans rows 1+2) -->
+                    <div class="runner-avatar">
+                        ${runner.profileImage
+                            ? `<img src="${runner.profileImage}" alt="${runner.name}">`
+                            : `<div class="avatar-placeholder">${runner.avatar}</div>`
+                        }
+                        ${runner.is_online ? '<div class="online-indicator"></div>' : ''}
+                    </div>
+
+                    <!-- Row 1: name, rating, online status -->
+                    <div class="row1">
+                        <div class="name-rating">
+                            <div class="runner-name">${runner.name}</div>
+                            <div class="runner-rating"><i class="fas fa-star"></i> ${runner.rating.toFixed(1)}</div>
                         </div>
-                        <div class="runner-main-info">
-                            <div class="runner-name-rating">
-                                <div class="runner-name">${runner.name}</div>
-                                <div class="rating"><i class="fas fa-star"></i>${runner.rating.toFixed(1)}/5</div>
-                                <span class="status-indicator ${statusClass}"><i class="fas fa-circle" style="font-size:6px;"></i>${statusText}</span>
-                            </div>
-                            <div class="runner-details">
-                                <div class="detail-item"><i class="fas ${getVehicleIcon(runner.vehicle_type)}"></i><span class="vehicle-type">${runner.vehicle_type}</span></div>
-                                <div class="detail-item"><i class="fas fa-map-marker-alt"></i><span>${runner.city}</span></div>
-                                <div class="detail-item"><i class="fas fa-road"></i><span class="distance-indicator">${runner.distance || '~'} km away</span></div>
-                                <div class="detail-item"><i class="fas fa-check-circle"></i><span>${runner.completion_rate}% completion</span></div>
-                            </div>
+                        <span class="online-badge ${statusClass}">${statusText}</span>
+                    </div>
+
+                    <!-- Row 2: distance, vehicle type, service fee (runner's bid) -->
+                    <div class="row2">
+                        <div class="info-group">
+                            <span><i class="fas fa-road"></i> ${runner.distance ? runner.distance + ' km' : '~'}</span>
+                            <span><i class="fas fa-car"></i> ${runner.vehicle_type}</span>
+                        </div>
+                        <div class="service-fee">
+                            ${runner.price ? `<strong>$${runner.price}</strong>` : '<span class="no-bid">No bid</span>'}
                         </div>
                     </div>
-                    <div class="runner-price-section">
-                        <div class="runner-price">
-                            ${runner.price ? `$${runner.price}<span class="price-label">runner's bid</span>` : `<span class="price-label">No bid yet</span>`}
+
+                    <!-- Row 3: city, completion rate, select button -->
+                    <div class="row3">
+                        <div class="info-group">
+                            <span><i class="fas fa-map-marker-alt"></i> ${runner.city}</span>
+                            <span><i class="fas fa-check-circle"></i> ${runner.completion_rate}%</span>
                         </div>
-                        <div class="runner-actions">
-                            <button class="btn select-btn" onclick="selectRunner(${runner.id}, '${runner.name}')" id="btn-${runner.id}">
-                                <i class="fas fa-check"></i> Select
-                            </button>
-                        </div>
-                    </div>`;
+                        <button class="btn select-btn" onclick="selectRunner(${runner.id}, '${runner.name}')" id="btn-${runner.id}">
+                            <i class="fas fa-check"></i> Select
+                        </button>
+                    </div>
+                `;
                 list.appendChild(strip);
             });
             updateRunnerCount(allRunners.length);
@@ -865,9 +826,9 @@
 
         function filterByStatus(status) {
             document.querySelectorAll('.runner-strip').forEach(item => {
-                item.style.display = (status === 'all' || item.dataset.status === status) ? 'flex' : 'none';
+                item.style.display = (status === 'all' || item.dataset.status === status) ? 'grid' : 'none';
             });
-            updateRunnerCount(document.querySelectorAll('.runner-strip[style*="flex"], .runner-strip:not([style*="none"])').length);
+            updateRunnerCount(document.querySelectorAll('.runner-strip[style*="grid"], .runner-strip:not([style*="none"])').length);
         }
 
         function searchRunners(query) {
@@ -875,9 +836,9 @@
             let count = 0;
             document.querySelectorAll('.runner-strip').forEach(item => {
                 const name = item.querySelector('.runner-name')?.textContent.toLowerCase() || '';
-                const details = item.querySelector('.runner-details')?.textContent.toLowerCase() || '';
+                const details = item.querySelector('.info-group')?.textContent.toLowerCase() || '';
                 const visible = name.includes(lower) || details.includes(lower);
-                item.style.display = visible ? 'flex' : 'none';
+                item.style.display = visible ? 'grid' : 'none';
                 if (visible) count++;
             });
             updateRunnerCount(count);

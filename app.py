@@ -86,29 +86,70 @@ def create_basic_errand(user, errand_type):
     dropoff_lon = form.get("dropoff_lon") or form.get("dropoff_lng") or form.get("dropoff_longitude")
     distance = 0
     if pickup_lat and pickup_lon and dropoff_lat and dropoff_lon:
-        try: distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
-        except ValueError: distance = 0
+        try:
+            distance = calculate_distance(float(pickup_lat), float(pickup_lon), float(dropoff_lat), float(dropoff_lon))
+        except ValueError:
+            distance = 0
+
+    # ===== OVERRIDE WITH ROAD DISTANCE FROM CLIENT-SIDE MAP =====
+    form_distance_km = form.get("distance_km")
+    if form_distance_km:
+        try:
+            distance = float(form_distance_km)
+        except ValueError:
+            pass  # keep the straight-line distance if conversion fails
+
     weight_value = form.get("estimated_weight") or form.get("weight") or form.get("weight_kg") or form.get("package_weight") or "0"
     vehicle_type = form.get("vehicle_type") or "car"
     delivery_time = form.get("delivery_time") or form.get("delivery_timeframe") or form.get("collection_time") or form.get("specific_time") or ""
-    pickup_location = get_first_form_value(form, ["pickup_location","pickup_address","store_location","store_address","restaurant_location","collection_location","collection_address","service_location","venue","service_provider"])
-    delivery_location = get_first_form_value(form, ["delivery_location","delivery_address","dropoff_location","dropoff_address","destination","to_location","to_address"])
+    pickup_location = get_first_form_value(form, [
+        "pickup_location", "pickup_address", "store_location", "store_address",
+        "restaurant_location", "collection_location", "collection_address",
+        "service_location", "venue", "service_provider"
+    ])
+    delivery_location = get_first_form_value(form, [
+        "delivery_location", "delivery_address", "dropoff_location", "dropoff_address",
+        "destination", "to_location", "to_address"
+    ])
     client_service_price = form.get("service_price")
     if client_service_price:
-        try: client_offer = float(client_service_price)
-        except ValueError: client_offer = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
-    else: client_offer = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+        try:
+            client_offer = float(client_service_price)
+        except ValueError:
+            client_offer = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+    else:
+        client_offer = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+
     template_est_fee = form.get("estimated_fee")
     if template_est_fee:
         try:
             calculated_fee = float(template_est_fee)
-            if calculated_fee <= 0: calculated_fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
-        except ValueError: calculated_fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
-    else: calculated_fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+            if calculated_fee <= 0:
+                calculated_fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+        except ValueError:
+            calculated_fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+    else:
+        calculated_fee = calculate_minimum_fee(distance, weight_value, vehicle_type, datetime.now())
+
     details = form.to_dict(flat=False)
     now = datetime.utcnow()
-    errand = Errand(client_id=user.id, type=errand_type, pickup_location=pickup_location, delivery_location=delivery_location, weight=weight_value, delivery_time=delivery_time, distance_km=distance, details=json.dumps(details), price_estimate=client_offer, calculated_minimum_fee=calculated_fee, status="available", expires_at=now+timedelta(minutes=5), hard_deadline=now+timedelta(minutes=7))
-    db.session.add(errand); db.session.commit()
+    errand = Errand(
+        client_id=user.id,
+        type=errand_type,
+        pickup_location=pickup_location,
+        delivery_location=delivery_location,
+        weight=weight_value,
+        delivery_time=delivery_time,
+        distance_km=distance,
+        details=json.dumps(details),
+        price_estimate=client_offer,
+        calculated_minimum_fee=calculated_fee,
+        status="available",
+        expires_at=now + timedelta(minutes=5),
+        hard_deadline=now + timedelta(minutes=7)
+    )
+    db.session.add(errand)
+    db.session.commit()
     return errand
 
 @app.route("/uploads/<path:filename>")
@@ -204,6 +245,7 @@ def home_page():
     if user.user_type=="runner": return redirect(url_for('runnerhome'))
     return render_template("home.html",user=user,pending_count=Errand.query.filter_by(client_id=user.id,status="pending").count(),completed_count=Errand.query.filter_by(client_id=user.id,status="completed").count())
 
+# ==================== UPDATED ROUTE ====================
 @app.route("/runnerhome")
 @login_required
 def runnerhome():
@@ -214,8 +256,18 @@ def runnerhome():
     completed=ActiveErrand.query.filter_by(runner_id=user.id,status="completed").count()
     active=ActiveErrand.query.filter_by(runner_id=user.id,status="ongoing").count()
     rc=getattr(rp,'city','')
-    if rc: ae=Errand.query.filter(Errand.status.in_(['available','pending']),Errand.pickup_location.ilike(f"%{rc}%")).all()
-    else: ae=Errand.query.filter(Errand.status.in_(['available','pending'])).all()
+    now_utc = datetime.utcnow()
+    if rc:
+        ae=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc,
+            Errand.pickup_location.ilike(f"%{rc}%")
+        ).all()
+    else:
+        ae=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc
+        ).all()
     total=0.0
     for a in ActiveErrand.query.filter_by(runner_id=user.id,status="completed").all():
         n=Negotiation.query.filter_by(errand_id=a.errand_id,runner_id=user.id,status="accepted").first()
@@ -239,6 +291,7 @@ def runnerprofile():
     avg=sum(r.rating for r in ratings)/len(ratings) if ratings else 0
     return render_template("runnerprofile.html",user=user,runner_profile=rp,completed_count=len(ce),active_count=len(ae),total_earnings=te,avg_rating=avg)
 
+# ==================== UPDATED ROUTE ====================
 @app.route("/dashboardrunner")
 @login_required
 def dashboardrunner():
@@ -250,8 +303,18 @@ def dashboardrunner():
     te=sum(e.errand.price_estimate for e in ActiveErrand.query.filter(ActiveErrand.runner_id==user.id,ActiveErrand.status=="completed",db.func.date(ActiveErrand.end_time)==today).all())
     rp=RunnerProfile.query.filter_by(user_id=user.id).first()
     rc=getattr(rp,'city','')
-    if rc: ae=Errand.query.filter(Errand.status.in_(['available','pending']),Errand.pickup_location.ilike(f"%{rc}%")).all()
-    else: ae=Errand.query.filter(Errand.status.in_(['available','pending'])).all()
+    now_utc = datetime.utcnow()
+    if rc:
+        ae=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc,
+            Errand.pickup_location.ilike(f"%{rc}%")
+        ).all()
+    else:
+        ae=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc
+        ).all()
     notifs=Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).limit(5).all()
     ratings=Rating.query.filter_by(to_user_id=user.id).all()
     avg=sum(r.rating for r in ratings)/len(ratings) if ratings else 0
@@ -269,6 +332,7 @@ def runnercompleted():
     if user.user_type!="runner": return redirect(url_for('home_page'))
     return render_template("runnercompleted.html",user=user,completed_errands=ActiveErrand.query.filter_by(runner_id=user.id,status="completed").all())
 
+# ==================== UPDATED ROUTE ====================
 @app.route("/runneravailable_errands")
 @login_required
 def runneravailable_errands():
@@ -276,11 +340,22 @@ def runneravailable_errands():
     if user.user_type!="runner": return redirect(url_for('home_page'))
     rp=RunnerProfile.query.filter_by(user_id=user.id).first()
     rc=getattr(rp,'city','')
-    if rc: ae=Errand.query.filter(Errand.status.in_(['available','pending']),Errand.pickup_location.ilike(f"%{rc}%")).all()
-    else: ae=Errand.query.filter(Errand.status.in_(['available','pending'])).all()
+    now_utc = datetime.utcnow()
+    if rc:
+        ae=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc,
+            Errand.pickup_location.ilike(f"%{rc}%")
+        ).all()
+    else:
+        ae=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc
+        ).all()
     data=[{"errand":serialize_errand(e),"client":serialize_user(e.client)} for e in ae]
     return render_template("runneravailable_errands.html",user=user,available_errands=data)
 
+# ==================== UPDATED ROUTE ====================
 @app.route("/api/errands")
 @login_required
 def api_available_errands():
@@ -288,8 +363,18 @@ def api_available_errands():
     if user.user_type!="runner": return jsonify([])
     rp=RunnerProfile.query.filter_by(user_id=user.id).first()
     rc=getattr(rp,'city','')
-    if rc: q=Errand.query.filter(Errand.status.in_(['available','pending']),Errand.pickup_location.ilike(f"%{rc}%"))
-    else: q=Errand.query.filter(Errand.status.in_(['available','pending']))
+    now_utc = datetime.utcnow()
+    if rc:
+        q=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc,
+            Errand.pickup_location.ilike(f"%{rc}%")
+        )
+    else:
+        q=Errand.query.filter(
+            Errand.status.in_(['available','pending']),
+            Errand.hard_deadline > now_utc
+        )
     return jsonify([{"errand":serialize_errand(e),"client":serialize_user(e.client)} for e in q.order_by(Errand.created_at.desc()).all()])
 
 @app.route("/runnerhistory")
@@ -462,72 +547,235 @@ def property_page(): return render_template("property.html",user=current_user())
 @app.route("/create_purchase_errand", methods=["POST"])
 @login_required
 def create_purchase_errand():
-    user=current_user(); now=datetime.utcnow()
-    store_name=request.form.get("store_name"); store_location=request.form.get("store_location")
-    delivery_address=request.form.get("delivery_address"); delivery_time=request.form.get("delivery_time")
-    specific_time=request.form.get("specific_time"); estimated_weight=request.form.get("estimated_weight")
-    pickup_lat=request.form.get("pickup_lat"); pickup_lon=request.form.get("pickup_lon")
-    dropoff_lat=request.form.get("dropoff_lat"); dropoff_lon=request.form.get("dropoff_lon")
-    items=[{"name":(n or "").strip(),"quantity":request.form.getlist("quantities[]")[i] if i<len(request.form.getlist("quantities[]")) else "","brand":request.form.getlist("brands[]")[i] if i<len(request.form.getlist("brands[]")) else "","price":request.form.getlist("prices[]")[i] if i<len(request.form.getlist("prices[]")) else ""} for i,n in enumerate(request.form.getlist("items[]")) if (n or "").strip()]
-    distance=0
-    if pickup_lat and dropoff_lat: distance=calculate_distance(float(pickup_lat),float(pickup_lon),float(dropoff_lat),float(dropoff_lon))
-    fee=calculate_minimum_fee(distance,estimated_weight or "0","car",datetime.now())
-    st=specific_time if delivery_time=="specific" and specific_time else delivery_time
-    sp=request.form.get("service_price")
-    try: co=float(sp) if sp else fee
-    except ValueError: co=fee
-    ef=request.form.get("estimated_fee")
-    try: cf=float(ef) if ef else fee
-    except ValueError: cf=fee
-    errand=Errand(client_id=user.id,type="Purchase",pickup_location=store_location,delivery_location=delivery_address,weight=estimated_weight or "0",delivery_time=st,distance_km=distance,details=json.dumps({"store_name":store_name,"store_location":store_location,"delivery_address":delivery_address,"delivery_time":delivery_time,"specific_time":specific_time,"items":items}),price_estimate=co,calculated_minimum_fee=cf,status="available",expires_at=now+timedelta(minutes=5),hard_deadline=now+timedelta(minutes=7))
-    db.session.add(errand); db.session.commit()
-    return redirect(url_for('available_runners',errand_id=errand.id))
+    user = current_user()
+    now = datetime.utcnow()
+    store_name = request.form.get("store_name")
+    store_location = request.form.get("store_location")
+    delivery_address = request.form.get("delivery_address")
+    delivery_time = request.form.get("delivery_time")
+    specific_time = request.form.get("specific_time")
+    estimated_weight = request.form.get("estimated_weight")
+    pickup_lat = request.form.get("pickup_lat")
+    pickup_lon = request.form.get("pickup_lon")
+    dropoff_lat = request.form.get("dropoff_lat")
+    dropoff_lon = request.form.get("dropoff_lon")
+
+    items = []
+    for i, n in enumerate(request.form.getlist("items[]")):
+        if (n or "").strip():
+            items.append({
+                "name": n.strip(),
+                "quantity": request.form.getlist("quantities[]")[i] if i < len(request.form.getlist("quantities[]")) else "",
+                "brand": request.form.getlist("brands[]")[i] if i < len(request.form.getlist("brands[]")) else "",
+                "price": request.form.getlist("prices[]")[i] if i < len(request.form.getlist("prices[]")) else ""
+            })
+
+    # Calculate straight-line distance first (fallback)
+    distance = 0
+    if pickup_lat and pickup_lon and dropoff_lat and dropoff_lon:
+        try:
+            distance = calculate_distance(float(pickup_lat), float(pickup_lon),
+                                         float(dropoff_lat), float(dropoff_lon))
+        except ValueError:
+            distance = 0
+
+    # ===== OVERRIDE WITH ROAD DISTANCE FROM CLIENT-SIDE MAP =====
+    form_distance_km = request.form.get("distance_km")
+    if form_distance_km:
+        try:
+            distance = float(form_distance_km)
+        except ValueError:
+            pass  # keep straight-line distance if conversion fails
+
+    fee = calculate_minimum_fee(distance, estimated_weight or "0", "car", datetime.now())
+    st = specific_time if delivery_time == "specific" and specific_time else delivery_time
+
+    # Client's offered price
+    sp = request.form.get("service_price")
+    try:
+        co = float(sp) if sp else fee
+    except ValueError:
+        co = fee
+
+    # System estimated fee from template
+    ef = request.form.get("estimated_fee")
+    try:
+        cf = float(ef) if ef else fee
+    except ValueError:
+        cf = fee
+
+    errand = Errand(
+        client_id=user.id,
+        type="Purchase",
+        pickup_location=store_location,
+        delivery_location=delivery_address,
+        weight=estimated_weight or "0",
+        delivery_time=st,
+        distance_km=distance,
+        details=json.dumps({
+            "store_name": store_name,
+            "store_location": store_location,
+            "delivery_address": delivery_address,
+            "delivery_time": delivery_time,
+            "specific_time": specific_time,
+            "items": items
+        }),
+        price_estimate=co,
+        calculated_minimum_fee=cf,
+        status="available",
+        expires_at=now + timedelta(minutes=5),
+        hard_deadline=now + timedelta(minutes=7)
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return redirect(url_for('available_runners', errand_id=errand.id))
 
 @app.route("/create_property_errand", methods=["POST"])
 @login_required
 def create_property_errand():
-    user=current_user(); now=datetime.utcnow()
-    store_name=request.form.get("store_name"); store_location=request.form.get("store_location")
-    collection_location=request.form.get("collection_location"); delivery_address=request.form.get("delivery_address")
-    delivery_time=request.form.get("delivery_time"); specific_time=request.form.get("specific_time")
-    estimated_weight=request.form.get("estimated_weight")
-    pickup_lat=request.form.get("pickup_lat"); pickup_lon=request.form.get("pickup_lon")
-    dropoff_lat=request.form.get("dropoff_lat"); dropoff_lon=request.form.get("dropoff_lon")
-    items=[{"name":(n or "").strip(),"quantity":request.form.getlist("quantities[]")[i] if i<len(request.form.getlist("quantities[]")) else "","brand":request.form.getlist("brands[]")[i] if i<len(request.form.getlist("brands[]")) else "","price":request.form.getlist("prices[]")[i] if i<len(request.form.getlist("prices[]")) else ""} for i,n in enumerate(request.form.getlist("items[]")) if (n or "").strip()]
-    stype="collect-deliver" if collection_location else "buy-deliver"
-    ploc=store_location if stype=="buy-deliver" else collection_location
-    distance=0
-    if pickup_lat and dropoff_lat: distance=calculate_distance(float(pickup_lat),float(pickup_lon),float(dropoff_lat),float(dropoff_lon))
-    fee=calculate_minimum_fee(distance,estimated_weight or "0","car",datetime.now())
-    st=specific_time if delivery_time=="specific" and specific_time else delivery_time
-    sp=request.form.get("service_price")
-    try: co=float(sp) if sp else fee
-    except ValueError: co=fee
-    ef=request.form.get("estimated_fee")
-    try: cf=float(ef) if ef else fee
-    except ValueError: cf=fee
-    errand=Errand(client_id=user.id,type="Property",pickup_location=ploc,delivery_location=delivery_address,weight=estimated_weight or "0",delivery_time=st,distance_km=distance,details=json.dumps({"service_type":stype,"store_name":store_name,"store_location":store_location,"collection_location":collection_location,"delivery_address":delivery_address,"delivery_time":delivery_time,"specific_time":specific_time,"items":items}),price_estimate=co,calculated_minimum_fee=cf,status="available",expires_at=now+timedelta(minutes=5),hard_deadline=now+timedelta(minutes=7))
-    db.session.add(errand); db.session.commit()
-    return redirect(url_for('available_runners',errand_id=errand.id))
+    user = current_user()
+    now = datetime.utcnow()
+    store_name = request.form.get("store_name")
+    store_location = request.form.get("store_location")
+    collection_location = request.form.get("collection_location")
+    delivery_address = request.form.get("delivery_address")
+    delivery_time = request.form.get("delivery_time")
+    specific_time = request.form.get("specific_time")
+    estimated_weight = request.form.get("estimated_weight")
+    pickup_lat = request.form.get("pickup_lat")
+    pickup_lon = request.form.get("pickup_lon")
+    dropoff_lat = request.form.get("dropoff_lat")
+    dropoff_lon = request.form.get("dropoff_lon")
+
+    items = []
+    for i, n in enumerate(request.form.getlist("items[]")):
+        if (n or "").strip():
+            items.append({
+                "name": n.strip(),
+                "quantity": request.form.getlist("quantities[]")[i] if i < len(request.form.getlist("quantities[]")) else "",
+                "brand": request.form.getlist("brands[]")[i] if i < len(request.form.getlist("brands[]")) else "",
+                "price": request.form.getlist("prices[]")[i] if i < len(request.form.getlist("prices[]")) else ""
+            })
+
+    stype = "collect-deliver" if collection_location else "buy-deliver"
+    ploc = store_location if stype == "buy-deliver" else collection_location
+
+    # Calculate straight-line distance (fallback)
+    distance = 0
+    if pickup_lat and pickup_lon and dropoff_lat and dropoff_lon:
+        try:
+            distance = calculate_distance(float(pickup_lat), float(pickup_lon),
+                                         float(dropoff_lat), float(dropoff_lon))
+        except ValueError:
+            distance = 0
+
+    # ===== OVERRIDE WITH ROAD DISTANCE FROM CLIENT-SIDE MAP =====
+    form_distance_km = request.form.get("distance_km")
+    if form_distance_km:
+        try:
+            distance = float(form_distance_km)
+        except ValueError:
+            pass
+
+    fee = calculate_minimum_fee(distance, estimated_weight or "0", "car", datetime.now())
+    st = specific_time if delivery_time == "specific" and specific_time else delivery_time
+
+    # Client's offer
+    sp = request.form.get("service_price")
+    try:
+        co = float(sp) if sp else fee
+    except ValueError:
+        co = fee
+
+    # System estimated fee from template
+    ef = request.form.get("estimated_fee")
+    try:
+        cf = float(ef) if ef else fee
+    except ValueError:
+        cf = fee
+
+    errand = Errand(
+        client_id=user.id,
+        type="Property",
+        pickup_location=ploc,
+        delivery_location=delivery_address,
+        weight=estimated_weight or "0",
+        delivery_time=st,
+        distance_km=distance,
+        details=json.dumps({
+            "service_type": stype,
+            "store_name": store_name,
+            "store_location": store_location,
+            "collection_location": collection_location,
+            "delivery_address": delivery_address,
+            "delivery_time": delivery_time,
+            "specific_time": specific_time,
+            "items": items
+        }),
+        price_estimate=co,
+        calculated_minimum_fee=cf,
+        status="available",
+        expires_at=now + timedelta(minutes=5),
+        hard_deadline=now + timedelta(minutes=7)
+    )
+    db.session.add(errand)
+    db.session.commit()
+    return redirect(url_for('available_runners', errand_id=errand.id))
 
 @app.route("/create_errand", methods=["GET","POST"])
 @login_required
 def create_errand():
-    user=current_user()
-    if request.method=="POST":
-        now=datetime.utcnow()
-        pickup=request.form.get("pickup_location"); dropoff=request.form.get("delivery_location")
-        details=request.form.get("details"); vehicle_type=request.form.get("vehicle_type","car")
-        weight=request.form.get("weight","0")
-        pickup_lat=request.form.get("pickup_lat"); pickup_lon=request.form.get("pickup_lon")
-        dropoff_lat=request.form.get("dropoff_lat"); dropoff_lon=request.form.get("dropoff_lon")
-        distance=0
-        if pickup_lat and dropoff_lat: distance=calculate_distance(float(pickup_lat),float(pickup_lon),float(dropoff_lat),float(dropoff_lon))
-        fee=calculate_minimum_fee(distance,weight,vehicle_type,datetime.now())
-        errand=Errand(client_id=user.id,type="General",pickup_location=pickup,delivery_location=dropoff,distance_km=distance,weight_kg=weight,details=details,price_estimate=fee,calculated_minimum_fee=fee,status="available",expires_at=now+timedelta(minutes=5),hard_deadline=now+timedelta(minutes=7))
-        db.session.add(errand); db.session.commit()
-        return redirect(url_for('available_runners',errand_id=errand.id))
-    return render_template("create_errand.html",user=user)
+    user = current_user()
+    if request.method == "POST":
+        now = datetime.utcnow()
+        pickup = request.form.get("pickup_location")
+        dropoff = request.form.get("delivery_location")
+        details = request.form.get("details")
+        vehicle_type = request.form.get("vehicle_type", "car")
+        weight = request.form.get("weight", "0")
+        pickup_lat = request.form.get("pickup_lat")
+        pickup_lon = request.form.get("pickup_lon")
+        dropoff_lat = request.form.get("dropoff_lat")
+        dropoff_lon = request.form.get("dropoff_lon")
+
+        # Calculate straight-line distance (fallback)
+        distance = 0
+        if pickup_lat and pickup_lon and dropoff_lat and dropoff_lon:
+            try:
+                distance = calculate_distance(float(pickup_lat), float(pickup_lon),
+                                             float(dropoff_lat), float(dropoff_lon))
+            except ValueError:
+                distance = 0
+
+        # ===== OVERRIDE WITH ROAD DISTANCE FROM CLIENT-SIDE MAP =====
+        form_distance_km = request.form.get("distance_km")
+        if form_distance_km:
+            try:
+                distance = float(form_distance_km)
+            except ValueError:
+                pass
+
+        fee = calculate_minimum_fee(distance, weight, vehicle_type, datetime.now())
+
+        errand = Errand(
+            client_id=user.id,
+            type="General",
+            pickup_location=pickup,
+            delivery_location=dropoff,
+            distance_km=distance,
+            weight_kg=weight,
+            details=details,
+            price_estimate=fee,
+            calculated_minimum_fee=fee,
+            status="available",
+            expires_at=now + timedelta(minutes=5),
+            hard_deadline=now + timedelta(minutes=7)
+        )
+        db.session.add(errand)
+        db.session.commit()
+        return redirect(url_for('available_runners', errand_id=errand.id))
+
+    return render_template("create_errand.html", user=user)
 
 @app.route("/runner_register", methods=["GET","POST"])
 @login_required
@@ -687,6 +935,63 @@ def confirm_errand_start(errand_id):
         return redirect(url_for("chat_detail",chat_id=Chat.query.filter_by(errand_id=errand.id).first().id))
     return redirect(url_for("home_page"))
 
+@app.route("/negotiate", methods=["POST"])
+@login_required
+def negotiate():
+    errand_id = request.form.get("errand_id")
+    runner_id = request.form.get("runner_id")
+    if not errand_id or not runner_id:
+        return jsonify({"error": "Missing data"}), 400
+
+    existing = Negotiation.query.filter_by(errand_id=errand_id, runner_id=runner_id).first()
+    if not existing:
+        neg = Negotiation(
+            errand_id=errand_id,
+            runner_id=runner_id,
+            offer_price=0,
+            status="pending"
+        )
+        db.session.add(neg)
+        db.session.commit()
+    return jsonify({"message": "Offer sent"})
+
+@app.route("/api/check_negotiation", methods=["GET"])
+@login_required
+def api_check_negotiation():
+    errand_id = request.args.get("errand_id")
+    runner_id = request.args.get("runner_id")
+
+    if not errand_id or not runner_id:
+        return jsonify({"error": "Missing parameters"}), 400
+
+    neg = Negotiation.query.filter_by(
+        errand_id=errand_id,
+        runner_id=runner_id
+    ).first()
+
+    if neg and neg.offer_price and neg.offer_price > 0:
+        return jsonify({
+            "runner_price": neg.offer_price,
+            "status": neg.status
+        })
+    return jsonify({"runner_price": None})
+
+@app.route("/api/accept_negotiation", methods=["POST"])
+@login_required
+def accept_negotiation():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    runner_id = data.get("runner_id")
+
+    if not errand_id or not runner_id:
+        return jsonify({"error": "Missing data"}), 400
+
+    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=runner_id).first()
+    if neg and neg.offer_price and neg.offer_price > 0:
+        neg.status = "accepted"
+        db.session.commit()
+        return jsonify({"success": True})
+    return jsonify({"error": "No valid offer found"}), 400
 
 # ============================================================================
 # BACKGROUND CLEANUP THREAD
@@ -721,12 +1026,54 @@ def cleanup_expired_errands():
 
         time.sleep(60)
 
+@app.route("/api/runner_offer", methods=["POST"])
+@login_required
+def runner_offer():
+    user = current_user()
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    offer_price = data.get("offer_price")
 
-cleanup_thread = threading.Thread(target=cleanup_expired_errands, daemon=True)
-cleanup_thread.start()
+    if not errand_id or not offer_price:
+        return jsonify({"error": "Missing data"}), 400
+
+    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=user.id).first()
+
+    if neg:
+        neg.offer_price = offer_price
+        neg.status = "pending"
+    else:
+        neg = Negotiation(
+            errand_id=errand_id,
+            runner_id=user.id,
+            offer_price=offer_price,
+            status="pending"
+        )
+        db.session.add(neg)
+
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route("/api/check_client_acceptance", methods=["GET"])
+@login_required
+def check_client_acceptance():
+    user = current_user()
+    errand_id = request.args.get("errand_id")
+    runner_id = user.id
+
+    if not errand_id:
+        return jsonify({"error": "errand_id required"}), 400
+
+    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=runner_id).first()
+    if neg and neg.status == "accepted":
+        return jsonify({
+            "accepted": True,
+            "agreed_price": neg.offer_price
+        })
+    else:
+        return jsonify({"accepted": False})
 
 if __name__ == "__main__":
+    cleanup_thread = threading.Thread(target=cleanup_expired_errands, daemon=True)
+    cleanup_thread.start()
     app.run(host="0.0.0.0", port=5000, debug=True)
-
-if __name__=="__main__":
-    app.run(host="0.0.0.0",port=5000,debug=True)
