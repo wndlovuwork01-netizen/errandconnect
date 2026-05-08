@@ -1416,7 +1416,7 @@ body {
 
         const visibleErrands = errands.filter(errand => {
             if (errand.status === 'expired') return false;
-            if (errand.status === 'accepted' && errand.selectedRunner !== currentRunner.id) return false;
+            if (errand.status === 'accepted' && !errand.runnerPrice) return false;
             return true;
         });
 
@@ -1453,15 +1453,26 @@ body {
             let buttonClass = 'btn-primary';
             let buttonOnclick = `submitRunnerBid(${errand.id})`;
 
-            switch(errand.buttonState) {
+                        switch(errand.buttonState) {
                 case 'submit':
-                    buttonContent = '<i class="fas fa-bolt"></i> Submit Price & Accept';
+                    buttonContent = '<i class="fas fa-bolt"></i> Offer Your Price';
                     buttonClass = 'btn-primary';
+                    buttonOnclick = `submitRunnerBid(${errand.id})`;
                     break;
                 case 'pending':
                     buttonContent = '<i class="fas fa-clock"></i> Waiting for client...';
                     buttonClass = 'btn-pending';
                     buttonOnclick = '';
+                    break;
+                case 'accepted':
+                    buttonContent = '<i class="fas fa-check-circle"></i> Accepted';
+                    buttonClass = 'btn-accept-chat';
+                    buttonOnclick = '';
+                    break;
+                case 'proceed':
+                    buttonContent = '<i class="fas fa-arrow-right"></i> Proceed';
+                    buttonClass = 'btn-accept-chat';
+                    buttonOnclick = `confirmProceed(${errand.id})`;
                     break;
                 case 'accept-chat':
                     buttonContent = '<i class="fas fa-check"></i> Accept & Chat';
@@ -1723,7 +1734,7 @@ body {
         });
     }
 
-    function pollForClientAcceptance(errandId) {
+        function pollForClientAcceptance(errandId) {
         const interval = setInterval(() => {
             fetch(`/api/check_client_acceptance?errand_id=${errandId}`)
                 .then(r => r.json())
@@ -1733,56 +1744,69 @@ body {
                         const errand = errands.find(e => e.id === errandId);
                         if (errand) {
                             errand.status = 'accepted';
-                            errand.buttonState = 'accept-chat';
-                            // Update the price to the agreed one just in case
                             if (data.agreed_price) {
                                 errand.runnerPrice = data.agreed_price;
                             }
+                            // Show notification
+                            showNotification('Client has accepted your offer! Please click Proceed to start Errand.');
+                            // First show "Accepted" then after 3s switch to "Proceed"
+                            errand.buttonState = 'accepted';
                             renderErrands();
                             updateStats();
-                            alert('Client has accepted your offer! You can now proceed to chat.');
+                            setTimeout(() => {
+                                errand.buttonState = 'proceed';
+                                renderErrands();
+                            }, 3000);
                         }
                     }
                 })
                 .catch(() => {});
-        }, 5000); // poll every 5 seconds
+        }, 5000);
     }
 
-    // ========== CHAT NAVIGATION ==========
+    function confirmProceed(errandId) {
+        fetch('/api/confirm_proceed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ errand_id: errandId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const errand = errands.find(e => e.id === errandId);
+                if (errand) {
+                    errand.buttonState = 'pending'; // shows "Waiting for client..."
+                    renderErrands();
+                }
+                // Poll until both proceeded
+                const interval = setInterval(() => {
+                    fetch(`/api/check_proceed?errand_id=${errandId}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.both_proceeded) {
+                                clearInterval(interval);
+                                window.location.href = `/chat/${data.chat_id}`;
+                            }
+                        })
+                        .catch(() => {});
+                }, 2000);
+            } else {
+                alert('Could not proceed. Try again.');
+            }
+        })
+        .catch(() => alert('Network error'));
+    }
+
     function navigateToChat(errandId) {
-        const errand = errands.find(e => e.id === errandId);
-        if (!errand || !errand.runnerPrice) {
-            alert('Please submit a price first.');
-            return;
-        }
-        const params = new URLSearchParams({
-            role: 'runner',
-            errand_id: errandId,
-            runner_price: errand.runnerPrice,
-            errand_title: errand.type,
-            client_price: errand.clientPrice,
-            action: 'accepted',
-            runner_name: currentRunner.name
-        });
-        window.location.href = `Errandfinal.html?${params.toString()}`;
+        window.location.href = `/go_to_chat/${errandId}`;
     }
 
-    function startChat(errandId) {
-        const errand = errands.find(e => e.id === errandId);
-        const priceInput = document.getElementById(`price-${errandId}`);
-        const proposedPrice = priceInput.value ? parseFloat(priceInput.value) : null;
-
-        const params = new URLSearchParams({
-            role: 'runner',
-            errand_id: errandId,
-            errand_title: errand.type,
-            client_price: errand.clientPrice,
-            action: 'chat_first',
-            runner_name: currentRunner.name
-        });
-        if (proposedPrice) params.append('runner_price', proposedPrice);
-
-        window.location.href = `Errandfinal.html?${params.toString()}`;
+    function showNotification(msg) {
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:20px;left:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:8px;text-align:center;z-index:2000;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:fadeInOut 4s forwards';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
     }
 
     function toggleErrandDetails(button) {

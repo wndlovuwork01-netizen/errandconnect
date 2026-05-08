@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chats - Errand Conversations</title>
+    <title>ErrandConnect – Chats</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fdf8; color: #333; height: 100vh; display: flex; flex-direction: column; }
-        
-        .chat-container { display: flex; height: 100%; }
-        
+
+        .chat-container { display: flex; height: calc(100% - 60px); }
+
         /* Sidebar (Chat List) */
         .chat-sidebar { width: 300px; background: white; border-right: 1px solid #ddd; overflow-y: auto; }
         .sidebar-header { padding: 15px; background: #28a745; color: white; }
@@ -18,32 +18,75 @@
         .chat-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
         .chat-item:hover { background: #f0fff4; }
         .chat-item.active { background: #e8f5e9; border-left: 4px solid #28a745; }
+        .chat-item.support { background: #fff8e1; border-left: 4px solid #ff9800; }
         .chat-item-name { font-weight: bold; margin-bottom: 5px; }
         .chat-item-info { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
-        
+
         /* Main Chat Area */
         .chat-main { flex: 1; display: flex; flex-direction: column; background: #f9f9f9; }
         .chat-header { padding: 15px; background: white; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
+
         .message { max-width: 70%; padding: 10px 15px; border-radius: 15px; font-size: 14px; position: relative; }
         .message.sent { align-self: flex-end; background: #28a745; color: white; border-bottom-right-radius: 2px; }
         .message.received { align-self: flex-start; background: white; border: 1px solid #ddd; border-bottom-left-radius: 2px; }
         .message-time { font-size: 10px; margin-top: 5px; opacity: 0.7; text-align: right; }
-        
+
         .chat-input-area { padding: 15px; background: white; border-top: 1px solid #ddd; display: flex; gap: 10px; }
         .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
         .send-btn { background: #28a745; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
-        
+
         /* Tracking Info */
         .tracking-info { background: #e8f5e9; padding: 10px 15px; font-size: 13px; border-bottom: 1px solid #c8e6c9; display: flex; justify-content: space-between; align-items: center; }
         .tracking-status { display: flex; align-items: center; gap: 5px; }
         .tracking-update-form { display: flex; gap: 5px; }
-        
+
+        /* Agreed price banner */
+        .agreed-price {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            padding: 0 10px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            color: #666;
+            text-decoration: none;
+            gap: 4px;
+            padding: 5px;
+            flex: 1;
+        }
+        .nav-item.active { color: #28a745; font-weight: bold; }
+        .nav-item i { font-size: 18px; }
+
         @media (max-width: 768px) {
-            .chat-sidebar { display: none; } /* Mobile view logic needed */
+            .chat-sidebar { display: none; }
             .chat-sidebar.mobile-visible { display: block; width: 100%; }
             .chat-main.mobile-hidden { display: none; }
+            .bottom-nav { padding: 0 5px; }
+            .nav-item { font-size: 10px; }
         }
     </style>
 </head>
@@ -57,9 +100,21 @@
             <a href="{{ url_for('home_page') }}" style="color: white; font-size: 12px; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Home</a>
         </div>
         <ul class="chat-list">
+            <!-- Fixed Support Chat -->
+            <li class="chat-item support {% if active_chat and active_chat.id == support_chat_id %}active{% endif %}"
+                onclick="window.location.href='{{ url_for('chat_detail', chat_id=support_chat_id) }}'">
+                <div class="chat-item-name">
+                    <i class="fas fa-headset"></i> ErrandGo Support
+                </div>
+                <div class="chat-item-info">
+                    <span>Help & Support</span>
+                </div>
+            </li>
+
             {% if chats %}
                 {% for chat in chats %}
-                <li class="chat-item {% if active_chat and active_chat.id == chat.id %}active{% endif %}" onclick="window.location.href='{{ url_for('chat_detail', chat_id=chat.id) }}'">
+                <li class="chat-item {% if active_chat and active_chat.id == chat.id %}active{% endif %}"
+                    onclick="window.location.href='{{ url_for('chat_detail', chat_id=chat.id) }}'">
                     <div class="chat-item-name">
                         {% if user.user_type == 'client' %}
                             {{ chat.runner.fullname }}
@@ -74,7 +129,7 @@
                 </li>
                 {% endfor %}
             {% else %}
-                <li style="padding: 20px; text-align: center; color: #999;">No chats yet</li>
+                <li style="padding: 20px; text-align: center; color: #999;">No other chats yet</li>
             {% endif %}
         </ul>
     </div>
@@ -94,11 +149,18 @@
                 </h3>
             </div>
             <div class="header-actions">
-                <a href="{{ url_for('errandfinal', errand_id=active_chat.errand_id) }}" class="btn-sm"><i class="fas fa-info-circle"></i> Errand Info</a>
+                {% if active_chat.errand_id %}
+                <a href="{{ url_for('go_to_chat', errand_id=active_chat.errand_id) }}" class="btn-sm"><i class="fas fa-info-circle"></i> Errand Info</a>
+                {% endif %}
             </div>
         </div>
-        
-        <!-- Tracking Info -->
+
+        {% if agreed_price %}
+        <div class="agreed-price">
+            <i class="fas fa-handshake"></i> Agreed Price: <strong>${{ "%.2f"|format(agreed_price) }}</strong>
+        </div>
+        {% endif %}
+
         {% if active_errand %}
         <div class="tracking-info">
             <div class="tracking-status">
@@ -108,7 +170,7 @@
                     <span style="margin-left: 10px;"><i class="fas fa-clock"></i> Arriving in: <span id="time-display">{{ active_errand.estimated_duration }}</span></span>
                 {% endif %}
             </div>
-            
+
             {% if user.user_type == 'runner' and active_errand.status == 'ongoing' %}
             <div class="tracking-update-form">
                 <input type="text" id="duration-input" placeholder="e.g. 15 mins" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
@@ -120,14 +182,18 @@
 
         <div class="chat-messages" id="messages-area">
             {% for msg in messages %}
-            <div class="message {% if msg.sender_id == user.id %}sent{% else %}received{% endif %}">
+            <div class="message {% if msg.sender_id == user.id %}sent{% else %}received{% endif %}" data-message-id="{{ msg.id }}">
                 {{ msg.content }}
                 <div class="message-time">{{ msg.created_at.strftime('%H:%M') }}</div>
             </div>
             {% endfor %}
         </div>
 
-        <div class="chat-input-area">
+                <div class="chat-input-area">
+            <button id="voice-record-btn" class="send-btn" style="background: none; border: 1px solid #ddd; margin-right: 5px;" onclick="toggleVoiceRecording()">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <span id="recording-time" style="display:none; font-size:12px; margin-right:5px; color:red;">00:00</span>
             <input type="text" class="chat-input" id="message-input" placeholder="Type a message...">
             <button class="send-btn" onclick="sendMessage({{ active_chat.id }})"><i class="fas fa-paper-plane"></i></button>
         </div>
@@ -142,35 +208,86 @@
     {% endif %}
 </div>
 
+<!-- Bottom Navigation Bar -->
+<div class="bottom-nav">
+    {% if user.user_type == 'client' %}
+        <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' %}active{% endif %}">
+            <i class="fas fa-comment-dots"></i>
+            <span>Chats</span>
+        </a>
+        <a href="{{ url_for('order_history') }}" class="nav-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Errands</span>
+        </a>
+        <a href="{{ url_for('home_page') }}" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('order_history') }}" class="nav-item">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+    {% else %}
+        <!-- Runner navigation -->
+        <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' %}active{% endif %}">
+            <i class="fas fa-comment-dots"></i>
+            <span>Chats</span>
+        </a>
+        <a href="{{ url_for('runnerhome') }}" class="nav-item">
+            <i class="fas fa-tasks"></i>
+            <span>Active Errands</span>
+        </a>
+        <a href="{{ url_for('runneravailable_errands') }}" class="nav-item">
+            <i class="fas fa-list-ul"></i>
+            <span>Available</span>
+        </a>
+        <a href="{{ url_for('runnercompleted') }}" class="nav-item">
+            <i class="fas fa-check-double"></i>
+            <span>Completed</span>
+        </a>
+    {% endif %}
+</div>
+
 <script>
+    // ---- GLOBAL VARS ----
+    let currentChatId = {{ active_chat.id if active_chat else 0 }};
+    let currentUserId = {{ user.id }};
+    let lastMessageId = {{ messages[-1].id if messages else 0 }};
+    let pollInterval = null;
+
+    // Prevent polling from re‑adding our own messages
+    const locallySentMessageIds = new Set();
+
+    // Voice recording vars
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingStartTime = 0;
+    let recordingTimerInterval = null;
+
     const messagesArea = document.getElementById('messages-area');
     if (messagesArea) {
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
+    // ---- SEND TEXT MESSAGE ----
     function sendMessage(chatId) {
         const input = document.getElementById('message-input');
         const content = input.value.trim();
-        
         if (!content) return;
-        
+
         fetch('/api/send_message', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chat_id: chatId,
-                content: content
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, content: content })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
-                // Append message to chat
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'message sent';
-                msgDiv.innerHTML = `${data.message.content}<div class="message-time">${data.message.created_at}</div>`;
+                // Mark this message as sent locally to prevent duplicate
+                locallySentMessageIds.add(data.message.id);
+                lastMessageId = data.message.id;
+
+                const msgDiv = createMessageElement(data.message.id, data.message.content, true, data.message.created_at);
                 messagesArea.appendChild(msgDiv);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
                 input.value = '';
@@ -180,23 +297,137 @@
         });
     }
 
+    // ---- CREATE MESSAGE ELEMENT ----
+    function createMessageElement(id, content, isSent, time) {
+        const div = document.createElement('div');
+        div.className = 'message ' + (isSent ? 'sent' : 'received');
+        div.setAttribute('data-message-id', id);
+        // Use innerHTML to render audio players (safe here)
+        div.innerHTML = content + '<div class="message-time">' + time + '</div>';
+        return div;
+    }
+
+    // ---- VOICE MESSAGE ----
+    function toggleVoiceRecording() {
+        const voiceBtn = document.getElementById('voice-record-btn');
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            // Stop recording
+            mediaRecorder.stop();
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            voiceBtn.style.color = '';
+            clearInterval(recordingTimerInterval);
+            document.getElementById('recording-time').style.display = 'none';
+        } else {
+            // Start recording
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Voice recording is not supported in your browser.');
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        audioChunks.push(event.data);
+                    });
+                    mediaRecorder.addEventListener('stop', () => {
+                        // Upload the recording
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        uploadVoiceMessage(audioBlob);
+                    });
+                    mediaRecorder.start();
+                    recordingStartTime = Date.now();
+                    voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    voiceBtn.style.color = 'red';
+                    document.getElementById('recording-time').style.display = 'inline-block';
+                    recordingTimerInterval = setInterval(updateRecordingTimer, 1000);
+                })
+                .catch(err => {
+                    alert('Microphone access denied.');
+                });
+        }
+    }
+
+    function updateRecordingTimer() {
+        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        document.getElementById('recording-time').textContent =
+            (mins < 10 ? '0' + mins : mins) + ':' + (secs < 10 ? '0' + secs : secs);
+    }
+
+    function uploadVoiceMessage(blob) {
+        const formData = new FormData();
+        formData.append('chat_id', currentChatId);
+        formData.append('audio', blob, 'voice.webm');
+
+        fetch('/api/send_voice_message', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                locallySentMessageIds.add(data.message.id);
+                lastMessageId = data.message.id;
+                const msgDiv = createMessageElement(data.message.id, data.message.content, true, data.message.created_at);
+                messagesArea.appendChild(msgDiv);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } else {
+                alert('Voice message failed');
+            }
+        })
+        .catch(() => alert('Network error'));
+    }
+
+    // ---- POLLING FOR NEW MESSAGES ----
+    function startPolling() {
+        if (!currentChatId) return;
+        stopPolling();
+        pollInterval = setInterval(() => {
+            fetch(`/api/get_messages?chat_id=${currentChatId}&after=${lastMessageId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.messages && data.messages.length > 0) {
+                        let newMessages = false;
+                        data.messages.forEach(msg => {
+                            // Skip if we already added it (our own message or DOM duplicate)
+                            if (locallySentMessageIds.has(msg.id)) return;
+                            if (document.querySelector(`[data-message-id="${msg.id}"]`)) return;
+                            const isSent = msg.sender_id === currentUserId;
+                            const msgDiv = createMessageElement(msg.id, msg.content, isSent, msg.created_at);
+                            messagesArea.appendChild(msgDiv);
+                            newMessages = true;
+                            if (msg.id > lastMessageId) lastMessageId = msg.id;
+                        });
+                        if (newMessages) {
+                            messagesArea.scrollTop = messagesArea.scrollHeight;
+                        }
+                    }
+                })
+                .catch(() => {});
+        }, 2000);
+    }
+
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    }
+
+    // ---- TRACKING UPDATE ----
     function updateTracking(errandId) {
         const input = document.getElementById('duration-input');
         const duration = input.value.trim();
-        
         if (!duration) return;
-        
+
         fetch('/api/update_tracking', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                errand_id: errandId,
-                duration: duration
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ errand_id: errandId, duration: duration })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
                 const display = document.getElementById('time-display');
@@ -207,13 +438,20 @@
             }
         });
     }
-    
-    // Allow sending with Enter key
+
+    // ---- KEYBOARD SEND ----
     document.getElementById('message-input')?.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
-            sendMessage({{ active_chat.id if active_chat else 0 }});
+            sendMessage(currentChatId);
         }
     });
+
+    // ---- START POLLING IF ACTIVE CHAT EXISTS ----
+    if (currentChatId) {
+        startPolling();
+    }
+
+    window.addEventListener('beforeunload', stopPolling);
 </script>
 
 </body>

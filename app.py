@@ -177,6 +177,57 @@ def serialize_errand(errand):
     if hasattr(errand,'expires_at') and errand.expires_at: ea = errand.expires_at.isoformat()
     if hasattr(errand,'hard_deadline') and errand.hard_deadline: hd = errand.hard_deadline.isoformat()
     return {"id":errand.id,"type":errand.type,"pickup_location":errand.pickup_location,"delivery_location":errand.delivery_location,"weight":errand.weight,"delivery_time":errand.delivery_time,"details":errand.details,"price_estimate":errand.price_estimate,"calculated_minimum_fee":getattr(errand,'calculated_minimum_fee',errand.price_estimate),"distance_km":getattr(errand,'distance_km',None),"status":errand.status,"created_at":ca,"expires_at":ea,"hard_deadline":hd}
+def get_or_create_support_chat(user):
+    """Ensure every user has a support chat by using a dedicated Support errand."""
+    # 1) Find or create the special "Support" errand (only once per app)
+    support_errand = Errand.query.filter_by(type="System Support").first()
+    if not support_errand:
+        support_errand = Errand(
+            client_id=user.id,  # temporary, will be overwritten later but harmless
+            type="System Support",
+            pickup_location="Internal",
+            delivery_location="Internal",
+            weight="0",
+            delivery_time="N/A",
+            distance_km=0,
+            details=json.dumps({"note": "Automated support chat"}),
+            price_estimate=0,
+            calculated_minimum_fee=0,
+            status="system",
+            expires_at=datetime.utcnow() + timedelta(days=365),
+            hard_deadline=datetime.utcnow() + timedelta(days=365)
+        )
+        db.session.add(support_errand)
+        db.session.commit()
+
+    # 2) Find or create the support user
+    support_user = User.query.filter_by(email="support@errandgo.com").first()
+    if not support_user:
+        support_user = User(
+            fullname="ErrandGo Support",
+            username="support",
+            email="support@errandgo.com",
+            password_hash=generate_password_hash("support"),
+            user_type="client"
+        )
+        db.session.add(support_user)
+        db.session.commit()
+
+    # 3) Create a chat between the current user and the support user, linked to the support errand
+    if user.user_type == "client":
+        chat = Chat.query.filter_by(client_id=user.id, runner_id=support_user.id, errand_id=support_errand.id).first()
+        if not chat:
+            chat = Chat(errand_id=support_errand.id, client_id=user.id, runner_id=support_user.id)
+            db.session.add(chat)
+            db.session.commit()
+    else:
+        chat = Chat.query.filter_by(client_id=support_user.id, runner_id=user.id, errand_id=support_errand.id).first()
+        if not chat:
+            chat = Chat(errand_id=support_errand.id, client_id=support_user.id, runner_id=user.id)
+            db.session.add(chat)
+            db.session.commit()
+
+    return chat
 
 @app.template_filter('timesince')
 def timesince_filter(dt):
@@ -796,21 +847,33 @@ def runner_register():
         flash("Registration successful!","success"); return redirect(url_for('runnerhome'))
     return render_template("runner_register.html",user=user)
 
+
 @app.route("/available_runners/<int:errand_id>")
 @login_required
 def available_runners(errand_id):
-    user=current_user()
-    errand=Errand.query.get_or_404(errand_id)
-    if hasattr(errand,'status') and errand.status=='pending' and errand.client_id==user.id:
-        now=datetime.utcnow()
-        errand.status='available'
-        if hasattr(errand,'expires_at'): errand.expires_at=now+timedelta(minutes=5)
-        if hasattr(errand,'hard_deadline'): errand.hard_deadline=now+timedelta(minutes=7)
+    user = current_user()
+    errand = Errand.query.get_or_404(errand_id)
+    if hasattr(errand, 'status') and errand.status == 'pending' and errand.client_id == user.id:
+        now = datetime.utcnow()
+        errand.status = 'available'
+        if hasattr(errand, 'expires_at'): errand.expires_at = now + timedelta(minutes=5)
+        if hasattr(errand, 'hard_deadline'): errand.hard_deadline = now + timedelta(minutes=7)
         db.session.commit()
-    runners=RunnerProfile.query.filter_by(is_available=True).all()
-    rd=[{"user":serialize_user(p.user),"runner_profile":serialize_runner_profile(p),"avg_rating":p.user.average_rating if p.user else 0,"completed_errands":ActiveErrand.query.filter_by(runner_id=p.user_id,status="completed").count(),"total_errands":ActiveErrand.query.filter_by(runner_id=p.user_id).count()} for p in runners]
-    return render_template("available_runners.html",user=user,errand=errand,runners=rd,client_offer=errand.price_estimate,est_fee=errand.calculated_minimum_fee or errand.price_estimate)
+    runners = RunnerProfile.query.filter_by(is_available=True).all()
+    rd = [{"user": serialize_user(p.user), "runner_profile": serialize_runner_profile(p),
+           "avg_rating": p.user.average_rating if p.user else 0,
+           "completed_errands": ActiveErrand.query.filter_by(runner_id=p.user_id, status="completed").count(),
+           "total_errands": ActiveErrand.query.filter_by(runner_id=p.user_id).count()} for p in runners]
 
+    # Build a dict of runner_id -> offer_price for this errand
+    bids = {}
+    for neg in Negotiation.query.filter_by(errand_id=errand_id).all():
+        if neg.offer_price and neg.offer_price > 0:
+            bids[str(neg.runner_id)] = float(neg.offer_price)
+
+    return render_template("available_runners.html", user=user, errand=errand, runners=rd,
+                           client_offer=errand.price_estimate,
+                           est_fee=errand.calculated_minimum_fee or errand.price_estimate, runner_bids=bids)
 # ============================================================================
 # RUNNER SETTINGS ROUTES
 # ============================================================================
@@ -875,19 +938,49 @@ def runnerrate():
 @app.route("/chats")
 @login_required
 def chats():
-    user=current_user()
-    if user.user_type=="client": ucs=Chat.query.filter_by(client_id=user.id).order_by(Chat.created_at.desc()).all()
-    else: ucs=Chat.query.filter_by(runner_id=user.id).order_by(Chat.created_at.desc()).all()
-    return render_template("chats.html",user=user,chats=ucs)
+    user = current_user()
+    support_chat = get_or_create_support_chat(user)
+
+    if user.user_type == "client":
+        ucs = Chat.query.filter_by(client_id=user.id).order_by(Chat.created_at.desc()).all()
+    else:
+        ucs = Chat.query.filter_by(runner_id=user.id).order_by(Chat.created_at.desc()).all()
+
+    return render_template("chats.html", user=user, chats=ucs, support_chat_id=support_chat.id)
+
 @app.route("/chat/<int:chat_id>")
 @login_required
 def chat_detail(chat_id):
-    user=current_user(); chat=Chat.query.get_or_404(chat_id)
-    if user.id!=chat.client_id and user.id!=chat.runner_id: flash("Unauthorized","danger"); return redirect(url_for("home_page"))
-    for msg in Message.query.filter_by(chat_id=chat.id,is_read=False).all():
-        if msg.sender_id!=user.id: msg.is_read=True
+    user = current_user()
+    chat = Chat.query.get_or_404(chat_id)
+    if user.id != chat.client_id and user.id != chat.runner_id:
+        flash("Unauthorized", "danger")
+        return redirect(url_for("home_page"))
+
+    for msg in Message.query.filter_by(chat_id=chat.id, is_read=False).all():
+        if msg.sender_id != user.id:
+            msg.is_read = True
     db.session.commit()
-    return render_template("chats.html",user=user,active_chat=chat,messages=Message.query.filter_by(chat_id=chat.id).order_by(Message.created_at.asc()).all(),active_errand=ActiveErrand.query.filter_by(errand_id=chat.errand_id).first())
+
+    agreed_price = None
+    neg = Negotiation.query.filter_by(errand_id=chat.errand_id, status="accepted").first()
+    if neg and neg.offer_price > 0:
+        agreed_price = neg.offer_price
+
+    support_chat = get_or_create_support_chat(user)
+
+    messages = Message.query.filter_by(chat_id=chat.id).order_by(Message.created_at.asc()).all()
+    active_errand = ActiveErrand.query.filter_by(errand_id=chat.errand_id).first()
+
+    return render_template("chats.html",
+                           user=user,
+                           active_chat=chat,
+                           chats=None,  # we'll fetch chats via JS or in the template if needed
+                           messages=messages,
+                           active_errand=active_errand,
+                           agreed_price=agreed_price,
+                           support_chat_id=support_chat.id)
+
 @app.route("/api/send_message", methods=["POST"])
 @login_required
 def send_message():
@@ -898,6 +991,73 @@ def send_message():
     msg=Message(chat_id=chat.id,sender_id=user.id,content=data["content"])
     db.session.add(msg); db.session.commit()
     return jsonify({"success":True,"message":{"id":msg.id,"content":msg.content,"sender_id":msg.sender_id,"created_at":msg.created_at.strftime("%H:%M")}})
+
+@app.route("/api/get_messages", methods=["GET"])
+@login_required
+def get_messages():
+    chat_id = request.args.get("chat_id")
+    after = request.args.get("after", 0, type=int)
+    if not chat_id:
+        return jsonify({"error": "chat_id required"}), 400
+
+    chat = Chat.query.get(chat_id)
+    if not chat:
+        return jsonify({"error": "Chat not found"}), 404
+    if current_user().id not in (chat.client_id, chat.runner_id):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    messages = Message.query.filter(
+        Message.chat_id == chat_id,
+        Message.id > after
+    ).order_by(Message.id.asc()).all()
+
+    return jsonify({
+        "messages": [{
+            "id": msg.id,
+            "content": msg.content,
+            "sender_id": msg.sender_id,
+            "created_at": msg.created_at.strftime("%H:%M")
+        } for msg in messages]
+    })
+
+@app.route("/api/send_voice_message", methods=["POST"])
+@login_required
+def send_voice_message():
+    chat_id = request.form.get("chat_id")
+    if not chat_id:
+        return jsonify({"error": "chat_id required"}), 400
+
+    chat = Chat.query.get(chat_id)
+    if not chat:
+        return jsonify({"error": "Chat not found"}), 404
+    if current_user().id not in (chat.client_id, chat.runner_id):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    file = request.files.get("audio")
+    if not file or file.filename == "":
+        return jsonify({"error": "No audio file"}), 400
+
+    filename = secure_filename(f"voice_{current_user().id}_{int(time.time())}.webm")
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    # Create a message that embeds an audio player
+    audio_url = url_for("uploaded_file", filename=filename)
+    msg_content = f'<audio controls src="{audio_url}"></audio>'
+
+    msg = Message(chat_id=chat_id, sender_id=current_user().id, content=msg_content)
+    db.session.add(msg)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": {
+            "id": msg.id,
+            "content": msg.content,
+            "sender_id": msg.sender_id,
+            "created_at": msg.created_at.strftime("%H:%M")
+        }
+    })
+
 @app.route("/api/update_tracking", methods=["POST"])
 @login_required
 def update_tracking():
@@ -907,20 +1067,7 @@ def update_tracking():
     if not ae: return jsonify({"error":"Not found"}),404
     ae.estimated_duration=data.get("duration"); db.session.commit()
     return jsonify({"success":True})
-@app.route("/errandfinal/<int:errand_id>")
-@login_required
-def errandfinal(errand_id):
-    user=current_user(); errand=Errand.query.get_or_404(errand_id)
-    if user.id!=errand.client_id:
-        n=Negotiation.query.filter_by(errand_id=errand.id,runner_id=user.id).first()
-        if not n: flash("Unauthorized","danger"); return redirect(url_for("home_page"))
-    an=Negotiation.query.filter_by(errand_id=errand.id,status="accepted").first()
-    if an: agreed_price=an.offer_price; runner=User.query.get(an.runner_id)
-    else:
-        agreed_price=errand.price_estimate; runner=None
-        ae=ActiveErrand.query.filter_by(errand_id=errand.id).first()
-        if ae: runner=User.query.get(ae.runner_id)
-    return render_template("Errandfinal.html",user=user,errand=errand,agreed_price=agreed_price,runner=runner)
+
 @app.route("/confirm_errand_start/<int:errand_id>", methods=["POST"])
 @login_required
 def confirm_errand_start(errand_id):
@@ -993,6 +1140,27 @@ def accept_negotiation():
         return jsonify({"success": True})
     return jsonify({"error": "No valid offer found"}), 400
 
+
+@app.route("/api/cancel_acceptance", methods=["POST"])
+@login_required
+def cancel_acceptance():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    runner_id = data.get("runner_id")
+    if not errand_id or not runner_id:
+        return jsonify({"error": "Missing data"}), 400
+
+    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=runner_id).first()
+    if neg:
+        if neg.status == "accepted":
+            # Revert to pending so runner sees it again
+            neg.status = "pending"
+            db.session.commit()
+            return jsonify({"success": True})
+        else:
+            return jsonify({"error": "Not in accepted state"}), 400
+    return jsonify({"error": "No negotiation found"}), 404
+
 # ============================================================================
 # BACKGROUND CLEANUP THREAD
 # ============================================================================
@@ -1054,6 +1222,34 @@ def runner_offer():
     db.session.commit()
     return jsonify({"success": True})
 
+@app.route("/go_to_chat/<int:errand_id>")
+@login_required
+def go_to_chat(errand_id):
+    """Create (or find) the chat for this errand and redirect to it."""
+    user = current_user()
+    errand = Errand.query.get_or_404(errand_id)
+
+    # Determine the two participants
+    if user.id == errand.client_id:
+        neg = Negotiation.query.filter_by(errand_id=errand_id, status="accepted").first()
+        if not neg:
+            flash("No accepted offer for this errand.", "warning")
+            return redirect(url_for("home_page"))
+        runner_id = neg.runner_id
+        client_id = errand.client_id
+    else:
+        runner_id = user.id
+        client_id = errand.client_id
+
+    # Look for an existing chat or create one
+    chat = Chat.query.filter_by(errand_id=errand_id, client_id=client_id, runner_id=runner_id).first()
+    if not chat:
+        chat = Chat(errand_id=errand_id, client_id=client_id, runner_id=runner_id)
+        db.session.add(chat)
+        db.session.commit()
+
+    return redirect(url_for("chat_detail", chat_id=chat.id))
+
 @app.route("/api/check_client_acceptance", methods=["GET"])
 @login_required
 def check_client_acceptance():
@@ -1072,6 +1268,99 @@ def check_client_acceptance():
         })
     else:
         return jsonify({"accepted": False})
+
+
+@app.route("/api/confirm_proceed", methods=["POST"])
+@login_required
+def confirm_proceed():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    if not errand_id:
+        return jsonify({"error": "Missing errand_id"}), 400
+
+    user = current_user()
+    errand = Errand.query.get(errand_id)
+    if not errand:
+        return jsonify({"error": "Errand not found"}), 404
+
+    # Find the accepted negotiation for this errand involving the user
+    if user.id == errand.client_id:
+        neg = Negotiation.query.filter_by(
+            errand_id=errand_id, status="accepted"
+        ).first()
+        if not neg:
+            neg = Negotiation.query.filter_by(
+                errand_id=errand_id, status="runner_proceeded"
+            ).first()
+    else:
+        neg = Negotiation.query.filter_by(
+            errand_id=errand_id, runner_id=user.id, status="accepted"
+        ).first()
+        if not neg:
+            neg = Negotiation.query.filter_by(
+                errand_id=errand_id, runner_id=user.id, status="client_proceeded"
+            ).first()
+
+    if not neg:
+        return jsonify({"error": "No accepted negotiation found"}), 400
+
+    # Update status based on who is proceeding
+    if user.id == errand.client_id:
+        if neg.status == "accepted":
+            neg.status = "client_proceeded"
+        elif neg.status == "runner_proceeded":
+            neg.status = "active"
+    else:
+        if neg.status == "accepted":
+            neg.status = "runner_proceeded"
+        elif neg.status == "client_proceeded":
+            neg.status = "active"
+
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@app.route("/api/check_proceed", methods=["GET"])
+@login_required
+def check_proceed():
+    errand_id = request.args.get("errand_id")
+    if not errand_id:
+        return jsonify({"error": "Missing errand_id"}), 400
+
+    user = current_user()
+    errand = Errand.query.get(errand_id)
+    if not errand:
+        return jsonify({"error": "Errand not found"}), 404
+
+    neg = Negotiation.query.filter_by(errand_id=errand_id).filter(
+        Negotiation.status.in_(["active", "client_proceeded", "runner_proceeded", "accepted"])
+    ).first()
+
+    if not neg:
+        return jsonify({"both_proceeded": False, "status": "not_accepted"})
+
+    if neg.status == "active":
+        # Both have proceeded – find or create the chat
+        chat = Chat.query.filter_by(
+            errand_id=errand_id,
+            client_id=errand.client_id,
+            runner_id=neg.runner_id
+        ).first()
+        if not chat:
+            chat = Chat(
+                errand_id=errand_id,
+                client_id=errand.client_id,
+                runner_id=neg.runner_id
+            )
+            db.session.add(chat)
+            db.session.commit()
+        return jsonify({"both_proceeded": True, "chat_id": chat.id})
+    else:
+        return jsonify({
+            "both_proceeded": False,
+            "status": neg.status,
+            "my_side": "client" if user.id == errand.client_id else "runner"
+        })
 
 if __name__ == "__main__":
     cleanup_thread = threading.Thread(target=cleanup_expired_errands, daemon=True)

@@ -597,267 +597,307 @@
     </div>
 
     <script>
-        const realRunners = {{ runners | tojson | safe }};
-        const currentErrandId = {{ errand.id if errand else 0 }};
-        const errandPrice = {{ errand.price_estimate if errand else 15 }};
-        let selectedRunner = null;
-        let allRunners = [];
+   const realRunners = {{ runners | tojson | safe }};
+   const runnerBids = {{ runner_bids | tojson | safe }};
+   const currentErrandId = {{ errand.id if errand else 0 }};
+   const errandPrice = {{ errand.price_estimate if errand else 15 }};
+   let currentSelectedRunnerId = null;
+   let allRunners = [];
+   let cancelTimeout = null;
+   let transitionTimer = null;
 
-        function transformRunnersData() {
-            allRunners = realRunners.map(r => {
-                const profile = r.runner_profile;
-                const user = r.user;
-                const completed = r.completed_errands || 0;
-                const total = r.total_errands || 1;
-                const completionRate = Math.round((completed / total) * 100);
-                const avgRating = r.avg_rating || 4.5;
-                const isOnline = profile.is_available;
-                return {
-                    id: user.id,
-                    name: user.fullname,
-                    avatar: user.fullname.charAt(0).toUpperCase(),
-                    profileImage: profile.profile_photo ? profile.profile_image_url || profile.profile_photo : null,
-                    rating: avgRating,
-                    vehicle_type: profile.vehicle_type || 'Various',
-                    city: profile.city || 'Not specified',
-                    completion_rate: completionRate,
-                    status: isOnline ? 'online' : 'offline',
-                    is_online: isOnline,
-                    price: null,
-                    distance: null
-                };
-            });
-            allRunners.sort((a, b) => {
-                if (a.is_online && !b.is_online) return -1;
-                if (!a.is_online && b.is_online) return 1;
-                return b.rating - a.rating;
-            });
+   function transformRunnersData() {
+    allRunners = realRunners.map(r => {
+        const profile = r.runner_profile;
+        const user = r.user;
+        const completed = r.completed_errands || 0;
+        const total = r.total_errands || 1;
+        const completionRate = Math.round((completed / total) * 100);
+        const avgRating = r.avg_rating || 4.5;
+        const isOnline = profile.is_available;
+        const bidPrice = runnerBids[String(user.id)] || null;
+        return {
+            id: user.id,
+            name: user.fullname,
+            avatar: user.fullname.charAt(0).toUpperCase(),
+            profileImage: profile.profile_photo ? profile.profile_image_url || profile.profile_photo : null,
+            rating: avgRating,
+            vehicle_type: profile.vehicle_type || 'Various',
+            city: profile.city || 'Not specified',
+            completion_rate: completionRate,
+            status: isOnline ? 'online' : 'offline',
+            is_online: isOnline,
+            price: bidPrice,
+            distance: null
+        };
+    });
+    allRunners.sort((a, b) => {
+        if (a.is_online && !b.is_online) return -1;
+        if (!a.is_online && b.is_online) return 1;
+        return b.rating - a.rating;
+    });
+}
+
+    function renderRunners() {
+        const list = document.getElementById('runnersList');
+        const noState = document.getElementById('noRunnersState');
+        list.innerHTML = '';
+        if (allRunners.length === 0) {
+            noState.style.display = 'flex';
+            updateRunnerCount(0);
+            return;
         }
+        noState.style.display = 'none';
+        allRunners.forEach(runner => {
+            const strip = document.createElement('div');
+            strip.className = 'runner-strip';
+            strip.id = `runner-${runner.id}`;
+            strip.dataset.rating = runner.rating;
+            strip.dataset.completion = runner.completion_rate;
+            strip.dataset.status = runner.status;
+            strip.dataset.name = runner.name.toLowerCase();
+            strip.dataset.distance = runner.distance || '~';
+            strip.dataset.price = runner.price || '0';
 
-        function renderRunners() {
-            const list = document.getElementById('runnersList');
-            const noState = document.getElementById('noRunnersState');
-            list.innerHTML = '';
-            if (allRunners.length === 0) {
-                noState.style.display = 'flex';
-                updateRunnerCount(0);
-                return;
-            }
-            noState.style.display = 'none';
-            allRunners.forEach(runner => {
-                const strip = document.createElement('div');
-                strip.className = 'runner-strip';
-                strip.id = `runner-${runner.id}`;
-                strip.dataset.rating = runner.rating;
-                strip.dataset.completion = runner.completion_rate;
-                strip.dataset.status = runner.status;
-                strip.dataset.name = runner.name.toLowerCase();
-                strip.dataset.distance = runner.distance || '~';
-                strip.dataset.price = runner.price || '0';
+            const statusClass = runner.status === 'online' ? 'status-online' : 'status-offline';
+            const statusText = runner.status === 'online' ? 'Online' : 'Offline';
 
-                const statusClass = runner.status === 'online' ? 'status-online' : 'status-offline';
-                const statusText = runner.status === 'online' ? 'Online' : 'Offline';
+            strip.innerHTML = `
+                <!-- Profile picture (spans rows 1+2) -->
+                <div class="runner-avatar">
+                    ${runner.profileImage
+                        ? `<img src="${runner.profileImage}" alt="${runner.name}">`
+                        : `<div class="avatar-placeholder">${runner.avatar}</div>`
+                    }
+                    ${runner.is_online ? '<div class="online-indicator"></div>' : ''}
+                </div>
 
-                strip.innerHTML = `
-                    <!-- Profile picture (spans rows 1+2) -->
-                    <div class="runner-avatar">
-                        ${runner.profileImage
-                            ? `<img src="${runner.profileImage}" alt="${runner.name}">`
-                            : `<div class="avatar-placeholder">${runner.avatar}</div>`
-                        }
-                        ${runner.is_online ? '<div class="online-indicator"></div>' : ''}
+                <!-- Row 1: name, rating, online status -->
+                <div class="row1">
+                    <div class="name-rating">
+                        <div class="runner-name">${runner.name}</div>
+                        <div class="runner-rating"><i class="fas fa-star"></i> ${runner.rating.toFixed(1)}</div>
                     </div>
+                    <span class="online-badge ${statusClass}">${statusText}</span>
+                </div>
 
-                    <!-- Row 1: name, rating, online status -->
-                    <div class="row1">
-                        <div class="name-rating">
-                            <div class="runner-name">${runner.name}</div>
-                            <div class="runner-rating"><i class="fas fa-star"></i> ${runner.rating.toFixed(1)}</div>
-                        </div>
-                        <span class="online-badge ${statusClass}">${statusText}</span>
+                <!-- Row 2: distance, vehicle type, service fee (runner's bid) -->
+                <div class="row2">
+                    <div class="info-group">
+                        <span><i class="fas fa-road"></i> ${runner.distance ? runner.distance + ' km' : '~'}</span>
+                        <span><i class="fas fa-car"></i> ${runner.vehicle_type}</span>
                     </div>
-
-                    <!-- Row 2: distance, vehicle type, service fee (runner's bid) -->
-                    <div class="row2">
-                        <div class="info-group">
-                            <span><i class="fas fa-road"></i> ${runner.distance ? runner.distance + ' km' : '~'}</span>
-                            <span><i class="fas fa-car"></i> ${runner.vehicle_type}</span>
-                        </div>
-                        <div class="service-fee">
-                            ${runner.price ? `<strong>$${runner.price}</strong>` : '<span class="no-bid">No bid</span>'}
-                        </div>
+                    <div class="service-fee">
+                        ${runner.price ? `<strong>$${runner.price}</strong>` : '<span class="no-bid">No bid</span>'}
                     </div>
+                </div>
 
-                    <!-- Row 3: city, completion rate, select button -->
-                    <div class="row3">
-                        <div class="info-group">
-                            <span><i class="fas fa-map-marker-alt"></i> ${runner.city}</span>
-                            <span><i class="fas fa-check-circle"></i> ${runner.completion_rate}%</span>
-                        </div>
-                        <button class="btn select-btn" onclick="selectRunner(${runner.id}, '${runner.name}')" id="btn-${runner.id}">
-                            <i class="fas fa-check"></i> Select
-                        </button>
+                <!-- Row 3: city, completion rate, select button -->
+                <div class="row3">
+                    <div class="info-group">
+                        <span><i class="fas fa-map-marker-alt"></i> ${runner.city}</span>
+                        <span><i class="fas fa-check-circle"></i> ${runner.completion_rate}%</span>
                     </div>
-                `;
-                list.appendChild(strip);
-            });
-            updateRunnerCount(allRunners.length);
-        }
+                   <button class="btn select-btn" onclick="${runner.price ? `acceptRunnerOffer(${runner.id}, '${runner.name}', ${runner.price})` : ''}" id="btn-${runner.id}" ${runner.price ? '' : 'disabled'}>
+                   <i class="fas fa-check"></i> ${runner.price ? 'Accept' : 'Accept'}
+                   </button>
+                </div>
+            `;
+            list.appendChild(strip);
+        });
+        updateRunnerCount(allRunners.length);
+    }
 
-        function getVehicleIcon(vehicle) {
-            const icons = {'car':'fa-car','motorcycle':'fa-motorcycle','bicycle':'fa-bicycle','scooter':'fa-motorcycle','walking':'fa-walking','truck':'fa-truck'};
-            return icons[vehicle.toLowerCase()] || 'fa-vehicle';
-        }
+    // ========== NEW ACCEPT / CANCEL FLOW ==========
+    function acceptRunnerOffer(runnerId, runnerName, price) {
+        const btn = document.getElementById(`btn-${runnerId}`);
+        // Disable all runner buttons
+        document.querySelectorAll('.select-btn').forEach(b => {
+            b.disabled = true;
+        });
+        // Call backend to accept the existing offer
+        fetch('/api/accept_negotiation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ errand_id: currentErrandId, runner_id: runnerId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+    currentSelectedRunnerId = runnerId;
+    // Immediately show "Accepted"
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> Accepted';
+    btn.className = 'btn chat-btn';
+    addCancelButton(runnerId);
+    showNotification(`Offer accepted! ${runnerName} has been notified.`);
 
-        function selectRunner(runnerId, runnerName) {
-            if (selectedRunner && selectedRunner !== runnerId) resetRunner(selectedRunner);
-            selectedRunner = runnerId;
-            const strip = document.getElementById(`runner-${runnerId}`);
-            const btn = document.getElementById(`btn-${runnerId}`);
-            strip.classList.add('selected-runner');
-            btn.innerHTML = '<i class="fas fa-clock"></i> Sending request...';
-            btn.className = 'btn pending-btn';
-            btn.disabled = true;
-            disableOtherRunners(runnerId);
-            fetch('/negotiate', {
+    // After 3 seconds, change to "Proceed"
+    cancelTimeout = setTimeout(() => {
+        if (currentSelectedRunnerId !== runnerId) return;
+        btn.innerHTML = '<i class="fas fa-arrow-right"></i> Proceed';
+        btn.className = 'btn select-btn';
+        btn.disabled = false;
+        btn.onclick = function() {
+            // Client clicks Proceed → confirm and wait for runner
+            fetch('/api/confirm_proceed', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `errand_id=${currentErrandId}&runner_id=${runnerId}&offer_price=${errandPrice}`
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ errand_id: currentErrandId })
             })
             .then(r => r.json())
-            .then(data => {
-                if (data.message === 'Offer sent') {
-                    btn.innerHTML = '<i class="fas fa-clock"></i> Waiting for runner...';
-                    showNotification(`Request sent to ${runnerName}!`);
-                    pollForNegotiation(runnerId, runnerName);
-                } else {
-                    throw new Error(data.error || 'Failed');
-                }
+            .then(() => {
+                btn.innerHTML = '<i class="fas fa-clock"></i> Waiting for runner...';
+                btn.className = 'btn pending-btn';
+                btn.disabled = true;
+                removeCancelButton();
+                // Poll until both proceeded
+                const interval = setInterval(() => {
+                    fetch(`/api/check_proceed?errand_id=${currentErrandId}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.both_proceeded) {
+                                clearInterval(interval);
+                                window.location.href = `/chat/${data.chat_id}`;
+                            }
+                        })
+                        .catch(() => {});
+                }, 2000);
             })
-            .catch(err => {
-                showNotification('Failed to send request. Please try again.');
-                resetRunner(runnerId);
-                enableAllRunners();
-            });
-        }
+            .catch(() => alert('Network error'));
+        };
+        removeCancelButton();   // Cancel is no longer needed
+    }, 3000);
+} else {
+                alert('Failed to accept offer. Please try again.');
+                enableAllButtons();
+            }
+        })
+        .catch(() => {
+            alert('Network error');
+            enableAllButtons();
+        });
+    }
 
-        function resetRunner(runnerId) {
-            const strip = document.getElementById(`runner-${runnerId}`);
-            const btn = document.getElementById(`btn-${runnerId}`);
-            if (strip) strip.classList.remove('selected-runner');
-            if (btn) {
-                btn.innerHTML = '<i class="fas fa-check"></i> Select';
+    function addCancelButton(runnerId) {
+        const strip = document.getElementById(`runner-${runnerId}`);
+        const btn = document.getElementById(`btn-${runnerId}`);
+        // Create cancel button
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn secondary';
+        cancelBtn.id = `cancel-btn-${runnerId}`;
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+        cancelBtn.onclick = function() { cancelAcceptance(runnerId); };
+        // Insert after the select button (which is inside row3)
+        const row3 = strip.querySelector('.row3');
+        row3.appendChild(cancelBtn);
+    }
+
+    function removeCancelButton() {
+        const existing = document.querySelector('[id^="cancel-btn-"]');
+        if (existing) existing.remove();
+    }
+
+    function cancelAcceptance(runnerId) {
+        fetch('/api/cancel_acceptance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ errand_id: currentErrandId, runner_id: runnerId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Clear any pending timers
+                if (transitionTimer) clearTimeout(transitionTimer);
+                if (cancelTimeout) clearTimeout(cancelTimeout);
+                currentSelectedRunnerId = null;
+                // Re-enable all runner buttons
+                enableAllButtons();
+                removeCancelButton();
+                // Reset the selected runner's button back to "Accept"
+                const btn = document.getElementById(`btn-${runnerId}`);
+                btn.innerHTML = '<i class="fas fa-check"></i> Accept';
                 btn.className = 'btn select-btn';
                 btn.disabled = false;
+                btn.onclick = function() {
+                    const runner = allRunners.find(r => r.id === runnerId);
+                    if (runner && runner.price) {
+                        acceptRunnerOffer(runnerId, runner.name, runner.price);
+                    }
+                };
+                showNotification('Cancelled. You can select another runner.');
+            } else {
+                alert('Could not cancel. Try again.');
             }
-        }
+        })
+        .catch(() => alert('Network error'));
+    }
 
-        function disableOtherRunners(selectedId) {
-            allRunners.forEach(r => { if (r.id !== selectedId) { const btn = document.getElementById(`btn-${r.id}`); if (btn) btn.disabled = true; } });
-        }
-
-        function enableAllRunners() {
-            allRunners.forEach(r => { const btn = document.getElementById(`btn-${r.id}`); if (btn) btn.disabled = false; });
-        }
-
-        function pollForNegotiation(runnerId, runnerName) {
-            const interval = setInterval(() => {
-                fetch(`/api/check_negotiation?errand_id=${currentErrandId}&runner_id=${runnerId}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.runner_price) {
-                            clearInterval(interval);
-                            const runner = allRunners.find(r => r.id === runnerId);
-                            if (runner) runner.price = data.runner_price;
-                            const btn = document.getElementById(`btn-${runnerId}`);
-                            btn.innerHTML = `<i class="fas fa-check-circle"></i> Accept $${data.runner_price}`;
-                            btn.className = 'btn chat-btn';
-                            btn.disabled = false;
-                            btn.onclick = function() { acceptRunner(runnerId, runnerName, data.runner_price); };
-                            showNotification(`${runnerName} offered $${data.runner_price}. Click Accept to proceed.`);
-                        }
-                    }).catch(() => {});
-            }, 5000);
-        }
-
-        function acceptRunner(runnerId, runnerName, price) {
-            fetch('/api/accept_negotiation', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({errand_id: currentErrandId, runner_id: runnerId})
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(`${runnerName} accepted! Opening chat...`);
-                    navigateToChat(runnerId, runnerName, price);
-                } else alert(data.error || 'Acceptance failed');
-            }).catch(() => alert('Network error'));
-        }
-
-        function navigateToChat(runnerId, runnerName, price) {
-            window.location.href = `/Errandfinal.html?runner_id=${runnerId}&runner_name=${encodeURIComponent(runnerName)}&errand_id=${currentErrandId}&agreed_price=${price}`;
-        }
-
-        function showNotification(msg, dur=4000) {
-            const el = document.createElement('div');
-            el.style.cssText = `position:fixed;top:20px;right:20px;left:20px;background:#28a745;color:white;padding:15px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;text-align:center;animation:slideIn 0.3s ease;`;
-            el.textContent = msg;
-            document.body.appendChild(el);
-            setTimeout(() => { el.remove(); }, dur);
-        }
-
-        const notifStyle = document.createElement('style');
-        notifStyle.textContent = `@keyframes slideIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}`;
-        document.head.appendChild(notifStyle);
-
-        function sortRunners(criteria) {
-            const container = document.getElementById('runnersList');
-            const items = Array.from(container.querySelectorAll('.runner-strip'));
-            items.sort((a, b) => {
-                if (criteria === 'name') return a.dataset.name.localeCompare(b.dataset.name);
-                if (criteria === 'distance') return parseFloat(a.dataset.distance||999) - parseFloat(b.dataset.distance||999);
-                if (criteria === 'price') return parseFloat(a.dataset.price||999) - parseFloat(b.dataset.price||999);
-                const aVal = parseFloat(a.dataset[criteria]||0), bVal = parseFloat(b.dataset[criteria]||0);
-                return bVal - aVal;
-            });
-            items.forEach(item => container.appendChild(item));
-        }
-
-        function filterByStatus(status) {
-            document.querySelectorAll('.runner-strip').forEach(item => {
-                item.style.display = (status === 'all' || item.dataset.status === status) ? 'grid' : 'none';
-            });
-            updateRunnerCount(document.querySelectorAll('.runner-strip[style*="grid"], .runner-strip:not([style*="none"])').length);
-        }
-
-        function searchRunners(query) {
-            const lower = query.toLowerCase();
-            let count = 0;
-            document.querySelectorAll('.runner-strip').forEach(item => {
-                const name = item.querySelector('.runner-name')?.textContent.toLowerCase() || '';
-                const details = item.querySelector('.info-group')?.textContent.toLowerCase() || '';
-                const visible = name.includes(lower) || details.includes(lower);
-                item.style.display = visible ? 'grid' : 'none';
-                if (visible) count++;
-            });
-            updateRunnerCount(count);
-        }
-
-        function updateRunnerCount(count) {
-            document.getElementById('runnerCount').textContent = `${count} runners available`;
-        }
-
-        function refreshRunners() { window.location.reload(); }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            transformRunnersData();
-            renderRunners();
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.addEventListener('touchstart', function() { this.style.transform = 'scale(0.98)'; });
-                btn.addEventListener('touchend', function() { this.style.transform = 'scale(1)'; });
-            });
+    function enableAllButtons() {
+        // Re-enable all runner select buttons that were disabled
+        document.querySelectorAll('.select-btn').forEach(b => {
+            b.disabled = false;
         });
-    </script>
+    }
+
+    function showNotification(msg, dur=4000) {
+        const el = document.createElement('div');
+        el.style.cssText = `position:fixed;top:20px;right:20px;left:20px;background:#28a745;color:white;padding:15px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;text-align:center;animation:slideIn 0.3s ease;`;
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => { el.remove(); }, dur);
+    }
+
+    const notifStyle = document.createElement('style');
+    notifStyle.textContent = `@keyframes slideIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}`;
+    document.head.appendChild(notifStyle);
+
+    function sortRunners(criteria) {
+        const container = document.getElementById('runnersList');
+        const items = Array.from(container.querySelectorAll('.runner-strip'));
+        items.sort((a, b) => {
+            if (criteria === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+            if (criteria === 'distance') return parseFloat(a.dataset.distance||999) - parseFloat(b.dataset.distance||999);
+            if (criteria === 'price') return parseFloat(a.dataset.price||999) - parseFloat(b.dataset.price||999);
+            const aVal = parseFloat(a.dataset[criteria]||0), bVal = parseFloat(b.dataset[criteria]||0);
+            return bVal - aVal;
+        });
+        items.forEach(item => container.appendChild(item));
+    }
+
+    function filterByStatus(status) {
+        document.querySelectorAll('.runner-strip').forEach(item => {
+            item.style.display = (status === 'all' || item.dataset.status === status) ? 'grid' : 'none';
+        });
+        updateRunnerCount(document.querySelectorAll('.runner-strip[style*="grid"], .runner-strip:not([style*="none"])').length);
+    }
+
+    function searchRunners(query) {
+        const lower = query.toLowerCase();
+        let count = 0;
+        document.querySelectorAll('.runner-strip').forEach(item => {
+            const name = item.querySelector('.runner-name')?.textContent.toLowerCase() || '';
+            const details = item.querySelector('.info-group')?.textContent.toLowerCase() || '';
+            const visible = name.includes(lower) || details.includes(lower);
+            item.style.display = visible ? 'grid' : 'none';
+            if (visible) count++;
+        });
+        updateRunnerCount(count);
+    }
+
+    function updateRunnerCount(count) {
+        document.getElementById('runnerCount').textContent = `${count} runners available`;
+    }
+
+    function refreshRunners() { window.location.reload(); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        transformRunnersData();
+        renderRunners();
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('touchstart', function() { this.style.transform = 'scale(0.98)'; });
+            btn.addEventListener('touchend', function() { this.style.transform = 'scale(1)'; });
+        });
+    });
+</script>
 </body>
 </html>
