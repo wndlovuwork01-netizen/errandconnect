@@ -1220,10 +1220,10 @@ body {
             <!-- Quick Actions -->
             <section class="quick-actions-bar">
                 <div class="actions-container">
-                    <button class="action-btn primary" onclick="refreshErrands()">
-                        <i class="fas fa-sync"></i>
-                        Refresh List
-                    </button>
+                  <button class="action-btn primary" onclick="refreshWithSpinner()">
+                       <i class="fas fa-sync"></i>
+                       Refresh List
+                  </button>
                     <button class="action-btn" onclick="filterByDistance('near')">
                         <i class="fas fa-location-arrow"></i>
                         Nearby Errands
@@ -1281,11 +1281,25 @@ body {
     </div>
 
     <script>
+
+        function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+        return c;
+    });
+}
+
     // Mobile optimization code
     document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'auto';
         document.body.style.height = 'auto';
         document.body.style.minHeight = '100vh';
+
 
         const page = document.getElementById('available-errands-page');
         if (page) {
@@ -1339,9 +1353,9 @@ body {
             pickup: errand.pickup_location || 'Not specified',
             delivery: errand.delivery_location || 'Not specified',
             time: errand.delivery_time || 'Flexible',
-            description: errand.details || errand.type,
-            weight: errand.weight || 'Standard',
-            instructions: errand.details || 'No special instructions',
+            description: errand.description || errand.details || '',
+            weight: errand.weight || '',
+            instructions: errand.instructions || errand.special_instructions || '',
             client: client ? client.fullname : 'Anonymous',
             rating: "4.5/5",
             reviews: 15,
@@ -1546,56 +1560,92 @@ body {
                     </div>
 
                     <div class="details-grid">
-                        <div class="detail-column">
-                            <h4>Delivery Information</h4>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <div class="detail-content">
-                                    <strong>Pickup:</strong>
-                                    <span>${errand.pickup}</span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker"></i>
-                                <div class="detail-content">
-                                    <strong>Delivery:</strong>
-                                    <span>${errand.delivery}</span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-clock"></i>
-                                <div class="detail-content">
-                                    <strong>Estimated Time:</strong>
-                                    <span>${errand.time}</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="detail-column">
-                            <h4>Errand Details</h4>
-                            <div class="detail-item">
-                                <i class="fas fa-list-alt"></i>
-                                <div class="detail-content">
-                                    <strong>Description:</strong>
-                                    <span>${errand.description}</span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-weight"></i>
-                                <div class="detail-content">
-                                    <strong>Weight/Size:</strong>
-                                    <span>${errand.weight}</span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-comment"></i>
-                                <div class="detail-content">
-                                    <strong>Instructions:</strong>
-                                    <span>${errand.instructions}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Left column: Location & Time -->
+    <div class="detail-column">
+        <h4><i class="fas fa-location-dot"></i> Pickup & Delivery</h4>
+        <div class="detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div class="detail-content">
+                <strong>Pickup:</strong>
+                <span>${escapeHtml(errand.pickup)}</span>
+            </div>
+        </div>
+        <div class="detail-item">
+            <i class="fas fa-flag-checkered"></i>
+            <div class="detail-content">
+                <strong>Delivery:</strong>
+                <span>${escapeHtml(errand.delivery)}</span>
+            </div>
+        </div>
+        <div class="detail-item">
+            <i class="fas fa-clock"></i>
+            <div class="detail-content">
+                <strong>Time Window:</strong>
+                <span>${escapeHtml(errand.time)}</span>
+            </div>
+        </div>
+        ${errand.delivery_date ? `
+        <div class="detail-item">
+            <i class="fas fa-calendar-day"></i>
+            <div class="detail-content">
+                <strong>Delivery Date:</strong>
+                <span>${escapeHtml(errand.delivery_date)}</span>
+            </div>
+        </div>
+        ` : ''}
+    </div>
+
+    <!-- Right column: Item & Special notes -->
+      <!-- Right column: Errand Details (rows, show "None" if empty) -->
+<div class="detail-column">
+    <h4><i class="fas fa-clipboard-list"></i> Errand Details</h4>
+
+    <div class="detail-item">
+        <i class="fas fa-align-left"></i>
+        <div class="detail-content">
+            <strong>Description:</strong>
+            <span>${escapeHtml(errand.description) || 'None'}</span>
+        </div>
+    </div>
+
+    <div class="detail-item">
+        <i class="fas fa-comment-dots"></i>
+        <div class="detail-content">
+            <strong>Additional instructions:</strong>
+            <span>${escapeHtml(errand.instructions) || 'None'}</span>
+        </div>
+    </div>
+
+    ${errand.weight ? `
+    <div class="detail-item">
+        <i class="fas fa-weight-hanging"></i>
+        <div class="detail-content">
+            <strong>Weight / Size:</strong>
+            <span>${escapeHtml(errand.weight)}</span>
+        </div>
+    </div>
+    ` : `
+    <div class="detail-item">
+        <i class="fas fa-weight-hanging"></i>
+        <div class="detail-content">
+            <strong>Weight / Size:</strong>
+            <span>None</span>
+        </div>
+    </div>
+    `}
+</div>
+
+<!-- Client Information (with Contact field) -->
+<div class="errand-description">
+    <h4><i class="fas fa-user-check"></i> Client Information</h4>
+    <p>
+        <strong>Client:</strong> ${escapeHtml(errand.client)}<br>
+        <strong>Rating:</strong> ${errand.rating} (${errand.reviews} reviews)<br>
+        <strong>Contact:</strong> ${escapeHtml(errand.client_phone) || 'Not provided'}<br>
+        <strong>Status:</strong> <span style="color: var(--primary-color);">Verified User</span>
+    </p>
+</div>
 
                     <div class="price-proposal-section">
                         <h4>Submit Your Price</h4>
@@ -1854,29 +1904,47 @@ body {
     }
 
     function notInterested(errandId) {
-        if (confirm('Are you sure you\'re not interested in this errand? It will be removed from your available list.')) {
-            const index = errands.findIndex(errand => errand.id === errandId);
-            if (index !== -1) {
-                errands.splice(index, 1);
-                renderErrands();
-                updateStats();
-                alert('Errand removed from your available list.');
-            }
+    if (!confirm('Are you sure you\'re not interested in this errand? It will be removed from your list and your bid (if any) will be cancelled.')) return;
+
+    // Convert the runner ID from the Jinja template to integer
+    const runnerId = parseInt('{{ user.id if user else "0" }}', 10);
+
+    // First, delete the bid on the server
+    fetch('/api/delete_negotiation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            errand_id: errandId,
+            runner_id: runnerId
+        })
+    })
+    .then(r => r.json())
+    .finally(() => {
+        // Remove the errand from the local array, regardless of server response
+        const index = errands.findIndex(e => e.id === errandId);
+        if (index !== -1) {
+            errands.splice(index, 1);
+            renderErrands();
+            updateStats();
         }
-    }
+    });
+}
+
+function refreshWithSpinner() {
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    button.disabled = true;
+
+    // Small delay to let the spinner render, then reload with cache-buster
+    setTimeout(() => {
+        window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
+    }, 100);
+}
 
     function refreshErrands() {
-        const button = event.target.closest('button');
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-        button.disabled = true;
-        setTimeout(() => {
-            checkExpiredErrands();
-            button.innerHTML = originalHTML;
-            button.disabled = false;
-            alert('Errands list refreshed!');
-        }, 1500);
-    }
+    window.location.reload();
+}
 
     function updateLocation() {
         alert('Location update feature would open here.');
@@ -1897,6 +1965,244 @@ body {
             card.style.display = (type === 'high' && price >= 20) || type === 'all' ? 'block' : 'none';
         });
     }
+
+// Create a single errand card element (same HTML as in renderErrands)
+function createErrandCard(errand) {
+    const iconName = errandIcons[errand.type.toLowerCase()] || 'tasks';
+    const statusInfo = getStatusInfo(errand);
+
+    const card = document.createElement('div');
+    card.className = 'errand-card';
+    card.setAttribute('data-type', errand.type.toLowerCase());
+    card.setAttribute('data-distance', errand.distance);
+    card.setAttribute('data-price', errand.clientPrice);
+    card.setAttribute('data-date', errand.date);
+    card.setAttribute('data-status', errand.status);
+    card.setAttribute('data-errand-id', errand.id);
+
+    let buttonContent = '';
+    let buttonClass = 'btn-primary';
+    let buttonOnclick = `submitRunnerBid(${errand.id})`;
+
+    switch(errand.buttonState) {
+        case 'submit':
+            buttonContent = '<i class="fas fa-bolt"></i> Offer Your Price';
+            buttonClass = 'btn-primary';
+            buttonOnclick = `submitRunnerBid(${errand.id})`;
+            break;
+        case 'pending':
+            buttonContent = '<i class="fas fa-clock"></i> Waiting for client...';
+            buttonClass = 'btn-pending';
+            buttonOnclick = '';
+            break;
+        case 'accepted':
+            buttonContent = '<i class="fas fa-check-circle"></i> Accepted';
+            buttonClass = 'btn-accept-chat';
+            buttonOnclick = '';
+            break;
+        case 'proceed':
+            buttonContent = '<i class="fas fa-arrow-right"></i> Proceed';
+            buttonClass = 'btn-accept-chat';
+            buttonOnclick = `confirmProceed(${errand.id})`;
+            break;
+        case 'accept-chat':
+            buttonContent = '<i class="fas fa-check"></i> Accept & Chat';
+            buttonClass = 'btn-accept-chat';
+            buttonOnclick = `navigateToChat(${errand.id})`;
+            break;
+    }
+
+    card.innerHTML = `
+        <div class="compact-view">
+            <div class="card-main">
+                <div class="service-info">
+                    <div class="service-icon" data-errand-type="${errand.type.toLowerCase()}">
+                        <i class="fas fa-${iconName}"></i>
+                    </div>
+                    <div class="service-details">
+                        <h3>${errand.type}
+                            <span class="errand-status ${statusInfo.class}">
+                                <i class="fas fa-${statusInfo.icon}"></i>
+                                ${statusInfo.text}
+                            </span>
+                        </h3>
+                        <div class="meta-info">
+                            <span class="order-id">#EC-${errand.id}</span>
+                            <span class="post-date">
+                                <i class="fas fa-calendar-plus"></i>
+                                ${formatDate(errand.date)}
+                            </span>
+                            <span class="expiry-time">
+                                <i class="fas fa-clock"></i>
+                                ${getTimeRemaining(errand.expiresAt)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-stats">
+                    <div class="earnings">
+                        <span class="amount">$${errand.clientPrice.toFixed(2)}</span>
+                        <span class="label">Client's Price</span>
+                        ${errand.runnerPrice ? `
+                            <div class="runner-price-display">
+                                <span class="runner-price-label">Your Bid:</span>
+                                <span class="runner-price-value">$${errand.runnerPrice.toFixed(2)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="estimated-cost">
+                        <span class="estimated-value">$${errand.estimatedCost.toFixed(2)}</span>
+                        <span class="label">Est. Cost</span>
+                    </div>
+                    <div class="distance">
+                        <span class="distance-value">${(errand.distance || 0).toFixed(2)} km</span>
+                        <span class="label">Distance</span>
+                    </div>
+                </div>
+            </div>
+            <button class="view-details-btn" onclick="toggleErrandDetails(this)">
+                <i class="fas fa-chevron-down"></i>
+                View Details
+            </button>
+        </div>
+
+        <div class="expanded-view" style="display: none;">
+            <div class="hide-details-container">
+                <button class="hide-details-btn" onclick="toggleErrandDetails(this)">
+                    <i class="fas fa-chevron-up"></i>
+                    Hide Details
+                </button>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-column">
+                    <h4>Delivery Information</h4>
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="detail-content">
+                            <strong>Pickup:</strong>
+                            <span>${errand.pickup}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker"></i>
+                        <div class="detail-content">
+                            <strong>Delivery:</strong>
+                            <span>${errand.delivery}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <div class="detail-content">
+                            <strong>Estimated Time:</strong>
+                            <span>${errand.time}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-column">
+                    <h4>Errand Details</h4>
+                    <div class="detail-item">
+                        <i class="fas fa-list-alt"></i>
+                        <div class="detail-content">
+                            <strong>Description:</strong>
+                            <span>${errand.description}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-weight"></i>
+                        <div class="detail-content">
+                            <strong>Weight/Size:</strong>
+                            <span>${errand.weight}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-comment"></i>
+                        <div class="detail-content">
+                            <strong>Instructions:</strong>
+                            <span>${errand.instructions}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="price-proposal-section">
+                <h4>Submit Your Price</h4>
+                <div class="price-input-group">
+                    <label for="price-${errand.id}">Your Proposed Price:</label>
+                    <div style="display: flex; gap: 6px; align-items: center; flex: 1;">
+                        <span style="font-weight: bold; color: var(--primary-color);">$</span>
+                        <input type="number"
+                               id="price-${errand.id}"
+                               class="price-input"
+                               placeholder="Enter your price"
+                               min="1"
+                               step="0.01"
+                               value="${errand.runnerPrice || ''}"
+                               ${errand.buttonState !== 'submit' ? 'disabled' : ''}>
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 10px;">
+                    <i class="fas fa-info-circle"></i>
+                    Client's initial price: <strong>$${errand.clientPrice.toFixed(2)}</strong> •
+                    Estimated cost: <strong>$${errand.estimatedCost.toFixed(2)}</strong> •
+                    <span style="color: #757575;">
+                        <i class="fas fa-clock"></i> ${getTimeRemaining(errand.expiresAt)}
+                    </span>
+                </div>
+            </div>
+
+            <div class="errand-description">
+                <h4>Client Information</h4>
+                <p>
+                    <strong>Client:</strong> ${errand.client} •
+                    <strong>Rating:</strong> ${errand.rating} (${errand.reviews} reviews) •
+                    <strong>Status:</strong> <span style="color: var(--primary-color);">Verified User</span>
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="${buttonClass}" onclick="${buttonOnclick}" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
+                    ${buttonContent}
+                </button>
+                <button class="btn-outline" onclick="getDirections(${errand.id})">
+                    <i class="fas fa-directions"></i>
+                    Get Directions
+                </button>
+                <button class="btn-not-interested" onclick="notInterested(${errand.id})" ${errand.buttonState === 'pending' ? 'disabled' : ''}>
+                    <i class="fas fa-times"></i>
+                    Not Interested
+                </button>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+// Remove a card by errand id
+function removeErrandCard(id) {
+    const card = document.querySelector(`.errand-card[data-errand-id="${id}"]`);
+    if (card) card.remove();
+}
+
+function rebuildErrandsArrayFromDOM() {
+    const cards = document.querySelectorAll('.errand-card');
+    const newErrandsList = [];
+    cards.forEach(card => {
+        const id = parseInt(card.getAttribute('data-errand-id'), 10);
+        // Find existing errand object from old array (if any)
+        const oldErrand = errands.find(e => e.id === id);
+        if (oldErrand) {
+            newErrandsList.push(oldErrand);
+        } else {
+            // Should not happen because we only add cards with corresponding objects, but fallback
+            // You could extract data from DOM if needed, but for safety we skip.
+            console.warn('Card without errand object', id);
+        }
+    });
+    errands = newErrandsList;
+}
+
 </script>
 </body>
 </html>

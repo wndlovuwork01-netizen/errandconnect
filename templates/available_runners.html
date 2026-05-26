@@ -628,6 +628,7 @@
             status: isOnline ? 'online' : 'offline',
             is_online: isOnline,
             price: bidPrice,
+            bidTimestamp: null,
             distance: null
         };
     });
@@ -708,6 +709,88 @@
         updateRunnerCount(allRunners.length);
     }
 
+// ========== AUTO‑FETCH BIDS EVERY 2 SECONDS ==========
+
+async function pollBids() {
+    try {
+        const res = await fetch(`/api/errand_bids/${currentErrandId}`);
+        const data = await res.json();
+        if (!data.bids) return;
+
+        const container = document.getElementById('runnersList');
+        if (!container) return;
+
+        allRunners.forEach(runner => {
+            // Remember the price before update
+            const oldPrice = runner.price;
+            const oldTimestamp = runner.bidTimestamp;
+
+            const bid = data.bids.find(b => b.runner_id === runner.id);
+
+            if (bid) {
+                runner.price = bid.offer_price;
+                runner.bidTimestamp = bid.updated_at ? new Date(bid.updated_at).getTime() : Date.now();
+            } else {
+                runner.price = null;
+                runner.bidTimestamp = null;
+            }
+
+            const strip = document.getElementById(`runner-${runner.id}`);
+            if (!strip) return;
+
+            // Update the displayed price
+            const feeDiv = strip.querySelector('.service-fee');
+            if (feeDiv) {
+                if (runner.price) {
+                    feeDiv.innerHTML = `<strong>$${runner.price}</strong>`;
+                } else {
+                    feeDiv.innerHTML = '<span class="no-bid">No bid</span>';
+                }
+            }
+
+            const btn = strip.querySelector('.select-btn');
+
+            // ----- BID APPEARED (new) -----
+            if (runner.price && !oldPrice) {
+                // Enable Accept button if it's in its initial "Accept" state
+                if (btn && btn.disabled && btn.innerHTML.includes('Accept') &&
+                    !btn.innerHTML.includes('Accepted') && !btn.innerHTML.includes('Proceed')) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Accept';
+                    btn.onclick = function() {
+                        acceptRunnerOffer(runner.id, runner.name, runner.price);
+                    };
+                }
+                // Move the card to the top
+                if (container.firstChild !== strip) {
+                    container.insertBefore(strip, container.firstChild);
+                }
+            }
+
+            // ----- BID DISAPPEARED (runner not interested) -----
+            if (!runner.price && oldPrice) {
+                // Disable the Accept button and reset it
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Accept';
+                    btn.onclick = '';
+                }
+                // Move the card to the end of the list
+                container.appendChild(strip);
+            }
+
+            // ----- BID PRICE CHANGED (updated) -----
+            if (runner.price && oldPrice && oldTimestamp !== runner.bidTimestamp) {
+                // Move to top to reflect recency
+                if (container.firstChild !== strip) {
+                    container.insertBefore(strip, container.firstChild);
+                }
+            }
+        });
+    } catch (err) {
+        console.error('Bid polling error:', err);
+    }
+}
     // ========== NEW ACCEPT / CANCEL FLOW ==========
     function acceptRunnerOffer(runnerId, runnerName, price) {
         const btn = document.getElementById(`btn-${runnerId}`);
@@ -893,6 +976,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         transformRunnersData();
         renderRunners();
+        setInterval(pollBids, 2000);
         document.querySelectorAll('.btn').forEach(btn => {
             btn.addEventListener('touchstart', function() { this.style.transform = 'scale(0.98)'; });
             btn.addEventListener('touchend', function() { this.style.transform = 'scale(1)'; });

@@ -1161,6 +1161,53 @@ def cancel_acceptance():
             return jsonify({"error": "Not in accepted state"}), 400
     return jsonify({"error": "No negotiation found"}), 404
 
+@app.route("/api/delete_negotiation", methods=["POST"])
+@login_required
+def delete_negotiation():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    runner_id = data.get("runner_id")
+    if not errand_id or not runner_id:
+        return jsonify({"error": "Missing data"}), 400
+
+    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=runner_id).first()
+    if neg:
+        if neg.status == "accepted":
+            return jsonify({"error": "Cannot cancel an accepted offer"}), 400
+        db.session.delete(neg)
+        db.session.commit()
+        return jsonify({"success": True})
+    return jsonify({"error": "No negotiation found"}), 404
+
+@app.route("/api/errand_bids/<int:errand_id>")
+@login_required
+def errand_bids(errand_id):
+    """Return all runner bids for an errand, sorted most recent first."""
+    errand = Errand.query.get_or_404(errand_id)
+    user = current_user()
+    # Only the errand owner (client) or any runner can view bids
+    if user.id != errand.client_id and user.user_type != "runner":
+        return jsonify({"error": "Unauthorized"}), 403
+
+    # Fetch negotiations ordered by most recent first
+    # Use updated_at if available, else id (which increases with time)
+    if hasattr(Negotiation, 'updated_at'):
+        negs = Negotiation.query.filter_by(errand_id=errand_id)\
+            .order_by(Negotiation.updated_at.desc()).all()
+    else:
+        negs = Negotiation.query.filter_by(errand_id=errand_id)\
+            .order_by(Negotiation.id.desc()).all()
+
+    bids = []
+    for neg in negs:
+        bids.append({
+            "runner_id": neg.runner_id,
+            "offer_price": neg.offer_price,
+            "status": neg.status,
+            "updated_at": neg.updated_at.isoformat() if hasattr(neg, 'updated_at') and neg.updated_at else None
+        })
+    return jsonify({"bids": bids})
+
 # ============================================================================
 # BACKGROUND CLEANUP THREAD
 # ============================================================================
