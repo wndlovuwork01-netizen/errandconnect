@@ -59,11 +59,25 @@ class RunnerProfile(db.Model):
     preferred_routes = db.Column(db.String(500))
     license_photo = db.Column(db.String(300))
     id_photo = db.Column(db.String(300))
+    id_front = db.Column(db.String(300))
+    id_back = db.Column(db.String(300))
+    license_front = db.Column(db.String(300))
+    license_back = db.Column(db.String(300))
+    selfie_left = db.Column(db.String(300))
+    selfie_right = db.Column(db.String(300))
+    selfie_straight = db.Column(db.String(300))
+    selfie_with_id = db.Column(db.String(300))
+    vehicle_front = db.Column(db.String(300))
+    vehicle_back = db.Column(db.String(300))
+    vehicle_left = db.Column(db.String(300))
+    vehicle_right = db.Column(db.String(300))
+    car_registration = db.Column(db.String(300))
     is_verified = db.Column(db.Boolean, default=False)
     is_available = db.Column(db.Boolean, default=False)
     current_latitude = db.Column(db.Float)
     current_longitude = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = db.relationship("User", back_populates="runner_profile")
 
@@ -148,7 +162,7 @@ class Chat(db.Model):
     errand = db.relationship("Errand", back_populates="chats")
     client = db.relationship("User", foreign_keys=[client_id], backref="client_chats")
     runner = db.relationship("User", foreign_keys=[runner_id], backref="runner_chats")
-    messages = db.relationship("Message", back_populates="chat", cascade="all, delete-orphan")
+    messages = db.relationship("Message", back_populates="chat", cascade="all, delete-orphan", order_by="Message.created_at.asc()")
 
     def __repr__(self):
         return f"<Chat errand={self.errand_id}>"
@@ -187,6 +201,8 @@ class ActiveErrand(db.Model):
     end_time = db.Column(db.DateTime, nullable=True)
     estimated_duration = db.Column(db.String(100))
     status = db.Column(db.String(50))
+    stage_progress = db.Column(db.Text, default='[]')
+    runner_marked_complete = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     errand = db.relationship("Errand", back_populates="active_errand")

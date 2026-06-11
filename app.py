@@ -46,6 +46,23 @@ def current_user():
         return None
     return User.query.get(uid)
 
+def validate_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def validate_phone(phone):
+    """
+    Validate Zimbabwe mobile numbers.
+    Must be 9 digits (after removing non-digits) starting with 71, 73, 77, or 78.
+    """
+    digits_only = re.sub(r'\D', '', phone)
+    if len(digits_only) != 9:
+        return False
+    valid_prefixes = ['71', '73', '77', '78']
+    if digits_only[:2] not in valid_prefixes:
+        return False
+    return digits_only.isdigit()
+
 def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371
     dlat = radians(lat2 - lat1)
@@ -264,25 +281,6 @@ def signin():
         flash("Invalid credentials","danger")
     return render_template("signin.html")
 
-@app.route("/signup", methods=["GET","POST"])
-def signup():
-    if request.method=="POST":
-        fn=request.form.get("first_name"); ln=request.form.get("last_name")
-        fullname=request.form.get("fullname"); username=request.form.get("username")
-        email=request.form.get("email"); phone_number=request.form.get("phone_number")
-        country_code=request.form.get("country_code"); password=request.form.get("password")
-        user_type=request.form.get("user_type","client")
-        if not fullname:
-            name_parts=[p for p in [fn,ln] if p]
-            fullname=" ".join(name_parts) if name_parts else username
-        if country_code and phone_number: phone=f"{country_code}{phone_number}"
-        else: phone=phone_number
-        if User.query.filter((User.email==email)|(User.username==username)).first():
-            flash("User already exists","warning"); return redirect(url_for('signup'))
-        user=User(fullname=fullname,username=username,email=email,phone=phone,password_hash=generate_password_hash(password),user_type=user_type)
-        db.session.add(user); db.session.commit()
-        flash("Account created!","success"); return redirect(url_for('signin'))
-    return render_template("signup.html")
 
 @app.route("/logout")
 def logout():
@@ -828,26 +826,6 @@ def create_errand():
 
     return render_template("create_errand.html", user=user)
 
-@app.route("/runner_register", methods=["GET","POST"])
-@login_required
-def runner_register():
-    user=current_user()
-    if request.method=="POST":
-        pf=request.files.get("profile_photo")
-        fn=None
-        if pf and secure_filename(pf.filename):
-            fn=secure_filename(pf.filename)
-            pf.save(os.path.join(app.config['UPLOAD_FOLDER'],fn))
-        full_name=request.form.get("full_name"); phone_number=request.form.get("phone_number")
-        if full_name: user.fullname=full_name
-        if phone_number: user.phone=phone_number
-        profile=RunnerProfile(user_id=user.id,full_name=full_name,phone_number=phone_number,national_id_number=request.form.get("national_id_number"),vehicle_type=request.form.get("vehicle_type"),vehicle_registration_number=request.form.get("vehicle_registration_number"),profile_photo=fn,city=request.form.get("city","Harare"),is_available=True)
-        db.session.add(profile)
-        user.user_type="runner"; db.session.commit()
-        flash("Registration successful!","success"); return redirect(url_for('runnerhome'))
-    return render_template("runner_register.html",user=user)
-
-
 @app.route("/available_runners/<int:errand_id>")
 @login_required
 def available_runners(errand_id):
@@ -968,6 +946,11 @@ def chat_detail(chat_id):
         agreed_price = neg.offer_price
 
     support_chat = get_or_create_support_chat(user)
+    
+    if user.user_type == "client":
+        ucs = Chat.query.filter_by(client_id=user.id).order_by(Chat.created_at.desc()).all()
+    else:
+        ucs = Chat.query.filter_by(runner_id=user.id).order_by(Chat.created_at.desc()).all()
 
     messages = Message.query.filter_by(chat_id=chat.id).order_by(Message.created_at.asc()).all()
     active_errand = ActiveErrand.query.filter_by(errand_id=chat.errand_id).first()
@@ -975,7 +958,7 @@ def chat_detail(chat_id):
     return render_template("chats.html",
                            user=user,
                            active_chat=chat,
-                           chats=None,  # we'll fetch chats via JS or in the template if needed
+                           chats=ucs,
                            messages=messages,
                            active_errand=active_errand,
                            agreed_price=agreed_price,
@@ -1408,6 +1391,393 @@ def check_proceed():
             "status": neg.status,
             "my_side": "client" if user.id == errand.client_id else "runner"
         })
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        email = request.form.get("email", "").strip()
+        phone_number = request.form.get("phone_number", "").strip()
+        date_of_birth = request.form.get("date_of_birth", "").strip()
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        user_type = request.form.get("user_type", "client")
+        terms_agreed = request.form.get("terms_agreed")
+        country_code = request.form.get("country_code", "+263")
+        # id_number = request.form.get("id_number", "").strip()  # REMOVED – column doesn't exist
+        country = request.form.get("country", "").strip()
+        city = request.form.get("city", "").strip()
+
+        # Validate all required fields
+        if not all([first_name, last_name, email, phone_number, date_of_birth, username, password, confirm_password]):
+            flash("Please fill all required fields", "danger")
+            return redirect(url_for("signup"))
+
+        if user_type == "client" and not terms_agreed:
+            flash("You must agree to the Terms of Service and Privacy Policy", "danger")
+            return redirect(url_for("signup"))
+
+        if not validate_email(email):
+            flash("Please enter a valid email address", "danger")
+            return redirect(url_for("signup"))
+
+        if not validate_phone(phone_number):
+            flash("Please enter a valid Zimbabwe mobile number (9 digits starting with 71,73,77,78)", "danger")
+            return redirect(url_for("signup"))
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters", "danger")
+            return redirect(url_for("signup"))
+
+        if password != confirm_password:
+            flash("Passwords do not match", "danger")
+            return redirect(url_for("signup"))
+
+        # Validate date of birth
+        try:
+            dob = datetime.strptime(date_of_birth, "%Y-%m-%d")
+            age = datetime.now().year - dob.year - ((datetime.now().month, datetime.now().day) < (dob.month, dob.day))
+            if age < 13:
+                flash("You must be at least 13 years old to register", "danger")
+                return redirect(url_for("signup"))
+        except ValueError:
+            flash("Please enter a valid date of birth", "danger")
+            return redirect(url_for("signup"))
+
+        # Check if username or email already exists
+        if User.query.filter((User.username == username) | (User.email == email)).first():
+            flash("Username or email already exists", "danger")
+            return redirect(url_for("signup"))
+
+        # REMOVED: duplicate ID number check (id_number column missing)
+        # if id_number and User.query.filter_by(id_number=id_number).first():
+        #     flash("ID number already registered", "danger")
+        #     return redirect(url_for("signup"))
+
+        # Create new user – only include columns that exist in your User model
+        full_phone = f"{country_code}{phone_number}"
+        fullname = f"{first_name} {last_name}"
+
+        user = User(
+            fullname=fullname,
+            email=email,
+            phone=full_phone,
+            username=username,
+            password_hash=generate_password_hash(password),
+            user_type=user_type
+        )
+        # Optional fields – comment out if your model doesn't have them
+        # user.first_name = first_name
+        # user.last_name = last_name
+        # user.date_of_birth = date_of_birth
+        # user.country = country
+        # user.city = city
+
+        db.session.add(user)
+        db.session.commit()
+
+        if user_type == "runner":
+            session["user_id"] = user.id
+            session["user_type"] = user.user_type
+            session["temp_signup_data"] = {
+                "user_id": user.id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "phone": full_phone,
+                "date_of_birth": date_of_birth,
+                "username": username,
+                "user_type": user_type
+            }
+            flash("Registration successful! Please complete your runner profile.", "success")
+            return redirect(url_for("runner_signup"))
+        else:
+            session["user_id"] = user.id
+            session["user_type"] = user.user_type
+            flash("Registration successful! Welcome to ErrandGo.", "success")
+            return redirect(url_for("home_page"))
+
+    return render_template("signup.html")
+
+
+@app.route('/signup/customer')
+def signup_customer():
+    return render_template('signup.html', user_type='client')
+
+@app.route('/runner_register', methods=['GET'])
+def runner_register():
+    return render_template('runner_register.html')
+
+@app.route('/runner_register', methods=['POST'])
+def runner_register_post():
+    from datetime import datetime
+
+    # Collect data
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    date_of_birth = request.form.get('date_of_birth', '').strip()
+    country = request.form.get('country', '').strip()
+    city = request.form.get('city', '').strip()
+    phone_number = request.form.get('phone_number', '').strip()
+    country_code = request.form.get('country_code', '+263').strip()
+    email = request.form.get('email', '').strip()
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
+    confirm_password = request.form.get('confirm_password', '')
+
+    errors = []
+
+    # Required fields
+    if not all([first_name, last_name, date_of_birth, country, city, phone_number, email, username, password, confirm_password]):
+        errors.append("All fields are required.")
+
+    # Email validation
+    if not validate_email(email):
+        errors.append("Please enter a valid email address.")
+    # Phone validation
+    if not validate_phone(phone_number):
+        errors.append("Invalid Zimbabwe mobile number. Must be 9 digits starting with 71,73,77,78.")
+    # Password
+    if len(password) < 6:
+        errors.append("Password must be at least 6 characters.")
+    if password != confirm_password:
+        errors.append("Passwords do not match.")
+    # Check existing user
+    existing = User.query.filter((User.username == username) | (User.email == email)).first()
+    if existing:
+        errors.append("Username or email already exists.")
+    # Age validation
+    try:
+        dob = datetime.strptime(date_of_birth, '%Y-%m-%d')
+        age = (datetime.now().date() - dob.date()).days // 365
+        if age < 18:
+            errors.append("You must be at least 18 years old to become a runner.")
+    except ValueError:
+        errors.append("Invalid date of birth format.")
+
+    if errors:
+        for error in errors:
+            flash(error, 'danger')
+        return render_template('runner_register.html', form_data=request.form), 400
+
+    # Corrected User creation – only use existing columns
+    full_phone = f"{country_code}{phone_number}"
+    fullname = f"{first_name} {last_name}".strip()
+    new_user = User(
+        fullname=fullname,
+        email=email,
+        phone=full_phone,
+        username=username,
+        password_hash=generate_password_hash(password),
+        user_type='runner'
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    session['user_id'] = new_user.id
+    session['user_type'] = 'runner'
+
+    flash("Runner account created successfully! Please complete your profile.", "success")
+    return redirect(url_for('runner_signup'))
+
+
+@app.route("/runner_signup", methods=["GET", "POST"])
+@login_required
+def runner_signup():
+    user = current_user()
+
+    if not user or user.user_type != "runner":
+        flash("You must be registered as a runner first.", "danger")
+        return redirect(url_for("signup"))
+
+    existing_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    if existing_profile:
+        flash("You already have a runner profile.", "info")
+        return redirect(url_for("runnerhome"))
+
+    if request.method == "POST":
+        # Collect runner profile fields
+        address = request.form.get("address", "").strip()
+        city = request.form.get("city", "").strip()
+        id_number = request.form.get("id_number", "").strip()
+        license_number = request.form.get("license_number", "").strip()
+        vehicle_type = request.form.get("vehicle_type", "").strip()
+        preferred_routes = request.form.get("preferred_routes", "").strip()
+
+        if not all([address, city, id_number, vehicle_type]):
+            flash("Please fill all required fields.", "danger")
+            return redirect(url_for("runner_signup"))
+
+        # Helper to save uploaded files
+        def save_file(file_field, prefix):
+            if file_field and file_field.filename:
+                filename = secure_filename(f"{user.id}_{prefix}_{file_field.filename}")
+                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                file_field.save(file_path)
+                return filename
+            return None
+
+        # Save uploaded photos
+        id_front = save_file(request.files.get("id_front"), "id_front")
+        id_back = save_file(request.files.get("id_back"), "id_back")
+        license_front = save_file(request.files.get("license_front"), "license_front")
+        license_back = save_file(request.files.get("license_back"), "license_back")
+        selfie_left = save_file(request.files.get("selfie_left"), "selfie_left")
+        selfie_right = save_file(request.files.get("selfie_right"), "selfie_right")
+        selfie_straight = save_file(request.files.get("selfie_straight"), "selfie_straight")
+        selfie_with_id = save_file(request.files.get("selfie_with_id"), "selfie_with_id")
+        vehicle_front = save_file(request.files.get("vehicle_front"), "vehicle_front")
+        vehicle_back = save_file(request.files.get("vehicle_back"), "vehicle_back")
+        vehicle_left = save_file(request.files.get("vehicle_left"), "vehicle_left")
+        vehicle_right = save_file(request.files.get("vehicle_right"), "vehicle_right")
+        car_registration = save_file(request.files.get("car_registration"), "car_registration")
+
+        # Basic photo validation
+        if not all([id_front, id_back, license_front, license_back]):
+            flash("Please upload both sides of your National ID and Driver's License.", "danger")
+            return redirect(url_for("runner_signup"))
+
+        if not all([selfie_left, selfie_right, selfie_straight, selfie_with_id]):
+            flash("Please take all four required selfies.", "danger")
+            return redirect(url_for("runner_signup"))
+
+        if vehicle_type in ["car", "motorcycle"]:
+            if not all([vehicle_front, vehicle_back, vehicle_left, vehicle_right, car_registration]):
+                flash("Please upload all required vehicle photos and registration.", "danger")
+                return redirect(url_for("runner_signup"))
+
+        # Create RunnerProfile
+        profile = RunnerProfile(
+            user_id=user.id,
+            address=address,
+            id_number=id_number,
+            vehicle_type=vehicle_type,
+            city=city,
+            preferred_routes=preferred_routes,
+            license_photo=license_front,
+            id_photo=id_front,
+            id_front=id_front,
+            id_back=id_back,
+            license_front=license_front,
+            license_back=license_back,
+            selfie_left=selfie_left,
+            selfie_right=selfie_right,
+            selfie_straight=selfie_straight,
+            selfie_with_id=selfie_with_id,
+            vehicle_front=vehicle_front,
+            vehicle_back=vehicle_back,
+            vehicle_left=vehicle_left,
+            vehicle_right=vehicle_right,
+            car_registration=car_registration
+        )
+        db.session.add(profile)
+        db.session.commit()
+
+        flash("Runner profile completed! You can now accept errands.", "success")
+        return redirect(url_for("runnerhome"))
+
+    return render_template("runner_signup.html", user=user)
+
+
+@app.route('/roles.html')
+def roles():
+    return render_template('roles.html')
+
+@app.route('/usertype')
+def usertype():
+    # Render a page where user chooses "Client" or "Runner"
+    return render_template('usertype.html')  # or redirect to signup
+
+@app.route("/api/runner/available_count")
+@login_required
+def api_runner_available_count():
+    user = current_user()
+    if user.user_type != "runner":
+        return jsonify({"count": 0, "error": "Not a runner"}), 403
+
+    rp = RunnerProfile.query.filter_by(user_id=user.id).first()
+    runner_city = rp.city if rp else ""
+    now_utc = datetime.utcnow()
+
+    if runner_city:
+        count = Errand.query.filter(
+            Errand.status.in_(['available', 'pending']),
+            Errand.expires_at > now_utc,
+            Errand.pickup_location.ilike(f"%{runner_city}%")
+        ).count()
+    else:
+        count = Errand.query.filter(
+            Errand.status.in_(['available', 'pending']),
+            Errand.expires_at > now_utc
+        ).count()
+
+    return jsonify({"count": count})
+
+@app.route("/api/update_stage_progress", methods=["POST"])
+@login_required
+def update_stage_progress():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    stages = data.get("stages")
+    if not errand_id or stages is None:
+        return jsonify({"error": "Missing data"}), 400
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        return jsonify({"error": "Not found"}), 404
+    ae.stage_progress = json.dumps(stages)
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route("/api/get_stage_progress", methods=["GET"])
+@login_required
+def get_stage_progress():
+    errand_id = request.args.get("errand_id")
+    if not errand_id:
+        return jsonify({"stages": [False]*6, "runner_marked_complete": False})
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        return jsonify({"stages": [False]*6, "runner_marked_complete": False})
+    try:
+        stages = json.loads(ae.stage_progress) if ae.stage_progress else [False]*6
+    except:
+        stages = [False]*6
+    return jsonify({
+        "stages": stages, 
+        "runner_marked_complete": ae.runner_marked_complete or False
+    })
+
+@app.route("/api/runner_mark_complete", methods=["POST"])
+@login_required
+def runner_mark_complete():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    if not errand_id:
+        return jsonify({"error": "Missing errand_id"}), 400
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        return jsonify({"error": "Not found"}), 404
+    ae.runner_marked_complete = True
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route("/api/complete_errand", methods=["POST"])
+@login_required
+def complete_errand():
+    data = request.get_json()
+    errand_id = data.get("errand_id")
+    if not errand_id:
+        return jsonify({"error": "Missing errand_id"}), 400
+    errand = Errand.query.get(errand_id)
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not errand or not ae:
+        return jsonify({"error": "Not found"}), 404
+    errand.status = "completed"
+    ae.status = "completed"
+    ae.end_time = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"success": True})
 
 if __name__ == "__main__":
     cleanup_thread = threading.Thread(target=cleanup_expired_errands, daemon=True)

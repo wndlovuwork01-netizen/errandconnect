@@ -35,25 +35,25 @@
 
                     <!-- Runner Stats -->
                     <div class="hero-stats">
-                        <div class="stat-card">
-                            <div class="stat-icon client">
-                                <i class="fas fa-tasks"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3>Active Tasks</h3>
-                                <p>{{ pending_count or 0 }}</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon completed">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3>Completed</h3>
-                                <p>{{ completed_count or 0 }}</p>
-                            </div>
-                        </div>
-                    </div>
+    <div class="stat-card">
+        <div class="stat-icon client">
+            <i class="fas fa-list-alt"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Available Errands</h3>
+            <p id="availableErrandsCount">...</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon completed">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Completed</h3>
+            <p>{{ completed_count or 0 }}</p>
+        </div>
+    </div>
+</div>
                 </div>
                 <div class="hero-image">
                     <!-- Removed floating cards for mobile -->
@@ -105,8 +105,8 @@
                         <p class="service-note">Browse available errands to accept</p>
                         <div class="action-stats">
                             <div class="stat-badge large">
-                                <span class="stat-number">{{ available_errands|length if available_errands else 0 }}</span>
-                                <span class="stat-label">Available</span>
+                               <span class="stat-number" id="quickAvailableCount">...</span>
+                               <span class="stat-label">Available</span>
                             </div>
                         </div>
                         <a href="{{ url_for('runneravailable_errands') }}" class="action-link">
@@ -189,6 +189,10 @@
             <i class="fas fa-chart-bar"></i>
             <span>Dashboard</span>
         </a>
+        <a href="{{ url_for('chats') }}" class="nav-item">
+    <i class="fas fa-comment-dots"></i>
+    <span>Chats</span>
+</a>
         <a href="{{ url_for('runneravailable_errands') }}" class="nav-item">
             <i class="fas fa-list"></i>
             <span>Errands</span>
@@ -1088,5 +1092,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the page
     console.log('Runner mobile homepage initialized');
 });
+
+    // Dynamic available errands count (updates every 10 seconds)
+function fetchAvailableCount() {
+    fetch('/api/runner/available_count')
+        .then(response => response.json())
+        .then(data => {
+            if (data.count !== undefined) {
+                // Update top stat card
+                const topCount = document.getElementById('availableErrandsCount');
+                if (topCount) topCount.textContent = data.count;
+
+                // Update Quick Actions card
+                const quickCount = document.getElementById('quickAvailableCount');
+                if (quickCount) quickCount.textContent = data.count;
+            }
+        })
+        .catch(err => console.warn('Fetch error:', err));
+}
+
+// Start polling every 10 seconds
+setInterval(fetchAvailableCount, 3000);
+fetchAvailableCount();  // Immediate first update
 </script>
 {% endblock %}

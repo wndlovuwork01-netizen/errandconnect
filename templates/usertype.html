@@ -1,0 +1,558 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="usertype-container">
+    <!-- Header -->
+    <div class="usertype-header">
+        <h1>ErrandGo</h1>
+        <p>Choose your path</p>
+    </div>
+
+    <!-- Role Cards -->
+    <div class="roles-container">
+        <!-- Customer Card -->
+        <div class="role-card customer" onclick="selectRole('customer')">
+            <div class="card-gradient"></div>
+            <div class="card-content">
+                <div class="card-header">
+                    <span class="badge">MOST POPULAR</span>
+                    <div class="card-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                <h2>Customer</h2>
+                <p class="role-desc">I need errands done</p>
+
+                <div class="benefits-list">
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Post tasks & errands</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Get quotes from providers</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Track in real-time</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Secure payments</span>
+                    </div>
+                </div>
+
+                <button class="select-btn">
+                    <span>Continue as Customer</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Service Provider Card -->
+        <div class="role-card provider" onclick="selectRole('provider')">
+            <div class="card-gradient"></div>
+            <div class="card-content">
+                <div class="card-header">
+                    <span class="badge">EARN MONEY</span>
+                    <div class="card-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                </div>
+                <h2>Service Provider</h2>
+                <p class="role-desc">I complete errands</p>
+
+                <div class="benefits-list">
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Browse available tasks</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Set your own schedule</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Competitive earnings</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Weekly payouts</span>
+                    </div>
+                </div>
+
+                <button class="select-btn">
+                    <span>Continue as Provider</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Compare -->
+    <div class="quick-compare">
+        <div class="compare-header">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Quick Compare</span>
+        </div>
+
+        <div class="compare-grid">
+            <div class="compare-item">
+                <i class="fas fa-shopping-cart"></i>
+                <div>
+                    <strong>Customer</strong>
+                    <span>Post tasks, get help</span>
+                </div>
+            </div>
+            <div class="compare-arrow">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="compare-item">
+                <i class="fas fa-running"></i>
+                <div>
+                    <strong>Provider</strong>
+                    <span>Complete tasks, earn</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Link -->
+<div class="help-link">
+    <i class="fas fa-question-circle"></i>
+    <span>Not sure?</span>
+    <a href="roles.html">Learn more about roles</a>
+</div>
+
+<style>
+:root {
+    --primary-green: #4CAF50;
+    --primary-light: #81C784;
+    --primary-dark: #2E7D32;
+    --primary-soft: #E8F5E9;
+    --gold: #FFD700;
+    --gold-light: #fff0b3;
+    --white: #ffffff;
+    --surface: #ffffff;
+    --background: #f0faf0;
+    --text-primary: #0a1a3a;
+    --text-secondary: #2a3f6b;
+    --text-light: #4a5f8c;
+    --success-green: #10b981;
+    --shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+/* Mobile-first container */
+.usertype-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1rem 1rem 2rem;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Header */
+.usertype-header {
+    text-align: left;
+    padding: 0.5rem 0;
+}
+
+.usertype-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.usertype-header h1 span {
+    color: var(--gold);
+}
+
+.usertype-header p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Roles Container */
+.roles-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Role Card */
+.role-card {
+    background: var(--surface);
+    border-radius: 28px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.role-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(76, 175, 80, 0.25);
+}
+
+.card-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+}
+
+.customer .card-gradient {
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-light));
+}
+
+.provider .card-gradient {
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary-green));
+}
+
+.card-content {
+    padding: 1.5rem 1.25rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 30px;
+    letter-spacing: 0.5px;
+}
+
+.customer .badge {
+    background: var(--gold);
+    color: var(--primary-dark);
+}
+
+.provider .badge {
+    background: var(--primary-green);
+    color: white;
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--primary-soft);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-icon i {
+    font-size: 1.5rem;
+    color: var(--primary-green);
+}
+
+.provider .card-icon i {
+    color: var(--primary-dark);
+}
+
+.role-card h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.role-desc {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.25rem;
+}
+
+/* Benefits List */
+.benefits-list {
+    margin-bottom: 1.5rem;
+}
+
+.benefit {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.benefit i {
+    color: var(--success-green);
+    font-size: 0.9rem;
+}
+
+/* Select Button */
+.select-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--primary-green);
+    border: 2px solid var(--primary-green);
+}
+
+.customer .select-btn:hover {
+    background: var(--primary-green);
+    color: white;
+}
+
+.provider .select-btn {
+    background: var(--primary-dark);
+    color: white;
+    border: 2px solid var(--primary-dark);
+}
+
+.provider .select-btn:hover {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+/* Quick Compare */
+.quick-compare {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.compare-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.compare-header i {
+    color: var(--primary-green);
+}
+
+.compare-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compare-item {
+    background: var(--background);
+    padding: 0.75rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.compare-item i {
+    font-size: 1.2rem;
+    color: var(--primary-green);
+}
+
+.compare-item div {
+    display: flex;
+    flex-direction: column;
+}
+
+.compare-item strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.compare-item span {
+    font-size: 0.7rem;
+    color: var(--text-light);
+}
+
+.compare-arrow {
+    color: var(--primary-light);
+    font-size: 1rem;
+}
+
+/* Help Link */
+.help-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: 0.5rem;
+}
+
+.help-link i {
+    color: var(--primary-green);
+}
+
+.help-link a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px dashed var(--primary-green);
+}
+
+.help-link a:hover {
+    color: var(--primary-dark);
+}
+
+/* Loading State */
+.role-card.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.role-card {
+    animation: slideUp 0.4s ease-out;
+}
+
+.role-card:last-child {
+    animation-delay: 0.1s;
+}
+
+/* Responsive adjustments */
+@media (min-width: 481px) {
+    .usertype-container {
+        max-width: 600px;
+    }
+
+    .roles-container {
+        flex-direction: row;
+    }
+
+    .role-card {
+        flex: 1;
+    }
+}
+
+@media (max-width: 380px) {
+    .usertype-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .card-content {
+        padding: 1.25rem 1rem;
+    }
+
+    .role-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .benefit {
+        font-size: 0.85rem;
+    }
+
+    .select-btn {
+        padding: 0.875rem;
+        font-size: 0.95rem;
+    }
+}
+</style>
+
+<script>
+function selectRole(role) {
+    // Add loading state
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.classList.add('loading');
+    });
+
+    // Route to the appropriate sign-up page
+    if (role === 'customer') {
+        window.location.href = '/signup/customer';
+    } else if (role === 'provider') {
+        window.location.href = '/runner_register';
+    }
+}
+
+// Clear loading state on page load (fixes back button freeze)
+function resetCards() {
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.classList.remove('loading');
+        card.style.pointerEvents = ''; // ensure any inline styles are cleared
+    });
+}
+
+// Run when page first loads
+document.addEventListener('DOMContentLoaded', resetCards);
+
+// Also run when page is restored from bfcache (back/forward)
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted || performance.getEntriesByType('navigation')[0].type === 'back_forward') {
+        resetCards();
+    }
+});
+
+// Quick keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === '1' || e.key === 'c' || e.key === 'C') {
+        selectRole('customer');
+    } else if (e.key === '2' || e.key === 'p' || e.key === 'P' || e.key === 'r' || e.key === 'R') {
+        selectRole('provider');
+    }
+});
+
+// Touch feedback
+document.querySelectorAll('.role-card').forEach(card => {
+    card.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.98)';
+    }, { passive: true });
+    card.addEventListener('touchend', function() {
+        this.style.transform = '';
+    });
+    card.addEventListener('touchcancel', function() {
+        this.style.transform = '';
+    });
+});
+</script>
+{% endblock %}

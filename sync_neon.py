@@ -84,12 +84,18 @@ def sync():
             
             missing_active_cols = {
                 'estimated_duration': sqlalchemy.String(100),
+                'runner_marked_complete': sqlalchemy.Boolean(),
             }
             
             for col_name, col_type in missing_active_cols.items():
                 if col_name not in active_errand_columns:
                     print(f"Adding missing column {col_name} to active_errands...")
-                    type_str = f"VARCHAR({col_type.length})"
+                    type_str = ""
+                    if isinstance(col_type, sqlalchemy.String):
+                        type_str = f"VARCHAR({col_type.length})"
+                    elif isinstance(col_type, sqlalchemy.Boolean):
+                        type_str = "BOOLEAN"
+                    
                     try:
                         db.session.execute(sqlalchemy.text(f'ALTER TABLE active_errands ADD COLUMN {col_name} {type_str}'))
                     except Exception as e:

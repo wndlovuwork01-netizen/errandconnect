@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ErrandGo · Customer & Runner roles explained</title>
+  <!-- Google Fonts + Font Awesome 6 (clean icons) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #f8fafc 0%, #eef2f9 100%);
+      color: #0a2540;
+      line-height: 1.4;
+    }
+
+    /* main container — clean, airy */
+    .errandgo-roles {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* header section (brand + description) */
+    .roles-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10, 37, 64, 0.06);
+      backdrop-filter: blur(2px);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #1e6f5c;
+      margin-bottom: 1rem;
+    }
+
+    .brand-badge i {
+      font-size: 0.9rem;
+    }
+
+    .roles-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #0F2B3D, #1C6E5F);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .roles-header .tagline {
+      font-size: 1.1rem;
+      color: #2c5a6e;
+      max-width: 550px;
+      margin: 0 auto;
+      font-weight: 450;
+    }
+
+    /* two-column layout (grid) — fresh, asymmetric but balanced */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0 2rem;
+    }
+
+    /* role card base (completely different from previous gradient design) */
+    .role-card {
+      background: #ffffff;
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s ease;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .role-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 28px 40px -16px rgba(0, 32, 32, 0.12);
+    }
+
+    /* role-specific header colors */
+    .customer-header {
+      background: linear-gradient(115deg, #EFF6FF 0%, #E0F2FE 100%);
+      border-bottom: 1px solid #bdd9ff;
+    }
+
+    .provider-header {
+      background: linear-gradient(115deg, #FFF6E8 0%, #FFEFDB 100%);
+      border-bottom: 1px solid #ffe0b5;
+    }
+
+    .role-title-section {
+      padding: 1.8rem 1.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .role-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.02);
+    }
+
+    .customer-header .role-icon i {
+      color: #2c7da0;
+    }
+
+    .provider-header .role-icon i {
+      color: #d97a1c;
+    }
+
+    .role-title-text h2 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.2rem;
+    }
+
+    .role-sub {
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: rgba(0,0,0,0.03);
+      display: inline-block;
+      padding: 0.2rem 0.8rem;
+      border-radius: 30px;
+    }
+
+    .customer-header .role-sub {
+      background: #cfe3ff;
+      color: #145c8c;
+    }
+
+    .provider-header .role-sub {
+      background: #ffe2bf;
+      color: #b45f1b;
+    }
+
+    /* role journey (the detailed steps) */
+    .role-journey {
+      padding: 1.6rem 1.8rem 2rem;
+      flex: 1;
+    }
+
+    .journey-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 1rem;
+      color: #4d6a7c;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 0.9rem;
+      align-items: flex-start;
+    }
+
+    .step-marker {
+      min-width: 28px;
+      height: 28px;
+      background: #f0f4f9;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1a5c6e;
+    }
+
+    .customer-steps .step-marker {
+      background: #e1f0fa;
+      color: #1f6e8c;
+    }
+
+    .provider-steps .step-marker {
+      background: #fff0e0;
+      color: #c96216;
+    }
+
+    .step-text {
+      flex: 1;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #1b3b4f;
+      line-height: 1.4;
+    }
+
+    .step-detail {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: #587b8c;
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* badge for special features (rating, bids, etc) */
+    .feature-badge {
+      background: #eef2fa;
+      border-radius: 18px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-left: 0.5rem;
+      color: #2c6280;
+    }
+
+    /* action button (distinct from previous design) */
+    .role-action {
+      margin: 0 1.8rem 1.8rem 1.8rem;
+    }
+
+    .select-role-btn {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid;
+      border-radius: 60px;
+      padding: 0.85rem 0;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: 0.2s;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .customer-btn {
+      border-color: #2c7da0;
+      color: #2c7da0;
+      background: #ffffff;
+    }
+
+    .customer-btn:hover {
+      background: #2c7da0;
+      color: white;
+      border-color: #2c7da0;
+    }
+
+    .provider-btn {
+      border-color: #e68a2e;
+      color: #cf711f;
+      background: #ffffff;
+    }
+
+    .provider-btn:hover {
+      background: #e68a2e;
+      color: white;
+      border-color: #e68a2e;
+    }
+
+    /* quick reference summary (divider - fresh style) */
+    .insight-card {
+      background: #ffffffdd;
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 1.3rem 1.8rem;
+      margin-top: 1rem;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 8px 20px -8px rgba(0,0,0,0.05);
+    }
+
+    .insight-title {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #134e6f;
+    }
+
+    .comparison-flow {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .flow-item {
+      flex: 1;
+      background: #fafcff;
+      border-radius: 1.2rem;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .flow-item i {
+      font-size: 1.4rem;
+      margin-bottom: 0.3rem;
+      display: inline-block;
+    }
+
+    .flow-item span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2c6280;
+    }
+
+    .flow-arrow {
+      font-size: 1.2rem;
+      color: #9bb7c9;
+    }
+
+    /* help footer */
+    .help-footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      font-size: 0.85rem;
+      color: #4b6e82;
+    }
+
+    .help-footer a {
+      color: #1c6e5f;
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px dashed #81b5a8;
+    }
+
+    /* responsive */
+    @media (max-width: 880px) {
+      .roles-grid {
+        gap: 1.5rem;
+      }
+      .role-title-section {
+        padding: 1.2rem 1.2rem 0.8rem;
+      }
+      .role-journey {
+        padding: 1rem 1.2rem 1.5rem;
+      }
+      .role-action {
+        margin: 0 1.2rem 1.2rem 1.2rem;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .roles-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .errandgo-roles {
+        padding: 1.5rem 1rem 2rem;
+      }
+      .roles-header h1 {
+        font-size: 2rem;
+      }
+    }
+
+    /* subtle animation */
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(12px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .role-card {
+      animation: fadeSlide 0.4s ease-out;
+    }
+    .insight-card {
+      animation: fadeSlide 0.45s ease-out;
+    }
+  </style>
+</head>
+<body>
+<div class="errandgo-roles">
+  <!-- header with fresh identity -->
+  <div class="roles-header">
+    <div class="brand-badge">
+      <i class="fas fa-running"></i> <span>Errand ecosystem</span>
+    </div>
+    <h1>ErrandGo · Role compass</h1>
+    <div class="tagline">
+      Choose your path: <strong>request help</strong> as a client, or <strong>earn</strong> as a trusted runner
+    </div>
+  </div>
+
+  <!-- Two primary roles: Customer / Client  +  Service Provider / Runner (detailed workflows) -->
+  <div class="roles-grid">
+
+    <!-- CUSTOMER / CLIENT card -->
+    <div class="role-card">
+      <div class="customer-header">
+        <div class="role-title-section">
+          <div class="role-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="role-title-text">
+            <h2>Customer</h2>
+            <div class="role-sub"><i class="fas fa-hand-peace"></i> Client · Errand requester</div>
+          </div>
+        </div>
+      </div>
+      <div class="role-journey">
+        <div class="journey-title">
+          <i class="fas fa-map-signs"></i> Full client journey
+        </div>
+        <div class="steps-list customer-steps">
+          <div class="step-item">
+            <div class="step-marker">1</div>
+            <div class="step-text">
+              Request an errand
+              <span class="step-detail">Add pickup/delivery details, description, urgency</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">2</div>
+            <div class="step-text">
+              Set your offer / budget
+              <span class="step-detail">Define what you're willing to pay for the task</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">3</div>
+            <div class="step-text">
+              Scout & select runner
+              <span class="step-detail">Compare by <strong>⭐ rating, distance, bid amount, completion rate & profile</strong></span>
+              <span class="feature-badge"><i class="fas fa-chart-line"></i> Smart match</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">4</div>
+            <div class="step-text">
+              Direct chat & instructions
+              <span class="step-detail">Share extra details, ask questions, coordinate pickup</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">5</div>
+            <div class="step-text">
+              Track & confirm completion
+              <span class="step-detail">Wait for runner updates → mark “errand completed” together</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">6</div>
+            <div class="step-text">
+              Rate the runner & leave feedback
+              <span class="step-detail">Help the community with honest reviews</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="role-action">
+        <button class="select-role-btn customer-btn" data-role="customer">
+          <span>Continue as customer</span> <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SERVICE PROVIDER / RUNNER card -->
+    <div class="role-card">
+      <div class="provider-header">
+        <div class="role-title-section">
+          <div class="role-icon">
+            <i class="fas fa-person-walking-arrow-right"></i>
+          </div>
+          <div class="role-title-text">
+            <h2>Service Provider</h2>
+            <div class="role-sub"><i class="fas fa-bolt"></i> Runner · Task solver</div>
+          </div>
+        </div>
+      </div>
+      <div class="role-journey">
+        <div class="journey-title">
+          <i class="fas fa-road"></i> Runner workflow
+        </div>
+        <div class="steps-list provider-steps">
+          <div class="step-item">
+            <div class="step-marker">1</div>
+            <div class="step-text">
+              Browse incoming errands
+              <span class="step-detail">Real-time feed — new requests appear near you</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">2</div>
+            <div class="step-text">
+              Choose to act or skip
+              <span class="step-detail"><strong>Select errand</strong> if interested · <strong>Delete / dismiss</strong> if not a fit</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">3</div>
+            <div class="step-text">
+              Place your bid
+              <span class="step-detail">Based on offer fee, travel distance, errand complexity & your availability</span>
+              <span class="feature-badge"><i class="fas fa-gavel"></i> Competitive bidding</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">4</div>
+            <div class="step-text">
+              Chat with the customer
+              <span class="step-detail">Get refined instructions, ask relevant questions, align expectations</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">5</div>
+            <div class="step-text">
+              Execute & confirm completion
+              <span class="step-detail">Mark errand as “done” → client also confirms to release payment</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-marker">6</div>
+            <div class="step-text">
+              Build your reputation
+              <span class="step-detail">Receive rating, increase completion rate & earn trust badges</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="role-action">
+        <button class="select-role-btn provider-btn" data-role="provider">
+          <span>Continue as runner</span> <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- compact insight: compare core interaction (fresh design, not a table) -->
+  <div class="insight-card">
+    <div class="insight-title">
+      <i class="fas fa-handshake"></i> How customers & runners connect
+      <span style="font-size: 0.7rem; background: #eef2fa; padding: 0.15rem 0.6rem; border-radius: 50px;">mutual confirmation flow</span>
+    </div>
+    <div class="comparison-flow">
+      <div class="flow-item">
+        <i class="fas fa-file-signature"></i>
+        <span>Customer posts errand + offer</span>
+      </div>
+      <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+      <div class="flow-item">
+        <i class="fas fa-hand-holding-usd"></i>
+        <span>Runner sees & places bid</span>
+      </div>
+      <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+      <div class="flow-item">
+        <i class="fas fa-comments"></i>
+        <span>Chat · refine details</span>
+      </div>
+      <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+      <div class="flow-item">
+        <i class="fas fa-check-double"></i>
+        <span>Both confirm completion → rating</span>
+      </div>
+    </div>
+    <div style="margin-top: 0.9rem; font-size: 0.75rem; color: #3e6b7e; text-align: center; border-top: 1px solid #e9eff5; padding-top: 0.7rem;">
+      <i class="fas fa-info-circle"></i> Selection based on rating, distance, bid, completion rate & profile — full transparency.
+    </div>
+  </div>
+
+  <!-- help & navigation note (not identical to previous reference) -->
+  <div class="help-footer">
+    <i class="fas fa-arrows-spin"></i> Not sure which side fits you?
+    <a href="#" onclick="return false;">Read detailed comparison guide</a> — or pick a role above.
+    <div style="margin-top: 6px; font-size: 0.7rem;">⚡ keyboard: [C] for Customer · [P] for Provider / Runner</div>
+  </div>
+</div>
+
+<script>
+  // Role selection: forward to respective signup / registration pages (consistent with existing backend routes)
+  function goToRole(roleType) {
+    // Add short loading indicator to prevent multiple clicks
+    const btns = document.querySelectorAll('.select-role-btn');
+    btns.forEach(btn => {
+      btn.style.opacity = '0.65';
+      btn.style.pointerEvents = 'none';
+    });
+
+    // route mapping: customer -> /signup/customer , provider -> /runner_register (as per reference)
+    let targetUrl = '';
+    if (roleType === 'customer') {
+      targetUrl = '/signup/customer';
+    } else if (roleType === 'provider') {
+      targetUrl = '/runner_register';
+    } else {
+      targetUrl = '/';
+    }
+
+    // slight delay for visual feedback
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, 80);
+  }
+
+  // attach event listeners to both buttons
+  document.querySelectorAll('.select-role-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const role = btn.getAttribute('data-role');
+      if (role === 'customer') {
+        goToRole('customer');
+      } else if (role === 'provider') {
+        goToRole('provider');
+      }
+    });
+  });
+
+  // optional keyboard shortcuts: C for Customer, P / R for Runner
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (key === 'c') {
+      e.preventDefault();
+      goToRole('customer');
+    } else if (key === 'p' || key === 'r') {
+      e.preventDefault();
+      goToRole('provider');
+    }
+  });
+
+  // small hover + touch feedback
+  const allCards = document.querySelectorAll('.role-card');
+  allCards.forEach(card => {
+    card.addEventListener('touchstart', () => {
+      card.style.transform = 'scale(0.99)';
+    });
+    card.addEventListener('touchend', () => {
+      card.style.transform = '';
+    });
+    card.addEventListener('touchcancel', () => {
+      card.style.transform = '';
+    });
+  });
+</script>
+</body>
+</html>

@@ -1343,6 +1343,62 @@ body {
         const errand = errandData.errand;
         const client = errandData.client;
 
+        // Parse the details JSON string safely
+        let parsedDetails = {};
+        if (errand.details) {
+            try {
+                parsedDetails = JSON.parse(errand.details);
+            } catch(e) {
+                parsedDetails = {};
+            }
+        }
+
+        // Flatten nested arrays (Flask stores form values as arrays e.g. {"pickup_location": ["123 Main St"]})
+        function flatVal(val) {
+            if (Array.isArray(val)) return val[0] || '';
+            return val || '';
+        }
+
+        // Build a human-readable description from parsedDetails fields
+        function buildDescription(pd) {
+            const skip = ['pickup_location','pickup_address','delivery_location','delivery_address',
+                          'dropoff_location','dropoff_address','pickup_lat','pickup_lon','dropoff_lat',
+                          'dropoff_lon','distance_km','estimated_fee','service_price','vehicle_type',
+                          'delivery_time','specific_time','estimated_weight','weight'];
+            const lines = [];
+            for (const [key, val] of Object.entries(pd)) {
+                if (skip.includes(key)) continue;
+                const label = key.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+                const value = Array.isArray(val) ? val.join(', ') : String(val);
+                if (value && value !== 'undefined' && value !== 'null') {
+                    lines.push(`${label}: ${value}`);
+                }
+            }
+            return lines.join(' | ') || 'No additional details';
+        }
+
+        const description = buildDescription(parsedDetails);
+
+        // Extract instructions/special notes
+        const instructions = flatVal(parsedDetails.instructions)
+            || flatVal(parsedDetails.special_instructions)
+            || flatVal(parsedDetails.notes)
+            || flatVal(parsedDetails.additional_notes)
+            || 'None';
+
+        // Extract weight
+        const weight = errand.weight
+            || flatVal(parsedDetails.estimated_weight)
+            || flatVal(parsedDetails.weight)
+            || flatVal(parsedDetails.weight_kg)
+            || '';
+
+        // Extract delivery time
+        const deliveryTime = errand.delivery_time
+            || flatVal(parsedDetails.delivery_time)
+            || flatVal(parsedDetails.specific_time)
+            || 'Flexible';
+
         return {
             id: errand.id,
             type: errand.type,
@@ -1350,13 +1406,14 @@ body {
             estimatedCost: errand.calculated_minimum_fee ?? (errand.price_estimate || 0),
             distance: errand.distance_km ?? 0,
             date: errand.created_at ? new Date(errand.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            pickup: errand.pickup_location || 'Not specified',
-            delivery: errand.delivery_location || 'Not specified',
-            time: errand.delivery_time || 'Flexible',
-            description: errand.description || errand.details || '',
-            weight: errand.weight || '',
-            instructions: errand.instructions || errand.special_instructions || '',
+            pickup: errand.pickup_location || flatVal(parsedDetails.pickup_location) || flatVal(parsedDetails.store_location) || 'Not specified',
+            delivery: errand.delivery_location || flatVal(parsedDetails.delivery_location) || flatVal(parsedDetails.delivery_address) || 'Not specified',
+            time: deliveryTime,
+            description: description,
+            weight: weight,
+            instructions: instructions,
             client: client ? client.fullname : 'Anonymous',
+            client_phone: client ? client.phone : null,
             rating: "4.5/5",
             reviews: 15,
             status: "available",
@@ -1364,7 +1421,7 @@ body {
             bids: [],
             buttonState: "submit",
             acceptedAt: null,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 min
+            expiresAt: errand.expires_at ? new Date(errand.expires_at.endsWith('Z') ? errand.expires_at : errand.expires_at + 'Z') : new Date(Date.now() + 5 * 60 * 1000)
         };
     });
 
