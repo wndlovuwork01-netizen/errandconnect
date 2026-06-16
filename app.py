@@ -14,28 +14,6 @@ import threading
 import time
 from datetime import datetime
 import pytz
-import requests
-
-def send_whatsapp_message(to_number, message_body):
-    url = f"https://graph.facebook.com/v18.0/{app.config['WHATSAPP_PHONE_NUMBER_ID']}/messages"
-    headers = {
-        "Authorization": f"Bearer {app.config['WHATSAPP_ACCESS_TOKEN']}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "messaging_product": "whatsapp",
-        "to": to_number,
-        "type": "text",
-        "text": {"body": message_body}
-    }
-    try:
-        resp = requests.post(url, headers=headers, json=data, timeout=10)
-        if resp.status_code == 200:
-            print("WhatsApp message sent")
-        else:
-            print(f"WhatsApp API error: {resp.status_code} {resp.text}")
-    except Exception as e:
-        print(f"Failed to send WhatsApp message: {e}")
 
 CAT = pytz.timezone('Africa/Harare')
 

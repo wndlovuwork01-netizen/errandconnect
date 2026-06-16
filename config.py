@@ -10,7 +10,5 @@ class Config:
         "pool_pre_ping": True,
         "pool_recycle": 300
     }
-    WHATSAPP_PHONE_NUMBER_ID = 'your-phone-number-id'  # e.g. '123456789'
-    WHATSAPP_ACCESS_TOKEN = 'your-permanent-access-token'
-    ADMIN_WHATSAPP_NUMBER = '263771112812'  # your number in international format (no +)
+
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
