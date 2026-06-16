@@ -20,7 +20,7 @@
         <section class="balance-card">
             <div class="balance-info">
                 <span class="balance-label">Available Errands</span>
-                <span class="balance-value">{{ remaining_errands if remaining_errands else 5 }}</span>
+                <span class="balance-value">{{ remaining_errands }}</span>
             </div>
             <div class="balance-footer">
                 <span>New accounts start with 5 free errands</span>
@@ -37,11 +37,11 @@
                 </li>
                 <li>
                     <i class="fas fa-user-friends"></i>
-                    <span><strong>Refer a friend</strong> who completes 5 errands → both get 2 free errands</span>
+                    <span><strong>Refer 5 friends</strong> who completes 5 errands, each → get 5 free errands</span>
                 </li>
                 <li>
                     <i class="fas fa-calendar-check"></i>
-                    <span><strong>Weekly streak:</strong> complete 10 errands in a week → 1 free errand</span>
+                    <span><strong>Weekly streak:</strong> complete 10 errands in a week → 3 free errands</span>
                 </li>
             </ul>
         </section>
@@ -142,37 +142,6 @@
                     <i class="fas fa-shopping-cart"></i> Buy Now
                 </button>
             </div>
-        </section>
-
-        <!-- Payout Method Section -->
-        <section class="info-section">
-            <h3 class="section-title">🏦 Payout Details</h3>
-            <form id="payout-form" class="info-form" method="POST" action="{{ url_for('runnerbank') }}">
-                <div class="form-group">
-                    <label for="payout_method" class="form-label">Payout Method</label>
-                    <select id="payout_method" name="payout_method" class="form-input">
-                        <option value="bank" {% if user.payout_method == 'bank' %}selected{% endif %}>Bank Account</option>
-                        <option value="mobile_money" {% if user.payout_method == 'mobile_money' %}selected{% endif %}>Mobile Money</option>
-                        <option value="paypal" {% if user.payout_method == 'paypal' %}selected{% endif %}>PayPal</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="account_number" class="form-label">Account Number / Phone</label>
-                    <input type="text" id="account_number" name="account_number" class="form-input"
-                           value="{{ user.account_number if user else '' }}" required>
-                </div>
-                <div class="form-group">
-                    <label for="account_name" class="form-label">Account Name</label>
-                    <input type="text" id="account_name" name="account_name" class="form-input"
-                           value="{{ user.account_name if user else '' }}" required>
-                </div>
-                <div class="form-group">
-                    <label for="bank_name" class="form-label">Bank / Provider Name</label>
-                    <input type="text" id="bank_name" name="bank_name" class="form-input"
-                           value="{{ user.bank_name if user else '' }}">
-                </div>
-                <button type="submit" class="btn-primary">Save Payout Info</button>
-            </form>
         </section>
     </main>
 
@@ -558,7 +527,7 @@
             detailCard.style.display = method === 'visa' ? 'block' : 'none';
         });
 
-        // Confirm purchase simulation
+        // Confirm purchase
         confirmBtn.addEventListener('click', function() {
             if (!selectedPackage) {
                 alert('Please select a package.');
@@ -591,21 +560,38 @@
             confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             confirmBtn.disabled = true;
 
-            setTimeout(() => {
-                document.getElementById('modal-message').innerHTML = `You purchased <strong>${errands} Errands</strong> for <strong>$${price}</strong>. Your balance has been updated.`;
-                document.getElementById('success-modal').style.display = 'flex';
-                const balanceSpan = document.querySelector('.balance-value');
-                if (balanceSpan) {
-                    balanceSpan.textContent = parseInt(balanceSpan.textContent) + parseInt(errands);
+            fetch('/api/purchase_errands', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ errands: errands })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('modal-message').innerHTML = `You purchased <strong>${errands} Errands</strong> for <strong>$${price}</strong>. Your balance has been updated.`;
+                    document.getElementById('success-modal').style.display = 'flex';
+                    const balanceSpan = document.querySelector('.balance-value');
+                    if (balanceSpan) {
+                        balanceSpan.textContent = data.remaining;
+                    }
+                    // Reset form
+                    selectedPackage.classList.remove('selected');
+                    selectedDiv.style.display = 'none';
+                    paymentMethod.value = '';
+                    paymentDetails.style.display = 'none';
+                    confirmBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buy Now';
+                    confirmBtn.disabled = false;
+                } else {
+                    alert(data.error || 'Purchase failed. Please try again.');
+                    confirmBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buy Now';
+                    confirmBtn.disabled = false;
                 }
-                // Reset form
-                selectedPackage.classList.remove('selected');
-                selectedDiv.style.display = 'none';
-                paymentMethod.value = '';
-                paymentDetails.style.display = 'none';
+            })
+            .catch(() => {
+                alert('Network error. Please try again.');
                 confirmBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buy Now';
                 confirmBtn.disabled = false;
-            }, 1000);
+            });
         });
 
         // Save notification threshold

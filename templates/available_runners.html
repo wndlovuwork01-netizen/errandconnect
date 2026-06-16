@@ -307,7 +307,7 @@
             border-radius: 50%;
         }
 
-        /* Row 1: Name, Rating, Online Status */
+        /* Row 1: Name, Rating, Status */
         .row1 {
             grid-column: 2 / 4;
             display: flex;
@@ -339,11 +339,6 @@
             white-space: nowrap;
             background: #E8F5E9;
             color: #2E7D32;
-        }
-
-        .online-badge.status-offline {
-            background: #FFEBEE;
-            color: #C62828;
         }
 
         /* Row 2: Distance, Vehicle Type, Bid/Service Fee */
@@ -379,7 +374,7 @@
             font-style: italic;
         }
 
-        /* Row 3: City, Completion Rate, Select Button */
+        /* Row 3: Completion Rate, Select Button */
         .row3 {
             grid-column: 1 / 4;
             display: flex;
@@ -554,9 +549,9 @@
                 <div class="filter-group">
                     <label>Sort by:</label>
                     <select class="filter-select" onchange="sortRunners(this.value)" id="sortSelect">
+                        <option value="distance" selected>Distance (closest first)</option>
                         <option value="rating">Highest Rating</option>
                         <option value="completion">Completion Rate</option>
-                        <option value="distance">Distance</option>
                         <option value="name">Name A-Z</option>
                     </select>
                 </div>
@@ -564,7 +559,7 @@
                     <label>Status:</label>
                     <select class="filter-select" onchange="filterByStatus(this.value)" id="statusSelect">
                         <option value="all">All Runners</option>
-                        <option value="online">Online Only</option>
+                        <option value="available">Available Only</option>
                     </select>
                 </div>
             </div>
@@ -597,391 +592,343 @@
     </div>
 
     <script>
-   const realRunners = {{ runners | tojson | safe }};
-   const runnerBids = {{ runner_bids | tojson | safe }};
-   const currentErrandId = {{ errand.id if errand else 0 }};
-   const errandPrice = {{ errand.price_estimate if errand else 15 }};
-   let currentSelectedRunnerId = null;
-   let allRunners = [];
-   let cancelTimeout = null;
-   let transitionTimer = null;
+        const realRunners = {{ runners | tojson | safe }};
+        const runnerBids = {{ runner_bids | tojson | safe }};
+        const currentErrandId = {{ errand.id if errand else 0 }};
+        const errandPrice = {{ errand.price_estimate if errand else 15 }};
+        let currentSelectedRunnerId = null;
+        let allRunners = [];
+        let cancelTimeout = null;
+        let transitionTimer = null;
 
-   function transformRunnersData() {
-    allRunners = realRunners.map(r => {
-        const profile = r.runner_profile;
-        const user = r.user;
-        const completed = r.completed_errands || 0;
-        const total = r.total_errands || 1;
-        const completionRate = Math.round((completed / total) * 100);
-        const avgRating = r.avg_rating || 4.5;
-        const isOnline = profile.is_available;
-        const bidPrice = runnerBids[String(user.id)] || null;
-        return {
-            id: user.id,
-            name: user.fullname,
-            avatar: user.fullname.charAt(0).toUpperCase(),
-            profileImage: profile.profile_photo ? profile.profile_image_url || profile.profile_photo : null,
-            rating: avgRating,
-            vehicle_type: profile.vehicle_type || 'Various',
-            city: profile.city || 'Not specified',
-            completion_rate: completionRate,
-            status: isOnline ? 'online' : 'offline',
-            is_online: isOnline,
-            price: bidPrice,
-            bidTimestamp: null,
-            distance: null
-        };
-    });
-    allRunners.sort((a, b) => {
-        if (a.is_online && !b.is_online) return -1;
-        if (!a.is_online && b.is_online) return 1;
-        return b.rating - a.rating;
-    });
-}
-
-    function renderRunners() {
-        const list = document.getElementById('runnersList');
-        const noState = document.getElementById('noRunnersState');
-        list.innerHTML = '';
-        if (allRunners.length === 0) {
-            noState.style.display = 'flex';
-            updateRunnerCount(0);
-            return;
+        function transformRunnersData() {
+            allRunners = realRunners.map(r => {
+                const profile = r.runner_profile;
+                const user = r.user;
+                const completed = r.completed_errands || 0;
+                const total = r.total_errands || 1;
+                const completionRate = r.completion_rate || Math.round((completed / total) * 100);
+                const avgRating = r.avg_rating || 0;
+                const bidPrice = runnerBids[String(user.id)] || null;
+                return {
+                    id: user.id,
+                    name: user.fullname,
+                    avatar: user.fullname.charAt(0).toUpperCase(),
+                    profileImage: profile.profile_photo ? (profile.profile_image_url || profile.profile_photo) : null,
+                    rating: avgRating,
+                    vehicle_type: profile.vehicle_type || 'Various',
+                    completion_rate: completionRate,
+                    status: 'available',   // all visible runners are available
+                    is_online: true,
+                    price: bidPrice,
+                    bidTimestamp: null,
+                    distance: r.distance_km   // from server
+                };
+            });
+            // keep initial server order (closest first)
         }
-        noState.style.display = 'none';
-        allRunners.forEach(runner => {
-            const strip = document.createElement('div');
-            strip.className = 'runner-strip';
-            strip.id = `runner-${runner.id}`;
-            strip.dataset.rating = runner.rating;
-            strip.dataset.completion = runner.completion_rate;
-            strip.dataset.status = runner.status;
-            strip.dataset.name = runner.name.toLowerCase();
-            strip.dataset.distance = runner.distance || '~';
-            strip.dataset.price = runner.price || '0';
 
-            const statusClass = runner.status === 'online' ? 'status-online' : 'status-offline';
-            const statusText = runner.status === 'online' ? 'Online' : 'Offline';
+        function renderRunners() {
+            const list = document.getElementById('runnersList');
+            const noState = document.getElementById('noRunnersState');
+            list.innerHTML = '';
+            if (allRunners.length === 0) {
+                noState.style.display = 'flex';
+                updateRunnerCount(0);
+                return;
+            }
+            noState.style.display = 'none';
+            allRunners.forEach(runner => {
+                const strip = document.createElement('div');
+                strip.className = 'runner-strip';
+                strip.id = `runner-${runner.id}`;
+                strip.dataset.rating = runner.rating;
+                strip.dataset.completion = runner.completion_rate;
+                strip.dataset.status = runner.status;
+                strip.dataset.name = runner.name.toLowerCase();
+                strip.dataset.distance = runner.distance || '~';
+                strip.dataset.price = runner.price || '0';
 
-            strip.innerHTML = `
-                <!-- Profile picture (spans rows 1+2) -->
-                <div class="runner-avatar">
-                    ${runner.profileImage
-                        ? `<img src="${runner.profileImage}" alt="${runner.name}">`
-                        : `<div class="avatar-placeholder">${runner.avatar}</div>`
+                const distText = runner.distance ? runner.distance.toFixed(1) + ' km away' : '~';
+
+                strip.innerHTML = `
+                    <div class="runner-avatar">
+                        ${runner.profileImage
+                            ? `<img src="${runner.profileImage}" alt="${runner.name}">`
+                            : `<div class="avatar-placeholder">${runner.avatar}</div>`
+                        }
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="row1">
+                        <div class="name-rating">
+                            <div class="runner-name">${runner.name}</div>
+                            <div class="runner-rating"><i class="fas fa-star"></i> ${runner.rating.toFixed(1)}</div>
+                        </div>
+                        <span class="online-badge">Available</span>
+                    </div>
+                    <div class="row2">
+                        <div class="info-group">
+                            <span><i class="fas fa-road"></i> ${distText}</span>
+                            <span><i class="fas fa-car"></i> ${runner.vehicle_type}</span>
+                        </div>
+                        <div class="service-fee">
+                            ${runner.price ? `<strong>$${runner.price}</strong>` : '<span class="no-bid">No bid</span>'}
+                        </div>
+                    </div>
+                    <div class="row3">
+                        <div class="info-group">
+                            <span><i class="fas fa-check-circle"></i> ${runner.completion_rate}%</span>
+                        </div>
+                        <button class="btn select-btn" ${runner.price ? '' : 'disabled'} onclick="${runner.price ? `acceptRunnerOffer(${runner.id}, '${runner.name}', ${runner.price})` : ''}" id="btn-${runner.id}">
+                            <i class="fas fa-check"></i> Accept
+                        </button>
+                    </div>
+                `;
+                list.appendChild(strip);
+            });
+            updateRunnerCount(allRunners.length);
+        }
+
+        // ========== AUTO‑FETCH BIDS EVERY 2 SECONDS ==========
+        async function pollBids() {
+            try {
+                const res = await fetch(`/api/errand_bids/${currentErrandId}`);
+                const data = await res.json();
+                if (!data.bids) return;
+
+                const container = document.getElementById('runnersList');
+                if (!container) return;
+
+                allRunners.forEach(runner => {
+                    const oldPrice = runner.price;
+                    const oldTimestamp = runner.bidTimestamp;
+                    const bid = data.bids.find(b => b.runner_id === runner.id);
+                    if (bid) {
+                        runner.price = bid.offer_price;
+                        runner.bidTimestamp = bid.updated_at ? new Date(bid.updated_at).getTime() : Date.now();
+                    } else {
+                        runner.price = null;
+                        runner.bidTimestamp = null;
                     }
-                    ${runner.is_online ? '<div class="online-indicator"></div>' : ''}
-                </div>
 
-                <!-- Row 1: name, rating, online status -->
-                <div class="row1">
-                    <div class="name-rating">
-                        <div class="runner-name">${runner.name}</div>
-                        <div class="runner-rating"><i class="fas fa-star"></i> ${runner.rating.toFixed(1)}</div>
-                    </div>
-                    <span class="online-badge ${statusClass}">${statusText}</span>
-                </div>
+                    const strip = document.getElementById(`runner-${runner.id}`);
+                    if (!strip) return;
 
-                <!-- Row 2: distance, vehicle type, service fee (runner's bid) -->
-                <div class="row2">
-                    <div class="info-group">
-                        <span><i class="fas fa-road"></i> ${runner.distance ? runner.distance + ' km' : '~'}</span>
-                        <span><i class="fas fa-car"></i> ${runner.vehicle_type}</span>
-                    </div>
-                    <div class="service-fee">
-                        ${runner.price ? `<strong>$${runner.price}</strong>` : '<span class="no-bid">No bid</span>'}
-                    </div>
-                </div>
+                    const feeDiv = strip.querySelector('.service-fee');
+                    if (feeDiv) {
+                        if (runner.price) {
+                            feeDiv.innerHTML = `<strong>$${runner.price}</strong>`;
+                        } else {
+                            feeDiv.innerHTML = '<span class="no-bid">No bid</span>';
+                        }
+                    }
 
-                <!-- Row 3: city, completion rate, select button -->
-                <div class="row3">
-                    <div class="info-group">
-                        <span><i class="fas fa-map-marker-alt"></i> ${runner.city}</span>
-                        <span><i class="fas fa-check-circle"></i> ${runner.completion_rate}%</span>
-                    </div>
-                   <button class="btn select-btn" onclick="${runner.price ? `acceptRunnerOffer(${runner.id}, '${runner.name}', ${runner.price})` : ''}" id="btn-${runner.id}" ${runner.price ? '' : 'disabled'}>
-                   <i class="fas fa-check"></i> ${runner.price ? 'Accept' : 'Accept'}
-                   </button>
-                </div>
-            `;
-            list.appendChild(strip);
-        });
-        updateRunnerCount(allRunners.length);
-    }
-
-// ========== AUTO‑FETCH BIDS EVERY 2 SECONDS ==========
-
-async function pollBids() {
-    try {
-        const res = await fetch(`/api/errand_bids/${currentErrandId}`);
-        const data = await res.json();
-        if (!data.bids) return;
-
-        const container = document.getElementById('runnersList');
-        if (!container) return;
-
-        allRunners.forEach(runner => {
-            // Remember the price before update
-            const oldPrice = runner.price;
-            const oldTimestamp = runner.bidTimestamp;
-
-            const bid = data.bids.find(b => b.runner_id === runner.id);
-
-            if (bid) {
-                runner.price = bid.offer_price;
-                runner.bidTimestamp = bid.updated_at ? new Date(bid.updated_at).getTime() : Date.now();
-            } else {
-                runner.price = null;
-                runner.bidTimestamp = null;
+                    const btn = strip.querySelector('.select-btn');
+                    if (runner.price && !oldPrice) {
+                        if (btn && btn.disabled && btn.innerHTML.includes('Accept') &&
+                            !btn.innerHTML.includes('Accepted') && !btn.innerHTML.includes('Proceed')) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-check"></i> Accept';
+                            btn.onclick = function() { acceptRunnerOffer(runner.id, runner.name, runner.price); };
+                        }
+                        if (container.firstChild !== strip) {
+                            container.insertBefore(strip, container.firstChild);
+                        }
+                    }
+                    if (!runner.price && oldPrice) {
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = '<i class="fas fa-check"></i> Accept';
+                            btn.onclick = '';
+                        }
+                        container.appendChild(strip);
+                    }
+                    if (runner.price && oldPrice && oldTimestamp !== runner.bidTimestamp) {
+                        if (container.firstChild !== strip) {
+                            container.insertBefore(strip, container.firstChild);
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Bid polling error:', err);
             }
+        }
 
-            const strip = document.getElementById(`runner-${runner.id}`);
-            if (!strip) return;
-
-            // Update the displayed price
-            const feeDiv = strip.querySelector('.service-fee');
-            if (feeDiv) {
-                if (runner.price) {
-                    feeDiv.innerHTML = `<strong>$${runner.price}</strong>`;
-                } else {
-                    feeDiv.innerHTML = '<span class="no-bid">No bid</span>';
-                }
-            }
-
-            const btn = strip.querySelector('.select-btn');
-
-            // ----- BID APPEARED (new) -----
-            if (runner.price && !oldPrice) {
-                // Enable Accept button if it's in its initial "Accept" state
-                if (btn && btn.disabled && btn.innerHTML.includes('Accept') &&
-                    !btn.innerHTML.includes('Accepted') && !btn.innerHTML.includes('Proceed')) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Accept';
-                    btn.onclick = function() {
-                        acceptRunnerOffer(runner.id, runner.name, runner.price);
-                    };
-                }
-                // Move the card to the top
-                if (container.firstChild !== strip) {
-                    container.insertBefore(strip, container.firstChild);
-                }
-            }
-
-            // ----- BID DISAPPEARED (runner not interested) -----
-            if (!runner.price && oldPrice) {
-                // Disable the Accept button and reset it
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Accept';
-                    btn.onclick = '';
-                }
-                // Move the card to the end of the list
-                container.appendChild(strip);
-            }
-
-            // ----- BID PRICE CHANGED (updated) -----
-            if (runner.price && oldPrice && oldTimestamp !== runner.bidTimestamp) {
-                // Move to top to reflect recency
-                if (container.firstChild !== strip) {
-                    container.insertBefore(strip, container.firstChild);
-                }
-            }
-        });
-    } catch (err) {
-        console.error('Bid polling error:', err);
-    }
-}
-    // ========== NEW ACCEPT / CANCEL FLOW ==========
-    function acceptRunnerOffer(runnerId, runnerName, price) {
-        const btn = document.getElementById(`btn-${runnerId}`);
-        // Disable all runner buttons
-        document.querySelectorAll('.select-btn').forEach(b => {
-            b.disabled = true;
-        });
-        // Call backend to accept the existing offer
-        fetch('/api/accept_negotiation', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errand_id: currentErrandId, runner_id: runnerId })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-    currentSelectedRunnerId = runnerId;
-    // Immediately show "Accepted"
-    btn.innerHTML = '<i class="fas fa-check-circle"></i> Accepted';
-    btn.className = 'btn chat-btn';
-    addCancelButton(runnerId);
-    showNotification(`Offer accepted! ${runnerName} has been notified.`);
-
-    // After 3 seconds, change to "Proceed"
-    cancelTimeout = setTimeout(() => {
-        if (currentSelectedRunnerId !== runnerId) return;
-        btn.innerHTML = '<i class="fas fa-arrow-right"></i> Proceed';
-        btn.className = 'btn select-btn';
-        btn.disabled = false;
-        btn.onclick = function() {
-            // Client clicks Proceed → confirm and wait for runner
-            fetch('/api/confirm_proceed', {
+        // ========== NEW ACCEPT / CANCEL FLOW ==========
+        function acceptRunnerOffer(runnerId, runnerName, price) {
+            const btn = document.getElementById(`btn-${runnerId}`);
+            document.querySelectorAll('.select-btn').forEach(b => { b.disabled = true; });
+            fetch('/api/accept_negotiation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ errand_id: currentErrandId })
+                body: JSON.stringify({ errand_id: currentErrandId, runner_id: runnerId })
             })
             .then(r => r.json())
-            .then(() => {
-                btn.innerHTML = '<i class="fas fa-clock"></i> Waiting for runner...';
-                btn.className = 'btn pending-btn';
-                btn.disabled = true;
-                removeCancelButton();
-                // Poll until both proceeded
-                const interval = setInterval(() => {
-                    fetch(`/api/check_proceed?errand_id=${currentErrandId}`)
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data.both_proceeded) {
-                                clearInterval(interval);
-                                window.location.href = `/chat/${data.chat_id}`;
-                            }
-                        })
-                        .catch(() => {});
-                }, 2000);
+            .then(data => {
+                if (data.success) {
+                    currentSelectedRunnerId = runnerId;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Accepted';
+                    btn.className = 'btn chat-btn';
+                    addCancelButton(runnerId);
+                    showNotification(`Offer accepted! ${runnerName} has been notified.`);
+
+                    cancelTimeout = setTimeout(() => {
+                        if (currentSelectedRunnerId !== runnerId) return;
+                        btn.innerHTML = '<i class="fas fa-arrow-right"></i> Proceed';
+                        btn.className = 'btn select-btn';
+                        btn.disabled = false;
+                        btn.onclick = function() {
+                            fetch('/api/confirm_proceed', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ errand_id: currentErrandId })
+                            })
+                            .then(r => r.json())
+                            .then(() => {
+                                btn.innerHTML = '<i class="fas fa-clock"></i> Waiting for runner...';
+                                btn.className = 'btn pending-btn';
+                                btn.disabled = true;
+                                removeCancelButton();
+                                const interval = setInterval(() => {
+                                    fetch(`/api/check_proceed?errand_id=${currentErrandId}`)
+                                        .then(r => r.json())
+                                        .then(data => {
+                                            if (data.both_proceeded) {
+                                                clearInterval(interval);
+                                                window.location.href = `/chat/${data.chat_id}`;
+                                            }
+                                        })
+                                        .catch(() => {});
+                                }, 2000);
+                            })
+                            .catch(() => alert('Network error'));
+                        };
+                        removeCancelButton();
+                    }, 3000);
+                } else {
+                    alert('Failed to accept offer. Please try again.');
+                    enableAllButtons();
+                }
+            })
+            .catch(() => {
+                alert('Network error');
+                enableAllButtons();
+            });
+        }
+
+        function addCancelButton(runnerId) {
+            const strip = document.getElementById(`runner-${runnerId}`);
+            const btn = document.getElementById(`btn-${runnerId}`);
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn secondary';
+            cancelBtn.id = `cancel-btn-${runnerId}`;
+            cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+            cancelBtn.onclick = function() { cancelAcceptance(runnerId); };
+            const row3 = strip.querySelector('.row3');
+            row3.appendChild(cancelBtn);
+        }
+
+        function removeCancelButton() {
+            const existing = document.querySelector('[id^="cancel-btn-"]');
+            if (existing) existing.remove();
+        }
+
+        function cancelAcceptance(runnerId) {
+            fetch('/api/cancel_acceptance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ errand_id: currentErrandId, runner_id: runnerId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (transitionTimer) clearTimeout(transitionTimer);
+                    if (cancelTimeout) clearTimeout(cancelTimeout);
+                    currentSelectedRunnerId = null;
+                    enableAllButtons();
+                    removeCancelButton();
+                    const btn = document.getElementById(`btn-${runnerId}`);
+                    btn.innerHTML = '<i class="fas fa-check"></i> Accept';
+                    btn.className = 'btn select-btn';
+                    btn.disabled = false;
+                    btn.onclick = function() {
+                        const runner = allRunners.find(r => r.id === runnerId);
+                        if (runner && runner.price) {
+                            acceptRunnerOffer(runnerId, runner.name, runner.price);
+                        }
+                    };
+                    showNotification('Cancelled. You can select another runner.');
+                } else {
+                    alert('Could not cancel. Try again.');
+                }
             })
             .catch(() => alert('Network error'));
-        };
-        removeCancelButton();   // Cancel is no longer needed
-    }, 3000);
-} else {
-                alert('Failed to accept offer. Please try again.');
-                enableAllButtons();
-            }
-        })
-        .catch(() => {
-            alert('Network error');
-            enableAllButtons();
+        }
+
+        function enableAllButtons() {
+            document.querySelectorAll('.select-btn').forEach(b => { b.disabled = false; });
+        }
+
+        function showNotification(msg, dur = 4000) {
+            const el = document.createElement('div');
+            el.style.cssText = `position:fixed;top:20px;right:20px;left:20px;background:#28a745;color:white;padding:15px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;text-align:center;animation:slideIn 0.3s ease;`;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => { el.remove(); }, dur);
+        }
+
+        const notifStyle = document.createElement('style');
+        notifStyle.textContent = `@keyframes slideIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}`;
+        document.head.appendChild(notifStyle);
+
+        function sortRunners(criteria) {
+            const container = document.getElementById('runnersList');
+            const items = Array.from(container.querySelectorAll('.runner-strip'));
+            items.sort((a, b) => {
+                if (criteria === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+                if (criteria === 'distance') return parseFloat(a.dataset.distance||999) - parseFloat(b.dataset.distance||999);
+                if (criteria === 'price') return parseFloat(a.dataset.price||999) - parseFloat(b.dataset.price||999);
+                const aVal = parseFloat(a.dataset[criteria]||0), bVal = parseFloat(b.dataset[criteria]||0);
+                return bVal - aVal;
+            });
+            items.forEach(item => container.appendChild(item));
+        }
+
+        function filterByStatus(status) {
+            document.querySelectorAll('.runner-strip').forEach(item => {
+                item.style.display = (status === 'all' || item.dataset.status === status) ? 'grid' : 'none';
+            });
+            updateRunnerCount(document.querySelectorAll('.runner-strip[style*="grid"], .runner-strip:not([style*="none"])').length);
+        }
+
+        function searchRunners(query) {
+            const lower = query.toLowerCase();
+            let count = 0;
+            document.querySelectorAll('.runner-strip').forEach(item => {
+                const name = item.querySelector('.runner-name')?.textContent.toLowerCase() || '';
+                const details = item.querySelector('.info-group')?.textContent.toLowerCase() || '';
+                const visible = name.includes(lower) || details.includes(lower);
+                item.style.display = visible ? 'grid' : 'none';
+                if (visible) count++;
+            });
+            updateRunnerCount(count);
+        }
+
+        function updateRunnerCount(count) {
+            document.getElementById('runnerCount').textContent = `${count} runners available`;
+        }
+
+        function refreshRunners() { window.location.reload(); }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            transformRunnersData();
+            renderRunners();
+            setInterval(pollBids, 2000);
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('touchstart', function() { this.style.transform = 'scale(0.98)'; });
+                btn.addEventListener('touchend', function() { this.style.transform = 'scale(1)'; });
+            });
         });
-    }
-
-    function addCancelButton(runnerId) {
-        const strip = document.getElementById(`runner-${runnerId}`);
-        const btn = document.getElementById(`btn-${runnerId}`);
-        // Create cancel button
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'btn secondary';
-        cancelBtn.id = `cancel-btn-${runnerId}`;
-        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
-        cancelBtn.onclick = function() { cancelAcceptance(runnerId); };
-        // Insert after the select button (which is inside row3)
-        const row3 = strip.querySelector('.row3');
-        row3.appendChild(cancelBtn);
-    }
-
-    function removeCancelButton() {
-        const existing = document.querySelector('[id^="cancel-btn-"]');
-        if (existing) existing.remove();
-    }
-
-    function cancelAcceptance(runnerId) {
-        fetch('/api/cancel_acceptance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errand_id: currentErrandId, runner_id: runnerId })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                // Clear any pending timers
-                if (transitionTimer) clearTimeout(transitionTimer);
-                if (cancelTimeout) clearTimeout(cancelTimeout);
-                currentSelectedRunnerId = null;
-                // Re-enable all runner buttons
-                enableAllButtons();
-                removeCancelButton();
-                // Reset the selected runner's button back to "Accept"
-                const btn = document.getElementById(`btn-${runnerId}`);
-                btn.innerHTML = '<i class="fas fa-check"></i> Accept';
-                btn.className = 'btn select-btn';
-                btn.disabled = false;
-                btn.onclick = function() {
-                    const runner = allRunners.find(r => r.id === runnerId);
-                    if (runner && runner.price) {
-                        acceptRunnerOffer(runnerId, runner.name, runner.price);
-                    }
-                };
-                showNotification('Cancelled. You can select another runner.');
-            } else {
-                alert('Could not cancel. Try again.');
-            }
-        })
-        .catch(() => alert('Network error'));
-    }
-
-    function enableAllButtons() {
-        // Re-enable all runner select buttons that were disabled
-        document.querySelectorAll('.select-btn').forEach(b => {
-            b.disabled = false;
-        });
-    }
-
-    function showNotification(msg, dur=4000) {
-        const el = document.createElement('div');
-        el.style.cssText = `position:fixed;top:20px;right:20px;left:20px;background:#28a745;color:white;padding:15px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;text-align:center;animation:slideIn 0.3s ease;`;
-        el.textContent = msg;
-        document.body.appendChild(el);
-        setTimeout(() => { el.remove(); }, dur);
-    }
-
-    const notifStyle = document.createElement('style');
-    notifStyle.textContent = `@keyframes slideIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}`;
-    document.head.appendChild(notifStyle);
-
-    function sortRunners(criteria) {
-        const container = document.getElementById('runnersList');
-        const items = Array.from(container.querySelectorAll('.runner-strip'));
-        items.sort((a, b) => {
-            if (criteria === 'name') return a.dataset.name.localeCompare(b.dataset.name);
-            if (criteria === 'distance') return parseFloat(a.dataset.distance||999) - parseFloat(b.dataset.distance||999);
-            if (criteria === 'price') return parseFloat(a.dataset.price||999) - parseFloat(b.dataset.price||999);
-            const aVal = parseFloat(a.dataset[criteria]||0), bVal = parseFloat(b.dataset[criteria]||0);
-            return bVal - aVal;
-        });
-        items.forEach(item => container.appendChild(item));
-    }
-
-    function filterByStatus(status) {
-        document.querySelectorAll('.runner-strip').forEach(item => {
-            item.style.display = (status === 'all' || item.dataset.status === status) ? 'grid' : 'none';
-        });
-        updateRunnerCount(document.querySelectorAll('.runner-strip[style*="grid"], .runner-strip:not([style*="none"])').length);
-    }
-
-    function searchRunners(query) {
-        const lower = query.toLowerCase();
-        let count = 0;
-        document.querySelectorAll('.runner-strip').forEach(item => {
-            const name = item.querySelector('.runner-name')?.textContent.toLowerCase() || '';
-            const details = item.querySelector('.info-group')?.textContent.toLowerCase() || '';
-            const visible = name.includes(lower) || details.includes(lower);
-            item.style.display = visible ? 'grid' : 'none';
-            if (visible) count++;
-        });
-        updateRunnerCount(count);
-    }
-
-    function updateRunnerCount(count) {
-        document.getElementById('runnerCount').textContent = `${count} runners available`;
-    }
-
-    function refreshRunners() { window.location.reload(); }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        transformRunnersData();
-        renderRunners();
-        setInterval(pollBids, 2000);
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('touchstart', function() { this.style.transform = 'scale(0.98)'; });
-            btn.addEventListener('touchend', function() { this.style.transform = 'scale(1)'; });
-        });
-    });
-</script>
+    </script>
 </body>
 </html>

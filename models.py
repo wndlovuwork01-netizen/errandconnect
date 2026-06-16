@@ -78,7 +78,8 @@ class RunnerProfile(db.Model):
     current_longitude = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    remaining_errands = db.Column(db.Integer, default=5, nullable=False)
+    errand_deducted_ids = db.Column(db.Text, default='')
     user = db.relationship("User", back_populates="runner_profile")
 
     def __repr__(self):
@@ -180,6 +181,8 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    delivered_at = db.Column(db.DateTime, default=datetime.utcnow)
+    read_at = db.Column(db.DateTime, nullable=True)
 
     chat = db.relationship("Chat", back_populates="messages")
     sender = db.relationship("User", foreign_keys=[sender_id])
@@ -200,8 +203,11 @@ class ActiveErrand(db.Model):
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime, nullable=True)
     estimated_duration = db.Column(db.String(100))
+    location_sharing_requested = db.Column(db.Boolean, default=False)
+    location_sharing_active = db.Column(db.Boolean, default=False)
+    location_sharing_expires = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(50))
-    stage_progress = db.Column(db.Text, default='[]')
+    stage_progress = db.Column(db.Text, default='[false, false, false, false, false, false]')
     runner_marked_complete = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

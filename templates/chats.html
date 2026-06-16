@@ -5,1069 +5,897 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>ErrandConnect – Chats</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8fdf8;
-            color: #333;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Sidebar */
-        .chat-sidebar {
-            width: 300px;
-            background: white;
-            border-right: 1px solid #ddd;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-        .sidebar-header {
-            padding: 15px;
-            background: #28a745;
-            color: white;
-            flex-shrink: 0;
-        }
-        .chat-list { list-style: none; flex: 1; overflow-y: auto; }
-        .chat-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .chat-item:hover { background: #f0fff4; }
-        .chat-item.active { background: #e8f5e9; border-left: 4px solid #28a745; }
-        .chat-item.support { background: #fff8e1; border-left: 4px solid #ff9800; }
-        .chat-item-name { font-weight: bold; margin-bottom: 5px; }
-        .chat-item-info { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
-
-        /* Main chat */
-        .chat-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #f0f4f0;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Fixed header */
-        .chat-header {
-            padding: 12px 15px;
-            background: #28a745;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-        .chat-header h3 { color: white; font-size: 16px; margin: 0; }
-        .header-left { display: flex; align-items: center; gap: 10px; }
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .progress-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.4);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
-        }
-        .progress-btn:hover { background: rgba(255,255,255,0.3); }
-
-        .agreed-price {
-            background: #fff3cd;
-            color: #856404;
-            padding: 7px 15px;
-            font-size: 13px;
-            text-align: center;
-            font-weight: 600;
-            border-bottom: 1px solid #ffe082;
-            flex-shrink: 0;
-        }
-
-        .tracking-info {
             background: #e8f5e9;
-            padding: 10px 15px;
-            font-size: 13px;
-            border-bottom: 1px solid #c8e6c9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
+            color: #333;
         }
 
-        /* Messages */
-        .chat-messages {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
+        .app-shell {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-        .message {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 15px;
-            font-size: 14px;
-            position: relative;
-            word-wrap: break-word;
-        }
-        .message.sent {
-            align-self: flex-end;
-            background: #28a745;
-            color: white;
-            border-bottom-right-radius: 3px;
-        }
-        .message.received {
-            align-self: flex-start;
-            background: white;
-            border: 1px solid #ddd;
-            border-bottom-left-radius: 3px;
-        }
-        .message-time {
-            font-size: 10px;
-            margin-top: 4px;
-            opacity: 0.7;
-            text-align: right;
-        }
-        .message img {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 10px;
-            display: block;
-            margin: 5px 0;
-            cursor: pointer;
-        }
-        .message audio { max-width: 200px; border-radius: 20px; }
-
-        /* Input area */
-        .chat-input-area {
-            padding: 10px 12px;
-            background: white;
-            border-top: 1px solid #ddd;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .chat-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 22px;
-            outline: none;
-            font-size: 14px;
-            background: #f9f9f9;
-        }
-        .chat-input:focus { border-color: #28a745; background: white; }
-        .icon-btn {
-            background: #f0f4f0;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #555;
-            font-size: 18px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-        .icon-btn:hover { background: #ddd; }
-        .icon-btn.recording { background: #ffebee; color: #d32f2f; }
-        .send-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        #recording-time {
-            font-size: 12px;
-            background: #ffebee;
-            padding: 3px 8px;
-            border-radius: 20px;
-            color: #d32f2f;
-            flex-shrink: 0;
+            height: 100vh; height: 100dvh;
+            overflow: hidden;
         }
 
-        /* Progress Overlay (slide-in from right) */
-        .progress-overlay {
-            position: absolute;
-            top: 0;
-            right: -100%;
-            bottom: 0;
-            width: 78%;
-            max-width: 320px;
-            background: white;
-            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            transition: right 0.3s ease;
-        }
-        .progress-overlay.open { right: 0; }
-        .overlay-backdrop {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 99;
-            display: none;
-        }
-        .overlay-backdrop.open { display: block; }
-        .overlay-header {
-            background: #28a745;
-            color: white;
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .overlay-header h4 { font-size: 15px; font-weight: 600; margin: 0; }
-        .overlay-close {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .overlay-body {
-            flex: 1;
-            padding: 20px 16px;
-            overflow-y: auto;
-        }
-        .overlay-note {
-            font-size: 12px;
-            color: #888;
-            text-align: center;
-            padding: 4px 16px 0;
-            flex-shrink: 0;
-        }
-        .overlay-footer {
-            padding: 12px 16px;
-            flex-shrink: 0;
-        }
-        .confirm-delivery-btn {
-            width: 100%;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .confirm-delivery-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* Progress stages */
-        .stage-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 0;
-            align-items: flex-start;
-        }
-        .stage-track {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .stage-dot {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            color: #aaa;
-            transition: all 0.3s;
-        }
-        .stage-dot.done { background: #28a745; border-color: #28a745; color: white; }
-        .stage-dot.current { border-color: #28a745; background: #e8f5e9; color: #28a745; }
-        .stage-line {
-            width: 2px;
-            height: 22px;
-            background: #e0e0e0;
-            margin: 3px 0;
-        }
-        .stage-line.done { background: #28a745; }
-        .stage-label {
-            font-size: 13px;
-            color: #aaa;
-            padding-top: 3px;
-            line-height: 1.4;
-        }
-        .stage-label.done { color: #28a745; font-weight: 600; }
-        .stage-label.current { color: #333; font-weight: 500; }
-
-        /* Runner checkbox style */
-        .runner-stage-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 0;
-            align-items: flex-start;
-        }
-        .runner-check {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid #28a745;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            margin-top: 2px;                    
-        }
-        .runner-check.checked { background: #28a745; color: white; }
-        .runner-check.clickable { 
-            border: 3px solid #28a745; 
-            animation: pulse 1.5s infinite; 
-            cursor: pointer; 
-        }
-        .runner-check:hover { background: #e8f5e9; }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-        }
-        .runner-stage-label {
-            font-size: 13px;
-            color: #555;
-            padding-top: 4px;
-            line-height: 1.4;
-            flex: 1;
-        }
-        .runner-stage-label.checked { color: #28a745; font-weight: 600; }
-        .runner-stage-wrap {
-            display: flex;
-            flex-direction: column;
-        }
-        .runner-stage-line {
-            width: 2px;
-            height: 20px;
-            background: #e0e0e0;
-            margin: 3px 11px;
-        }
-        .runner-stage-line.checked { background: #28a745; }
-
-        /* Bottom Nav */
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 56px;
-            background: white;
-            border-top: 1px solid #ddd;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
+            flex-shrink: 0; height: 56px; background: white;
+            border-top: 1px solid #ddd; display: flex;
+            justify-content: space-around; align-items: center; z-index: 200;
         }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 11px;
-            color: #666;
-            text-decoration: none;
-            gap: 3px;
-            flex: 1;
-            padding: 6px 0;
-        }
-        .nav-item.active { color: #28a745; font-weight: bold; }
-        .nav-item i { font-size: 18px; }
+        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#666; text-decoration:none; gap:3px; flex:1; padding:6px 0; }
+        .nav-item.active { color:#28a745; font-weight:bold; }
+        .nav-item i { font-size:18px; }
 
-        @media (max-width: 768px) {
-            .chat-sidebar { display: none; }
-            .chat-sidebar.mobile-visible { display: flex; width: 100%; }
-            .chat-main.mobile-hidden { display: none; }
-            .message { max-width: 88%; }
+        .chat-container { display:flex; flex:1; overflow:hidden; position:relative; min-height:0; }
+        .chat-sidebar { width:300px; background:white; border-right:1px solid #ddd; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
+        .sidebar-header { padding:15px; background:#28a745; color:white; flex-shrink:0; }
+        .chat-list { list-style:none; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .chat-item { padding:15px; border-bottom:1px solid #eee; cursor:pointer; transition:background 0.2s; }
+        .chat-item:hover { background:#f0fff4; }
+        .chat-item.active { background:#e8f5e9; border-left:4px solid #28a745; }
+        .chat-item.support { background:#fff8e1; border-left:4px solid #ff9800; }
+        .chat-item-name { font-weight:bold; margin-bottom:5px; }
+        .chat-item-info { font-size:12px; color:#666; display:flex; justify-content:space-between; }
+
+        .chat-main { flex:1; display:flex; flex-direction:column; background: #e8f5e9; overflow:hidden; position:relative; min-height:0; }
+        .chat-header { flex-shrink:0; padding:12px 15px; background:#28a745; color:white; display:flex; justify-content:space-between; align-items:center; z-index:50; }
+        .chat-header h3 { color:white; font-size:16px; margin:0; }
+        .header-left { display:flex; align-items:center; gap:10px; }
+        .back-btn { background:rgba(255,255,255,0.2); border:none; color:white; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
+        .progress-btn { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
+        .progress-btn:hover { background:rgba(255,255,255,0.3); }
+        .agreed-price { flex-shrink:0; background:#fff3cd; color:#856404; padding:7px 15px; font-size:13px; text-align:center; font-weight:600; border-bottom:1px solid #ffe082; }
+        .tracking-info { flex-shrink:0; background:#e8f5e9; padding:10px 15px; font-size:13px; border-bottom:1px solid #c8e6c9; display:flex; justify-content:space-between; align-items:center; }
+
+        .chat-messages {
+            flex:1; padding:16px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+            display:flex; flex-direction:column; gap:10px; min-height:0;
+            background: linear-gradient(135deg, #f0f4f0 0%, #e8f5e9 100%);
+        }
+        .message { max-width:80%; padding:8px 12px; border-radius:15px; font-size:14px; position:relative; word-wrap:break-word; }
+        .message.sent { align-self:flex-end; background:#28a745; color:white; border-bottom-right-radius:3px; }
+        .message.received { align-self:flex-start; background:white; border:1px solid #ddd; border-bottom-left-radius:3px; }
+        .message-time { font-size:10px; margin-top:4px; opacity:0.7; text-align:right; }
+        .message img { max-width:200px; max-height:200px; border-radius:10px; display:block; margin:5px 0; cursor:pointer; }
+        .message audio { max-width:200px; border-radius:20px; }
+
+        .message-status { font-size:10px; text-align:right; margin-top:2px; }
+        .message-status .grey { color:#aaa; }
+        .message-status .blue { color:#34b7f1; }
+
+        .chat-input-area { flex-shrink:0; padding:10px 12px; background:white; border-top:1px solid #ddd; display:flex; gap:8px; align-items:center; }
+        .chat-input { flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:22px; outline:none; font-size:14px; background:#f9f9f9; }
+        .chat-input:focus { border-color:#28a745; background:white; }
+        .icon-btn { background:#f0f4f0; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; color:#555; font-size:18px; display:inline-flex; align-items:center; justify-content:center; transition:background 0.2s; flex-shrink:0; }
+        .icon-btn:hover { background:#ddd; }
+        .icon-btn.recording { background:#ffebee; color:#d32f2f; }
+        .send-btn { background:#28a745; color:white; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+        #recording-time { font-size:12px; background:#ffebee; padding:3px 8px; border-radius:20px; color:#d32f2f; flex-shrink:0; }
+
+        .progress-overlay { position:absolute; top:0; right:-100%; bottom:0; width:78%; max-width:320px; background:white; box-shadow:-4px 0 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; z-index:100; transition:right 0.3s ease; }
+        .progress-overlay.open { right:0; }
+        .overlay-backdrop { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.3); z-index:99; display:none; }
+        .overlay-backdrop.open { display:block; }
+        .overlay-header { background:#28a745; color:white; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+        .overlay-header h4 { font-size:15px; font-weight:600; margin:0; }
+        .overlay-close { background:rgba(255,255,255,0.2); border:none; color:white; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
+        .overlay-body { flex:1; padding:20px 16px; overflow-y:auto; }
+        .overlay-note { font-size:12px; color:#888; text-align:center; padding:4px 16px 0; flex-shrink:0; }
+        .overlay-footer { padding:12px 16px; flex-shrink:0; }
+
+        .confirm-delivery-btn, .cancel-btn, .rate-btn {
+            width:100%; color:white; border:none; border-radius:8px; padding:12px;
+            font-size:14px; font-weight:600; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .confirm-delivery-btn:disabled, .cancel-btn:disabled, .rate-btn:disabled {
+            background:#ccc; cursor:not-allowed;
+        }
+        .confirm-delivery-btn { background:#28a745; }
+        .cancel-btn { background:#d32f2f; }
+        .rate-btn { background:#1565c0; }
+
+        .stage-row { display:flex; gap:12px; margin-bottom:0; align-items:flex-start; }
+        .stage-track { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+        .stage-dot { width:24px; height:24px; border-radius:50%; border:2px solid #ddd; background:white; display:flex; align-items:center; justify-content:center; font-size:11px; color:#aaa; transition:all 0.3s; }
+        .stage-dot.done { background:#28a745; border-color:#28a745; color:white; }
+        .stage-dot.current { border-color:#28a745; background:#e8f5e9; color:#28a745; }
+        .stage-line { width:2px; height:22px; background:#e0e0e0; margin:3px 0; }
+        .stage-line.done { background:#28a745; }
+        .stage-label { font-size:13px; color:#aaa; padding-top:3px; line-height:1.4; }
+        .stage-label.done { color:#28a745; font-weight:600; }
+        .stage-label.current { color:#333; font-weight:500; }
+
+        .runner-stage-row { display:flex; gap:12px; margin-bottom:0; align-items:flex-start; }
+        .runner-check { width:24px; height:24px; border-radius:50%; border:2px solid #28a745; background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; margin-top:2px; }
+        .runner-check.checked { background:#28a745; color:white; border-color:#28a745; }
+        .runner-check.clickable { border:3px solid #28a745; animation:pulse 1.5s infinite; cursor:pointer; }
+        .runner-check.locked { border-color:#ccc; cursor:not-allowed; opacity:0.5; }
+        @keyframes pulse { 0%{ box-shadow:0 0 0 0 rgba(40,167,69,0.4); } 70%{ box-shadow:0 0 0 10px rgba(40,167,69,0); } 100%{ box-shadow:0 0 0 0 rgba(40,167,69,0); } }
+        .runner-stage-label { font-size:13px; color:#555; padding-top:4px; line-height:1.4; flex:1; }
+        .runner-stage-label.checked { color:#28a745; font-weight:600; }
+        .runner-stage-wrap { display:flex; flex-direction:column; }
+        .runner-stage-line { width:2px; height:20px; background:#e0e0e0; margin:3px 11px; }
+        .runner-stage-line.checked { background:#28a745; }
+
+        /* Map markers */
+        .pickup-icon, .delivery-icon {
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px;
+            border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .delivery-icon { background: #d32f2f; }
+        .runner-icon { /* emoji, no extra style needed */ }
+
+        #map-container { width:100%; height:200px; margin:12px 0; border-radius:8px; border:1px solid #ddd; background:#f5f5f5; display:none; }
+        #map-container.active { display:block; }
+        .location-btn { background:#28a745; color:white; border:none; border-radius:6px; padding:8px 12px; font-size:13px; font-weight:600; cursor:pointer; width:100%; margin:8px 0; }
+        .location-btn:disabled { background:#ccc; cursor:not-allowed; }
+        .location-request-buttons { display:flex; gap:8px; margin-top:8px; }
+        .location-request-buttons button { flex:1; padding:8px; border-radius:6px; font-weight:600; border:none; cursor:pointer; }
+        .accept-location-btn { background:#28a745; color:white; }
+        .decline-location-btn { background:#f44336; color:white; }
+
+        .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+        .modal-content { background:white; border-radius:20px; padding:24px; width:100%; max-width:340px; text-align:center; }
+        .stars { display:flex; justify-content:center; gap:8px; margin:16px 0; }
+        .stars i { font-size:28px; color:#ddd; cursor:pointer; }
+        .stars i.active { color:#ffc107; }
+        textarea { width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; resize:vertical; margin-bottom:12px; }
+        .btn-primary { width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:600; margin-top:8px; cursor:pointer; }
+        .btn-outline { width:100%; padding:12px; background:transparent; border:1px solid #ddd; border-radius:8px; margin-top:8px; cursor:pointer; }
+
+        .font-size-control { display:flex; align-items:center; gap:6px; margin-left:10px; }
+        .font-size-control input[type=range] { width:60px; }
+
+        @media (max-width:768px) {
+            .chat-sidebar { display:none; }
+            .chat-sidebar.mobile-visible { display:flex; width:100%; }
+            .chat-main.mobile-hidden { display:none; }
+            .message { max-width:88%; }
         }
     </style>
 </head>
-<body style="padding-bottom: 56px;">
-
-<div class="chat-container">
-    <!-- Sidebar -->
-    <div class="chat-sidebar {% if active_chat %}mobile-hidden{% endif %}">
-        <div class="sidebar-header">
-            <h2 style="margin-bottom:6px;"><i class="fas fa-comments"></i> Messages</h2>
-            <a href="{{ url_for('home_page') }}" style="color:white;font-size:12px;text-decoration:none;">
-                <i class="fas fa-arrow-left"></i> Back to Home
-            </a>
-        </div>
-        <ul class="chat-list">
-            <li class="chat-item support {% if active_chat and active_chat.id == support_chat_id %}active{% endif %}"
-                onclick="window.location.href='{{ url_for('chat_detail', chat_id=support_chat_id) }}'">
-                <div class="chat-item-name"><i class="fas fa-headset"></i> ErrandGo Support</div>
-                {% set support_chat = namespace(obj=None) %}
-                {% for c in chats %}
-                    {% if c.id == support_chat_id %}
-                        {% set support_chat.obj = c %}
-                    {% endif %}
-                {% endfor %}
-                {% set last_msg = support_chat.obj.messages[-1] if support_chat.obj and support_chat.obj.messages else None %}
-                <div class="chat-item-info" style="flex-direction:column;align-items:flex-start;">
-                    <div style="display:flex;justify-content:space-between;width:100%;">
-                        <span>Help &amp; Support</span>
+<body>
+<div class="app-shell">
+    <div class="chat-container">
+        <div class="chat-sidebar {% if active_chat %}mobile-hidden{% endif %}">
+            <!-- ... sidebar unchanged ... -->
+            <div class="sidebar-header">
+                <h2 style="margin-bottom:6px;"><i class="fas fa-comments"></i> Messages</h2>
+                <a href="{{ url_for('home_page') }}" style="color:white;font-size:12px;text-decoration:none;">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+            <ul class="chat-list">
+                <li class="chat-item support {% if active_chat and active_chat.id == support_chat_id %}active{% endif %}"
+                    onclick="window.location.href='{{ url_for('chat_detail', chat_id=support_chat_id) }}'">
+                    <div class="chat-item-name"><i class="fas fa-headset"></i> ErrandGo Support</div>
+                    {% set support_chat = namespace(obj=None) %}
+                    {% for c in chats %}{% if c.id == support_chat_id %}{% set support_chat.obj = c %}{% endif %}{% endfor %}
+                    {% set last_msg = support_chat.obj.messages[-1] if support_chat.obj and support_chat.obj.messages else None %}
+                    <div class="chat-item-info" style="flex-direction:column;align-items:flex-start;">
+                        <div style="display:flex;justify-content:space-between;width:100%;"><span>Help &amp; Support</span></div>
+                        {% if last_msg %}<div style="font-size:12px;color:#757575;margin-top:4px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            {% if last_msg.content.startswith('<img') %}<i class="fas fa-image"></i> Photo
+                            {% elif last_msg.content.startswith('<audio') %}<i class="fas fa-microphone"></i> Voice
+                            {% else %}{{ last_msg.content }}{% endif %}
+                            <span style="margin-left:8px;color:#9e9e9e;font-size:11px;">{{ last_msg.created_at | to_cat_time }}</span>
+                        </div>{% endif %}
                     </div>
-                    {% if last_msg %}
-                        <div style="font-size:12px;color:#757575;margin-top:4px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                            {% if last_msg.content.startswith('<img') %}
-                                <i class="fas fa-image"></i> Photo
-                            {% elif last_msg.content.startswith('<audio') %}
-                                <i class="fas fa-microphone"></i> Voice
-                            {% else %}
-                                {{ last_msg.content }}
-                            {% endif %}
-                            <span style="margin-left:8px;color:#9e9e9e;font-size:11px;">{{ last_msg.created_at.strftime('%H:%M') }}</span>
-                        </div>
-                    {% endif %}
-                </div>
-            </li>
-            {% if chats %}
-                {% for chat in chats %}
+                </li>
+                {% if chats %}{% for chat in chats %}
                 {% set last_msg = chat.messages[-1] if chat.messages else None %}
                 <li class="chat-item {% if active_chat and active_chat.id == chat.id %}active{% endif %}"
                     onclick="window.location.href='{{ url_for('chat_detail', chat_id=chat.id) }}'">
-                    <div class="chat-item-name">
-                        {% if user.user_type == 'client' %}{{ chat.runner.fullname }}
-                        {% else %}{{ chat.client.fullname }}{% endif %}
-                    </div>
+                    <div class="chat-item-name">{% if user.user_type == 'client' %}{{ chat.runner.fullname }}{% else %}{{ chat.client.fullname }}{% endif %}</div>
                     <div class="chat-item-info" style="flex-direction:column;align-items:flex-start;">
                         <div style="display:flex;justify-content:space-between;width:100%;">
                             <span>Errand #{{ chat.errand_id }}</span>
                             {% set ae = chat.errand.active_errand %}
-                            {% if ae and ae.status == 'completed' %}
-                                <span style="background:#e8f5e9;color:#28a745;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Confirmed</span>
-                            {% elif ae and ae.runner_marked_complete %}
-                                <span style="background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Waiting Confirmation</span>
-                            {% elif ae and ae.status == 'ongoing' %}
-                                <span style="background:#fff3cd;color:#856404;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Pending</span>
-                            {% else %}
-                                <span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">In Discussion</span>
-                            {% endif %}
+                            {% if ae and ae.status == 'completed' %}<span style="background:#e8f5e9;color:#28a745;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Confirmed</span>
+                            {% elif ae and ae.runner_marked_complete %}<span style="background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Waiting Confirmation</span>
+                            {% elif ae and ae.status == 'ongoing' %}<span style="background:#fff3cd;color:#856404;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Pending</span>
+                            {% else %}<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">In Discussion</span>{% endif %}
                         </div>
-                        {% if last_msg %}
-                            <div style="font-size:12px;color:#757575;margin-top:4px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                {% if last_msg.content.startswith('<img') %}
-                                    <i class="fas fa-image"></i> Photo
-                                {% elif last_msg.content.startswith('<audio') %}
-                                    <i class="fas fa-microphone"></i> Voice
-                                {% else %}
-                                    {{ last_msg.content }}
-                                {% endif %}
-                                <span style="margin-left:8px;color:#9e9e9e;font-size:11px;">{{ last_msg.created_at.strftime('%H:%M') }}</span>
-                            </div>
-                        {% endif %}
+                        {% if last_msg %}<div style="font-size:12px;color:#757575;margin-top:4px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            {% if last_msg.content.startswith('<img') %}<i class="fas fa-image"></i> Photo
+                            {% elif last_msg.content.startswith('<audio') %}<i class="fas fa-microphone"></i> Voice
+                            {% else %}{{ last_msg.content }}{% endif %}
+                            <span style="margin-left:8px;color:#9e9e9e;font-size:11px;">{{ last_msg.created_at | to_cat_time }}</span>
+                        </div>{% endif %}
                     </div>
                 </li>
+                {% endfor %}{% else %}<li style="padding:20px;text-align:center;color:#999;">No chats yet</li>{% endif %}
+            </ul>
+        </div>
+
+        {% if active_chat %}
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="header-left">
+                    <a href="{{ url_for('chats') }}" class="back-btn"><i class="fas fa-arrow-left" style="font-size:14px;"></i></a>
+                    <h3>{% if user.user_type == 'client' %}{{ active_chat.runner.fullname }}{% else %}{{ active_chat.client.fullname }}{% endif %}</h3>
+                    <div class="font-size-control">
+                        <span style="font-size:12px;color:white;">A</span>
+                        <input type="range" id="font-size-slider" min="12" max="22" value="14" oninput="changeFontSize(this.value)" title="Font size">
+                        <span style="font-size:16px;color:white;">A</span>
+                    </div>
+                </div>
+                <button class="progress-btn" onclick="openProgress()"><i class="fas fa-route"></i> {% if user.user_type == 'runner' %}Update Progress{% else %}View Progress{% endif %}</button>
+            </div>
+            {% if agreed_price %}<div class="agreed-price"><i class="fas fa-handshake"></i> Agreed Price: <strong>${{ "%.2f"|format(agreed_price) }}</strong></div>{% endif %}
+            {% if active_errand %}<div class="tracking-info">
+                <div><i class="fas fa-shipping-fast" style="color:#28a745;"></i><strong>Status:</strong> {{ active_errand.status|title }}{% if active_errand.estimated_duration %}<span style="margin-left:10px;"><i class="fas fa-clock"></i> ETA: <span id="time-display">{{ active_errand.estimated_duration }}</span></span>{% endif %}</div>
+                {% if user.user_type == 'runner' and active_errand.status == 'ongoing' %}<div style="display:flex;gap:6px;align-items:center;"><input type="text" id="duration-input" placeholder="ETA e.g. 10 mins" style="padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:12px;width:110px;"><button onclick="updateTracking({{ active_errand.errand_id }})" style="padding:5px 10px;background:#28a745;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">Set</button></div>{% endif %}
+            </div>{% endif %}
+
+            <div class="chat-messages" id="messages-area">
+                {% for msg in messages %}
+                <div class="message {% if msg.sender_id == user.id %}sent{% else %}received{% endif %}" data-message-id="{{ msg.id }}">
+                    {% if msg.content.startswith('<img') or msg.content.startswith('<audio') %}{{ msg.content|safe }}{% else %}{{ msg.content }}{% endif %}
+                    <div class="message-time">{{ msg.created_at | to_cat_time }}</div>
+                </div>
                 {% endfor %}
-            {% else %}
-                <li style="padding:20px;text-align:center;color:#999;">No other chats yet</li>
-            {% endif %}
-        </ul>
-    </div>
-
-    <!-- Main Chat Area -->
-    {% if active_chat %}
-    <div class="chat-main">
-
-        <!-- Fixed Header -->
-        <div class="chat-header">
-            <div class="header-left">
-                <a href="{{ url_for('chats') }}" class="back-btn">
-                    <i class="fas fa-arrow-left" style="font-size:14px;"></i>
-                </a>
-                <h3>
-                    {% if user.user_type == 'client' %}{{ active_chat.runner.fullname }}
-                    {% else %}{{ active_chat.client.fullname }}{% endif %}
-                </h3>
             </div>
-            <button class="progress-btn" onclick="openProgress()">
-                <i class="fas fa-route"></i>
-                {% if user.user_type == 'runner' %}Update Progress{% else %}View Progress{% endif %}
-            </button>
-        </div>
 
-        {% if agreed_price %}
-        <div class="agreed-price">
-            <i class="fas fa-handshake"></i> Agreed Price: <strong>${{ "%.2f"|format(agreed_price) }}</strong>
+            <div class="chat-input-area">
+                <button class="icon-btn" id="camera-btn"><i class="fas fa-camera"></i></button>
+                <input type="file" id="image-input" accept="image/*" capture="environment" style="display:none;">
+                <button class="icon-btn" id="voice-record-btn"><i class="fas fa-microphone"></i></button>
+                <span id="recording-time" style="display:none;">00:00</span>
+                <input type="text" class="chat-input" id="message-input" placeholder="Type a message…">
+                <button class="send-btn" onclick="sendMessage({{ active_chat.id }})"><i class="fas fa-paper-plane"></i></button>
+            </div>
+
+            <div class="voice-unsupported-msg" id="voice-unsupported-msg"><i class="fas fa-exclamation-circle"></i> Voice messages are not supported on this browser/device.</div>
+            <div class="overlay-backdrop" id="overlay-backdrop" onclick="closeProgress()"></div>
+
+            <div class="progress-overlay" id="progress-overlay">
+                <div class="overlay-header"><h4 id="overlay-title">{% if user.user_type == 'runner' %}Update Progress{% else %}Errand Progress{% endif %}</h4><button class="overlay-close" onclick="closeProgress()"><i class="fas fa-times"></i></button></div>
+                <div class="overlay-body" id="overlay-body"></div>
+                <p class="overlay-note" id="overlay-note">{% if user.user_type == 'runner' %}{% if active_errand and active_errand.runner_marked_complete %}Waiting for client confirmation{% else %}Tap each stage as you complete it{% endif %}{% else %}{% if active_errand and active_errand.runner_marked_complete %}Runner marked complete – please confirm delivery{% else %}Live updates from your runner{% endif %}{% endif %}</p>
+                <div class="overlay-footer" id="overlay-footer">
+                    <!-- dynamically filled -->
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="chat-main" style="align-items:center;justify-content:center;color:#999;">
+            <div style="text-align:center;"><i class="fas fa-comments" style="font-size:50px;margin-bottom:20px;color:#ddd;"></i><p>Select a chat to start messaging</p></div>
         </div>
         {% endif %}
+    </div>
 
-        {% if active_errand %}
-        <div class="tracking-info">
-            <div>
-                <i class="fas fa-shipping-fast" style="color:#28a745;"></i>
-                <strong>Status:</strong> {{ active_errand.status|title }}
-                {% if active_errand.estimated_duration %}
-                <span style="margin-left:10px;">
-                    <i class="fas fa-clock"></i> ETA: <span id="time-display">{{ active_errand.estimated_duration }}</span>
-                </span>
-                {% endif %}
-            </div>
-            {% if user.user_type == 'runner' and active_errand.status == 'ongoing' %}
-            <div style="display:flex;gap:6px;align-items:center;">
-                <input type="text" id="duration-input" placeholder="ETA e.g. 10 mins"
-                    style="padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:12px;width:110px;">
-                <button onclick="updateTracking({{ active_errand.errand_id }})"
-                    style="padding:5px 10px;background:#28a745;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">
-                    Set
-                </button>
-            </div>
-            {% endif %}
-        </div>
+    <div class="bottom-nav">
+        {% if user.user_type == 'client' %}
+        <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' or request.endpoint == 'chat_detail' %}active{% endif %}"><i class="fas fa-comment-dots"></i><span>Chats</span></a>
+        <a href="{{ url_for('order_history') }}" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Errands</span></a>
+        <a href="{{ url_for('home_page') }}" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="{{ url_for('order_history') }}" class="nav-item"><i class="fas fa-history"></i><span>History</span></a>
+        {% else %}
+        <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' or request.endpoint == 'chat_detail' %}active{% endif %}"><i class="fas fa-comment-dots"></i><span>Chats</span></a>
+        <a href="{{ url_for('runnerhome') }}" class="nav-item"><i class="fas fa-tasks"></i><span>Active</span></a>
+        <a href="{{ url_for('runneravailable_errands') }}" class="nav-item"><i class="fas fa-list-ul"></i><span>Available</span></a>
+        <a href="{{ url_for('runnercompleted') }}" class="nav-item"><i class="fas fa-check-double"></i><span>Completed</span></a>
         {% endif %}
-
-        <!-- Messages -->
-        <div class="chat-messages" id="messages-area">
-            {% for msg in messages %}
-            <div class="message {% if msg.sender_id == user.id %}sent{% else %}received{% endif %}"
-                 data-message-id="{{ msg.id }}">
-                {% if msg.content.startswith('<img') or msg.content.startswith('<audio') %}
-                    {{ msg.content|safe }}
-                {% else %}
-                    {{ msg.content }}
-                {% endif %}
-                <div class="message-time">{{ msg.created_at.strftime('%H:%M') }}</div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Input Area -->
-        <div class="chat-input-area">
-            <button class="icon-btn" id="camera-btn" title="Take a photo">
-                <i class="fas fa-camera"></i>
-            </button>
-            <input type="file" id="image-input" accept="image/*" capture="environment" style="display:none;">
-            <button class="icon-btn" id="voice-record-btn" title="Voice message">
-                <i class="fas fa-microphone"></i>
-            </button>
-            <span id="recording-time" style="display:none;">00:00</span>
-            <input type="text" class="chat-input" id="message-input" placeholder="Type a message…">
-            <button class="send-btn" onclick="sendMessage({{ active_chat.id }})">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-
-        <!-- Backdrop -->
-        <div class="overlay-backdrop" id="overlay-backdrop" onclick="closeProgress()"></div>
-
-        <!-- Progress Overlay -->
-        <div class="progress-overlay" id="progress-overlay">
-            <div class="overlay-header">
-                <h4 id="overlay-title">
-                    {% if user.user_type == 'runner' %}Update Progress{% else %}Errand Progress{% endif %}
-                </h4>
-                <button class="overlay-close" onclick="closeProgress()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="overlay-body" id="overlay-body">
-                <!-- Rendered by JS -->
-            </div>
-            <p class="overlay-note" id="overlay-note">
-                {% if user.user_type == 'runner' %}
-                    {% if active_errand and active_errand.runner_marked_complete %}
-                        Waiting for client confirmation
-                    {% else %}
-                        Tap each stage as you complete it
-                    {% endif %}
-                {% else %}
-                    {% if active_errand and active_errand.runner_marked_complete %}
-                        Runner marked complete - please confirm delivery
-                    {% else %}
-                        Live updates from your runner
-                    {% endif %}
-                {% endif %}
-            </p>
-            <div class="overlay-footer">
-                {% if user.user_type == 'client' %}
-                <button class="confirm-delivery-btn" id="confirm-delivery-btn"
-                        onclick="confirmDelivery()" disabled>
-                    <i class="fas fa-check-circle"></i> Confirm Delivery
-                </button>
-                {% endif %}
-                {% if user.user_type == 'runner' %}
-                <button class="confirm-delivery-btn" id="runner-complete-btn"
-                        onclick="runnerMarkComplete()" disabled
-                        style="background:#1565c0;">
-                    <i class="fas fa-flag-checkered"></i> Mark Errand Completed
-                </button>
-                {% endif %}
-            </div>
-        </div>
-
     </div>
-
-    {% else %}
-    <div class="chat-main" style="align-items:center;justify-content:center;color:#999;">
-        <div style="text-align:center;">
-            <i class="fas fa-comments" style="font-size:50px;margin-bottom:20px;color:#ddd;"></i>
-            <p>Select a chat to start messaging</p>
-        </div>
-    </div>
-    {% endif %}
 </div>
 
-<!-- Bottom Nav -->
-<div class="bottom-nav">
-    {% if user.user_type == 'client' %}
-    <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' %}active{% endif %}">
-        <i class="fas fa-comment-dots"></i><span>Chats</span>
-    </a>
-    <a href="{{ url_for('order_history') }}" class="nav-item">
-        <i class="fas fa-clipboard-list"></i><span>Errands</span>
-    </a>
-    <a href="{{ url_for('home_page') }}" class="nav-item">
-        <i class="fas fa-home"></i><span>Home</span>
-    </a>
-    <a href="{{ url_for('order_history') }}" class="nav-item">
-        <i class="fas fa-history"></i><span>History</span>
-    </a>
-    {% else %}
-    <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' %}active{% endif %}">
-        <i class="fas fa-comment-dots"></i><span>Chats</span>
-    </a>
-    <a href="{{ url_for('runnerhome') }}" class="nav-item">
-        <i class="fas fa-tasks"></i><span>Active</span>
-    </a>
-    <a href="{{ url_for('runneravailable_errands') }}" class="nav-item">
-        <i class="fas fa-list-ul"></i><span>Available</span>
-    </a>
-    <a href="{{ url_for('runnercompleted') }}" class="nav-item">
-        <i class="fas fa-check-double"></i><span>Completed</span>
-    </a>
-    {% endif %}
+<!-- Rating Modal -->
+<div id="rating-modal" class="modal">
+    <div class="modal-content">
+        <h3>Rate Runner</h3>
+        <div class="stars" id="rating-stars">
+            <i class="fas fa-star star" data-star="1"></i>
+            <i class="fas fa-star star" data-star="2"></i>
+            <i class="fas fa-star star" data-star="3"></i>
+            <i class="fas fa-star star" data-star="4"></i>
+            <i class="fas fa-star star" data-star="5"></i>
+        </div>
+        <textarea id="rating-comment" placeholder="Leave a comment (optional)" rows="3"></textarea>
+        <button class="btn-primary" onclick="submitRating()">Submit Rating</button>
+        <button class="btn-outline" onclick="closeRatingModal()">Cancel</button>
+    </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const currentChatId = {{ active_chat.id if active_chat else 0 }};
-    const currentUserId = {{ user.id }};
-    const userType = "{{ user.user_type }}";
-    const errandId = {{ active_chat.errand_id if active_chat else 0 }};
+// ── Context ───────────────────────────────────────────────────────────
+const currentChatId = {{ active_chat.id if active_chat else 0 }};
+const currentUserId = {{ user.id }};
+const userType = "{{ user.user_type }}";
+const errandId = {{ active_chat.errand_id if active_chat else 0 }};
 
-    let lastMessageId = {{ messages[-1].id if messages else 0 }};
-    let pollInterval = null;
-    const locallySentIds = new Set();
+let lastMessageId = {{ messages[-1].id if messages else 0 }};
+let pollInterval = null;
+const locallySentIds = new Set();
 
-    const STAGES = [
-        "Errand started",
-        "Picked up",
-        "Out for delivery",
-        "On my way",
-        "Almost there",
-        "Delivered"
-    ];
+// ── Progress ──────────────────────────────────────────────────────────
+const STAGES = ["Errand started","Picked up","Out for delivery","On my way","Almost there","Delivered"];
+let stageProgress = new Array(STAGES.length).fill(false);
+let runnerMarkedComplete = false;
+let errandDeducted = false;
 
-    // Load saved progress from server or localStorage as fallback
-    let stageProgress = JSON.parse(localStorage.getItem('progress_' + errandId) || 'null')
-        || new Array(STAGES.length).fill(false);
-    let runnerMarkedComplete = false;
+// ── Client button state ──────────────────────────────────────────────
+let errandStartedAt = null;
+let errandCompleted = false;
+let selectedRating = 0;
 
-    const messagesArea = document.getElementById('messages-area');
-    if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+// ── Map ───────────────────────────────────────────────────────────────
+let progressOverlayOpen = false;
+let map = null, pickupMarker = null, deliveryMarker = null, runnerMarker = null, routePolyline = null;
+let watchId = null, currentRunnerPos = null, errandCoords = null;
+let locationSharingInterval = null, locationSharingActive = false;
 
-    // ---- Progress overlay ----
-    async function openProgress() {
-        document.getElementById('progress-overlay').classList.add('open');
-        document.getElementById('overlay-backdrop').classList.add('open');
-        // Fetch latest progress first before rendering
-        await pollProgress();
-        renderProgress();
-    }
+const messagesArea = document.getElementById('messages-area');
+if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
 
-    function closeProgress() {
-        document.getElementById('progress-overlay').classList.remove('open');
-        document.getElementById('overlay-backdrop').classList.remove('open');
-    }
-
-    function renderProgress() {
-        const body = document.getElementById('overlay-body');
-        const confirmBtn = document.getElementById('confirm-delivery-btn');
-        const runnerCompleteBtn = document.getElementById('runner-complete-btn');
-        let html = '';
-
-        if (userType === 'runner') {
-            // Calculate the current stage index (the first false)
-            let currentStageIndex = stageProgress.findIndex(completed => !completed);
-            STAGES.forEach((label, i) => {
-                const checked = stageProgress[i];
-                const isClickable = i === currentStageIndex && !runnerMarkedComplete;
-                const isLast = i === STAGES.length - 1;
-                html += `<div class="runner-stage-wrap">`;
-                html += `<div class="runner-stage-row">`;
-                html += `<div class="runner-check ${checked ? 'checked' : ''} ${isClickable ? 'clickable' : ''}" onclick="toggleStage(${i})">`;
-                if (checked) html += `<i class="fas fa-check" style="font-size:11px;"></i>`;
-                html += `</div>`;
-                html += `<div class="runner-stage-label ${checked ? 'checked' : ''}">${label}</div>`;
-                html += `</div>`;
-                if (!isLast) html += `<div class="runner-stage-line ${checked ? 'checked' : ''}"></div>`;
-                html += `</div>`;
-            });
-            
-            // Handle runner's complete button
-            if (runnerCompleteBtn) {
-                const allDone = stageProgress.every(Boolean);
-                runnerCompleteBtn.disabled = !allDone || runnerMarkedComplete;
-                if (runnerMarkedComplete) {
-                    runnerCompleteBtn.innerHTML = '<i class="fas fa-check-circle"></i> Errand Marked Complete';
-                }
-            }
-        } else {
-            STAGES.forEach((label, i) => {
-                const done = stageProgress[i];
-                const current = !done && (i === 0 || stageProgress[i - 1]);
-                const isLast = i === STAGES.length - 1;
-                html += `<div class="stage-row">`;
-                html += `<div class="stage-track">`;
-                html += `<div class="stage-dot ${done ? 'done' : current ? 'current' : ''}">`;
-                if (done) html += `<i class="fas fa-check" style="font-size:11px;"></i>`;
-                else html += `${i + 1}`;
-                html += `</div>`;
-                if (!isLast) html += `<div class="stage-line ${done ? 'done' : ''}"></div>`;
-                html += `</div>`;
-                html += `<div class="stage-label ${done ? 'done' : current ? 'current' : ''}">${label}</div>`;
-                html += `</div>`;
-            });
-
-            if (confirmBtn) {
-                // Client confirm button is enabled only if runner marked complete
-                confirmBtn.disabled = !runnerMarkedComplete;
-            }
-        }
-        body.innerHTML = html;
-    }
-
-    function toggleStage(i) {
-        if (userType !== 'runner') return;
-        
-        // Calculate the current stage index (the first false)
-        let currentStageIndex = stageProgress.findIndex(completed => !completed);
-        if (currentStageIndex === -1) {
-            // All stages are done
-            return;
-        }
-        
-        // Only allow clicking the current stage
-        if (i !== currentStageIndex) {
-            return;
-        }
-        
-        // Mark this stage as complete
-        stageProgress[i] = true;
-        
-        // Save locally
-        localStorage.setItem('progress_' + errandId, JSON.stringify(stageProgress));
-        // Push to server
-        fetch('/api/update_stage_progress', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errand_id: errandId, stages: stageProgress })
-        }).catch(() => {});
-        renderProgress();
-    }
-
-    function runnerMarkComplete() {
-        if (!confirm('Are you sure you want to mark this errand as complete?')) return;
-        fetch('/api/runner_mark_complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errand_id: errandId })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                runnerMarkedComplete = true;
-                renderProgress();
-                alert('Errand marked as complete! Waiting for client confirmation.');
-            } else {
-                alert(data.error || 'Could not mark errand as complete.');
-            }
-        })
-        .catch(() => alert('Network error.'));
-    }
-
-    function confirmDelivery() {
-        if (!confirm('Confirm that the errand has been delivered and mark as complete?')) return;
-        fetch('/api/complete_errand', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errand_id: errandId, chat_id: currentChatId })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert('Errand confirmed as completed!');
-                window.location.href = '/order_history';
-            } else {
-                alert(data.error || 'Could not complete errand.');
-            }
-        })
-        .catch(() => alert('Network error.'));
-    }
-
-    // Poll progress from server every 5s (so client sees runner updates)
-    function pollProgress() {
-        if (!errandId) return Promise.resolve();
-        return fetch('/api/get_stage_progress?errand_id=' + errandId)
-            .then(r => r.json())
-            .then(data => {
-                if (data.stages) {
-                    stageProgress = data.stages;
-                    localStorage.setItem('progress_' + errandId, JSON.stringify(stageProgress));
-                }
-                if (typeof data.runner_marked_complete !== 'undefined') {
-                    runnerMarkedComplete = data.runner_marked_complete;
-                }
-                // Re-render if overlay is open
-                if (document.getElementById('progress-overlay').classList.contains('open')) {
-                    renderProgress();
-                }
-            })
-            .catch(() => {});
-    }
-    setInterval(pollProgress, 5000);
-
-    // ---- Text message ----
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-    }
-
-    function createMessageEl(id, content, isSent, time) {
-        const div = document.createElement('div');
-        div.className = 'message ' + (isSent ? 'sent' : 'received');
-        div.setAttribute('data-message-id', id);
-        const isHtml = content && (content.startsWith('<img') || content.startsWith('<audio'));
-        div.innerHTML = (isHtml ? content : escapeHtml(content))
-            + '<div class="message-time">' + escapeHtml(time) + '</div>';
-        return div;
-    }
-
-    function sendMessage(chatId) {
-        const input = document.getElementById('message-input');
-        const content = input.value.trim();
-        if (!content) return;
-        fetch('/api/send_message', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, content })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                locallySentIds.add(data.message.id);
-                lastMessageId = data.message.id;
-                messagesArea.appendChild(createMessageEl(data.message.id, data.message.content, true, data.message.created_at));
-                messagesArea.scrollTop = messagesArea.scrollHeight;
-                input.value = '';
-            }
-        });
-    }
-
-    document.getElementById('message-input')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') sendMessage(currentChatId);
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+        if (messagesArea) setTimeout(() => messagesArea.scrollTop = messagesArea.scrollHeight, 100);
     });
+}
 
-    // ---- Camera / Image ----
-    const cameraBtn = document.getElementById('camera-btn');
-    const imageInput = document.getElementById('image-input');
-    if (cameraBtn && imageInput) {
-        cameraBtn.addEventListener('click', () => imageInput.click());
-        imageInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (!file || !file.type.startsWith('image/')) return;
-            const fd = new FormData();
-            fd.append('chat_id', currentChatId);
-            fd.append('image', file);
-            fetch('/api/send_image', { method: 'POST', body: fd })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        locallySentIds.add(data.message.id);
-                        lastMessageId = data.message.id;
-                        messagesArea.appendChild(createMessageEl(data.message.id, data.message.content, true, data.message.created_at));
-                        messagesArea.scrollTop = messagesArea.scrollHeight;
-                    }
-                });
-            imageInput.value = '';
+// Font size
+function changeFontSize(size) {
+    document.querySelectorAll('.message').forEach(el => el.style.fontSize = size + 'px');
+    localStorage.setItem('chatFontSize', size);
+}
+const savedSize = localStorage.getItem('chatFontSize') || 14;
+document.getElementById('font-size-slider').value = savedSize;
+changeFontSize(savedSize);
+
+// ═══════════════════════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════════════════════
+async function fetchErrandCoords() {
+    if (errandCoords) return errandCoords;
+    if (!errandId) return null;
+    const r = await fetch(`/api/errand_coords/${errandId}`);
+    const d = await r.json();
+    errandCoords = d;
+    return d;
+}
+
+function initMap() {
+    if (map) { map.invalidateSize(); return; }
+    const container = document.getElementById('map-container');
+    if (!container) return;
+    map = L.map('map-container').setView([-17.8292, 31.0522], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'&copy; OpenStreetMap' }).addTo(map);
+    fetchErrandCoords().then(coords => {
+        if (!coords) return;
+        if (coords.pickup_lat && coords.pickup_lng) {
+            pickupMarker = L.marker([coords.pickup_lat, coords.pickup_lng], {
+                icon: L.divIcon({ className:'pickup-icon', html:'A', iconSize:[30,30] })
+            }).addTo(map).bindPopup('Pickup');
+        }
+        if (coords.dropoff_lat && coords.dropoff_lng) {
+            deliveryMarker = L.marker([coords.dropoff_lat, coords.dropoff_lng], {
+                icon: L.divIcon({ className:'delivery-icon', html:'B', iconSize:[30,30] })
+            }).addTo(map).bindPopup('Delivery');
+        }
+        const pts = [pickupMarker?.getLatLng(), deliveryMarker?.getLatLng()].filter(Boolean);
+        if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding:[20,20] });
+        if (userType === 'runner') startRunnerLocationWatch();
+        else checkLiveLocationSharing();
+    });
+}
+
+function startRunnerLocationWatch() {
+    if (!navigator.geolocation) return;
+    watchId = navigator.geolocation.watchPosition(pos => {
+        currentRunnerPos = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+        updateRunnerMarker();
+        if (locationSharingActive) {
+            fetch('/api/update_runner_location', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({ errand_id:errandId, lat:currentRunnerPos.lat, lng:currentRunnerPos.lng })
+            });
+        }
+    }, () => {}, { enableHighAccuracy:true, maximumAge:10000, timeout:5000 });
+}
+function stopRunnerLocationWatch() { if (watchId!==null) { navigator.geolocation.clearWatch(watchId); watchId=null; } }
+
+function updateRunnerMarker() {
+    if (!map || !currentRunnerPos) return;
+    if (!runnerMarker) {
+        runnerMarker = L.marker([currentRunnerPos.lat, currentRunnerPos.lng], {
+            icon: L.divIcon({ className:'runner-icon', html:'🏃', iconSize:[30,30] })
+        }).addTo(map).bindPopup('Your Location');
+    } else {
+        runnerMarker.setLatLng([currentRunnerPos.lat, currentRunnerPos.lng]);
+    }
+    if (pickupMarker && deliveryMarker && currentRunnerPos) {
+        drawRoute([[currentRunnerPos.lat, currentRunnerPos.lng], pickupMarker.getLatLng(), deliveryMarker.getLatLng()]);
+    }
+}
+
+async function fetchRoute(waypoints) {
+    const coords = waypoints.map(w => `${w[1]},${w[0]}`).join(';');
+    const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+    const d = await r.json();
+    return d.code === 'Ok' ? d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]) : null;
+}
+async function drawRoute(waypoints) {
+    const rc = await fetchRoute(waypoints);
+    if (routePolyline) map.removeLayer(routePolyline);
+    if (rc) routePolyline = L.polyline(rc, { color:'#28a745', weight:5 }).addTo(map);
+}
+
+async function checkLiveLocationSharing() {
+    if (userType !== 'client') return;
+    const r = await fetch(`/api/live_location_status/${errandId}`);
+    const d = await r.json();
+    locationSharingActive = d.active;
+    if (locationSharingActive) startLiveLocationPolling();
+}
+function startLiveLocationPolling() {
+    if (locationSharingInterval) return;
+    locationSharingInterval = setInterval(async () => {
+        const r = await fetch(`/api/runner_location/${errandId}`);
+        const d = await r.json();
+        if (d.lat && d.lng) {
+            currentRunnerPos = { lat:d.lat, lng:d.lng };
+            updateRunnerMarkerForClient();
+        } else {
+            clearInterval(locationSharingInterval);
+            locationSharingInterval = null;
+            locationSharingActive = false;
+            if (runnerMarker) { map.removeLayer(runnerMarker); runnerMarker = null; }
+        }
+    }, 3000);
+}
+function updateRunnerMarkerForClient() {
+    if (!map || !currentRunnerPos) return;
+    if (!runnerMarker) {
+        runnerMarker = L.marker([currentRunnerPos.lat, currentRunnerPos.lng], {
+            icon: L.divIcon({ className:'runner-icon', html:'🏃', iconSize:[30,30] })
+        }).addTo(map).bindPopup('Runner Location');
+    } else {
+        runnerMarker.setLatLng([currentRunnerPos.lat, currentRunnerPos.lng]);
+    }
+}
+
+async function requestLiveLocation() {
+    const r = await fetch('/api/request_runner_location', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
+    });
+    const d = await r.json();
+    if (d.success) {
+        alert('Location request sent.');
+        document.getElementById('request-location-btn').disabled = true;
+    } else alert(d.error || 'Failed');
+}
+async function respondLocationRequest(accept) {
+    const r = await fetch('/api/respond_location_request', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, accept})
+    });
+    const d = await r.json();
+    if (d.success) {
+        if (accept) locationSharingActive = true;
+        document.getElementById('location-request-prompt').style.display = 'none';
+    } else alert(d.error || 'Failed');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PROGRESS OVERLAY
+// ═══════════════════════════════════════════════════════════════════════
+async function openProgress() {
+    progressOverlayOpen = true;
+    document.getElementById('progress-overlay').classList.add('open');
+    document.getElementById('overlay-backdrop').classList.add('open');
+    await fetchServerProgress();
+    await fetchClientButtonState();
+    renderProgress();
+    if (userType === 'runner') setInterval(pollLocationRequest, 5000);
+}
+
+async function closeProgress() {
+    progressOverlayOpen = false;
+    document.getElementById('progress-overlay').classList.remove('open');
+    document.getElementById('overlay-backdrop').classList.remove('open');
+    if (map) { map.remove(); map = null; pickupMarker = deliveryMarker = runnerMarker = routePolyline = null; }
+    clearInterval(locationSharingInterval);
+    stopRunnerLocationWatch();
+}
+
+async function fetchServerProgress() {
+    if (!errandId) return;
+    const r = await fetch(`/api/stage_progress?errand_id=${errandId}`);
+    const d = await r.json();
+    if (userType === 'runner' && progressOverlayOpen) {
+        if (typeof d.errand_deducted !== 'undefined') errandDeducted = d.errand_deducted;
+        return;
+    }
+    if (Array.isArray(d.stages)) stageProgress = d.stages;
+    if (typeof d.runner_marked_complete !== 'undefined') runnerMarkedComplete = d.runner_marked_complete;
+    if (typeof d.errand_deducted !== 'undefined') errandDeducted = d.errand_deducted;
+}
+
+async function fetchClientButtonState() {
+    if (userType !== 'client' || !errandId) return;
+    try {
+        const r = await fetch(`/api/active_errand/${errandId}`);
+        const d = await r.json();
+        if (d.start_time) {
+            errandStartedAt = new Date(d.start_time);
+        } else {
+            errandStartedAt = null;
+        }
+    } catch(e) {}
+}
+
+function renderProgress() {
+    const body = document.getElementById('overlay-body');
+    let html = '';
+
+    if (userType === 'runner') {
+        const currentStageIndex = stageProgress.findIndex(d => !d);
+        STAGES.forEach((label, i) => {
+            const checked = stageProgress[i];
+            const isClickable = (i === currentStageIndex) && !runnerMarkedComplete;
+            const isLocked = !checked && !isClickable;
+            const isLast = i === STAGES.length - 1;
+            html += `<div class="runner-stage-wrap">
+                <div class="runner-stage-row">
+                    <div class="runner-check ${checked ? 'checked' : ''} ${isClickable ? 'clickable' : ''} ${isLocked ? 'locked' : ''}" onclick="toggleStage(${i})" title="${isLocked ? 'Complete previous stages first' : ''}">${checked ? '<i class="fas fa-check" style="font-size:11px;"></i>' : ''}</div>
+                    <div class="runner-stage-label ${checked ? 'checked' : ''}">${label}</div>
+                </div>
+                ${!isLast ? `<div class="runner-stage-line ${checked ? 'checked' : ''}"></div>` : ''}
+            </div>`;
+        });
+
+        // Runner's 2‑in‑1 button
+        const started = stageProgress[0]; // true if Errand started has been ticked
+        const footer = document.getElementById('overlay-footer');
+        if (footer) {
+            const btnText = started ? 'Mark Errand Completed' : 'Cancel Errand';
+            const btnAction = started ? 'runnerMarkComplete()' : 'runnerCancelErrand()';
+            const disabled = started ? (!stageProgress.every(Boolean) || runnerMarkedComplete) : false;
+            footer.innerHTML = `
+                <button class="${started ? 'confirm-delivery-btn' : 'cancel-btn'}" id="runner-complete-btn" onclick="${btnAction}" ${disabled ? 'disabled' : ''} style="background:${started ? '#1565c0' : '#d32f2f'}; color:white;">
+                    <i class="fas fa-${started ? 'flag-checkered' : 'times-circle'}"></i> ${btnText}
+                </button>
+            `;
+        }
+    } else {
+        // Client view – read-only stages
+        STAGES.forEach((label, i) => {
+            const done = stageProgress[i];
+            const hasPreviousDone = i > 0 && stageProgress[i-1];
+            const current = !done && hasPreviousDone;
+            const isLast = i === STAGES.length - 1;
+            html += `<div class="stage-row">
+                <div class="stage-track">
+                    <div class="stage-dot ${done ? 'done' : current ? 'current' : ''}">${done ? '<i class="fas fa-check" style="font-size:11px;"></i>' : (i+1)}</div>
+                    ${!isLast ? `<div class="stage-line ${done ? 'done' : ''}"></div>` : ''}
+                </div>
+                <div class="stage-label ${done ? 'done' : current ? 'current' : ''}">${label}</div>
+            </div>`;
         });
     }
 
-    // ---- Voice recording ----
-    let mediaRecorder = null, audioChunks = [], recStart = 0, recTimer = null;
-    const voiceBtn = document.getElementById('voice-record-btn');
-    const recTimeSpan = document.getElementById('recording-time');
-
-    function getSupportedMime() {
-        for (const t of ['audio/webm','audio/mp4','audio/mpeg','audio/wav'])
-            if (MediaRecorder.isTypeSupported(t)) return t;
-        return null;
+    // Map + location
+    let mapHtml = errandId ? `<div id="map-container" class="active" style="height:200px;"></div>` : '';
+    if (userType === 'client') {
+        mapHtml += `<button class="location-btn" id="request-location-btn" onclick="requestLiveLocation()"><i class="fas fa-map-marker-alt"></i> Request Runner Live Location</button>`;
+    } else if (userType === 'runner') {
+        mapHtml += `<div id="location-request-prompt" style="display:none; margin-top:8px;"><p style="font-size:13px; color:#555;">Client is requesting your live location.</p><div class="location-request-buttons"><button class="accept-location-btn" onclick="respondLocationRequest(true)">Accept</button><button class="decline-location-btn" onclick="respondLocationRequest(false)">Decline</button></div></div>`;
     }
+    body.innerHTML = html + mapHtml;
+    if (progressOverlayOpen) setTimeout(initMap, 100);
 
-    function toggleVoice() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-            voiceBtn.classList.remove('recording');
-            clearInterval(recTimer);
-            recTimeSpan.style.display = 'none';
+    // Client button (3‑in‑1 with countdown)
+    if (userType === 'client') {
+        const footer = document.getElementById('overlay-footer');
+        if (!footer) return;
+        let btnHtml = '';
+        const now = new Date();
+        if (!errandStartedAt) {
+            // Not started yet
+            btnHtml = `<button class="cancel-btn" id="action-btn" onclick="cancelErrand()"><i class="fas fa-times-circle"></i> Cancel Errand</button>`;
         } else {
-            if (!navigator.mediaDevices?.getUserMedia) { alert('Voice recording not supported.'); return; }
-            const mime = getSupportedMime();
-            if (!mime) { alert('No supported audio format.'); return; }
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-                audioChunks = [];
-                mediaRecorder.addEventListener('dataavailable', e => { if (e.data.size > 0) audioChunks.push(e.data); });
-                mediaRecorder.addEventListener('stop', () => {
-                    const blob = new Blob(audioChunks, { type: mime });
-                    uploadVoice(blob);
-                    stream.getTracks().forEach(t => t.stop());
-                });
-                mediaRecorder.start();
-                recStart = Date.now();
-                voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
-                voiceBtn.classList.add('recording');
-                recTimeSpan.style.display = 'inline-block';
-                recTimer = setInterval(() => {
-                    const s = Math.floor((Date.now() - recStart) / 1000);
-                    recTimeSpan.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-                }, 1000);
-            }).catch(() => alert('Cannot access microphone.'));
+            const elapsed = (now - errandStartedAt) / 1000; // seconds
+            if (elapsed < 60) {
+                // 1‑minute countdown
+                const remaining = Math.ceil(60 - elapsed);
+                btnHtml = `<button class="cancel-btn" id="action-btn" disabled><i class="fas fa-hourglass-half"></i> Cancel Errand (${remaining}s)</button>`;
+            } else {
+                // After 1 minute
+                if (runnerMarkedComplete && errandCompleted) {
+                    btnHtml = `<button class="rate-btn" id="action-btn" onclick="openRatingModal()"><i class="fas fa-star"></i> Rate Runner</button>`;
+                } else {
+                    const disabled = !runnerMarkedComplete;
+                    const blink = runnerMarkedComplete ? 'animation: pulse 1.5s infinite;' : '';
+                    btnHtml = `<button class="confirm-delivery-btn" id="action-btn" onclick="confirmDelivery()" ${disabled ? 'disabled' : ''} style="${blink}"><i class="fas fa-check-circle"></i> Confirm Delivery</button>`;
+                }
+            }
         }
+        footer.innerHTML = btnHtml;
     }
+}
 
-    function uploadVoice(blob) {
-        const fd = new FormData();
-        fd.append('chat_id', currentChatId);
-        fd.append('audio', blob, 'voice.webm');
-        fetch('/api/send_voice_message', { method: 'POST', body: fd })
+// Poll for location request (runner)
+async function pollLocationRequest() {
+    if (userType !== 'runner' || !progressOverlayOpen || !errandId) return;
+    const r = await fetch(`/api/live_location_request_status/${errandId}`);
+    const d = await r.json();
+    const prompt = document.getElementById('location-request-prompt');
+    if (prompt) prompt.style.display = d.requested && !locationSharingActive ? 'block' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STAGE TOGGLING
+// ═══════════════════════════════════════════════════════════════════════
+async function toggleStage(i) {
+    if (userType !== 'runner') return;
+    const currentStageIndex = stageProgress.findIndex(d => !d);
+    if (currentStageIndex === -1 || i !== currentStageIndex) return;
+    if (i === 0 && !errandDeducted) {
+        const r = await fetch('/api/deduct_errand_credit', {
+            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
+        });
+        const d = await r.json();
+        if (d.success) { errandDeducted = true; await markStageComplete(i); }
+        else if (d.insufficient) alert('You have exhausted your errands. Please top up.');
+        else alert(d.error || 'Could not start errand.');
+    } else {
+        await markStageComplete(i);
+    }
+}
+
+async function markStageComplete(i) {
+    stageProgress[i] = true;
+    renderProgress();
+    const r = await fetch('/api/update_stage_progress', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, stages:stageProgress})
+    });
+    const d = await r.json();
+    if (!d.success) { stageProgress[i] = false; renderProgress(); alert('Failed to save progress.'); }
+}
+
+function runnerMarkComplete() {
+    if (!confirm('Mark this errand as complete?')) return;
+    fetch('/api/runner_mark_complete', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
+    })
+    .then(r => r.json()).then(d => {
+        if (d.success) { runnerMarkedComplete = true; renderProgress(); alert('Errand marked complete!'); }
+        else alert(d.error);
+    });
+}
+
+function runnerCancelErrand() {
+    if (!confirm('Cancel this errand? You will not be able to run it.')) return;
+    fetch('/api/runner_cancel_errand', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
+    })
+    .then(r => r.json()).then(d => {
+        if (d.success) window.location.reload();
+        else alert(d.error || 'Could not cancel errand.');
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CLIENT ACTIONS
+// ═══════════════════════════════════════════════════════════════════════
+function cancelErrand() {
+    if (!confirm('Cancel this errand?')) return;
+    fetch('/api/cancel_errand', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
+    })
+    .then(r => r.json()).then(d => {
+        if (d.success) window.location.reload();
+        else alert(d.error);
+    });
+}
+
+function confirmDelivery() {
+    if (!confirm('Confirm delivery and complete errand?')) return;
+    fetch('/api/complete_errand', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, chat_id:currentChatId})
+    })
+    .then(r => r.json()).then(d => {
+        if (d.success) { errandCompleted = true; renderProgress(); alert('Errand confirmed!'); }
+        else alert(d.error);
+    });
+}
+
+function openRatingModal() {
+    document.getElementById('rating-modal').style.display = 'flex';
+    selectedRating = 0; updateStars();
+}
+function closeRatingModal() { document.getElementById('rating-modal').style.display = 'none'; }
+function updateStars() {
+    document.querySelectorAll('#rating-stars i').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.star) <= selectedRating);
+    });
+}
+document.getElementById('rating-stars').addEventListener('click', e => {
+    if (e.target.classList.contains('star')) { selectedRating = parseInt(e.target.dataset.star); updateStars(); }
+});
+function submitRating() {
+    if (!selectedRating) { alert('Please select a rating.'); return; }
+    const comment = document.getElementById('rating-comment').value;
+    fetch('/api/rate_runner', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, rating:selectedRating, comment})
+    })
+    .then(r => r.json()).then(d => { if (d.success) { alert('Rating submitted!'); closeRatingModal(); } else alert(d.error); });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TICKS & MESSAGING (unchanged)
+// ═══════════════════════════════════════════════════════════════════════
+function updateMessageStatuses() {
+    if (!currentChatId) return;
+    fetch(`/api/get_messages?chat_id=${currentChatId}&after=0&status_info=true`)
+    .then(r => r.json()).then(data => {
+        if (!data.messages) return;
+        data.messages.forEach(msg => {
+            const el = document.querySelector(`[data-message-id="${msg.id}"]`);
+            if (el && msg.sender_id === currentUserId) {
+                let statusHtml = '';
+                if (msg.read_at) statusHtml = '<i class="fas fa-check-double blue"></i>';
+                else if (msg.delivered_at) statusHtml = '<i class="fas fa-check-double grey"></i>';
+                else statusHtml = '<i class="fas fa-check grey"></i>';
+                const statusEl = el.querySelector('.message-status');
+                if (statusEl) statusEl.innerHTML = statusHtml;
+                else el.insertAdjacentHTML('beforeend', `<div class="message-status">${statusHtml}</div>`);
+            }
+        });
+    });
+}
+setInterval(updateMessageStatuses, 5000);
+
+// Text / Camera / Voice (unchanged)
+function escapeHtml(s){ if(!s)return''; return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function createMessageEl(id, content, isSent, time) {
+    const div = document.createElement('div');
+    div.className = 'message ' + (isSent ? 'sent' : 'received');
+    div.setAttribute('data-message-id', id);
+    const isHtml = content && (content.startsWith('<img') || content.startsWith('<audio'));
+    div.innerHTML = (isHtml ? content : escapeHtml(content))
+        + '<div class="message-time">' + escapeHtml(time) + '</div>'
+        + (isSent ? '<div class="message-status"><i class="fas fa-check grey"></i></div>' : '');
+    return div;
+}
+function sendMessage(chatId) {
+    const input = document.getElementById('message-input');
+    const content = input.value.trim();
+    if (!content) return;
+    fetch('/api/send_message', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({chat_id:chatId, content}) })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            locallySentIds.add(data.message.id);
+            lastMessageId = data.message.id;
+            messagesArea.appendChild(createMessageEl(data.message.id, data.message.content, true, data.message.created_at));
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            input.value = '';
+        }
+    });
+}
+document.getElementById('message-input')?.addEventListener('keypress', e => { if (e.key==='Enter') sendMessage(currentChatId); });
+
+// Camera
+const cameraBtn = document.getElementById('camera-btn');
+const imageInput = document.getElementById('image-input');
+if (cameraBtn && imageInput) {
+    cameraBtn.addEventListener('click', () => imageInput.click());
+    imageInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const fd = new FormData(); fd.append('chat_id', currentChatId); fd.append('image', file);
+        fetch('/api/send_image', { method:'POST', body:fd })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    locallySentIds.add(data.message.id);
-                    lastMessageId = data.message.id;
+                    locallySentIds.add(data.message.id); lastMessageId = data.message.id;
                     messagesArea.appendChild(createMessageEl(data.message.id, data.message.content, true, data.message.created_at));
                     messagesArea.scrollTop = messagesArea.scrollHeight;
                 }
             });
-    }
+        imageInput.value = '';
+    });
+}
 
-    if (voiceBtn) voiceBtn.addEventListener('click', toggleVoice);
-
-    // ---- Message polling ----
-    function startPolling() {
-        if (!currentChatId) return;
-        pollInterval = setInterval(() => {
-            fetch(`/api/get_messages?chat_id=${currentChatId}&after=${lastMessageId}`)
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.messages?.length) return;
-                    let added = false;
-                    data.messages.forEach(msg => {
-                        if (locallySentIds.has(msg.id)) return;
-                        if (document.querySelector(`[data-message-id="${msg.id}"]`)) return;
-                        messagesArea.appendChild(createMessageEl(msg.id, msg.content, msg.sender_id === currentUserId, msg.created_at));
-                        if (msg.id > lastMessageId) lastMessageId = msg.id;
-                        added = true;
-                    });
-                    if (added) messagesArea.scrollTop = messagesArea.scrollHeight;
-                }).catch(() => {});
-        }, 2000);
-    }
-
-    // ---- Tracking update ----
-    function updateTracking(errandId) {
-        const input = document.getElementById('duration-input');
-        const duration = input.value.trim();
-        if (!duration) return;
-        fetch('/api/update_tracking', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ errand_id: errandId, duration })
+// Voice
+let mediaRecorder = null, audioChunks = [], recStart = 0, recTimer = null;
+const voiceBtn = document.getElementById('voice-record-btn');
+const recTimeSpan = document.getElementById('recording-time');
+const voiceUnsupMsg = document.getElementById('voice-unsupported-msg');
+function voiceIsSupported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
+function getSupportedMime(){ for(const t of ['audio/webm','audio/mp4','audio/mpeg','audio/wav']) if(MediaRecorder.isTypeSupported(t)) return t; return null; }
+function toggleVoice() {
+    if (!voiceIsSupported()) { if(voiceUnsupMsg){voiceUnsupMsg.style.display='block';setTimeout(()=>voiceUnsupMsg.style.display='none',4000);} return; }
+    if (mediaRecorder && mediaRecorder.state==='recording') {
+        mediaRecorder.stop(); voiceBtn.innerHTML='<i class="fas fa-microphone"></i>'; voiceBtn.classList.remove('recording'); clearInterval(recTimer); recTimeSpan.style.display='none';
+    } else {
+        const mime = getSupportedMime();
+        if (!mime) { if(voiceUnsupMsg){voiceUnsupMsg.style.display='block';setTimeout(()=>voiceUnsupMsg.style.display='none',4000);} return; }
+        navigator.mediaDevices.getUserMedia({audio:true})
+        .then(stream=>{
+            mediaRecorder = new MediaRecorder(stream, {mimeType:mime}); audioChunks=[];
+            mediaRecorder.addEventListener('dataavailable',e=>{if(e.data.size>0) audioChunks.push(e.data);});
+            mediaRecorder.addEventListener('stop',()=>{const blob=new Blob(audioChunks,{type:mime}); uploadVoice(blob); stream.getTracks().forEach(t=>t.stop());});
+            mediaRecorder.start(); recStart=Date.now(); voiceBtn.innerHTML='<i class="fas fa-stop"></i>'; voiceBtn.classList.add('recording'); recTimeSpan.style.display='inline-block';
+            recTimer=setInterval(()=>{const s=Math.floor((Date.now()-recStart)/1000);recTimeSpan.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;},1000);
         })
+        .catch(()=>{if(voiceUnsupMsg){voiceUnsupMsg.textContent='Microphone access was denied.';voiceUnsupMsg.style.display='block';setTimeout(()=>{voiceUnsupMsg.style.display='none';voiceUnsupMsg.textContent='Voice messages are not supported on this browser/device.';},4000);}});
+    }
+}
+function uploadVoice(blob) {
+    const fd = new FormData(); fd.append('chat_id', currentChatId); fd.append('audio', blob, 'voice.webm');
+    fetch('/api/send_voice_message', { method:'POST', body:fd })
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                const d = document.getElementById('time-display');
-                if (d) d.textContent = duration;
-                input.value = '';
+                locallySentIds.add(data.message.id); lastMessageId = data.message.id;
+                messagesArea.appendChild(createMessageEl(data.message.id, data.message.content, true, data.message.created_at));
+                messagesArea.scrollTop = messagesArea.scrollHeight;
             }
         });
-    }
+}
+if (voiceBtn) voiceBtn.addEventListener('click', toggleVoice);
 
-    // Get initial progress when page loads
-    pollProgress();
-    
-    if (currentChatId) startPolling();
-    window.addEventListener('beforeunload', () => clearInterval(pollInterval));
+// Message polling
+function startPolling() {
+    if (!currentChatId) return;
+    pollInterval = setInterval(() => {
+        fetch(`/api/get_messages?chat_id=${currentChatId}&after=${lastMessageId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.messages?.length) return;
+                let added = false;
+                data.messages.forEach(msg => {
+                    if (locallySentIds.has(msg.id)) return;
+                    if (document.querySelector(`[data-message-id="${msg.id}"]`)) return;
+                    messagesArea.appendChild(createMessageEl(msg.id, msg.content, msg.sender_id===currentUserId, msg.created_at));
+                    if (msg.id > lastMessageId) lastMessageId = msg.id;
+                    added = true;
+                });
+                if (added) messagesArea.scrollTop = messagesArea.scrollHeight;
+            }).catch(()=>{});
+    }, 2000);
+}
+
+function updateTracking(errandId) {
+    const input = document.getElementById('duration-input');
+    const duration = input.value.trim();
+    if (!duration) return;
+    fetch('/api/update_tracking', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, duration}) })
+    .then(r => r.json()).then(data => { if(data.success){ document.getElementById('time-display').textContent = duration; input.value=''; } });
+}
+
+// Progress polling
+function pollProgress() {
+    if (!errandId) return;
+    fetchServerProgress().then(() => {
+        if (document.getElementById('progress-overlay')?.classList.contains('open')) {
+            if (userType === 'client') fetchClientButtonState().then(() => renderProgress());
+            else renderProgress();
+        }
+    });
+}
+setInterval(pollProgress, 1000);
+pollProgress();
+
+if (currentChatId) startPolling();
+window.addEventListener('beforeunload', () => clearInterval(pollInterval));
 </script>
 </body>
 </html>

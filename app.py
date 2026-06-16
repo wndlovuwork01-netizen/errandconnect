@@ -12,16 +12,90 @@ from extensions import db
 from math import radians, sin, cos, sqrt, atan2
 import threading
 import time
+from datetime import datetime
+import pytz
+import requests
+
+def send_whatsapp_message(to_number, message_body):
+    url = f"https://graph.facebook.com/v18.0/{app.config['WHATSAPP_PHONE_NUMBER_ID']}/messages"
+    headers = {
+        "Authorization": f"Bearer {app.config['WHATSAPP_ACCESS_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "messaging_product": "whatsapp",
+        "to": to_number,
+        "type": "text",
+        "text": {"body": message_body}
+    }
+    try:
+        resp = requests.post(url, headers=headers, json=data, timeout=10)
+        if resp.status_code == 200:
+            print("WhatsApp message sent")
+        else:
+            print(f"WhatsApp API error: {resp.status_code} {resp.text}")
+    except Exception as e:
+        print(f"Failed to send WhatsApp message: {e}")
+
+CAT = pytz.timezone('Africa/Harare')
+
+def to_cat_time_filter(dt, fmt='%H:%M'):
+    if dt is None:
+        return ''
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt)
+        except ValueError:
+            return dt
+    if dt.tzinfo is None:
+        dt = pytz.utc.localize(dt)
+    cat_dt = dt.astimezone(CAT)
+    return cat_dt.strftime(fmt)
 
 # Create instance folder if missing
 os.makedirs(os.path.join(os.path.dirname(__file__), "instance"), exist_ok=True)
 os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
+app.jinja_env.filters['to_cat_time'] = to_cat_time_filter
 app.config.from_object(Config)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_fallback_key")
 
 db.init_app(app)
+
+
+def ensure_db_columns():
+    """Ensure required database columns exist, add them if missing"""
+    try:
+        with app.app_context():
+            # Check if active_errands has required columns
+            from sqlalchemy import inspect, text
+            
+            inspector = inspect(db.engine)
+            columns = [col['name'] for col in inspector.get_columns('active_errands')]
+            
+            # Check for stage_progress
+            if 'stage_progress' not in columns:
+                print("Adding missing column: stage_progress")
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE active_errands ADD COLUMN stage_progress TEXT DEFAULT '[]'"))
+                    conn.commit()
+            
+            # Check for runner_marked_complete
+            if 'runner_marked_complete' not in columns:
+                print("Adding missing column: runner_marked_complete")
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE active_errands ADD COLUMN runner_marked_complete BOOLEAN DEFAULT 0"))
+                    conn.commit()
+            
+            print("Database columns check complete")
+    except Exception as e:
+        print(f"DB migration check failed: {e}")
+
+
+# Run migration check when app starts
+ensure_db_columns()
+
 
 # ============================================================================
 # IMPORT MODELS
@@ -872,7 +946,7 @@ def runnerpersonal():
     return render_template("runnerpersonal.html",user=user,runner_profile=RunnerProfile.query.filter_by(user_id=user.id).first())
 @app.route("/runnerbank", methods=["GET","POST"])
 @login_required
-def runnerbank():
+def runner_bank_page():
     user=current_user()
     if user.user_type!="runner": flash("Runners only","warning"); return redirect(url_for("home_page"))
     if request.method=="POST":
@@ -935,10 +1009,14 @@ def chat_detail(chat_id):
         flash("Unauthorized", "danger")
         return redirect(url_for("home_page"))
 
+    now_utc = datetime.utcnow()
+    now_utc = datetime.utcnow()
     for msg in Message.query.filter_by(chat_id=chat.id, is_read=False).all():
         if msg.sender_id != user.id:
             msg.is_read = True
+            msg.read_at = now_utc
     db.session.commit()
+
 
     agreed_price = None
     neg = Negotiation.query.filter_by(errand_id=chat.errand_id, status="accepted").first()
@@ -973,6 +1051,14 @@ def send_message():
     if user.id!=chat.client_id and user.id!=chat.runner_id: return jsonify({"error":"Unauthorized"}),403
     msg=Message(chat_id=chat.id,sender_id=user.id,content=data["content"])
     db.session.add(msg); db.session.commit()
+    support_errand = Errand.query.filter_by(type="System Support").first()
+    if support_errand and chat.errand_id == support_errand.id:
+        support_user = User.query.filter_by(email="support@errandgo.com").first()
+        if msg.sender_id != support_user.id:
+            sender_name = current_user().fullname
+            message_text = f"{sender_name}:\n{data['content']}"
+            send_whatsapp_message(app.config['ADMIN_WHATSAPP_NUMBER'], message_text)
+    # ----------------------------------------------------------
     return jsonify({"success":True,"message":{"id":msg.id,"content":msg.content,"sender_id":msg.sender_id,"created_at":msg.created_at.strftime("%H:%M")}})
 
 @app.route("/api/get_messages", methods=["GET"])
@@ -999,7 +1085,9 @@ def get_messages():
             "id": msg.id,
             "content": msg.content,
             "sender_id": msg.sender_id,
-            "created_at": msg.created_at.strftime("%H:%M")
+            "created_at": msg.created_at.strftime("%H:%M"),
+            "delivered_at": msg.delivered_at.isoformat() if msg.delivered_at else None,
+            "read_at": msg.read_at.isoformat() if msg.read_at else None
         } for msg in messages]
     })
 
@@ -1116,14 +1204,28 @@ def accept_negotiation():
     if not errand_id or not runner_id:
         return jsonify({"error": "Missing data"}), 400
 
-    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=runner_id).first()
-    if neg and neg.offer_price and neg.offer_price > 0:
-        neg.status = "accepted"
-        db.session.commit()
-        return jsonify({"success": True})
-    return jsonify({"error": "No valid offer found"}), 400
+    # Find the chosen negotiation
+    chosen_neg = Negotiation.query.filter_by(
+        errand_id=errand_id, runner_id=runner_id
+    ).first()
 
+    if not chosen_neg or not chosen_neg.offer_price or chosen_neg.offer_price <= 0:
+        return jsonify({"error": "No valid offer found"}), 400
 
+    # Mark the chosen one as accepted
+    chosen_neg.status = "accepted"
+
+    # Reject all OTHER pending negotiations for this errand
+    other_neg = Negotiation.query.filter(
+        Negotiation.errand_id == errand_id,
+        Negotiation.id != chosen_neg.id,
+        Negotiation.status.in_(["pending"])
+    ).all()
+    for neg in other_neg:
+        neg.status = "rejected"   # or 'cancelled'
+
+    db.session.commit()
+    return jsonify({"success": True})
 @app.route("/api/cancel_acceptance", methods=["POST"])
 @login_required
 def cancel_acceptance():
@@ -1224,33 +1326,6 @@ def cleanup_expired_errands():
 
         time.sleep(60)
 
-@app.route("/api/runner_offer", methods=["POST"])
-@login_required
-def runner_offer():
-    user = current_user()
-    data = request.get_json()
-    errand_id = data.get("errand_id")
-    offer_price = data.get("offer_price")
-
-    if not errand_id or not offer_price:
-        return jsonify({"error": "Missing data"}), 400
-
-    neg = Negotiation.query.filter_by(errand_id=errand_id, runner_id=user.id).first()
-
-    if neg:
-        neg.offer_price = offer_price
-        neg.status = "pending"
-    else:
-        neg = Negotiation(
-            errand_id=errand_id,
-            runner_id=user.id,
-            offer_price=offer_price,
-            status="pending"
-        )
-        db.session.add(neg)
-
-    db.session.commit()
-    return jsonify({"success": True})
 
 @app.route("/go_to_chat/<int:errand_id>")
 @login_required
@@ -1501,6 +1576,17 @@ def signup():
 
     return render_template("signup.html")
 
+@app.route('/runner/bank')
+@login_required
+def runnerbank():
+    user = current_user()
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    remaining_errands = runner_profile.remaining_errands if runner_profile else 0
+    return render_template(
+        'runnerbank.html',
+        user=user,
+        remaining_errands=remaining_errands
+    )
 
 @app.route('/signup/customer')
 def signup_customer():
@@ -1680,6 +1766,23 @@ def runner_signup():
 
     return render_template("runner_signup.html", user=user)
 
+@app.route("/api/errand_coords/<int:errand_id>")
+@login_required
+def get_errand_coords(errand_id):
+    errand = Errand.query.get_or_404(errand_id)
+    # Only the client who created the errand or the runner who accepted it can see coords
+    user = current_user()
+    # If you want a stricter check, uncomment below:
+    # if user.id != errand.client_id and not ActiveErrand.query.filter_by(errand_id=errand.id, runner_id=user.id).first():
+    #     return jsonify({"error": "Unauthorized"}), 403
+
+    return jsonify({
+        "pickup_lat": errand.pickup_latitude,
+        "pickup_lng": errand.pickup_longitude,
+        "dropoff_lat": errand.dropoff_latitude,
+        "dropoff_lng": errand.dropoff_longitude
+    })
+
 
 @app.route('/roles.html')
 def roles():
@@ -1725,27 +1828,61 @@ def update_stage_progress():
         return jsonify({"error": "Missing data"}), 400
     ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
     if not ae:
-        return jsonify({"error": "Not found"}), 404
+        # Find the chat to get runner_id
+        chat = Chat.query.filter_by(errand_id=errand_id).first()
+        if not chat:
+            return jsonify({"error": "Chat not found"}), 404
+        ae = ActiveErrand(
+            errand_id=errand_id,
+            runner_id=chat.runner_id,
+            start_time=datetime.utcnow(),
+            status="ongoing"
+        )
+        db.session.add(ae)
+        db.session.commit()
     ae.stage_progress = json.dumps(stages)
     db.session.commit()
     return jsonify({"success": True})
 
-@app.route("/api/get_stage_progress", methods=["GET"])
+@app.route("/api/stage_progress", methods=["GET"])
 @login_required
 def get_stage_progress():
     errand_id = request.args.get("errand_id")
     if not errand_id:
-        return jsonify({"stages": [False]*6, "runner_marked_complete": False})
+        return jsonify({"stages": [False]*6, "runner_marked_complete": False, "errand_deducted": False})
     ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
     if not ae:
-        return jsonify({"stages": [False]*6, "runner_marked_complete": False})
+        # Find the chat to get runner_id
+        chat = Chat.query.filter_by(errand_id=errand_id).first()
+        if not chat:
+            return jsonify({"stages": [False]*6, "runner_marked_complete": False, "errand_deducted": False})
+        ae = ActiveErrand(
+            errand_id=errand_id,
+            runner_id=chat.runner_id,
+            start_time=datetime.utcnow(),
+            status="ongoing"
+        )
+        db.session.add(ae)
+        db.session.commit()
     try:
         stages = json.loads(ae.stage_progress) if ae.stage_progress else [False]*6
     except:
         stages = [False]*6
+    
+    # Check if errand has been deducted
+    errand_deducted = False
+    runner_profile = RunnerProfile.query.filter_by(user_id=ae.runner_id).first()
+    if runner_profile and runner_profile.errand_deducted_ids:
+        try:
+            deducted_ids = [int(x) for x in runner_profile.errand_deducted_ids.split(',') if x.strip()]
+            errand_deducted = int(errand_id) in deducted_ids
+        except:
+            errand_deducted = False
+    
     return jsonify({
         "stages": stages, 
-        "runner_marked_complete": ae.runner_marked_complete or False
+        "runner_marked_complete": ae.runner_marked_complete or False,
+        "errand_deducted": errand_deducted
     })
 
 @app.route("/api/runner_mark_complete", methods=["POST"])
@@ -1778,6 +1915,366 @@ def complete_errand():
     ae.end_time = datetime.utcnow()
     db.session.commit()
     return jsonify({"success": True})
+
+
+# ══════════════════════════════════════════════════════════════════════
+# 4. API ENDPOINT — /api/deduct_errand_credit
+#    Called when the runner taps "Errand started" (stage 0).
+# ══════════════════════════════════════════════════════════════════════
+@app.route('/api/deduct_errand_credit', methods=['POST'])
+@login_required          # replace with your own auth decorator
+def deduct_errand_credit():
+    data      = request.get_json()
+    errand_id = data.get('errand_id')
+
+    user = current_user()
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+
+    if not runner_profile:
+        return jsonify({
+            'success': False,
+            'error': 'Runner profile not found'
+        }), 404
+
+    # Idempotency: only deduct once per errand
+    already_deducted_ids = set(
+        int(x) for x in (runner_profile.errand_deducted_ids or '').split(',') if x.strip()
+    )
+    if errand_id in already_deducted_ids:
+        return jsonify({'success': True, 'errand_deducted': True,
+                        'remaining': runner_profile.remaining_errands})
+
+    if runner_profile.remaining_errands <= 0:
+        return jsonify({
+            'success': False,
+            'insufficient': True,
+            'error': 'You have exhausted your errands. Please top up to continue.'
+        }), 200  # 200 so JS can read the body
+
+    # Deduct
+    runner_profile.remaining_errands -= 1
+    already_deducted_ids.add(errand_id)
+    runner_profile.errand_deducted_ids = ','.join(str(i) for i in already_deducted_ids)
+    neg = Negotiation.query.filter_by(
+        errand_id=errand_id,
+        runner_id=user.id,
+        status='accepted'
+    ).first()
+    if neg:
+        neg.status = 'started'
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'errand_deducted': True,
+        'remaining': runner_profile.remaining_errands
+    })
+
+
+
+
+
+# ══════════════════════════════════════════════════════════════════════
+# 6. BID BLOCKING — /api/runner_offer
+#    Prevent runners with 0 remaining errands from submitting bids.
+# ══════════════════════════════════════════════════════════════════════
+@app.route('/api/runner_offer', methods=['POST'])
+@login_required
+def runner_offer():
+    user = current_user()
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+
+    # ── 1. Block if runner has no errand credits at all ──────────────
+    if not runner_profile or runner_profile.remaining_errands <= 0:
+        return jsonify({
+            'success': False,
+            'exhausted': True,
+            'error': (
+                'You have exhausted your errands. '
+                'Please top up to continue running more errands.'
+            )
+        }), 200
+
+    # ── 2. Count only active bids on errands that are still alive ─────
+    now_utc = datetime.utcnow()
+    active_bid_count = Negotiation.query.join(Errand).filter(
+        Negotiation.runner_id == user.id,
+        Negotiation.status.in_(['pending', 'accepted', 'client_proceeded',
+                                'runner_proceeded', 'active']),
+        Errand.status.in_(['available', 'pending']),
+        Errand.hard_deadline > now_utc
+    ).count()
+
+    # ── 3. If active bids >= remaining errands, they can't place another ─
+    if active_bid_count >= runner_profile.remaining_errands:
+        return jsonify({
+            'success': False,
+            'max_bids': True,
+            'active_bids': active_bid_count,
+            'remaining': runner_profile.remaining_errands,
+            'error': (
+                f'You already have {active_bid_count} active bid(s) and only '
+                f'{runner_profile.remaining_errands} errand(s) left. '
+                'Complete or cancel an existing bid, or top up.'
+            )
+        }), 200
+
+    # ── 4. Normal bid placement logic ──────────────────────────────
+    data        = request.get_json()
+    errand_id   = data.get('errand_id')
+    offer_price = data.get('offer_price')
+
+    if not errand_id or not offer_price:
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+
+    errand = Errand.query.get(errand_id)
+    if not errand:
+        return jsonify({'success': False, 'error': 'Errand not found'}), 404
+
+    if errand.status not in ['available', 'pending']:
+        return jsonify({'success': False, 'error': 'Errand is no longer available'}), 400
+
+    existing = Negotiation.query.filter_by(errand_id=errand_id, runner_id=user.id).first()
+    if existing:
+        existing.offer_price = offer_price
+    else:
+        negotiation = Negotiation(
+            errand_id=errand_id,
+            runner_id=user.id,
+            offer_price=offer_price,
+            status='pending'
+        )
+        db.session.add(negotiation)
+
+    errand.status = 'pending'
+    db.session.commit()
+
+    return jsonify({'success': True})
+
+# ══════════════════════════════════════════════════════════════════════
+# 7. PURCHASE / TOP-UP ENDPOINT — /api/purchase_errands
+#    Called after a successful payment to credit the runner's balance.
+# ══════════════════════════════════════════════════════════════════════
+@app.route('/api/purchase_errands', methods=['POST'])
+@login_required
+def purchase_errands():
+    data    = request.get_json()
+    amount  = int(data.get('errands', 0))
+    user  = current_user()
+
+    if amount <= 0:
+        return jsonify({'success': False, 'error': 'Invalid amount'}), 400
+
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    if not runner_profile:
+        return jsonify({'success': False, 'error': 'Runner profile not found'}), 404
+
+    runner_profile.remaining_errands += amount
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'remaining': runner_profile.remaining_errands
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════
+# 8. BALANCE READ ENDPOINT — /api/runner_errand_balance
+#    Called by the available-errands page to display live balance.
+# ══════════════════════════════════════════════════════════════════════
+@app.route('/api/runner_errand_balance')
+@login_required
+def runner_errand_balance():
+    user = current_user()
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    remaining = runner_profile.remaining_errands if runner_profile else 0
+    return jsonify({
+        'remaining': remaining,
+        'low': remaining <= 2
+    })
+
+@app.route('/api/send_image', methods=['POST'])
+@login_required
+def send_image():
+    chat_id = request.form.get('chat_id')
+    if not chat_id:
+        return jsonify({'error': 'chat_id required'}), 400
+
+    chat = Chat.query.get(chat_id)
+    if not chat or current_user().id not in (chat.client_id, chat.runner_id):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    file = request.files.get('image')
+    if not file or not file.filename:
+        return jsonify({'error': 'No image file'}), 400
+
+    filename = secure_filename(f"img_{current_user().id}_{int(time.time())}_{file.filename}")
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    image_url = url_for('uploaded_file', filename=filename)
+    msg_content = f'<img src="{image_url}" style="max-width:200px; max-height:200px; border-radius:10px;">'
+
+    msg = Message(chat_id=chat_id, sender_id=current_user().id, content=msg_content)
+    db.session.add(msg)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': {
+            'id': msg.id,
+            'content': msg.content,
+            'sender_id': msg.sender_id,
+            'created_at': msg.created_at.strftime('%H:%M')
+        }
+    })
+
+@app.route('/api/rate_runner', methods=['POST'])
+@login_required
+def rate_runner():
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    rating_value = data.get('rating')
+    comment = data.get('comment', '')
+    if not errand_id or not rating_value:
+        return jsonify({'error': 'Missing errand_id or rating'}), 400
+    try:
+        rating_value = int(rating_value)
+        if not 1 <= rating_value <= 5:
+            raise ValueError
+    except ValueError:
+        return jsonify({'error': 'Rating must be between 1 and 5'}), 400
+
+    errand = Errand.query.get(errand_id)
+    if not errand:
+        return jsonify({'error': 'Errand not found'}), 404
+
+    user = current_user()
+    # Ensure the rater is the client of this errand
+    if user.id != errand.client_id:
+        return jsonify({'error': 'Only the client can rate this runner'}), 403
+
+    # Find the active errand to get the runner_id
+    active = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not active:
+        return jsonify({'error': 'No active errand found'}), 404
+
+    # Prevent duplicate ratings
+    existing = Rating.query.filter_by(errand_id=errand_id, from_user_id=user.id).first()
+    if existing:
+        return jsonify({'error': 'You have already rated this errand'}), 400
+
+    rating = Rating(
+        errand_id=errand_id,
+        from_user_id=user.id,
+        to_user_id=active.runner_id,
+        rating=rating_value,
+        comment=comment
+    )
+    db.session.add(rating)
+    db.session.commit()
+    return jsonify({'success': True, 'rating_id': rating.id})
+
+@app.route('/api/cancel_errand', methods=['POST'])
+@login_required
+def cancel_errand():
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    if not errand_id:
+        return jsonify({'error': 'Missing errand_id'}), 400
+
+    user = current_user()
+    errand = Errand.query.get(errand_id)
+    if not errand:
+        return jsonify({'error': 'Errand not found'}), 404
+    if user.id != errand.client_id:
+        return jsonify({'error': 'Only the client can cancel this errand'}), 403
+
+    # Find the active errand
+    active = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not active:
+        # Errand not started yet – just mark as cancelled
+        errand.status = 'cancelled'
+        db.session.commit()
+        return jsonify({'success': True})
+
+    # If the runner has started, refund the errand credit
+    if active.status == 'ongoing' and active.start_time:
+        runner_profile = RunnerProfile.query.filter_by(user_id=active.runner_id).first()
+        if runner_profile:
+            runner_profile.remaining_errands += 1
+            # Remove from deducted ids
+            ded_ids = [int(x) for x in (runner_profile.errand_deducted_ids or '').split(',') if x.strip()]
+            if errand_id in ded_ids:
+                ded_ids.remove(errand_id)
+                runner_profile.errand_deducted_ids = ','.join(str(x) for x in ded_ids)
+
+    errand.status = 'cancelled'
+    active.status = 'cancelled'
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route("/api/active_errand/<int:errand_id>")
+@login_required
+def get_active_errand_info(errand_id):
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        return jsonify({"start_time": None, "status": "not_started"})
+    return jsonify({
+        "start_time": ae.start_time.isoformat() if ae.start_time else None,
+        "status": ae.status,
+        "location_sharing_requested": ae.location_sharing_requested,
+        "location_sharing_active": ae.location_sharing_active
+    })
+
+@app.route('/api/runner_cancel_errand', methods=['POST'])
+@login_required
+def runner_cancel_errand():
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    if not errand_id:
+        return jsonify({'error': 'Missing errand_id'}), 400
+    user = current_user()
+    errand = Errand.query.get(errand_id)
+    if not errand:
+        return jsonify({'error': 'Errand not found'}), 404
+    active = ActiveErrand.query.filter_by(errand_id=errand_id, runner_id=user.id).first()
+    if not active:
+        return jsonify({'error': 'Active errand not found'}), 404
+    # Only allow cancel if not started (stage[0] is false)
+    import json as pyjson
+    stages = pyjson.loads(active.stage_progress or '[]')
+    if stages and stages[0]:
+        return jsonify({'error': 'Cannot cancel after errand has started'}), 400
+    errand.status = 'cancelled'
+    active.status = 'cancelled'
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/api/runner_update_location', methods=['POST'])
+@login_required
+def runner_update_location():
+    user = current_user()
+    if user.user_type != 'runner':
+        return jsonify({'error': 'Runners only'}), 403
+
+    data = request.get_json()
+    lat = data.get('lat')
+    lng = data.get('lng')
+    if lat is None or lng is None:
+        return jsonify({'error': 'Missing coordinates'}), 400
+
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    if not runner_profile:
+        return jsonify({'error': 'Runner profile not found'}), 404
+
+    runner_profile.current_latitude = lat
+    runner_profile.current_longitude = lng
+    runner_profile.location_updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({'success': True})
 
 if __name__ == "__main__":
     cleanup_thread = threading.Thread(target=cleanup_expired_errands, daemon=True)
