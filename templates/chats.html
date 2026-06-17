@@ -1,173 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>ErrandConnect – Chats</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #e8f5e9;
-            color: #333;
-        }
-
-        .app-shell {
-            display: flex;
-            flex-direction: column;
-            height: 100vh; height: 100dvh;
-            overflow: hidden;
-        }
-
-        .bottom-nav {
-            flex-shrink: 0; height: 56px; background: white;
-            border-top: 1px solid #ddd; display: flex;
-            justify-content: space-around; align-items: center; z-index: 200;
-        }
-        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#666; text-decoration:none; gap:3px; flex:1; padding:6px 0; }
-        .nav-item.active { color:#28a745; font-weight:bold; }
-        .nav-item i { font-size:18px; }
-
-        .chat-container { display:flex; flex:1; overflow:hidden; position:relative; min-height:0; }
-        .chat-sidebar { width:300px; background:white; border-right:1px solid #ddd; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
-        .sidebar-header { padding:15px; background:#28a745; color:white; flex-shrink:0; }
-        .chat-list { list-style:none; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-        .chat-item { padding:15px; border-bottom:1px solid #eee; cursor:pointer; transition:background 0.2s; }
-        .chat-item:hover { background:#f0fff4; }
-        .chat-item.active { background:#e8f5e9; border-left:4px solid #28a745; }
-        .chat-item.support { background:#fff8e1; border-left:4px solid #ff9800; }
-        .chat-item-name { font-weight:bold; margin-bottom:5px; }
-        .chat-item-info { font-size:12px; color:#666; display:flex; justify-content:space-between; }
-
-        .chat-main { flex:1; display:flex; flex-direction:column; background: #e8f5e9; overflow:hidden; position:relative; min-height:0; }
-        .chat-header { flex-shrink:0; padding:12px 15px; background:#28a745; color:white; display:flex; justify-content:space-between; align-items:center; z-index:50; }
-        .chat-header h3 { color:white; font-size:16px; margin:0; }
-        .header-left { display:flex; align-items:center; gap:10px; }
-        .back-btn { background:rgba(255,255,255,0.2); border:none; color:white; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
-        .progress-btn { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
-        .progress-btn:hover { background:rgba(255,255,255,0.3); }
-        .agreed-price { flex-shrink:0; background:#fff3cd; color:#856404; padding:7px 15px; font-size:13px; text-align:center; font-weight:600; border-bottom:1px solid #ffe082; }
-        .tracking-info { flex-shrink:0; background:#e8f5e9; padding:10px 15px; font-size:13px; border-bottom:1px solid #c8e6c9; display:flex; justify-content:space-between; align-items:center; }
-
-        .chat-messages {
-            flex:1; padding:16px; overflow-y:auto; -webkit-overflow-scrolling:touch;
-            display:flex; flex-direction:column; gap:10px; min-height:0;
-            background: linear-gradient(135deg, #f0f4f0 0%, #e8f5e9 100%);
-        }
-        .message { max-width:80%; padding:8px 12px; border-radius:15px; font-size:14px; position:relative; word-wrap:break-word; }
-        .message.sent { align-self:flex-end; background:#28a745; color:white; border-bottom-right-radius:3px; }
-        .message.received { align-self:flex-start; background:white; border:1px solid #ddd; border-bottom-left-radius:3px; }
-        .message-time { font-size:10px; margin-top:4px; opacity:0.7; text-align:right; }
-        .message img { max-width:200px; max-height:200px; border-radius:10px; display:block; margin:5px 0; cursor:pointer; }
-        .message audio { max-width:200px; border-radius:20px; }
-
-        .message-status { font-size:10px; text-align:right; margin-top:2px; }
-        .message-status .grey { color:#aaa; }
-        .message-status .blue { color:#34b7f1; }
-
-        .chat-input-area { flex-shrink:0; padding:10px 12px; background:white; border-top:1px solid #ddd; display:flex; gap:8px; align-items:center; }
-        .chat-input { flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:22px; outline:none; font-size:14px; background:#f9f9f9; }
-        .chat-input:focus { border-color:#28a745; background:white; }
-        .icon-btn { background:#f0f4f0; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; color:#555; font-size:18px; display:inline-flex; align-items:center; justify-content:center; transition:background 0.2s; flex-shrink:0; }
-        .icon-btn:hover { background:#ddd; }
-        .icon-btn.recording { background:#ffebee; color:#d32f2f; }
-        .send-btn { background:#28a745; color:white; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-        #recording-time { font-size:12px; background:#ffebee; padding:3px 8px; border-radius:20px; color:#d32f2f; flex-shrink:0; }
-
-        .progress-overlay { position:absolute; top:0; right:-100%; bottom:0; width:78%; max-width:320px; background:white; box-shadow:-4px 0 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; z-index:100; transition:right 0.3s ease; }
-        .progress-overlay.open { right:0; }
-        .overlay-backdrop { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.3); z-index:99; display:none; }
-        .overlay-backdrop.open { display:block; }
-        .overlay-header { background:#28a745; color:white; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
-        .overlay-header h4 { font-size:15px; font-weight:600; margin:0; }
-        .overlay-close { background:rgba(255,255,255,0.2); border:none; color:white; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
-        .overlay-body { flex:1; padding:20px 16px; overflow-y:auto; }
-        .overlay-note { font-size:12px; color:#888; text-align:center; padding:4px 16px 0; flex-shrink:0; }
-        .overlay-footer { padding:12px 16px; flex-shrink:0; }
-
-        .confirm-delivery-btn, .cancel-btn, .rate-btn {
-            width:100%; color:white; border:none; border-radius:8px; padding:12px;
-            font-size:14px; font-weight:600; cursor:pointer;
-            display:flex; align-items:center; justify-content:center; gap:8px;
-        }
-        .confirm-delivery-btn:disabled, .cancel-btn:disabled, .rate-btn:disabled {
-            background:#ccc; cursor:not-allowed;
-        }
-        .confirm-delivery-btn { background:#28a745; }
-        .cancel-btn { background:#d32f2f; }
-        .rate-btn { background:#1565c0; }
-
-        .stage-row { display:flex; gap:12px; margin-bottom:0; align-items:flex-start; }
-        .stage-track { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
-        .stage-dot { width:24px; height:24px; border-radius:50%; border:2px solid #ddd; background:white; display:flex; align-items:center; justify-content:center; font-size:11px; color:#aaa; transition:all 0.3s; }
-        .stage-dot.done { background:#28a745; border-color:#28a745; color:white; }
-        .stage-dot.current { border-color:#28a745; background:#e8f5e9; color:#28a745; }
-        .stage-line { width:2px; height:22px; background:#e0e0e0; margin:3px 0; }
-        .stage-line.done { background:#28a745; }
-        .stage-label { font-size:13px; color:#aaa; padding-top:3px; line-height:1.4; }
-        .stage-label.done { color:#28a745; font-weight:600; }
-        .stage-label.current { color:#333; font-weight:500; }
-
-        .runner-stage-row { display:flex; gap:12px; margin-bottom:0; align-items:flex-start; }
-        .runner-check { width:24px; height:24px; border-radius:50%; border:2px solid #28a745; background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; margin-top:2px; }
-        .runner-check.checked { background:#28a745; color:white; border-color:#28a745; }
-        .runner-check.clickable { border:3px solid #28a745; animation:pulse 1.5s infinite; cursor:pointer; }
-        .runner-check.locked { border-color:#ccc; cursor:not-allowed; opacity:0.5; }
-        @keyframes pulse { 0%{ box-shadow:0 0 0 0 rgba(40,167,69,0.4); } 70%{ box-shadow:0 0 0 10px rgba(40,167,69,0); } 100%{ box-shadow:0 0 0 0 rgba(40,167,69,0); } }
-        .runner-stage-label { font-size:13px; color:#555; padding-top:4px; line-height:1.4; flex:1; }
-        .runner-stage-label.checked { color:#28a745; font-weight:600; }
-        .runner-stage-wrap { display:flex; flex-direction:column; }
-        .runner-stage-line { width:2px; height:20px; background:#e0e0e0; margin:3px 11px; }
-        .runner-stage-line.checked { background:#28a745; }
-
-        /* Map markers */
-        .pickup-icon, .delivery-icon {
-            background: #28a745;
-            color: white;
-            border-radius: 50%;
-            width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 16px;
-            border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        }
-        .delivery-icon { background: #d32f2f; }
-        .runner-icon { /* emoji, no extra style needed */ }
-
-        #map-container { width:100%; height:200px; margin:12px 0; border-radius:8px; border:1px solid #ddd; background:#f5f5f5; display:none; }
-        #map-container.active { display:block; }
-        .location-btn { background:#28a745; color:white; border:none; border-radius:6px; padding:8px 12px; font-size:13px; font-weight:600; cursor:pointer; width:100%; margin:8px 0; }
-        .location-btn:disabled { background:#ccc; cursor:not-allowed; }
-        .location-request-buttons { display:flex; gap:8px; margin-top:8px; }
-        .location-request-buttons button { flex:1; padding:8px; border-radius:6px; font-weight:600; border:none; cursor:pointer; }
-        .accept-location-btn { background:#28a745; color:white; }
-        .decline-location-btn { background:#f44336; color:white; }
-
-        .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:20px; }
-        .modal-content { background:white; border-radius:20px; padding:24px; width:100%; max-width:340px; text-align:center; }
-        .stars { display:flex; justify-content:center; gap:8px; margin:16px 0; }
-        .stars i { font-size:28px; color:#ddd; cursor:pointer; }
-        .stars i.active { color:#ffc107; }
-        textarea { width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; resize:vertical; margin-bottom:12px; }
-        .btn-primary { width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:600; margin-top:8px; cursor:pointer; }
-        .btn-outline { width:100%; padding:12px; background:transparent; border:1px solid #ddd; border-radius:8px; margin-top:8px; cursor:pointer; }
-
-        .font-size-control { display:flex; align-items:center; gap:6px; margin-left:10px; }
-        .font-size-control input[type=range] { width:60px; }
-
-        @media (max-width:768px) {
-            .chat-sidebar { display:none; }
-            .chat-sidebar.mobile-visible { display:flex; width:100%; }
-            .chat-main.mobile-hidden { display:none; }
-            .message { max-width:88%; }
-        }
-    </style>
-</head>
 <body>
 <div class="app-shell">
     <div class="chat-container">
@@ -192,13 +22,11 @@
                             <span>Help &amp; Support</span>
                         </div>
                         {% if last_msg %}
-                        <!-- Last message preview LEFT -->
                         <div style="font-size:12px;color:#757575;margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;">
                             {% if last_msg.content.startswith('<img') %}<i class="fas fa-image"></i> Photo
                             {% elif last_msg.content.startswith('<audio') %}<i class="fas fa-microphone"></i> Voice
                             {% else %}{{ last_msg.content }}{% endif %}
                         </div>
-                        <!-- Date RIGHT -->
                         <div style="font-size:10px;color:#999;margin-top:2px;text-align:right;width:100%;">
                             {{ last_msg.created_at | chat_timestamp }}
                         </div>
@@ -213,7 +41,6 @@
                     onclick="window.location.href='{{ url_for('chat_detail', chat_id=chat.id) }}'">
                     <div class="chat-item-name">{% if user.user_type == 'client' %}{{ chat.runner.fullname }}{% else %}{{ chat.client.fullname }}{% endif %}</div>
                     <div class="chat-item-info" style="flex-direction:column;align-items:flex-start;">
-                        <!-- Errand number and status (status right) -->
                         <div style="display:flex;justify-content:space-between;width:100%;">
                             <span>Errand #{{ chat.errand_id }}</span>
                             {% set ae = chat.errand.active_errand %}
@@ -222,8 +49,6 @@
                             {% elif ae and ae.status == 'ongoing' %}<span style="background:#fff3cd;color:#856404;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Pending</span>
                             {% else %}<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">In Discussion</span>{% endif %}
                         </div>
-
-                        <!-- Last message preview LEFT -->
                         {% if last_msg %}
                         <div style="font-size:12px;color:#757575;margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;">
                             {% if last_msg.content.startswith('<img') %}<i class="fas fa-image"></i> Photo
@@ -231,8 +56,6 @@
                             {% else %}{{ last_msg.content }}{% endif %}
                         </div>
                         {% endif %}
-
-                        <!-- Date RIGHT, below message (or just below status if no message) -->
                         <div style="font-size:10px;color:#999;margin-top:2px;text-align:right;width:100%;">
                             {% if last_msg %}
                                 {{ last_msg.created_at | chat_timestamp }}
@@ -245,11 +68,10 @@
                 {% endfor %}{% else %}<li style="padding:20px;text-align:center;color:#999;">No chats yet</li>{% endif %}
             </ul>
         </div>
-        <!-- END SIDEBAR -->
 
-        <!-- MAIN CHAT AREA (unchanged) -->
-        {% if active_chat %}
-        <div class="chat-main">
+        <!-- MAIN CHAT AREA (show/hide controlled by mobile-hidden class) -->
+        <div class="chat-main {% if not active_chat %}mobile-hidden{% endif %}">
+            {% if active_chat %}
             <div class="chat-header">
                 <div class="header-left">
                     <a href="{{ url_for('chats') }}" class="back-btn"><i class="fas fa-arrow-left" style="font-size:14px;"></i></a>
@@ -297,12 +119,12 @@
                     <!-- dynamically filled -->
                 </div>
             </div>
+            {% else %}
+            <div class="chat-main-placeholder" style="align-items:center;justify-content:center;color:#999; display:flex; flex:1;">
+                <div style="text-align:center;"><i class="fas fa-comments" style="font-size:50px;margin-bottom:20px;color:#ddd;"></i><p>Select a chat to start messaging</p></div>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="chat-main" style="align-items:center;justify-content:center;color:#999;">
-            <div style="text-align:center;"><i class="fas fa-comments" style="font-size:50px;margin-bottom:20px;color:#ddd;"></i><p>Select a chat to start messaging</p></div>
-        </div>
-        {% endif %}
     </div>
 
     <!-- BOTTOM NAV (unchanged) -->
@@ -321,7 +143,7 @@
     </div>
 </div>
 
-<!-- Rating Modal -->
+<!-- Rating Modal (unchanged) -->
 <div id="rating-modal" class="modal">
     <div class="modal-content">
         <h3>Rate Runner</h3>
@@ -336,6 +158,12 @@
         <button class="btn-primary" onclick="submitRating()">Submit Rating</button>
         <button class="btn-outline" onclick="closeRatingModal()">Cancel</button>
     </div>
+</div>
+
+<!-- ========== FULL‑SCREEN IMAGE VIEWER ========== -->
+<div id="image-viewer-modal" class="modal" style="background:rgba(0,0,0,0.95); z-index:2000;">
+    <span style="position:absolute;top:15px;right:20px;font-size:32px;color:white;cursor:pointer;z-index:2001;" onclick="closeImageViewer()">&times;</span>
+    <img id="image-viewer-img" src="" style="max-width:95%;max-height:95%;border-radius:8px;display:block;margin:auto;" />
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -643,7 +471,7 @@ function renderProgress() {
             </div>`;
         });
 
-      }
+    }
 
     // Map container
     let mapHtml = errandId ? `<div id="map-container" class="active" style="height:200px;"></div>` : '';
@@ -947,8 +775,35 @@ function pollProgress() {
 setInterval(pollProgress, 500);
 pollProgress();
 
+// ── FULL‑SCREEN IMAGE VIEWER ────────────────────────────────────────
+function openImageViewer(imgSrc) {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('image-viewer-img');
+    img.src = imgSrc;
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+}
+
+function closeImageViewer() {
+    const modal = document.getElementById('image-viewer-modal');
+    modal.style.display = 'none';
+    document.getElementById('image-viewer-img').src = '';
+}
+
+// Close when clicking the dark backdrop
+document.getElementById('image-viewer-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeImageViewer();
+});
+
+// Delegate clicks on all images inside the messages area
+document.getElementById('messages-area').addEventListener('click', function(e) {
+    if (e.target.tagName === 'IMG') {
+        openImageViewer(e.target.src);
+    }
+});
+
 if (currentChatId) startPolling();
 window.addEventListener('beforeunload', () => clearInterval(pollInterval));
 </script>
 </body>
-</html>
