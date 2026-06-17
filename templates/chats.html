@@ -171,8 +171,8 @@
 <body>
 <div class="app-shell">
     <div class="chat-container">
+        <!-- SIDEBAR (updated layout) -->
         <div class="chat-sidebar {% if active_chat %}mobile-hidden{% endif %}">
-            <!-- ... sidebar unchanged ... -->
             <div class="sidebar-header">
                 <h2 style="margin-bottom:6px;"><i class="fas fa-comments"></i> Messages</h2>
                 <a href="{{ url_for('home_page') }}" style="color:white;font-size:12px;text-decoration:none;">
@@ -180,6 +180,7 @@
                 </a>
             </div>
             <ul class="chat-list">
+                <!-- Support chat -->
                 <li class="chat-item support {% if active_chat and active_chat.id == support_chat_id %}active{% endif %}"
                     onclick="window.location.href='{{ url_for('chat_detail', chat_id=support_chat_id) }}'">
                     <div class="chat-item-name"><i class="fas fa-headset"></i> ErrandGo Support</div>
@@ -187,21 +188,32 @@
                     {% for c in chats %}{% if c.id == support_chat_id %}{% set support_chat.obj = c %}{% endif %}{% endfor %}
                     {% set last_msg = support_chat.obj.messages[-1] if support_chat.obj and support_chat.obj.messages else None %}
                     <div class="chat-item-info" style="flex-direction:column;align-items:flex-start;">
-                        <div style="display:flex;justify-content:space-between;width:100%;"><span>Help &amp; Support</span></div>
-                        {% if last_msg %}<div style="font-size:12px;color:#757575;margin-top:4px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        <div style="display:flex;justify-content:space-between;width:100%;">
+                            <span>Help &amp; Support</span>
+                        </div>
+                        {% if last_msg %}
+                        <!-- Last message preview LEFT -->
+                        <div style="font-size:12px;color:#757575;margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;">
                             {% if last_msg.content.startswith('<img') %}<i class="fas fa-image"></i> Photo
                             {% elif last_msg.content.startswith('<audio') %}<i class="fas fa-microphone"></i> Voice
                             {% else %}{{ last_msg.content }}{% endif %}
-                            <span style="margin-left:8px;color:#9e9e9e;font-size:11px;">{{ last_msg.created_at | to_cat_time }}</span>
-                        </div>{% endif %}
+                        </div>
+                        <!-- Date RIGHT -->
+                        <div style="font-size:10px;color:#999;margin-top:2px;text-align:right;width:100%;">
+                            {{ last_msg.created_at | chat_timestamp }}
+                        </div>
+                        {% endif %}
                     </div>
                 </li>
+
+                <!-- Regular chats -->
                 {% if chats %}{% for chat in chats %}
                 {% set last_msg = chat.messages[-1] if chat.messages else None %}
                 <li class="chat-item {% if active_chat and active_chat.id == chat.id %}active{% endif %}"
                     onclick="window.location.href='{{ url_for('chat_detail', chat_id=chat.id) }}'">
                     <div class="chat-item-name">{% if user.user_type == 'client' %}{{ chat.runner.fullname }}{% else %}{{ chat.client.fullname }}{% endif %}</div>
                     <div class="chat-item-info" style="flex-direction:column;align-items:flex-start;">
+                        <!-- Errand number and status (status right) -->
                         <div style="display:flex;justify-content:space-between;width:100%;">
                             <span>Errand #{{ chat.errand_id }}</span>
                             {% set ae = chat.errand.active_errand %}
@@ -210,18 +222,32 @@
                             {% elif ae and ae.status == 'ongoing' %}<span style="background:#fff3cd;color:#856404;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">Pending</span>
                             {% else %}<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;">In Discussion</span>{% endif %}
                         </div>
-                        {% if last_msg %}<div style="font-size:12px;color:#757575;margin-top:4px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+
+                        <!-- Last message preview LEFT -->
+                        {% if last_msg %}
+                        <div style="font-size:12px;color:#757575;margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;">
                             {% if last_msg.content.startswith('<img') %}<i class="fas fa-image"></i> Photo
                             {% elif last_msg.content.startswith('<audio') %}<i class="fas fa-microphone"></i> Voice
                             {% else %}{{ last_msg.content }}{% endif %}
-                            <span style="margin-left:8px;color:#9e9e9e;font-size:11px;">{{ last_msg.created_at | to_cat_time }}</span>
-                        </div>{% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Date RIGHT, below message (or just below status if no message) -->
+                        <div style="font-size:10px;color:#999;margin-top:2px;text-align:right;width:100%;">
+                            {% if last_msg %}
+                                {{ last_msg.created_at | chat_timestamp }}
+                            {% else %}
+                                {{ chat.created_at | chat_timestamp }}
+                            {% endif %}
+                        </div>
                     </div>
                 </li>
                 {% endfor %}{% else %}<li style="padding:20px;text-align:center;color:#999;">No chats yet</li>{% endif %}
             </ul>
         </div>
+        <!-- END SIDEBAR -->
 
+        <!-- MAIN CHAT AREA (unchanged) -->
         {% if active_chat %}
         <div class="chat-main">
             <div class="chat-header">
@@ -279,6 +305,7 @@
         {% endif %}
     </div>
 
+    <!-- BOTTOM NAV (unchanged) -->
     <div class="bottom-nav">
         {% if user.user_type == 'client' %}
         <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' or request.endpoint == 'chat_detail' %}active{% endif %}"><i class="fas fa-comment-dots"></i><span>Chats</span></a>
@@ -374,22 +401,43 @@ function initMap() {
     if (map) { map.invalidateSize(); return; }
     const container = document.getElementById('map-container');
     if (!container) return;
+
     map = L.map('map-container').setView([-17.8292, 31.0522], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'&copy; OpenStreetMap' }).addTo(map);
+
     fetchErrandCoords().then(coords => {
         if (!coords) return;
+
+        // Pickup marker (green circle with "A")
         if (coords.pickup_lat && coords.pickup_lng) {
             pickupMarker = L.marker([coords.pickup_lat, coords.pickup_lng], {
-                icon: L.divIcon({ className:'pickup-icon', html:'A', iconSize:[30,30] })
+                icon: L.divIcon({
+                    html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;'>A</div>",
+                    iconSize: [28,28],
+                    iconAnchor: [14,28]
+                })
             }).addTo(map).bindPopup('Pickup');
         }
+
+        // Delivery marker (blue circle with "B")
         if (coords.dropoff_lat && coords.dropoff_lng) {
             deliveryMarker = L.marker([coords.dropoff_lat, coords.dropoff_lng], {
-                icon: L.divIcon({ className:'delivery-icon', html:'B', iconSize:[30,30] })
+                icon: L.divIcon({
+                    html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;'>B</div>",
+                    iconSize: [28,28],
+                    iconAnchor: [14,28]
+                })
             }).addTo(map).bindPopup('Delivery');
         }
+
         const pts = [pickupMarker?.getLatLng(), deliveryMarker?.getLatLng()].filter(Boolean);
-        if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding:[20,20] });
+        if (pts.length) {
+            map.fitBounds(L.latLngBounds(pts), { padding:[20,20] });
+        }
+
+        // Force redraw after the container is visible
+        setTimeout(() => map.invalidateSize(), 50);
+
         if (userType === 'runner') startRunnerLocationWatch();
         else checkLiveLocationSharing();
     });
@@ -559,8 +607,7 @@ function renderProgress() {
             </div>`;
         });
 
-        // Runner's 2‑in‑1 button
-        const started = stageProgress[0]; // true if Errand started has been ticked
+        const started = stageProgress[0];
         const footer = document.getElementById('overlay-footer');
         if (footer) {
             const btnText = started ? 'Mark Errand Completed' : 'Cancel Errand';
@@ -573,23 +620,32 @@ function renderProgress() {
             `;
         }
     } else {
-        // Client view – read-only stages
+        let nextStageLabel = '';
         STAGES.forEach((label, i) => {
             const done = stageProgress[i];
             const hasPreviousDone = i > 0 && stageProgress[i-1];
-            const current = !done && hasPreviousDone;
+            const isFirst = i === 0;
+            const current = !done && (isFirst || hasPreviousDone);
             const isLast = i === STAGES.length - 1;
+
+            if (current && !nextStageLabel) {
+                nextStageLabel = label;
+            }
+
             html += `<div class="stage-row">
                 <div class="stage-track">
-                    <div class="stage-dot ${done ? 'done' : current ? 'current' : ''}">${done ? '<i class="fas fa-check" style="font-size:11px;"></i>' : (i+1)}</div>
+                    <div class="stage-dot ${done ? 'done' : current ? 'current' : ''}">
+                        ${done ? '<i class="fas fa-check" style="font-size:11px;"></i>' : (i+1)}
+                    </div>
                     ${!isLast ? `<div class="stage-line ${done ? 'done' : ''}"></div>` : ''}
                 </div>
                 <div class="stage-label ${done ? 'done' : current ? 'current' : ''}">${label}</div>
             </div>`;
         });
-    }
 
-    // Map + location
+      }
+
+    // Map container
     let mapHtml = errandId ? `<div id="map-container" class="active" style="height:200px;"></div>` : '';
     if (userType === 'client') {
         mapHtml += `<button class="location-btn" id="request-location-btn" onclick="requestLiveLocation()"><i class="fas fa-map-marker-alt"></i> Request Runner Live Location</button>`;
@@ -599,23 +655,20 @@ function renderProgress() {
     body.innerHTML = html + mapHtml;
     if (progressOverlayOpen) setTimeout(initMap, 100);
 
-    // Client button (3‑in‑1 with countdown)
+    // Client button
     if (userType === 'client') {
         const footer = document.getElementById('overlay-footer');
         if (!footer) return;
         let btnHtml = '';
         const now = new Date();
         if (!errandStartedAt) {
-            // Not started yet
             btnHtml = `<button class="cancel-btn" id="action-btn" onclick="cancelErrand()"><i class="fas fa-times-circle"></i> Cancel Errand</button>`;
         } else {
-            const elapsed = (now - errandStartedAt) / 1000; // seconds
+            const elapsed = (now - errandStartedAt) / 1000;
             if (elapsed < 60) {
-                // 1‑minute countdown
                 const remaining = Math.ceil(60 - elapsed);
                 btnHtml = `<button class="cancel-btn" id="action-btn" disabled><i class="fas fa-hourglass-half"></i> Cancel Errand (${remaining}s)</button>`;
             } else {
-                // After 1 minute
                 if (runnerMarkedComplete && errandCompleted) {
                     btnHtml = `<button class="rate-btn" id="action-btn" onclick="openRatingModal()"><i class="fas fa-star"></i> Rate Runner</button>`;
                 } else {
@@ -738,7 +791,7 @@ function submitRating() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// TICKS & MESSAGING (unchanged)
+// TICKS & MESSAGING
 // ═══════════════════════════════════════════════════════════════════════
 function updateMessageStatuses() {
     if (!currentChatId) return;
@@ -891,7 +944,7 @@ function pollProgress() {
         }
     });
 }
-setInterval(pollProgress, 1000);
+setInterval(pollProgress, 500);
 pollProgress();
 
 if (currentChatId) startPolling();

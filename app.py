@@ -14,6 +14,28 @@ import threading
 import time
 from datetime import datetime
 import pytz
+import requests
+
+def send_whatsapp_message(to_number, message_body):
+    url = f"https://graph.facebook.com/v18.0/{app.config['WHATSAPP_PHONE_NUMBER_ID']}/messages"
+    headers = {
+        "Authorization": f"Bearer {app.config['WHATSAPP_ACCESS_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "messaging_product": "whatsapp",
+        "to": to_number,
+        "type": "text",
+        "text": {"body": message_body}
+    }
+    try:
+        resp = requests.post(url, headers=headers, json=data, timeout=10)
+        if resp.status_code == 200:
+            print("WhatsApp message sent")
+        else:
+            print(f"WhatsApp API error: {resp.status_code} {resp.text}")
+    except Exception as e:
+        print(f"Failed to send WhatsApp message: {e}")
 
 CAT = pytz.timezone('Africa/Harare')
 
@@ -41,6 +63,37 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev_fallback_key")
 
 db.init_app(app)
 
+@app.template_filter('chat_timestamp')
+def chat_timestamp_filter(dt):
+    """Return 'Today HH:MM', 'Yesterday HH:MM', or a date string for older dates."""
+    if dt is None:
+        return ''
+    # Ensure dt is in CAT (Africa/Harare)
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt)
+        except ValueError:
+            return dt
+    if dt.tzinfo is None:
+        dt = pytz.utc.localize(dt)
+    cat_dt = dt.astimezone(CAT)
+    now_cat = datetime.now(CAT)
+
+    # Calculate midnight boundaries for today and yesterday in CAT
+    today_start = now_cat.replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday_start = today_start - timedelta(days=1)
+    yesterday_end = today_start - timedelta(seconds=1)
+
+    if cat_dt >= today_start:
+        return f"Today {cat_dt.strftime('%H:%M')}"
+    elif cat_dt >= yesterday_start:
+        return f"Yesterday {cat_dt.strftime('%H:%M')}"
+    else:
+        # Older: show day and month, and also year if not current year
+        if cat_dt.year == now_cat.year:
+            return cat_dt.strftime('%d %b')
+        else:
+            return cat_dt.strftime('%d %b %Y')
 
 def ensure_db_columns():
     """Ensure required database columns exist, add them if missing"""
@@ -434,27 +487,72 @@ def runnercompleted():
     return render_template("runnercompleted.html",user=user,completed_errands=ActiveErrand.query.filter_by(runner_id=user.id,status="completed").all())
 
 # ==================== UPDATED ROUTE ====================
+  # kilometres
 @app.route("/runneravailable_errands")
 @login_required
 def runneravailable_errands():
-    user=current_user()
-    if user.user_type!="runner": return redirect(url_for('home_page'))
-    rp=RunnerProfile.query.filter_by(user_id=user.id).first()
-    rc=getattr(rp,'city','')
+    user = current_user()
+    if user.user_type != "runner":
+        return redirect(url_for('home_page'))
+
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
     now_utc = datetime.utcnow()
-    if rc:
-        ae=Errand.query.filter(
-            Errand.status.in_(['available','pending']),
-            Errand.hard_deadline > now_utc,
-            Errand.pickup_location.ilike(f"%{rc}%")
-        ).all()
+
+    # Only use coordinates that were updated in the last 5 minutes
+    recent_threshold = now_utc - timedelta(minutes=5)
+
+    runner_lat = runner_profile.current_latitude if runner_profile else None
+    runner_lng = runner_profile.current_longitude if runner_profile else None
+    location_fresh = (
+        runner_profile.location_updated_at >= recent_threshold
+        if runner_profile and runner_profile.location_updated_at
+        else False
+    )
+
+    # Base query – only errands that are still alive
+    base_query = Errand.query.filter(
+        Errand.status.in_(['available', 'pending']),
+        Errand.hard_deadline > now_utc
+    )
+
+    # If we have a fresh runner location, filter by distance
+    if runner_lat and runner_lng and location_fresh:
+        all_errands = base_query.all()
+        errand_list = []
+        for errand in all_errands:
+            if errand.pickup_latitude and errand.pickup_longitude:
+                dist = calculate_distance(
+                    runner_lat, runner_lng,
+                    errand.pickup_latitude, errand.pickup_longitude
+                )
+                if dist <= MAX_ERRAND_DISTANCE_FOR_RUNNER:
+                    errand_list.append((errand, dist))
+            else:
+                # Errand without coordinates – optionally include or skip
+                # We'll skip to keep the list relevant
+                pass
+
+        # Sort by distance ascending
+        errand_list.sort(key=lambda x: x[1])
+
+        data = [{
+            "errand": serialize_errand(errand),
+            "client": serialize_user(errand.client),
+            "distance_km": round(dist, 2)
+        } for errand, dist in errand_list]
+
     else:
-        ae=Errand.query.filter(
-            Errand.status.in_(['available','pending']),
-            Errand.hard_deadline > now_utc
-        ).all()
-    data=[{"errand":serialize_errand(e),"client":serialize_user(e.client)} for e in ae]
-    return render_template("runneravailable_errands.html",user=user,available_errands=data)
+        # No fresh location – show all available errands without distance
+        all_errands = base_query.order_by(Errand.created_at.desc()).all()
+        data = [{
+            "errand": serialize_errand(e),
+            "client": serialize_user(e.client),
+            "distance_km": None
+        } for e in all_errands]
+
+    return render_template("runneravailable_errands.html",
+                           user=user,
+                           available_errands=data)
 
 # ==================== UPDATED ROUTE ====================
 @app.route("/api/errands")
@@ -1037,7 +1135,15 @@ def send_message():
             message_text = f"{sender_name}:\n{data['content']}"
             send_whatsapp_message(app.config['ADMIN_WHATSAPP_NUMBER'], message_text)
     # ----------------------------------------------------------
-    return jsonify({"success":True,"message":{"id":msg.id,"content":msg.content,"sender_id":msg.sender_id,"created_at":msg.created_at.strftime("%H:%M")}})
+    return jsonify({
+        "success": True,
+        "message": {
+            "id": msg.id,
+            "content": msg.content,
+            "sender_id": msg.sender_id,
+            "created_at": to_cat_time_filter(msg.created_at, fmt='%H:%M')
+        }
+    })
 
 @app.route("/api/get_messages", methods=["GET"])
 @login_required
@@ -1063,7 +1169,7 @@ def get_messages():
             "id": msg.id,
             "content": msg.content,
             "sender_id": msg.sender_id,
-            "created_at": msg.created_at.strftime("%H:%M"),
+            "created_at": to_cat_time_filter(msg.created_at, fmt='%H:%M'),
             "delivered_at": msg.delivered_at.isoformat() if msg.delivered_at else None,
             "read_at": msg.read_at.isoformat() if msg.read_at else None
         } for msg in messages]
@@ -1103,7 +1209,7 @@ def send_voice_message():
             "id": msg.id,
             "content": msg.content,
             "sender_id": msg.sender_id,
-            "created_at": msg.created_at.strftime("%H:%M")
+            "created_at": to_cat_time_filter(msg.created_at, fmt='%H:%M')
         }
     })
 
@@ -2102,7 +2208,7 @@ def send_image():
             'id': msg.id,
             'content': msg.content,
             'sender_id': msg.sender_id,
-            'created_at': msg.created_at.strftime('%H:%M')
+            'created_at': to_cat_time_filter(msg.created_at, fmt='%H:%M')
         }
     })
 
@@ -2253,6 +2359,7 @@ def runner_update_location():
     db.session.commit()
 
     return jsonify({'success': True})
+
 
 if __name__ == "__main__":
     cleanup_thread = threading.Thread(target=cleanup_expired_errands, daemon=True)

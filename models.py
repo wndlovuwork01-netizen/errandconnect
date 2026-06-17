@@ -76,6 +76,7 @@ class RunnerProfile(db.Model):
     is_available = db.Column(db.Boolean, default=False)
     current_latitude = db.Column(db.Float)
     current_longitude = db.Column(db.Float)
+    location_updated_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     remaining_errands = db.Column(db.Integer, default=5, nullable=False)
