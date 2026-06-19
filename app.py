@@ -2311,6 +2311,195 @@ def get_active_errand_info(errand_id):
         "location_sharing_active": ae.location_sharing_active
     })
 
+def _get_active_errand_for(errand_id):
+    """Helper: fetch ActiveErrand by errand_id, creating a bare one if missing
+    (mirrors the pattern already used in get_stage_progress / update_stage_progress)."""
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        chat = Chat.query.filter_by(errand_id=errand_id).first()
+        if not chat:
+            return None
+        ae = ActiveErrand(
+            errand_id=errand_id,
+            runner_id=chat.runner_id,
+            start_time=datetime.utcnow(),
+            status="ongoing"
+        )
+        db.session.add(ae)
+        db.session.commit()
+    return ae
+
+
+def _sharing_is_live(ae):
+    """True if sharing is currently active and not expired."""
+    if not ae or not ae.location_sharing_active:
+        return False
+    if ae.sharing_expires_at is None:
+        # "until delivery" — stays live unless explicitly stopped/completed
+        return True
+    return datetime.utcnow() < ae.sharing_expires_at
+
+
+@app.route('/api/request_runner_location', methods=['POST'])
+@login_required
+def request_runner_location():
+    """Client asks the runner to share live location."""
+    user = current_user()
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    if not errand_id:
+        return jsonify({'error': 'Missing errand_id'}), 400
+
+    errand = Errand.query.get(errand_id)
+    if not errand or user.id != errand.client_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    ae = _get_active_errand_for(errand_id)
+    if not ae:
+        return jsonify({'error': 'Active errand not found'}), 404
+
+    ae.location_sharing_requested = True
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/api/live_location_request_status/<int:errand_id>')
+@login_required
+def live_location_request_status(errand_id):
+    """Runner polls this to see if the client has a pending request."""
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        return jsonify({'requested': False})
+    return jsonify({
+        'requested': bool(ae.location_sharing_requested) and not _sharing_is_live(ae)
+    })
+
+
+@app.route('/api/respond_location_request', methods=['POST'])
+@login_required
+def respond_location_request():
+    """Runner accepts or declines the client's request.
+    Accepting here just clears the pending flag — the runner still needs to
+    pick a duration via /api/start_location_sharing before sharing actually begins."""
+    user = current_user()
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    accept = data.get('accept')
+    if not errand_id:
+        return jsonify({'error': 'Missing errand_id'}), 400
+
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id, runner_id=user.id).first()
+    if not ae:
+        return jsonify({'error': 'Active errand not found'}), 404
+
+    ae.location_sharing_requested = False
+    if not accept:
+        ae.location_sharing_active = False
+        ae.sharing_duration_seconds = None
+        ae.sharing_expires_at = None
+    db.session.commit()
+    return jsonify({'success': True, 'accepted': bool(accept)})
+
+
+@app.route('/api/start_location_sharing', methods=['POST'])
+@login_required
+def start_location_sharing():
+    """Runner picks a duration (seconds) or null for 'until delivery' and
+    sharing actually starts here."""
+    user = current_user()
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    duration_seconds = data.get('duration_seconds')  # None/null = until delivery
+    if not errand_id:
+        return jsonify({'error': 'Missing errand_id'}), 400
+
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id, runner_id=user.id).first()
+    if not ae:
+        return jsonify({'error': 'Active errand not found'}), 404
+
+    ae.location_sharing_active = True
+    ae.location_sharing_requested = False
+    if duration_seconds:
+        try:
+            duration_seconds = int(duration_seconds)
+            ae.sharing_duration_seconds = duration_seconds
+            ae.sharing_expires_at = datetime.utcnow() + timedelta(seconds=duration_seconds)
+        except (ValueError, TypeError):
+            ae.sharing_duration_seconds = None
+            ae.sharing_expires_at = None
+    else:
+        ae.sharing_duration_seconds = None
+        ae.sharing_expires_at = None  # until delivery
+
+    db.session.commit()
+    return jsonify({
+        'success': True,
+        'expires_at': ae.sharing_expires_at.isoformat() if ae.sharing_expires_at else None
+    })
+
+
+@app.route('/api/update_runner_location', methods=['POST'])
+@login_required
+def update_runner_location():
+    """Runner's periodic position ping while sharing is active.
+    (This is the endpoint name the chat template's JS already calls.)"""
+    user = current_user()
+    if user.user_type != 'runner':
+        return jsonify({'error': 'Runners only'}), 403
+
+    data = request.get_json()
+    errand_id = data.get('errand_id')
+    lat = data.get('lat')
+    lng = data.get('lng')
+    if lat is None or lng is None:
+        return jsonify({'error': 'Missing coordinates'}), 400
+
+    runner_profile = RunnerProfile.query.filter_by(user_id=user.id).first()
+    if not runner_profile:
+        return jsonify({'error': 'Runner profile not found'}), 404
+
+    runner_profile.current_latitude = lat
+    runner_profile.current_longitude = lng
+    runner_profile.location_updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/api/live_location_status/<int:errand_id>')
+@login_required
+def live_location_status(errand_id):
+    """Client checks whether sharing is currently active (used on map init)."""
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    live = _sharing_is_live(ae)
+    return jsonify({'active': live})
+
+
+@app.route('/api/runner_location/<int:errand_id>')
+@login_required
+def runner_location(errand_id):
+    """Client polls this for the runner's current/last-known position.
+    Returns expired=True (with last-known coords) once the timer has lapsed,
+    so the frontend can freeze + fade the marker instead of yanking it away."""
+    ae = ActiveErrand.query.filter_by(errand_id=errand_id).first()
+    if not ae:
+        return jsonify({'lat': None, 'lng': None, 'active': False, 'expired': False})
+
+    runner_profile = RunnerProfile.query.filter_by(user_id=ae.runner_id).first()
+    lat = runner_profile.current_latitude if runner_profile else None
+    lng = runner_profile.current_longitude if runner_profile else None
+
+    live = _sharing_is_live(ae)
+
+    # Just expired this tick? Flip active off server-side so future checks
+    # (and other endpoints like live_location_status) agree it's over.
+    if ae.location_sharing_active and not live and ae.sharing_expires_at is not None:
+        ae.location_sharing_active = False
+        db.session.commit()
+        return jsonify({'lat': lat, 'lng': lng, 'active': False, 'expired': True})
+
+    return jsonify({'lat': lat, 'lng': lng, 'active': live, 'expired': False})
+
+
 @app.route('/api/runner_cancel_errand', methods=['POST'])
 @login_required
 def runner_cancel_errand():

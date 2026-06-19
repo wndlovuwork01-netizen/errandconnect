@@ -536,26 +536,17 @@
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-list-alt"></i> Shopping List</h2>
-                    <div class="form-group"><label for="bagging_preference">Bagging Preference</label><div class="input-with-icon"><i class="fas fa-shopping-bag"></i><select id="bagging_preference" name="bagging_preference"><option value="no_preference">No preference</option><option value="plastic">Plastic bags</option><option value="paper">Paper bags</option><option value="reusable">Reusable bags</option></select></div></div>
                     <div class="form-group">
-                        <label>Shopping Items</label><div class="info-tip"><i class="fas fa-info-circle"></i> Add each item with quantity</div>
+                        <label>Shopping Items</label>
                         <div id="items-container">
                             <div class="grocery-item"><div class="grocery-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div>
                         </div>
                         <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
-                        <div class="budget-weight-row"><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Max budget ($)" step="0.01" min="0"></div><div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Est. weight (kg)" step="0.1" min="0"></div></div>
-                    </div>
-                    <div class="form-group"><label>Upload Shopping List (Optional)</label><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload shopping list or photos</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" name="shopping_list" accept="image/*,.pdf" onchange="displayFileName(this)"><span class="file-size-note">Max file size: 10MB</span></div></div>
+                        <div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Est. weight (kg)" step="0.1" min="0"></div></div>
+                    <input type="file" id="file_input" class="file-input" name="shopping_list" accept="image/*,.pdf" onchange="displayFileName(this)" style="display:none;">
                     <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-sliders-h"></i> Preferences</h2>
-                    <div class="preference-grid">
-                        <div class="preference-item"><label for="allow_substitutions">Allow Substitutions</label><select id="allow_substitutions" name="allow_substitutions"><option value="yes">Yes, if unavailable</option><option value="no">No, exact items only</option><option value="contact">Contact me first</option></select></div>
-                        <div class="preference-item"><label for="produce_preferences">Produce Preferences</label><select id="produce_preferences" name="produce_preferences"><option value="any">Any ripeness</option><option value="ripe">Ripe and ready</option><option value="unripe">Slightly unripe</option></select></div>
-                        <div class="preference-item"><label for="receipt_required">Receipt Required?</label><select id="receipt_required" name="receipt_required"><option value="yes">Yes, include receipt</option><option value="no">No receipt needed</option></select></div>
-                        <div class="preference-item"><label for="payment_method">Payment Method</label><select id="payment_method" name="payment_method"><option value="cash">Cash</option><option value="card">Credit/Debit Card</option><option value="mobile">Mobile Payment</option></select></div>
-                    </div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-heart"></i><input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="Dietary restrictions or allergies"></div></div>
+                   <div class="preference-item"><label for="payment_method">Payment Method</label><select id="payment_method" name="payment_method"><option value="cash">Cash</option><option value="card">Credit/Debit Card</option><option value="mobile">Mobile Payment</option></select></div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-truck"></i> Delivery Instructions</h2>

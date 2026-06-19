@@ -100,64 +100,182 @@
                     <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
                     <input type="hidden" id="distance_km_hidden" name="distance_km">
 
-                    <h2><i class="fas fa-mobile-alt"></i> Device Information</h2>
-                    <div class="device-grid">
-                        <div class="device-item"><label for="device_type">Device Type</label><div class="input-with-icon"><i class="fas fa-laptop"></i><select id="device_type" name="device_type" required onchange="toggleOtherDeviceInput(); updateEstimatedFee();"><option value="">Select device type</option><option value="smartphone">Smartphone</option><option value="laptop">Laptop</option><option value="tablet">Tablet</option><option value="desktop">Desktop Computer</option><option value="printer">Printer</option><option value="camera">Camera</option><option value="gaming_console">Gaming Console</option><option value="smart_watch">Smart Watch</option><option value="other">Other</option></select></div><div id="other_device_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_device_type" name="other_device_type" placeholder="Specify device type"></div></div></div>
-                        <div class="device-item"><label for="device_age">Device Age</label><div class="input-with-icon"><i class="fas fa-calendar-alt"></i><select id="device_age" name="device_age" onchange="updateEstimatedFee()"><option value="less_than_1">Less than 1 year</option><option value="1_2_years">1-2 years</option><option value="2_3_years">2-3 years</option><option value="3_plus_years">3+ years</option><option value="unknown">Unknown</option></select></div></div>
-                    </div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="brand" name="brand" placeholder="Brand (e.g., Apple, Samsung, Dell)" required></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-cube"></i><input type="text" id="model" name="model" placeholder="Model (e.g., iPhone 14, Galaxy S23)" required></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-map-marker-alt"></i> Service Location & Timing</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-location-arrow"></i><input type="text" id="service_location" name="service_location" placeholder="Where should service be performed?" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-store"></i><input type="text" id="preferred_repair_shop" name="preferred_repair_shop" placeholder="Preferred repair shop (optional)"></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-truck"></i><select id="pickup_dropoff" name="pickup_dropoff" onchange="togglePickupLocationFields(); updateEstimatedFee();"><option value="pickup">Pickup from my location</option><option value="dropoff">I will drop off</option><option value="both">Both pickup and drop-off</option></select></div></div>
-                    <div id="pickup_location_fields" class="expanding-input"><div class="pickup-location-fields"><div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="pickup_location" name="pickup_location" placeholder="Pickup location address" readonly onfocus="this.removeAttribute('readonly')"></div><div id="dropoff_location_field" class="expanding-input"><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="dropoff_location" name="dropoff_location" placeholder="Drop-off location address" readonly onfocus="this.removeAttribute('readonly')"></div></div></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-tools"></i> Service Required</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-cogs"></i><select id="service_type" name="service_type" required onchange="toggleSpecificRepair(); toggleOtherServiceInput(); updateEstimatedFee();"><option value="">Select service type</option><option value="repair">Repair</option><option value="diagnostic">Diagnostic Only</option><option value="purchase_assistance">Purchase Assistance</option><option value="setup">Setup/Installation</option><option value="data_transfer">Data Transfer</option><option value="software_issue">Software Issue</option><option value="other">Other</option></select></div><div id="other_service_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_service_type" name="other_service_type" placeholder="Specify service type"></div></div></div>
-                    <div id="specific_repair_section" style="display: none;"><div class="form-group"><div class="input-with-icon"><i class="fas fa-wrench"></i><select id="specific_repair" name="specific_repair" onchange="updateEstimatedFee()"><option value="">Select repair type</option><option value="screen_replacement">Screen Replacement</option><option value="battery_replacement">Battery Replacement</option><option value="charging_port">Charging Port Repair</option><option value="camera_repair">Camera Repair</option><option value="software_update">Software Update</option><option value="virus_removal">Virus/Malware Removal</option><option value="data_recovery">Data Recovery</option><option value="water_damage">Water Damage Repair</option><option value="other_repair">Other Repair</option></select></div></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-exclamation-circle"></i><textarea id="issue_description" name="issue_description" rows="3" placeholder="Describe the problem..." required></textarea></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-file-contract"></i> Warranty & Budget</h2>
-                    <div class="device-grid">
-                        <div class="device-item"><label for="warranty_status">Warranty Status</label><div class="input-with-icon"><i class="fas fa-file-signature"></i><select id="warranty_status" name="warranty_status" required onchange="updateEstimatedFee()"><option value="in_warranty">In Warranty</option><option value="out_of_warranty">Out of Warranty</option><option value="extended_warranty">Extended Warranty</option><option value="unknown">Unknown</option></select></div></div>
-                        <div class="device-item"><label for="diagnostic_fee">Diagnostic Fee</label><div class="input-with-icon"><i class="fas fa-search-dollar"></i><select id="diagnostic_fee" name="diagnostic_fee" onchange="updateEstimatedFee()"><option value="yes">Willing to pay</option><option value="no">Not willing</option><option value="depends">Depends on amount</option></select></div></div>
-                    </div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-money-bill-wave"></i><select id="budget_range" name="budget_range" onchange="updateEstimatedFee()"><option value="under_50">Under $50</option><option value="50_100">$50 - $100</option><option value="100_200">$100 - $200</option><option value="200_500">$200 - $500</option><option value="500_plus">$500+</option><option value="flexible">Flexible</option></select></div></div>
-                    <div id="serviceTypeIndicator" class="service-type-indicator" style="display: none;"><div class="service-type-icon"><i id="serviceTypeIcon" class="fas fa-tools"></i></div><div class="service-type-text"><h4 id="serviceTypeTitle">Service Type</h4><p id="serviceTypeDescription">Based on your selection</p></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-database"></i> Data & Backup</h2>
-                    <div class="device-grid">
-                        <div class="device-item"><label for="data_backup">Data Backup</label><div class="input-with-icon"><i class="fas fa-save"></i><select id="data_backup" name="data_backup" onchange="updateEstimatedFee()"><option value="no">No backup needed</option><option value="yes">Yes, backup my data</option><option value="already_backed_up">Already backed up</option><option value="unsure">Unsure</option></select></div></div>
-                        <div class="device-item"><label for="remote_access">Remote Access</label><div class="input-with-icon"><i class="fas fa-desktop"></i><select id="remote_access" name="remote_access"><option value="no">No remote access</option><option value="yes">Allow remote access</option><option value="supervised_only">Supervised only</option></select></div></div>
-                    </div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-shopping-cart"></i> Purchase Assistance</h2>
-                    <div class="info-tip"><i class="fas fa-info-circle"></i> Fill this section only if you need help purchasing a new device</div>
-                    <div class="device-grid">
-                        <div class="device-item"><label for="purchase_budget">Purchase Budget</label><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="purchase_budget" name="purchase_budget" placeholder="Budget for new device" step="0.01" min="0"></div></div>
-                        <div class="device-item"><label for="urgency">Urgency Level</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="urgency" name="urgency" required onchange="updateUrgencyBadge(); updateEstimatedFee();"><option value="low">Low - Flexible timing</option><option value="medium">Medium - Within a week</option><option value="high">High - Within 2-3 days</option><option value="urgent">Urgent - As soon as possible</option></select></div></div>
-                    </div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-star"></i><textarea id="preferred_features" name="preferred_features" rows="2" placeholder="Important features (e.g., battery, camera, storage)"></textarea></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><textarea id="special_instructions" name="special_instructions" rows="2" placeholder="Any other special instructions..."></textarea></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-                    <div class="service-phone-row">
-                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
-                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
-                    </div>
-                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Gadget Service Order</button>
-                </form>
+                   <h2><i class="fas fa-mobile-alt"></i> Device Information</h2>
+<div class="device-grid">
+    <div class="device-item">
+        <label for="device_type">Device Type</label>
+        <div class="input-with-icon">
+            <i class="fas fa-laptop"></i>
+            <select id="device_type" name="device_type" required onchange="toggleOtherDeviceInput(); updateEstimatedFee();">
+                <option value="">Select device type</option>
+                <option value="smartphone">Smartphone</option>
+                <option value="laptop">Laptop</option>
+                <option value="tablet">Tablet</option>
+                <option value="desktop">Desktop Computer</option>
+                <option value="printer">Printer</option>
+                <option value="camera">Camera</option>
+                <option value="gaming_console">Gaming Console</option>
+                <option value="smart_watch">Smart Watch</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div id="other_device_input" class="expanding-input">
+            <div class="input-with-icon">
+                <i class="fas fa-edit"></i>
+                <input type="text" id="other_device_type" name="other_device_type" placeholder="Specify device type">
             </div>
         </div>
     </div>
+    <div class="device-item">
+        <label for="device_age">Device Age</label>
+        <div class="input-with-icon">
+            <i class="fas fa-calendar-alt"></i>
+            <select id="device_age" name="device_age" onchange="updateEstimatedFee()">
+                <option value="less_than_1">Less than 1 year</option>
+                <option value="1_2_years">1-2 years</option>
+                <option value="2_3_years">2-3 years</option>
+                <option value="3_plus_years">3+ years</option>
+                <option value="unknown">Unknown</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="input-with-icon">
+        <i class="fas fa-tag"></i>
+        <input type="text" id="brand" name="brand" placeholder="Brand (e.g., Apple, Samsung, Dell)" required>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-map-marker-alt"></i> Service Location & Timing</h2>
+<div class="form-group">
+    <div class="input-with-icon">
+        <i class="fas fa-location-arrow"></i>
+        <input type="text" id="service_location" name="service_location" placeholder="Where should service be performed?" required readonly
+               onfocus="this.removeAttribute('readonly')">
+    </div>
+</div>
+<div class="form-group">
+    <div class="input-with-icon">
+        <i class="fas fa-truck"></i>
+        <select id="pickup_dropoff" name="pickup_dropoff" onchange="togglePickupLocationFields(); updateEstimatedFee();">
+            <option value="pickup">Pickup from my location</option>
+            <option value="dropoff">I will drop off</option>
+            <option value="both">Both pickup and drop-off</option>
+        </select>
+    </div>
+</div>
+<div id="pickup_location_fields" class="expanding-input">
+    <div class="pickup-location-fields">
+        <div class="input-with-icon">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" id="pickup_location" name="pickup_location" placeholder="Pickup location address" readonly
+                   onfocus="this.removeAttribute('readonly')">
+        </div>
+        <div id="dropoff_location_field" class="expanding-input">
+            <div class="input-with-icon">
+                <i class="fas fa-home"></i>
+                <input type="text" id="dropoff_location" name="dropoff_location" placeholder="Drop-off location address" readonly
+                       onfocus="this.removeAttribute('readonly')">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-tools"></i> Service Required</h2>
+<div class="form-group">
+    <div class="input-with-icon">
+        <i class="fas fa-cogs"></i>
+        <select id="service_type" name="service_type" required onchange="toggleSpecificRepair(); toggleOtherServiceInput(); updateEstimatedFee();">
+            <option value="">Select service type</option>
+            <option value="repair">Repair</option>
+            <option value="diagnostic">Diagnostic Only</option>
+            <option value="purchase_assistance">Purchase Assistance</option>
+            <option value="setup">Setup/Installation</option>
+            <option value="data_transfer">Data Transfer</option>
+            <option value="software_issue">Software Issue</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+    <div id="other_service_input" class="expanding-input">
+        <div class="input-with-icon">
+            <i class="fas fa-edit"></i>
+            <input type="text" id="other_service_type" name="other_service_type" placeholder="Specify service type">
+        </div>
+    </div>
+</div>
+<div id="specific_repair_section" style="display: none;">
+    <div class="form-group">
+        <div class="input-with-icon">
+            <i class="fas fa-wrench"></i>
+            <select id="specific_repair" name="specific_repair" onchange="updateEstimatedFee()">
+                <option value="">Select repair type</option>
+                <option value="screen_replacement">Screen Replacement</option>
+                <option value="battery_replacement">Battery Replacement</option>
+                <option value="charging_port">Charging Port Repair</option>
+                <option value="camera_repair">Camera Repair</option>
+                <option value="software_update">Software Update</option>
+                <option value="virus_removal">Virus/Malware Removal</option>
+                <option value="data_recovery">Data Recovery</option>
+                <option value="water_damage">Water Damage Repair</option>
+                <option value="other_repair">Other Repair</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="input-with-icon">
+        <i class="fas fa-exclamation-circle"></i>
+        <textarea id="issue_description" name="issue_description" rows="3" placeholder="Describe the problem..." required></textarea>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-shopping-cart"></i> Purchase Assistance</h2>
+<div class="info-tip"><i class="fas fa-info-circle"></i> Fill this section only if you need help purchasing a new device</div>
+<div class="device-grid">
+    <div class="device-item">
+        <label for="purchase_budget">Purchase Budget</label>
+        <div class="input-with-icon">
+            <i class="fas fa-dollar-sign"></i>
+            <input type="number" id="purchase_budget" name="purchase_budget" placeholder="Budget for new device" step="0.01" min="0">
+        </div>
+    </div>
+    <div class="device-item">
+        <label for="urgency">Urgency Level</label>
+        <div class="input-with-icon">
+            <i class="fas fa-clock"></i>
+            <select id="urgency" name="urgency" required onchange="updateUrgencyBadge(); updateEstimatedFee();">
+                <option value="low">Low - Flexible timing</option>
+                <option value="medium">Medium - Within a week</option>
+                <option value="high">High - Within 2-3 days</option>
+                <option value="urgent">Urgent - As soon as possible</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+<div class="service-phone-row">
+    <div class="form-group">
+        <label>Service Price ($)</label>
+        <div class="input-with-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+            <input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Phone Number</label>
+        <div class="input-with-icon">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required>
+        </div>
+    </div>
+</div>
+<button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Gadget Service Order</button>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>

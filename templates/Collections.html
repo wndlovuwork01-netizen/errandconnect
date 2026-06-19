@@ -134,43 +134,78 @@
                     <div class="collection-row-grid"><div class="form-group"><label for="collection_contact">Collection Contact</label><div class="input-with-icon"><i class="fas fa-user"></i><input type="text" id="collection_contact" name="collection_contact" placeholder="Name of contact person" required></div></div><div class="form-group"><label for="collection_phone">Contact Phone</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="collection_phone" name="collection_phone" placeholder="Contact phone number" required></div></div></div>
                     <div class="form-group"><label for="collection_time">Collection Time Window</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="collection_time" name="collection_time" onchange="toggleSpecificCollectionTime()"><option value="anytime">Anytime today</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
                     <div id="specific_collection_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_collection_time" name="specific_collection_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="collection_instructions" name="collection_instructions" rows="2" placeholder="Special instructions for collection..."></textarea></div></div>
                     <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Where should we deliver?" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
                     <div class="form-group"><label for="delivery_time">Delivery Time Window</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificDeliveryTime()"><option value="anytime">Anytime today</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
                     <div id="specific_delivery_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_delivery_time" name="specific_delivery_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
                     <div id="deliveryMethodIndicator" class="collection-method-indicator" style="display:none;"><div class="collection-method-icon"><i id="deliveryMethodIcon" class="fas fa-truck"></i></div><div class="collection-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating based on items and distance...</p></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions (gate code, leave at door, etc.)"></textarea></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special instructions (gate code, leave at door, etc.)"></textarea></div></div>
                     <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-list-check"></i> Items to Collect</h2>
-                    <div class="info-tip"><i class="fas fa-info-circle"></i> List all items that need to be collected.</div>
-                    <div id="items-container"><div class="collection-item"><div class="collection-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-box"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="collection-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-ruler-combined"></i><input type="text" name="sizes[]" placeholder="Size/Dimensions"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-weight-hanging"></i><input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div></div>
-                    <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
-                    <div class="collection-details-grid"><div class="input-with-icon"><i class="fas fa-boxes"></i><select id="item_condition" name="item_condition"><option value="">Item Condition</option><option value="new">New/Sealed</option><option value="used_good">Used - Good</option><option value="used_fair">Used - Fair</option><option value="fragile">Fragile</option><option value="perishable">Perishable</option></select></div><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="tracking_number" name="tracking_number" placeholder="Tracking # (optional)"></div><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="estimated_value" name="estimated_value" placeholder="Estimated value ($)" step="0.01" min="0"></div><div class="input-with-icon"><i class="fas fa-exclamation-triangle"></i><select id="handling_requirements" name="handling_requirements"><option value="standard">Standard Handling</option><option value="careful">Careful Handling</option><option value="special">Special Requirements</option></select></div></div>
-                    <div class="form-group"><label>Item Type</label><div class="item-type-selector"><div class="item-type active" onclick="selectItemType('package',this)"><i class="fas fa-box"></i><span>Package</span></div><div class="item-type" onclick="selectItemType('document',this)"><i class="fas fa-file-alt"></i><span>Documents</span></div><div class="item-type" onclick="selectItemType('electronics',this)"><i class="fas fa-laptop"></i><span>Electronics</span></div><div class="item-type" onclick="selectItemType('clothing',this)"><i class="fas fa-tshirt"></i><span>Clothing</span></div><div class="item-type" onclick="selectItemType('fragile',this)"><i class="fas fa-glass-whiskey"></i><span>Fragile</span></div><div class="item-type" onclick="selectItemType('other',this)"><i class="fas fa-box-open"></i><span>Other</span></div></div></div>
-                    <div class="toggle-switch"><div class="toggle-label">Signature Required</div><label class="switch"><input type="checkbox" id="signature_required" name="signature_required"><span class="slider"></span></label></div>
-                    <div class="toggle-switch"><div class="toggle-label">ID Verification Required</div><label class="switch"><input type="checkbox" id="id_verification" name="id_verification"><span class="slider"></span></label></div>
-                    <div class="form-group"><label>Reference Documents (Optional)</label><div class="info-tip"><i class="fas fa-lightbulb"></i> Upload photos of items, receipts, or any reference documents</div><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload reference photos/documents</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" accept="image/*,.pdf,.doc,.docx" onchange="displayFileName(this)" multiple></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-credit-card"></i> Payment & Preferences</h2>
-                    <div class="collection-row-grid"><div class="form-group"><label for="payment_method">Payment Method</label><div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash</option><option value="card_on_delivery">Card on Delivery</option><option value="prepaid">Prepaid Online</option><option value="mobile">Mobile Payment</option></select></div></div><div class="form-group"><label for="receipt_required">Receipt Required?</label><div class="input-with-icon"><i class="fas fa-receipt"></i><select id="receipt_required" name="receipt_required"><option value="yes">Yes, provide receipt</option><option value="photo">Photo of receipt</option><option value="no">Not required</option></select></div></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-comment-alt"></i><textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any other important details or special requirements..."></textarea></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-                    <div class="service-phone-row">
-                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
-                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
-                    </div>
-                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Collection Request</button>
-                </form>
+                   <h2><i class="fas fa-list-check"></i> Items to Collect</h2>
+<div class="info-tip"><i class="fas fa-info-circle"></i> List all items that need to be collected.</div>
+<div id="items-container">
+    <div class="collection-item">
+        <div class="collection-row">
+            <div class="input-with-icon" style="flex:2;">
+                <i class="fas fa-box"></i>
+                <input type="text" name="items[]" placeholder="Item description" required>
+            </div>
+            <div class="input-with-icon" style="flex:1;">
+                <i class="fas fa-hashtag"></i>
+                <input type="text" name="quantities[]" placeholder="Qty" required>
             </div>
         </div>
+        <div class="collection-row">
+            <div class="input-with-icon" style="flex:1;">
+                <i class="fas fa-ruler-combined"></i>
+                <input type="text" name="sizes[]" placeholder="Size/Dimensions">
+            </div>
+            <div class="input-with-icon" style="flex:1;">
+                <i class="fas fa-weight-hanging"></i>
+                <input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0">
+            </div>
+        </div>
+        <div class="item-actions">
+            <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+        </div>
     </div>
+</div>
+<button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
+
+<div class="collection-row-grid">
+    <div class="form-group">
+        <label for="payment_method">Payment Method</label>
+        <div class="input-with-icon">
+            <i class="fas fa-credit-card"></i>
+            <select id="payment_method" name="payment_method">
+                <option value="cash">Cash</option>
+                <option value="card_on_delivery">Card on Delivery</option>
+                <option value="prepaid">Prepaid Online</option>
+                <option value="mobile">Mobile Payment</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+<div class="service-phone-row" style="display:flex; flex-wrap:nowrap; gap:10px;">
+    <div class="form-group" style="flex:1; min-width:0;">
+        <label>Service Price ($)</label>
+        <div class="input-with-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+            <input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required>
+        </div>
+    </div>
+    <div class="form-group" style="flex:1; min-width:0;">
+        <label>Phone Number</label>
+        <div class="input-with-icon">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required>
+        </div>
+    </div>
+</div>
+<button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Collection Request</button>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>

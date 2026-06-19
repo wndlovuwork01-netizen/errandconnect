@@ -114,29 +114,79 @@
                     <div class="value-display"><div class="value-label">Declared Value:</div><div class="value-amount">$<span id="value_display">0.00</span></div></div>
                     <div class="form-group"><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="estimated_value" name="estimated_value" placeholder="Package value for insurance" step="0.01" min="0"></div></div>
                     <div class="section-divider"></div>
-
                     <h2><i class="fas fa-route"></i> Pickup & Delivery Information</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="pickup_address" name="pickup_address" placeholder="Pickup address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="preference-grid"><div class="preference-item"><label for="delivery_timeframe">Delivery Speed</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_timeframe" name="delivery_timeframe" required><option value="express">Express (same day)</option><option value="next_day">Next day</option><option value="2_day">2-day delivery</option><option value="standard">Standard (3-5 days)</option></select></div></div><div class="preference-item"><label for="packaging_requirements">Packaging</label><div class="input-with-icon"><i class="fas fa-box"></i><select id="packaging_requirements" name="packaging_requirements"><option value="standard">Standard packaging</option><option value="bubble_wrap">Bubble wrap</option><option value="double_box">Double boxing</option><option value="waterproof">Waterproof</option></select></div></div></div>
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-bicycle"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div></div>
-                    <div class="preference-grid"><div class="preference-item"><label for="signature_required">Signature Required</label><div class="input-with-icon"><i class="fas fa-signature"></i><select id="signature_required" name="signature_required" required><option value="no">No signature</option><option value="yes">Signature required</option><option value="adult_signature">Adult signature</option></select></div></div><div class="preference-item"><label for="proof_of_delivery">Proof of Delivery</label><div class="input-with-icon"><i class="fas fa-camera"></i><select id="proof_of_delivery" name="proof_of_delivery"><option value="none">No proof needed</option><option value="photo">Photo proof</option><option value="signature">Signature proof</option><option value="both">Photo & signature</option></select></div></div></div>
-                    <div class="section-divider"></div>
-                    <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-hands-helping"></i><textarea id="special_handling" name="special_handling" rows="2" placeholder="Special handling instructions..."></textarea></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-comment-alt"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Specific delivery instructions..."></textarea></div></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-                    <div class="service-phone-row">
-                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
-                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
-                    </div>
-                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Package Delivery</button>
-                </form>
-            </div>
+                <div class="form-group">
+                <div class="input-with-icon">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="pickup_address" name="pickup_address" placeholder="Pickup address" required readonly
+                      onfocus="this.removeAttribute('readonly')">
+                </div>
+                </div>
+        <div class="form-group">
+        <div class="input-with-icon"><i class="fas fa-home"></i>
+        <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')">
+    </div>
+</div>
+<div class="preference-grid">
+    <div class="preference-item">
+        <label for="delivery_timeframe">Delivery Speed</label>
+        <div class="input-with-icon">
+            <i class="fas fa-clock"></i>
+            <select id="delivery_timeframe" name="delivery_timeframe" required>
+                <option value="express">Express (same day)</option>
+                <option value="next_day">Next day</option>
+                <option value="2_day">2-day delivery</option>
+                <option value="standard">Standard (3-5 days)</option>
+            </select>
         </div>
     </div>
+</div>
+<div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;">
+    <div class="delivery-method-icon">
+        <i id="deliveryMethodIcon" class="fas fa-bicycle"></i>
+    </div>
+    <div class="delivery-method-text">
+        <h4 id="deliveryMethodTitle">Delivery Method</h4>
+        <p id="deliveryMethodDescription">Calculating...</p>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
+<div class="form-group">
+    <div class="input-with-icon">
+        <i class="fas fa-hands-helping"></i>
+        <textarea id="special_handling" name="special_handling" rows="2"
+                  placeholder="Special handling and delivery instructions..."></textarea>
+    </div>
+</div>
+<div class="section-divider"></div>
+
+<h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+<div class="service-phone-row">
+    <div class="form-group">
+        <label>Service Price ($)</label>
+        <div class="input-with-icon">
+            <i class="fas fa-hand-holding-usd"></i>
+            <input type="number" id="service_price" name="service_price" placeholder="Your price"
+                   step="0.01" min="0.50" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Phone Number</label>
+        <div class="input-with-icon">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required>
+        </div>
+    </div>
+</div>
+<button type="submit" class="submit-btn">
+    <i class="fas fa-paper-plane"></i> Create Package Delivery
+</button>
+</form>
+</div>
+</div>
+</div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>

@@ -232,13 +232,7 @@
 
                     <h2><i class="fas fa-store"></i> Restaurant / Delivery Information</h2>
                     <div class="form-group">
-                        <label>Restaurant Type</label>
-                        <div class="restaurant-type-grid">
-                            <div class="restaurant-type-item active" data-type="fast_food" onclick="selectRestaurantType(this, 'fast_food')"><i class="fas fa-hamburger"></i> Fast Food</div>
-                            <div class="restaurant-type-item" data-type="casual" onclick="selectRestaurantType(this, 'casual')"><i class="fas fa-utensil-spoon"></i> Casual Dining</div>
-                            <div class="restaurant-type-item" data-type="fine_dining" onclick="selectRestaurantType(this, 'fine_dining')"><i class="fas fa-wine-glass-alt"></i> Fine Dining</div>
-                            <div class="restaurant-type-item" data-type="cafe" onclick="selectRestaurantType(this, 'cafe')"><i class="fas fa-coffee"></i> Café</div>
-                        </div>
+
                         <input type="hidden" id="restaurant_type" name="restaurant_type" value="fast_food">
                     </div>
                     <div class="form-group">
@@ -263,16 +257,8 @@
                         <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Order budget ($)" step="0.01"></div>
                         <div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash on Delivery</option><option value="card">Card</option><option value="mobile">Mobile Payment</option></select></div>
                     </div>
-                    <div class="form-group"><label>Upload Menu (optional)</label><div class="file-upload-wrapper"><div class="file-upload-input" onclick="document.getElementById('file_input').click()"><i class="fas fa-cloud-upload-alt"></i><span>Upload screenshot</span><div id="file_name" class="file-name"></div></div><input type="file" id="file_input" class="file-input" name="menu_photo" accept="image/*,.pdf" onchange="displayFileName(this)"></div></div>
                     <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-sliders-h"></i> Preferences</h2>
-                    <div class="preference-grid">
-                        <div class="preference-item"><label>Food Temp</label><select id="temperature_preference" name="temperature_preference"><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option></select></div>
-                        <div class="preference-item"><label>Packaging</label><select id="packaging_preference" name="packaging_preference"><option value="eco_friendly">Eco-friendly</option><option value="secure">Secure</option></select></div>
-                        <div class="preference-item"><label>Utensils</label><select id="utensils_required" name="utensils_required"><option value="yes">Yes</option><option value="no">No</option></select></div>
-                        <div class="preference-item"><label>Contactless</label><select id="contactless_delivery" name="contactless_delivery"><option value="yes">Yes</option><option value="no">No</option></select></div>
-                    </div>
                     <div class="input-with-icon"><i class="fas fa-heart"></i><input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="Allergies / restrictions"></div>
                     <div class="section-divider"></div>
 
