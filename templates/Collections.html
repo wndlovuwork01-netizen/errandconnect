@@ -121,13 +121,17 @@
                     <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
                     <input type="hidden" id="distance_km_hidden" name="distance_km">
 
-                    <h2><i class="fas fa-cogs"></i> Collection Type</h2>
-                    <div class="service-type-selector">
-                        <div class="service-type active" onclick="selectServiceType('package',this)"><div class="service-type-header"><div class="service-type-icon"><i class="fas fa-box"></i></div><div class="service-type-title">Package Collection</div></div><div class="service-type-description">Collect packages, parcels, or envelopes</div><div class="service-type-badge">Most Common</div></div>
-                        <div class="service-type" onclick="selectServiceType('document',this)"><div class="service-type-header"><div class="service-type-icon"><i class="fas fa-file-contract"></i></div><div class="service-type-title">Document Collection</div></div><div class="service-type-description">Collect important documents, paperwork</div></div>
-                        <div class="service-type" onclick="selectServiceType('item',this)"><div class="service-type-header"><div class="service-type-icon"><i class="fas fa-shopping-bag"></i></div><div class="service-type-title">Item Collection</div></div><div class="service-type-description">Collect purchased items, goods, or products</div></div>
-                    </div>
-                    <div class="section-divider"></div>
+                   <h2><i class="fas fa-cogs"></i> Collection Type</h2>
+<div class="form-group">
+    <label for="collectionType">Collection Type</label>
+    <select id="collectionType" name="collectionType" class="form-control">
+        <option value="" disabled selected>Select collection type...</option>
+        <option value="document">Document</option>
+        <option value="package">Package / Parcel</option>
+        <option value="item">Item Collection</option>
+    </select>
+</div>
+<div class="section-divider"></div>
 
                     <h2><i class="fas fa-map-marker-alt"></i> Collection/Delivery Details</h2>
                     <div class="form-group"><label for="collection_address">Collection Address</label><div class="input-with-icon"><i class="fas fa-map-pin"></i><input type="text" id="collection_address" name="collection_address" placeholder="Full address for collection" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
@@ -138,7 +142,7 @@
                     <div class="form-group"><label for="delivery_time">Delivery Time Window</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificDeliveryTime()"><option value="anytime">Anytime today</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
                     <div id="specific_delivery_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_delivery_time" name="specific_delivery_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
                     <div id="deliveryMethodIndicator" class="collection-method-indicator" style="display:none;"><div class="collection-method-icon"><i id="deliveryMethodIcon" class="fas fa-truck"></i></div><div class="collection-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating based on items and distance...</p></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special instructions (gate code, leave at door, etc.)"></textarea></div></div>
+                    <div class="form-group"><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special instructions (gate code, leave at door, etc.)"></textarea></div>
                     <div class="section-divider"></div>
 
                    <h2><i class="fas fa-list-check"></i> Items to Collect</h2>

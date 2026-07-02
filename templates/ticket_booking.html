@@ -113,20 +113,15 @@
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-dollar-sign"></i> Budget & Payment</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-money-bill-wave"></i><select id="budget_range" name="budget_range" required onchange="updateEstimatedFee()"><option value="">Select budget range</option><option value="under_20">Under $20</option><option value="20_50">$20-$50</option><option value="50_100">$50-$100</option><option value="100_200">$100-$200</option><option value="200_plus">$200+</option><option value="flexible">Flexible</option></select></div></div>
+                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><select id="budget_range" name="budget_range" required onchange="updateEstimatedFee()"><option value="">Select budget range</option><option value="under_20">Under $20</option><option value="20_50">$20-$50</option><option value="50_100">$50-$100</option><option value="100_200">$100-$200</option><option value="200_plus">$200+</option><option value="flexible">Flexible</option></select></div></div>
                     <div class="form-group"><div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method" required><option value="">Select payment method</option><option value="cash">Cash</option><option value="card">Credit/Debit Card</option><option value="mobile">Mobile Payment</option><option value="online">Online Payment</option></select></div></div>
-                    <div id="feeBreakdown" class="fee-breakdown"><div class="fee-item"><span>Service Fee:</span><span id="serviceFee">$0.00</span></div><div class="fee-item"><span>Delivery Fee:</span><span id="deliveryFee">$0.00</span></div><div class="fee-item"><span>Convenience Fee:</span><span id="convenienceFee">$0.00</span></div><div class="fee-item"><span>Total Fee:</span><span id="totalFee">$0.00</span></div></div>
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display:none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-motorcycle"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div></div>
                     <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-cog"></i> Additional Requirements</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-wheelchair"></i><select id="special_access" name="special_access" onchange="updateEstimatedFee()"><option value="none">No special needs</option><option value="wheelchair">Wheelchair accessible</option><option value="hearing">Hearing assistance</option><option value="visual">Visual assistance</option><option value="other_access">Other accessibility needs</option></select></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-shield-alt"></i><select id="cancellation_insurance" name="cancellation_insurance" onchange="updateEstimatedFee()"><option value="no">No insurance</option><option value="yes">Yes, include cancellation insurance</option></select></div></div>
                     <div class="travel-section"><h3><i class="fas fa-plane"></i> Travel Information (if applicable)</h3><div class="form-group"><div class="input-with-icon"><i class="fas fa-plane-departure"></i><input type="text" id="departure_location" name="departure_location" placeholder="Departing from"></div></div><div class="form-group"><div class="input-with-icon"><i class="fas fa-plane-arrival"></i><input type="text" id="destination" name="destination" placeholder="Traveling to"></div></div></div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-comment-alt"></i> Additional Information</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><textarea id="special_requests" name="special_requests" rows="2" placeholder="Any special requests or instructions..."></textarea></div></div>
+                    <div class="form-group"><textarea id="special_requests" name="special_requests" rows="2" placeholder="Any special requests or instructions..."></textarea></div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>

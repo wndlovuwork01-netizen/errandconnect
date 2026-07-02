@@ -625,13 +625,29 @@ def profile(): return render_template("profile.html",user=current_user())
 @app.route("/wallet")
 @login_required
 def wallet(): return render_template("wallet.html",user=current_user())
+
+
 @app.route("/completed")
 @login_required
 def completed():
-    user=current_user()
-    e=Errand.query.filter_by(client_id=user.id,status="completed").first()
-    r=Rating.query.filter_by(client_id=user.id,errand_id=e.id).first() if e else None
-    return render_template("completed.html",user=user,errand=e,user_rating={"found":r is not None,"rating":r.value if r else 0},average_rating=sum(r.value for r in (Rating.query.filter_by(errand_id=e.id).all() if e else[]))/max(len(Rating.query.filter_by(errand_id=e.id).all() if e else[]),1))
+    user = current_user()
+    e = Errand.query.filter_by(client_id=user.id, status="completed").first()
+    r = Rating.query.filter_by(from_user_id=user.id, errand_id=e.id).first() if e else None
+
+    # Safely compute average rating for the errand (if any)
+    avg_rating = 0
+    if e:
+        ratings_for_errand = Rating.query.filter_by(errand_id=e.id).all()
+        if ratings_for_errand:
+            avg_rating = sum(rating.rating for rating in ratings_for_errand) / len(ratings_for_errand)
+
+    return render_template("completed.html",
+                           user=user,
+                           errand=e,
+                           user_rating={"found": r is not None, "rating": r.rating if r else 0},
+                           average_rating=avg_rating)
+
+
 @app.route("/terms")
 @login_required
 def terms(): return render_template("terms.html",user=current_user(),current_date=datetime.utcnow())

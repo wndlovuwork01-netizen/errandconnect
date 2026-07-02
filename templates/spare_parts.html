@@ -7,91 +7,583 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
-        :root { --primary:#4CAF50;--primary-light:#66BB6A;--primary-dark:#388E3C;--secondary:#2E7D32;--accent:#FF9800;--success:#8BC34A;--light:#f8fdf8;--dark:#1A331A;--gradient:linear-gradient(135deg,var(--primary)0%,var(--secondary)100%);--shadow:0 2px 10px rgba(76,175,80,0.15);--radius:10px;--transition:all 0.2s ease; }
-        *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;-webkit-tap-highlight-color:transparent;}
-        body{background:var(--light);color:var(--dark);line-height:1.5;min-height:100vh;padding:0;overflow-x:hidden;}
-        .container{width:100%;max-width:100%;margin:0;background:white;min-height:100vh;}
-        .fixed-service-bar{position:fixed;top:0;left:0;right:0;z-index:1000;background:white;box-shadow:0 2px 10px rgba(0,0,0,0.1);padding:6px 15px;display:flex;justify-content:space-between;align-items:center;height:48px;border-bottom:1px solid #e0e0e0;}
-        .service-info{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
-        .service-icon{font-size:18px;background:var(--gradient);color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-        .service-text h3{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .service-text p{display:none;}
-        .estimated-fee-display{background:var(--gradient);color:white;padding:4px 10px;border-radius:var(--radius);font-weight:600;font-size:11px;min-width:85px;text-align:center;}
-        .fee-amount{font-size:14px;font-weight:700;}
-        .content-wrapper{padding-top:58px;padding-bottom:20px;}
-        .mobile-header{background:var(--gradient);color:white;padding:12px 15px;text-align:center;}
-        .logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;}
-        .logo-icon{background:rgba(255,255,255,0.2);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-        h1{font-size:20px;margin-bottom:2px;}
-        .service-tag{background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:15px;font-size:10px;}
-        #map{height:280px;width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
-        .map-controls{display:flex;gap:10px;margin-bottom:12px;}
-        .map-btn{flex:1;padding:10px;border:none;border-radius:8px;background:#f0f0f0;color:#666;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;}
-        .map-btn.active{background:#4CAF50;color:white;}
-        .map-btn.active.dropoff{background:#2196F3;}
-        .map-hint{background:rgba(0,0,0,0.7);color:white;padding:5px 12px;border-radius:20px;font-size:12px;margin-bottom:8px;text-align:center;display:none;}
-        .route-info-bar{background:white;border-radius:12px;margin-top:12px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid #e9e9e9;}
-        .route-info-item{flex:1;text-align:center;}
-        .route-info-label{font-size:9px;color:#777;text-transform:uppercase;}
-        .route-info-value{font-size:13px;font-weight:700;color:var(--primary-dark);}
-        .route-info-value small{font-size:9px;}
-        .form-section{padding:15px;}
-        .progress-bar{height:3px;background:#e0e0e0;border-radius:2px;margin:15px 0 20px;}
-        .progress{height:100%;background:var(--gradient);width:25%;border-radius:2px;transition:width 0.3s ease;}
-        h2{font-size:16px;margin:15px 0 12px;color:var(--primary-dark);padding-bottom:6px;border-bottom:1px solid #e0e0e0;display:flex;gap:8px;}
-        .form-group{margin-bottom:16px;}
-        label{display:block;margin-bottom:5px;font-weight:600;font-size:13px;}
-        .input-with-icon{position:relative;}
-        .input-with-icon i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--primary);font-size:14px;}
-        input,select,textarea{width:100%;padding:12px 12px 12px 38px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;}
-        textarea{padding:12px;}
-        .device-info-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px;}
-        .device-info-item{background:var(--light);padding:10px;border-radius:var(--radius);border:1px solid #e0e0e0;}
-        .part-item{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding:10px;background:var(--light);border-radius:var(--radius);border:1px solid #e0e0e0;}
-        .part-row{display:flex;gap:8px;}
-        .part-row .input-with-icon{flex:1;}
-        .part-actions{display:flex;justify-content:flex-end;}
-        .remove-part{background:var(--accent);color:white;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;}
-        .add-part{background:var(--primary);color:white;padding:10px;border-radius:var(--radius);cursor:pointer;width:100%;margin-bottom:12px;font-weight:600;}
-        .budget-display{background:var(--gradient);color:white;padding:12px;border-radius:var(--radius);margin:15px 0;display:flex;justify-content:space-between;align-items:center;}
-        .preference-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px;}
-        .preference-item{background:var(--light);padding:10px;border-radius:var(--radius);border:1px solid #e0e0e0;}
-        .store-address-section{background:rgba(76,175,80,0.05);border-radius:var(--radius);padding:12px;margin:15px 0;border:1px solid rgba(76,175,80,0.2);}
-        .expanding-input{max-height:0;overflow:hidden;transition:0.3s;opacity:0;}
-        .expanding-input.expanded{max-height:80px;opacity:1;margin-top:8px;}
-        .service-phone-row{display:flex;gap:12px;margin-bottom:20px;}
-        .service-phone-row .form-group{flex:1;margin-bottom:0;}
-        .submit-btn{background:var(--gradient);color:white;border:none;border-radius:var(--radius);padding:14px;font-weight:600;width:100%;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px;}
-        .section-divider{margin:20px 0;height:1px;background:linear-gradient(90deg,transparent,var(--primary-light),transparent);}
-        .info-tip{background:rgba(76,175,80,0.1);border-left:3px solid var(--primary);padding:8px 12px;font-size:11px;margin:10px 0;border-radius:0 8px 8px 0;}
-        @media(min-width:768px){body{padding:10px;display:flex;justify-content:center;}.container{max-width:500px;border-radius:var(--radius);box-shadow:var(--shadow);}.device-info-grid{grid-template-columns:1fr 1fr;}.preference-grid{grid-template-columns:1fr 1fr;}.part-item{flex-direction:row;align-items:center;}.part-row{flex:1;}.part-actions{margin-left:10px;}}
-        @media(max-width:320px){.route-info-value{font-size:11px;}.map-btn{font-size:11px;padding:8px;}.service-phone-row{gap:8px;flex-direction:column;}}
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --primary-dark: #388E3C;
+            --secondary: #2E7D32;
+            --accent: #FF9800;
+            --success: #8BC34A;
+            --light: #f8fdf8;
+            --dark: #1A331A;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
+            --radius: 10px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .fixed-service-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 6px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 48px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .service-icon {
+            font-size: 18px;
+            background: var(--gradient);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .service-text h3 {
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .service-text p {
+            display: none;
+        }
+
+        .estimated-fee-display {
+            background: var(--gradient);
+            color: white;
+            padding: 4px 10px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 11px;
+            min-width: 85px;
+            text-align: center;
+        }
+
+        .fee-amount {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .content-wrapper {
+            padding-top: 58px;
+            padding-bottom: 20px;
+        }
+
+        .mobile-header {
+            background: var(--gradient);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .service-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 10px;
+        }
+
+        #map {
+            height: 280px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .map-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .map-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .map-btn.active.dropoff {
+            background: #2196F3;
+        }
+
+        .map-hint {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .route-info-bar {
+            background: white;
+            border-radius: 12px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9e9e9;
+        }
+
+        .route-info-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .route-info-label {
+            font-size: 9px;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .route-info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .route-info-value small {
+            font-size: 9px;
+        }
+
+        .form-section {
+            padding: 15px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 15px 0 20px;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin: 15px 0 12px;
+            color: var(--primary-dark);
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 12px 12px 38px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        textarea {
+            padding: 12px;
+        }
+
+        /* ────────── Vehicle/Device grid: always 2 columns ────────── */
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .device-info-item {
+            background: var(--light);
+            padding: 10px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+            min-width: 0;
+        }
+
+        /* Make sure inner elements don't overflow on small screens */
+        .device-info-item select,
+        .device-info-item input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* The "other device" expandable area inside the first grid item */
+        .device-info-item .expanding-input {
+            margin-top: 8px;
+        }
+
+        /* ────────── Parts list (unchanged) ────────── */
+        .part-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        .part-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .part-row .input-with-icon {
+            flex: 1;
+        }
+
+        .part-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .remove-part {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-part {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .budget-display {
+            background: var(--gradient);
+            color: white;
+            padding: 12px;
+            border-radius: var(--radius);
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ────────── Preference grid: 1 column on mobile, 2 on desktop (unchanged) ────────── */
+        .preference-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .preference-item {
+            background: var(--light);
+            padding: 10px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+
+        .store-address-section {
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .expanding-input {
+            max-height: 0;
+            overflow: hidden;
+            transition: 0.3s;
+            opacity: 0;
+        }
+
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 8px;
+        }
+
+        .service-phone-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .service-phone-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .section-divider {
+            margin: 20px 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 8px 12px;
+            font-size: 11px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ────────── Responsive: keep desktop container size, but vehicle grid already 2 cols ────────── */
+        @media(min-width: 768px) {
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+            }
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+            }
+            /* Preference grid becomes 2 columns on desktop */
+            .preference-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .part-item {
+                flex-direction: row;
+                align-items: center;
+            }
+            .part-row {
+                flex: 1;
+            }
+            .part-actions {
+                margin-left: 10px;
+            }
+        }
+
+        /* Very small screens: keep 2 columns for vehicle grid, just shrink a bit */
+        @media(max-width: 320px) {
+            .route-info-value {
+                font-size: 11px;
+            }
+            .map-btn {
+                font-size: 11px;
+                padding: 8px;
+            }
+            .service-phone-row {
+                gap: 8px;
+                flex-direction: column;
+            }
+            .device-info-grid {
+                gap: 6px;
+            }
+            .device-info-item {
+                padding: 6px;
+            }
+            .device-info-item label {
+                font-size: 11px;
+            }
+            .device-info-item .input-with-icon select,
+            .device-info-item .input-with-icon input {
+                font-size: 11px;
+                padding-left: 28px;
+            }
+            .device-info-item .input-with-icon i {
+                left: 8px;
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="fixed-service-bar">
-        <div class="service-info"><div class="service-icon"><i class="fas fa-cogs"></i></div><div class="service-text"><h3>Spare Parts</h3><p>Find and deliver parts</p></div></div>
-        <div class="estimated-fee-display"><span>Fee:</span><span id="estimated_fee" class="fee-amount">$0.00</span></div>
+        <div class="service-info">
+            <div class="service-icon"><i class="fas fa-cogs"></i></div>
+            <div class="service-text">
+                <h3>Spare Parts</h3>
+                <p>Find and deliver parts</p>
+            </div>
+        </div>
+        <div class="estimated-fee-display">
+            <span>Fee:</span>
+            <span id="estimated_fee" class="fee-amount">$0.00</span>
+        </div>
     </div>
 
     <div class="container">
         <div class="content-wrapper">
-            <div class="mobile-header"><div class="logo"><div class="logo-icon"><i class="fas fa-cogs"></i></div><div><h1>ErrandConnect</h1><div class="service-tag">Spare Parts Service</div></div></div></div>
+            <div class="mobile-header">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-cogs"></i></div>
+                    <div>
+                        <h1>ErrandConnect</h1>
+                        <div class="service-tag">Spare Parts Service</div>
+                    </div>
+                </div>
+            </div>
 
             <div class="form-section">
                 <div class="progress-bar"><div class="progress"></div></div>
 
                 <div class="map-wrapper">
                     <div class="map-controls">
-                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-store"></i> Set Store</button>
-                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')">
+                            <i class="fas fa-store"></i> Set Store
+                        </button>
+                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')">
+                            <i class="fas fa-home"></i> Set Delivery
+                        </button>
                     </div>
                     <div id="mapHint" class="map-hint">Tap map to set location</div>
                     <div id="map"></div>
                     <div class="route-info-bar" id="routeInfoBar">
-                        <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
-                        <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
-                        <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Distance</div>
+                            <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Time</div>
+                            <div class="route-info-value" id="infoTime">0 <small>min</small></div>
+                        </div>
+                        <div class="route-info-item">
+                            <div class="route-info-label">Est. Fee</div>
+                            <div class="route-info-value" id="infoFee">$0.00</div>
+                        </div>
                     </div>
                 </div>
 
@@ -103,57 +595,181 @@
                     <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
                     <input type="hidden" id="distance_km_hidden" name="distance_km">
 
+                    <!-- ────────── Vehicle/Device Information (always 2×2) ────────── -->
                     <h2><i class="fas fa-car"></i> Vehicle/Device Information</h2>
                     <div class="device-info-grid">
-                        <div class="device-info-item"><label for="device_type">Type</label><div class="input-with-icon"><i class="fas fa-cog"></i><select id="device_type" name="device_type" required onchange="toggleOtherDeviceInput();updateEstimatedFee();"><option value="">Select type</option><option value="car">Car/Automobile</option><option value="motorcycle">Motorcycle</option><option value="bicycle">Bicycle</option><option value="truck">Truck</option><option value="appliance">Home Appliance</option><option value="electronics">Electronics</option><option value="computer">Computer Hardware</option><option value="other">Other</option></select></div></div>
-                        <div id="other_device_input" class="device-info-item expanding-input"><label for="other_device_specify">Specify Device/Vehicle</label><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_device_specify" name="other_device_specify" placeholder="e.g., Boat, Agricultural equipment"></div></div>
-                        <div class="device-info-item"><label for="make">Make/Brand</label><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" id="make" name="make" placeholder="e.g., Toyota, Samsung" required></div></div>
-                        <div class="device-info-item"><label for="model">Model</label><div class="input-with-icon"><i class="fas fa-layer-group"></i><input type="text" id="model" name="model" placeholder="e.g., Camry, Galaxy S23" required></div></div>
-                        <div class="device-info-item"><label for="year">Year</label><div class="input-with-icon"><i class="fas fa-calendar-alt"></i><input type="number" id="year" name="year" placeholder="e.g., 2020" min="1900" max="2030"></div></div>
+                        <div class="device-info-item">
+                            <label for="device_type">Type</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-cog"></i>
+                                <select id="device_type" name="device_type" required onchange="toggleOtherDeviceInput();updateEstimatedFee();">
+                                    <option value="">Select type</option>
+                                    <option value="car">Car/Automobile</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                    <option value="bicycle">Bicycle</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="appliance">Home Appliance</option>
+                                    <option value="electronics">Electronics</option>
+                                    <option value="computer">Computer Hardware</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <!-- "Other device" expandable area now inside the same grid item -->
+                            <div id="other_device_input" class="expanding-input">
+                                <label for="other_device_specify">Specify Device/Vehicle</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-edit"></i>
+                                    <input type="text" id="other_device_specify" name="other_device_specify" placeholder="e.g., Boat, Agricultural equipment">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="device-info-item">
+                            <label for="make">Make/Brand</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-tag"></i>
+                                <input type="text" id="make" name="make" placeholder="e.g., Toyota, Samsung" required>
+                            </div>
+                        </div>
+                        <div class="device-info-item">
+                            <label for="model">Model</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-layer-group"></i>
+                                <input type="text" id="model" name="model" placeholder="e.g., Camry, Galaxy S23" required>
+                            </div>
+                        </div>
+                        <div class="device-info-item">
+                            <label for="year">Year</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                                <input type="number" id="year" name="year" placeholder="e.g., 2020" min="1900" max="2030">
+                            </div>
+                        </div>
                     </div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-store"></i> Store/Supplier Information</h2>
-                    <div class="form-group"><label for="preferred_supplier">Preferred Store/Supplier Name</label><div class="input-with-icon"><i class="fas fa-store-alt"></i><input type="text" id="preferred_supplier" name="preferred_supplier" placeholder="e.g., AutoZone, Best Buy"></div></div>
-                    <div class="store-address-section"><h3><i class="fas fa-map-marker-alt"></i> Store/Supplier Full Address</h3><div class="info-tip"><i class="fas fa-info-circle"></i> This address will be used as the pickup location.</div><div class="form-group"><div class="input-with-icon"><i class="fas fa-location-dot"></i><input type="text" id="store_address" name="store_address" placeholder="Store/supplier full address" required readonly onfocus="this.removeAttribute('readonly')"></div></div></div>
-                    <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="info-tip"><i class="fas fa-info-circle"></i> Where the parts should be delivered.</div><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="preference-item"><label for="delivery_timeframe">Delivery Timeframe</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_timeframe" name="delivery_timeframe" onchange="updateEstimatedFee()"><option value="asap">As soon as possible</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="this_week">This week</option><option value="flexible">Flexible</option></select></div></div>
+                    <div class="form-group">
+                        <label for="preferred_supplier">Preferred Store/Supplier Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-store-alt"></i>
+                            <input type="text" id="preferred_supplier" name="preferred_supplier" placeholder="e.g., AutoZone, Best Buy">
+                        </div>
+                    </div>
+                    <div class="store-address-section">
+                        <div class="form-group">
+                            <div class="input-with-icon">
+                                <i class="fas fa-location-dot"></i>
+                                <input type="text" id="store_address" name="store_address" placeholder="Store/supplier full address" required readonly onfocus="this.removeAttribute('readonly')">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery_address">Delivery Address</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-home"></i>
+                            <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')">
+                        </div>
+                    </div>
+                    <div class="preference-item">
+                        <label for="delivery_timeframe">Delivery Timeframe</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-clock"></i>
+                            <select id="delivery_timeframe" name="delivery_timeframe" onchange="updateEstimatedFee()">
+                                <option value="asap">As soon as possible</option>
+                                <option value="today">Today</option>
+                                <option value="tomorrow">Tomorrow</option>
+                                <option value="this_week">This week</option>
+                                <option value="flexible">Flexible</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-list"></i> Parts Required</h2>
-                    <div class="info-tip"><i class="fas fa-info-circle"></i> Add each part you need. Include part numbers if available.</div>
-                    <div id="parts-container"><div class="part-item"><div class="part-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-cog"></i><input type="text" name="part_names[]" placeholder="Part name" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-sort-amount-up"></i><input type="number" name="quantities[]" placeholder="Qty" min="1" required></div></div><div class="part-row"><div class="input-with-icon"><i class="fas fa-hashtag"></i><input type="text" name="part_numbers[]" placeholder="Part number"></div></div><div class="part-actions"><button type="button" class="remove-part" onclick="removePart(this)">×</button></div></div></div>
-                    <button type="button" class="add-part" onclick="addPart()"><i class="fas fa-plus"></i> Add Another Part</button>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-sliders-h"></i> Part Specifications</h2>
-                    <div class="budget-display"><div class="budget-label">Budget Range:</div><div class="budget-value" id="budget_display">Flexible</div></div>
-                    <div class="preference-grid">
-                        <div class="preference-item"><label for="urgency_level">Urgency Level</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="urgency_level" name="urgency_level" required onchange="updateEstimatedFee()"><option value="low">Low - Can wait</option><option value="medium">Medium - Within a week</option><option value="high">High - Within 2-3 days</option><option value="urgent">Urgent - Needed today</option></select></div></div>
-                        <div class="preference-item"><label for="budget_range">Budget Range</label><div class="input-with-icon"><i class="fas fa-dollar-sign"></i><select id="budget_range" name="budget_range" onchange="updateBudgetDisplay();updateEstimatedFee()"><option value="flexible">Flexible</option><option value="under_50">Under $50</option><option value="50_100">$50 - $100</option><option value="100_200">$100 - $200</option><option value="200_500">$200 - $500</option><option value="500_plus">$500+</option></select></div></div>
-                        <div class="preference-item"><label for="quality_preference">Quality Preference</label><div class="input-with-icon"><i class="fas fa-award"></i><select id="quality_preference" name="quality_preference" required onchange="updateEstimatedFee()"><option value="oem">OEM (Original Equipment)</option><option value="aftermarket">Aftermarket</option><option value="used">Used/Refurbished</option><option value="no_preference">No preference</option></select></div></div>
-                        <div class="preference-item"><label for="compatibility_verification">Compatibility Check</label><div class="input-with-icon"><i class="fas fa-check-circle"></i><select id="compatibility_verification" name="compatibility_verification" onchange="updateEstimatedFee()"><option value="yes">Yes, verify compatibility</option><option value="no">No, I'm sure</option><option value="expert">Let expert verify</option></select></div></div>
+                    <div class="info-tip">
+                        <i class="fas fa-info-circle"></i> Add each part you need. Include part numbers if available.
                     </div>
+                    <div id="parts-container">
+                        <div class="part-item">
+                            <div class="part-row">
+                                <div class="input-with-icon" style="flex:2;">
+                                    <i class="fas fa-cog"></i>
+                                    <input type="text" name="part_names[]" placeholder="Part name" required>
+                                </div>
+                                <div class="input-with-icon" style="flex:1;">
+                                    <i class="fas fa-sort-amount-up"></i>
+                                    <input type="number" name="quantities[]" placeholder="Qty" min="1" required>
+                                </div>
+                            </div>
+                            <div class="part-row">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-hashtag"></i>
+                                    <input type="text" name="part_numbers[]" placeholder="Part number">
+                                </div>
+                            </div>
+                            <div class="part-actions">
+                                <button type="button" class="remove-part" onclick="removePart(this)">×</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-part" onclick="addPart()">
+                        <i class="fas fa-plus"></i> Add Another Part
+                    </button>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-wrench"></i> Installation & Service</h2>
                     <div class="preference-grid">
-                        <div class="preference-item"><label for="installation_needed">Installation Needed?</label><div class="input-with-icon"><i class="fas fa-tools"></i><select id="installation_needed" name="installation_needed" onchange="updateEstimatedFee()"><option value="no">No, just purchase parts</option><option value="yes">Yes, install the parts</option><option value="maybe">Maybe, depending on complexity</option></select></div></div>
-                        <div class="preference-item"><label for="warranty_required">Warranty Required?</label><div class="input-with-icon"><i class="fas fa-shield-alt"></i><select id="warranty_required" name="warranty_required" onchange="updateEstimatedFee()"><option value="no">No warranty needed</option><option value="yes">Yes, with warranty</option><option value="extended">Extended warranty preferred</option></select></div></div>
+                        <div class="preference-item">
+                            <label for="installation_needed">Installation Needed?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-tools"></i>
+                                <select id="installation_needed" name="installation_needed" onchange="updateEstimatedFee()">
+                                    <option value="no">No, just purchase parts</option>
+                                    <option value="yes">Yes, install the parts</option>
+                                    <option value="maybe">Maybe, depending on complexity</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="preference-item">
+                            <label for="warranty_required">Warranty Required?</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-shield-alt"></i>
+                                <select id="warranty_required" name="warranty_required" onchange="updateEstimatedFee()">
+                                    <option value="no">No warranty needed</option>
+                                    <option value="yes">Yes, with warranty</option>
+                                    <option value="extended">Extended warranty preferred</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-sticky-note"></i> Additional Information</h2>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-barcode"></i><input type="text" id="vehicle_vin" name="vehicle_vin" placeholder="VIN Number (for vehicles)"></div></div>
-                    <div class="form-group"><div class="input-with-icon"><i class="fas fa-clipboard-list"></i><textarea id="specific_requirements" name="specific_requirements" rows="3" placeholder="Any specific requirements or notes about the parts..."></textarea></div></div>
+                    <div class="form-group">
+                        <textarea id="specific_requirements" name="specific_requirements" rows="3" placeholder="Any specific requirements or notes about the parts..."></textarea>
+                    </div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
                     <div class="service-phone-row">
-                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required></div></div>
-                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div>
+                        <div class="form-group">
+                            <label>Service Price ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.50" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Spare Parts Errand</button>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Create Spare Parts Errand
+                    </button>
                 </form>
             </div>
         </div>
