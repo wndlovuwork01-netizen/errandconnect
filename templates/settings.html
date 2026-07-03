@@ -94,7 +94,6 @@
                             <span class="setting-desc" id="currentLanguage">English</span>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right setting-arrow"></i>
                 </div>
 
                 <div class="setting-item" onclick="openModal('themeModal')">
@@ -192,56 +191,6 @@
             </button>
         </section>
     </main>
-
-    <!-- Language Modal -->
-    <div id="languageModal" class="settings-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Select Language</h3>
-                <button class="close-modal" onclick="closeModal('languageModal')">&times;</button>
-            </div>
-            <div class="modal-list">
-                <div class="modal-item active" onclick="selectLanguage('English')">
-                    <span>English</span>
-                    <i class="fas fa-check"></i>
-                </div>
-                <div class="modal-item" onclick="selectLanguage('Shona')">
-                    <span>Shona</span>
-                </div>
-                <div class="modal-item" onclick="selectLanguage('Ndebele')">
-                    <span>Ndebele</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Theme Modal -->
-    <div id="themeModal" class="settings-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Select Theme</h3>
-                <button class="close-modal" onclick="closeModal('themeModal')">&times;</button>
-            </div>
-            <div class="modal-list">
-                <div class="modal-item active" onclick="selectTheme('Green (Default)', '#4CAF50')">
-                    <div class="theme-preview" style="background: #4CAF50;"></div>
-                    <span>Green (Default)</span>
-                    <i class="fas fa-check"></i>
-                </div>
-                <div class="modal-item" onclick="selectTheme('Blue', '#2196F3')">
-                    <div class="theme-preview" style="background: #2196F3;"></div>
-                    <span>Blue</span>
-                </div>
-                <div class="modal-item" onclick="selectTheme('Orange', '#FF9800')">
-                    <div class="theme-preview" style="background: #FF9800;"></div>
-                    <span>Orange</span>
-                </div>
-                <div class="modal-item" onclick="selectTheme('Dark', '#333333')">
-                    <div class="theme-preview" style="background: #333333;"></div>
-                    <span>Dark</span>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 

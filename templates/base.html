@@ -48,6 +48,8 @@
       gap:6px;
     }
   </style>
+
+  {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -70,7 +72,7 @@
 
         <a href="{{ url_for('signin') }}">Sign In</a>
 
-        <a href="{{ url_for('signup') }}">Sign Up</a>
+        <a href="{{ url_for('usertype') }}">Sign Up</a>
 
       {% endif %}
     </nav>
