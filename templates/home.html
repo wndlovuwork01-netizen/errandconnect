@@ -36,7 +36,7 @@
                             </div>
                         </div>
                         <!-- Completed Card-->
-                        <div class="stat-card" onclick="window.location.href='{{ url_for('completed') }}'" style="cursor: pointer;">
+                        <div class="stat-card" onclick="window.location.href='{{ url_for('order_history') }}'" style="cursor: pointer;">
                             <div class="stat-icon completed">
                                 <i class="fas fa-check-circle"></i>
                             </div>
@@ -56,33 +56,13 @@
         <!-- Quick Actions -->
         <section class="quick-actions-section">
             <div class="actions-header">
-                <!-- Added icon to Quick Actions header -->
+
                 <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                <!-- Removed View All Button -->
+
             </div>
             <p class="actions-subtitle">Everything you need, one tap away</p>
 
             <div class="actions-grid">
-                <!-- Completed Errands Card - NOW FIRST -->
-                <div class="action-card" onclick="window.location.href='{{ url_for('completed') }}'">
-                    <div class="action-icon completed">
-                        ⚡
-                    </div>
-                    <div class="action-content">
-                        <h4>Completed Errands</h4>
-                        <div class="action-stats">
-                            <div class="stat-badge">
-                                <span class="stat-number">{{ completed_count }}</span>
-
-                                <span class="stat-label"><i class="fas fa-chart-bar stat-icon-small"></i> Total</span>
-                            </div>
-                        </div>
-                        <a href="{{ url_for('completed') }}" class="action-link view-details-link">
-                            View Details <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="card-overlay"></div>
-                </div>
 
                 <!-- Services/Errands Card -->
                 <div class="action-card" onclick="window.location.href='{{ url_for('dashboard') }}'">
@@ -92,46 +72,9 @@
                     <div class="action-content">
                         <h4>Errands/Services</h4>
                         <p class="service-note">Which errand will you want us to do for you?</p>
-                        <!-- Removed the Active Requests stat badge since it shows the same as Active Tasks -->
+
                         <a href="{{ url_for('dashboard') }}" class="action-link browse-link">
                             Browse errands <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="card-overlay"></div>
-                </div>
-
-                <!-- History Card -->
-                <div class="action-card" onclick="window.location.href='{{ url_for('order_history') }}'">
-                    <div class="action-icon history">
-                        📋
-                    </div>
-                    <div class="action-content">
-                        <h4>History</h4>
-                        <p>Review your order history and past errands</p>
-                        <!-- Updated to match other link sizes -->
-                        <a href="{{ url_for('order_history') }}" class="action-link history-link">
-                            View History <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="card-overlay"></div>
-                </div>
-
-                <!-- Wallet Card -->
-                <div class="action-card" onclick="window.location.href='{{ url_for('wallet') }}'">
-                    <div class="action-icon wallet">
-                        💵
-                    </div>
-                    <div class="action-content">
-                        <h4>Wallet</h4>
-                        <div class="action-stats">
-                            <div class="stat-badge large wallet-badge">
-                                <!-- Updated: Removed "Available Balance" label -->
-                                <span class="stat-number wallet-balance">${{ "%.2f"|format(user.balance) if user.balance else '0.00' }}</span>
-                            </div>
-                        </div>
-                        <!-- Updated to match other link sizes -->
-                        <a href="{{ url_for('wallet') }}" class="action-link wallet-link">
-                            Manage Funds <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
                     <div class="card-overlay"></div>
@@ -183,27 +126,6 @@
             </div>
         </section>
     </main>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a href="{{ url_for('home_page') }}" class="nav-item active">
-            <span class="nav-emoji">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="{{ url_for('dashboard') }}" class="nav-item">
-            <span class="nav-emoji">📊</span>
-            <span>Dashboard</span>
-        </a>
-        <a href="{{ url_for('chats') }}" class="nav-item">
-    <span class="nav-emoji">💬</span>
-    <span>Chats</span>
-</a>
-
-        <a href="{{ url_for('settings') }}" class="nav-item">
-            <span class="nav-emoji">⚙️</span>
-            <span>Settings</span>
-        </a>
-    </nav>
 </div>
 
 <style>
