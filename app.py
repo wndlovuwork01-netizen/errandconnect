@@ -176,6 +176,14 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
+dMAX_ERRAND_DISTANCE_FOR_RUNNER = 15  # kilometres
+
+def to_float_or_none(value):
+    try:
+        return float(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
 def calculate_minimum_fee(distance_km, weight_kg, vehicle_type, current_time):
     fee_config = FeeConfig.query.first()
     if not fee_config:
@@ -260,6 +268,10 @@ def create_basic_errand(user, errand_type):
         type=errand_type,
         pickup_location=pickup_location,
         delivery_location=delivery_location,
+        pickup_latitude=to_float_or_none(pickup_lat),
+        pickup_longitude=to_float_or_none(pickup_lon),
+        dropoff_latitude=to_float_or_none(dropoff_lat),
+        dropoff_longitude=to_float_or_none(dropoff_lon),
         weight=weight_value,
         delivery_time=delivery_time,
         distance_km=distance,
@@ -824,6 +836,10 @@ def create_purchase_errand():
         type="Purchase",
         pickup_location=store_location,
         delivery_location=delivery_address,
+        pickup_latitude=to_float_or_none(pickup_lat),
+        pickup_longitude=to_float_or_none(pickup_lon),
+        dropoff_latitude=to_float_or_none(dropoff_lat),
+        dropoff_longitude=to_float_or_none(dropoff_lon),
         weight=estimated_weight or "0",
         delivery_time=st,
         distance_km=distance,
@@ -914,6 +930,10 @@ def create_property_errand():
         type="Property",
         pickup_location=ploc,
         delivery_location=delivery_address,
+        pickup_latitude=to_float_or_none(pickup_lat),
+        pickup_longitude=to_float_or_none(pickup_lon),
+        dropoff_latitude=to_float_or_none(dropoff_lat),
+        dropoff_longitude=to_float_or_none(dropoff_lon),
         weight=estimated_weight or "0",
         delivery_time=st,
         distance_km=distance,
@@ -977,6 +997,10 @@ def create_errand():
             type="General",
             pickup_location=pickup,
             delivery_location=dropoff,
+            pickup_latitude=to_float_or_none(pickup_lat),
+            pickup_longitude=to_float_or_none(pickup_lon),
+            dropoff_latitude=to_float_or_none(dropoff_lat),
+            dropoff_longitude=to_float_or_none(dropoff_lon),
             distance_km=distance,
             weight_kg=weight,
             details=details,

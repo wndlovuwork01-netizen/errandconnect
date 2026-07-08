@@ -1336,24 +1336,47 @@ body {
             return val || '';
         }
 
-        function buildDescription(pd) {
-            const skip = ['pickup_location','pickup_address','delivery_location','delivery_address',
-                          'dropoff_location','dropoff_address','pickup_lat','pickup_lon','dropoff_lat',
-                          'dropoff_lon','distance_km','estimated_fee','service_price','vehicle_type',
-                          'delivery_time','specific_time','estimated_weight','weight'];
-            const lines = [];
-            for (const [key, val] of Object.entries(pd)) {
-                if (skip.includes(key)) continue;
-                const label = key.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
-                const value = Array.isArray(val) ? val.join(', ') : String(val);
-                if (value && value !== 'undefined' && value !== 'null') {
-                    lines.push(`${label}: ${value}`);
-                }
-            }
-            return lines.join(' | ') || 'No additional details';
-        }
+        function buildDescriptionRows(pd) {
+    const skip = ['pickup_location','pickup_address','delivery_location','delivery_address',
+                  'dropoff_location','dropoff_address','pickup_lat','pickup_lon','dropoff_lat',
+                  'dropoff_lon','distance_km','estimated_fee','service_price','vehicle_type',
+                  'delivery_time','specific_time','estimated_weight','weight',
+                  'contact_phone','contact_number','phone','phone_number',
+                  'instructions','special_instructions','notes','additional_notes',
+                  'items'];
+    const rows = [];
 
-        const description = buildDescription(parsedDetails);
+    // Items: one row per item with Item / Description / Qty side‑by‑side
+    if (Array.isArray(pd.items) && pd.items.length) {
+        pd.items.forEach((item, idx) => {
+            if (!item || typeof item !== 'object') return;
+            const name  = item.name || item.item_name || '';
+            const qty   = item.quantity || item.qty || '';
+            // Use brand as description, fallback to price
+            const desc  = item.brand || item.price || '';
+            if (!name && !qty) return;
+
+            // Build inline HTML with three columns – we'll mark this row as HTML
+            const html = `<span style="display:inline-block; min-width:40%;">${escapeHtml(name)}</span>
+                          <span style="display:inline-block; min-width:30%;">${escapeHtml(desc)}</span>
+                          <span style="display:inline-block; min-width:20%;">${escapeHtml(qty)}</span>`;
+            rows.push({ label: `Item ${idx + 1}`, value: html, isHtml: true });
+        });
+    }
+
+    // All other fields
+    for (const [key, val] of Object.entries(pd)) {
+        if (skip.includes(key)) continue;
+        const label = key.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+        const value = Array.isArray(val) ? val.join(', ') : String(val);
+        if (value && value !== 'undefined' && value !== 'null') {
+            rows.push({ label, value });
+        }
+    }
+    return rows;
+}
+
+const descriptionRows = buildDescriptionRows(parsedDetails);
 
         const instructions = flatVal(parsedDetails.instructions)
             || flatVal(parsedDetails.special_instructions)
@@ -1377,14 +1400,15 @@ body {
             type: errand.type,
             clientPrice: errand.price_estimate || 0,
             estimatedCost: errand.calculated_minimum_fee ?? (errand.price_estimate || 0),
-            distance: errandData.distance_km ?? 0,
+            distance: errand.distance_km ?? 0,
             date: errand.created_at ? new Date(errand.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             pickup: errand.pickup_location || flatVal(parsedDetails.pickup_location) || flatVal(parsedDetails.store_location) || 'Not specified',
             delivery: errand.delivery_location || flatVal(parsedDetails.delivery_location) || flatVal(parsedDetails.delivery_address) || 'Not specified',
             time: deliveryTime,
-            description: description,
+            descriptionRows: descriptionRows,
             weight: weight,
             instructions: instructions,
+            errandContact: flatVal(parsedDetails.contact_phone) || flatVal(parsedDetails.contact_number) || flatVal(parsedDetails.phone) || flatVal(parsedDetails.phone_number) || 'Not provided',
             client: client ? client.fullname : 'Anonymous',
             client_phone: client ? client.phone : null,
             rating: "4.5/5",
@@ -1615,6 +1639,13 @@ body {
                                     <span>${escapeHtml(errand.time)}</span>
                                 </div>
                             </div>
+                            <div class="detail-item">
+                                <i class="fas fa-phone"></i>
+                                <div class="detail-content">
+                                    <strong>Contact:</strong>
+                                    <span>${escapeHtml(errand.errandContact)}</span>
+                                </div>
+                            </div>
                             ${errand.delivery_date ? `
                             <div class="detail-item">
                                 <i class="fas fa-calendar-day"></i>
@@ -1626,15 +1657,27 @@ body {
                             ` : ''}
                         </div>
 
-                        <div class="detail-column">
+                         <div class="detail-column">
                             <h4><i class="fas fa-clipboard-list"></i> Errand Details</h4>
-                            <div class="detail-item">
-                                <i class="fas fa-align-left"></i>
-                                <div class="detail-content">
-                                    <strong>Description:</strong>
-                                    <span>${escapeHtml(errand.description) || 'None'}</span>
-                                </div>
-                            </div>
+                            ${errand.descriptionRows.length ? errand.descriptionRows.map(row => `
+<div class="detail-item">
+    <i class="fas fa-circle-dot"></i>
+    <div class="detail-content">
+        <strong>${escapeHtml(row.label)}:</strong>
+        ${row.isHtml
+            ? `<span>${row.value}</span>`   /* value already contains safe HTML */
+            : `<span>${escapeHtml(row.value)}</span>`
+        }
+    </div>
+</div>
+`).join('') : `
+<div class="detail-item">
+    <i class="fas fa-circle-dot"></i>
+    <div class="detail-content">
+        <span>No additional details</span>
+    </div>
+</div>
+`}
                             <div class="detail-item">
                                 <i class="fas fa-comment-dots"></i>
                                 <div class="detail-content">

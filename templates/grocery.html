@@ -532,7 +532,6 @@
                     <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
                     <div class="form-group"><label for="delivery_time">Delivery Time</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
                     <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Delivery Method</h4><p id="deliveryMethodDescription">Calculating...</p></div></div>
                     <div class="section-divider"></div>
 
                     <h2><i class="fas fa-list-alt"></i> Shopping List</h2>
@@ -756,14 +755,6 @@
         function calculateWeightFee(){
             let weight=parseFloat(document.getElementById('estimated_weight').value)||0;
             if(weight<=0)return 0;if(weight<=5)return 0.50;if(weight<=10)return 1.00;if(weight<=20)return 2.00;return 3.00;
-        }
-
-        function updateDeliveryMethod(distKm){
-            let indicator=document.getElementById('deliveryMethodIndicator'),weight=parseFloat(document.getElementById('estimated_weight').value)||0;
-            let method={title:'Car Required',icon:'fas fa-car',description:'Requires car delivery'};
-            if(distKm<=1.5&&weight<=5)method={title:'Runner on Foot',icon:'fas fa-walking',description:'Can be delivered by runners walking'};
-            else if(distKm<=8&&weight<=20)method={title:'Bike Delivery',icon:'fas fa-bicycle',description:'Requires bike delivery'};
-            if(distKm>0){indicator.style.display='flex';document.getElementById('deliveryMethodIcon').className=method.icon;document.getElementById('deliveryMethodTitle').innerText=method.title;document.getElementById('deliveryMethodDescription').innerText=method.description;}else indicator.style.display='none';
         }
 
         document.getElementById('delivery_time').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});

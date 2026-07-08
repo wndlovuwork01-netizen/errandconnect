@@ -8,7 +8,6 @@
                 <div class="logo-icon">
                     <i class="fas fa-running"></i>
                 </div>
-                <!-- Changed from ErrandConnect to Welcome message -->
                 <h1>Welcome, {{ user.username }}! 😊</h1>
             </div>
         </div>
@@ -24,18 +23,17 @@
                     <p>Your personal assistant for all errands and deliveries. Fast, reliable, and always there when you need us.</p>
 
                     <div class="hero-stats">
-                        <!-- Active Tasks Card - Now clickable -->
+                        <!-- Active Tasks Card -->
                         <div class="stat-card" onclick="window.location.href='{{ url_for('order_history') }}'" style="cursor: pointer;">
                             <div class="stat-icon client">
                                 <i class="fas fa-tasks"></i>
                             </div>
                             <div class="stat-info">
                                 <h3>Active Tasks</h3>
-                                <!-- FIXED: Now uses pending_count from view function -->
                                 <p>{{ pending_count }}</p>
                             </div>
                         </div>
-                        <!-- Completed Card-->
+                        <!-- Completed Card -->
                         <div class="stat-card" onclick="window.location.href='{{ url_for('order_history') }}'" style="cursor: pointer;">
                             <div class="stat-icon completed">
                                 <i class="fas fa-check-circle"></i>
@@ -48,7 +46,6 @@
                     </div>
                 </div>
                 <div class="hero-image">
-
                 </div>
             </div>
         </section>
@@ -56,16 +53,13 @@
         <!-- Quick Actions -->
         <section class="quick-actions-section">
             <div class="actions-header">
-
                 <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-
             </div>
             <p class="actions-subtitle">Everything you need, one tap away</p>
 
             <div class="actions-grid">
-
-                <!-- Services/Errands Card -->
-                <div class="action-card" onclick="window.location.href='{{ url_for('dashboard') }}'">
+                <!-- Services/Errands Card - now spans full width on all screens -->
+                <div class="action-card span-full" onclick="window.location.href='{{ url_for('dashboard') }}'">
                     <div class="action-icon grocery">
                         🛒
                     </div>
@@ -147,16 +141,14 @@
     --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
 
-    /* Greyish elements for quick action cards */
-    --card-bg: var(--primary-50); /* Light green background */
-    --card-light: var(--primary-100); /* Lighter green for hover */
-    --card-text: var(--text-primary); /* Dark green text */
-    --card-text-light: var(--text-secondary); /* Medium green for secondary text */
+    --card-bg: var(--primary-50);
+    --card-light: var(--primary-100);
+    --card-text: var(--text-primary);
+    --card-text-light: var(--text-secondary);
     --card-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
     --card-gradient: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
     --card-border: rgba(76, 175, 80, 0.2);
 
-    /* New greyish colors for icons and white elements */
     --greyish-white: #F8F8F8;
     --greyish-icon-bg: #F0F0F0;
     --greyish-icon-border: #E5E5E5;
@@ -191,7 +183,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Header - Mobile Optimized */
 .main-header {
     background: var(--surface);
     border-bottom: 1px solid var(--border-light);
@@ -232,7 +223,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Updated logo text to show welcome message - Same size as ErrandConnect */
 .logo h1 {
     font-size: 18px;
     font-weight: 600;
@@ -243,14 +233,12 @@ body {
     max-width: 200px;
 }
 
-/* Main Content - Mobile Optimized */
 .main-content {
     padding: 16px;
     max-width: 100%;
     margin: 0 auto;
 }
 
-/* Hero Section - Mobile Optimized */
 .hero-section {
     margin-bottom: 24px;
 }
@@ -332,12 +320,10 @@ body {
     margin: 0;
 }
 
-/* Hero Image - Mobile Optimized */
 .hero-image {
     display: none; /* Hidden on mobile */
 }
 
-/* Quick Actions Section - Mobile Optimized */
 .quick-actions-section {
     background: var(--surface);
     border-radius: 16px;
@@ -347,7 +333,6 @@ body {
     margin-bottom: 24px;
 }
 
-/* Added icon to Quick Actions header */
 .actions-header {
     display: flex;
     justify-content: space-between;
@@ -383,7 +368,7 @@ body {
     gap: 16px;
 }
 
-/* GREEN THEME ACTION CARDS - Matching Dashboard Service Cards */
+/* GREEN THEME ACTION CARDS */
 .action-card {
     background: var(--card-gradient);
     border-radius: 16px;
@@ -396,7 +381,7 @@ body {
     flex-direction: column;
     min-height: 180px;
     box-shadow: var(--card-shadow);
-    border: 1px solid var(--primary-100); /* Match dashboard border */
+    border: 1px solid var(--primary-100);
     overflow: hidden;
     color: var(--text-primary);
 }
@@ -404,8 +389,8 @@ body {
 .action-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 30px rgba(76, 175, 80, 0.2);
-    background: var(--primary-100); /* Match dashboard hover background */
-    border-color: var(--primary-color); /* Match dashboard hover border */
+    background: var(--primary-100);
+    border-color: var(--primary-color);
 }
 
 .action-card:active {
@@ -413,7 +398,6 @@ body {
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.15);
 }
 
-/* Overlay for click effect */
 .card-overlay {
     position: absolute;
     top: 0;
@@ -431,7 +415,6 @@ body {
     opacity: 0.05;
 }
 
-/* ICONS WITH GREYISH BACKGROUND - Changed from pure white */
 .action-icon {
     width: 50px;
     height: 50px;
@@ -441,10 +424,10 @@ body {
     justify-content: center;
     font-size: 24px;
     margin-bottom: 16px;
-    background: var(--greyish-icon-bg); /* Changed to greyish */
-    color: var(--primary-dark); /* Dark green color for icons */
+    background: var(--greyish-icon-bg);
+    color: var(--primary-dark);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--greyish-icon-border); /* Changed to greyish border */
+    border: 1px solid var(--greyish-icon-border);
 }
 
 .action-content {
@@ -470,7 +453,6 @@ body {
     flex-grow: 1;
 }
 
-/* Updated Service Note Styling */
 .service-note {
     color: var(--text-secondary) !important;
     font-weight: normal;
@@ -491,18 +473,17 @@ body {
     flex-wrap: wrap;
 }
 
-/* STAT BADGES WITH GREYISH BACKGROUND - Changed from pure white */
 .stat-badge {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 8px 12px;
-    background: var(--greyish-card-bg); /* Changed to greyish */
+    background: var(--greyish-card-bg);
     border-radius: 10px;
     min-width: 70px;
     flex: 1;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--greyish-icon-border); /* Changed to greyish border */
+    border: 1px solid var(--greyish-icon-border);
 }
 
 .stat-badge.large {
@@ -510,29 +491,26 @@ body {
     flex-grow: 1;
 }
 
-/* WALLET BADGE - Special styling for wallet balance without label */
 .stat-badge.wallet-badge {
-    min-height: 55px; /* Maintain height without label */
+    min-height: 55px;
     justify-content: center;
 }
 
 .stat-number {
     font-size: 18px;
     font-weight: 700;
-    color: var(--primary-dark); /* Dark green */
+    color: var(--primary-dark);
     line-height: 1.2;
 }
 
-/* WALLET BALANCE - Larger font for emphasis */
 .stat-number.wallet-balance {
     font-size: 20px;
     color: var(--primary-color);
 }
 
-/* SMALLER TEXT FOR "TOTAL" LABEL WITH ICON */
 .stat-label {
-    font-size: 10px; /* Smaller font size */
-    color: var(--text-secondary); /* Grey color for better contrast */
+    font-size: 10px;
+    color: var(--text-secondary);
     text-align: center;
     display: flex;
     align-items: center;
@@ -543,19 +521,17 @@ body {
     text-transform: uppercase;
 }
 
-/* Small icon for stat labels */
 .stat-icon-small {
     font-size: 9px;
     color: var(--primary-color);
 }
 
-/* ACTION LINKS WITH GREYISH BACKGROUND - Changed from pure white */
 .action-link {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    color: var(--primary-dark); /* Dark green */
+    color: var(--primary-dark);
     font-weight: 600;
     text-decoration: none;
     transition: all 0.3s ease;
@@ -565,13 +541,12 @@ body {
     touch-action: manipulation;
     margin-top: auto;
     padding: 10px 16px;
-    background: var(--greyish-white); /* Changed to greyish white */
+    background: var(--greyish-white);
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--greyish-icon-border); /* Changed to greyish border */
+    border: 1px solid var(--greyish-icon-border);
 }
 
-/* UNIFORM LINK SIZES - All action links now have same size */
 .action-link.browse-link,
 .action-link.view-details-link,
 .action-link.history-link,
@@ -584,7 +559,7 @@ body {
 }
 
 .action-link:hover {
-    background: var(--greyish-icon-bg); /* Darker greyish on hover */
+    background: var(--greyish-icon-bg);
     transform: translateX(4px);
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
     border-color: rgba(76, 175, 80, 0.3);
@@ -592,8 +567,8 @@ body {
 
 .action-link:active {
     transform: translateX(2px);
-    background: var(--greyish-card-bg); /* Even darker greyish */
-    color: var(--primary-dark); /* Darker green */
+    background: var(--greyish-card-bg);
+    color: var(--primary-dark);
 }
 
 .action-link i {
@@ -604,7 +579,6 @@ body {
     transform: translateX(4px);
 }
 
-/* Recent Activity - Mobile Optimized */
 .recent-activity {
     background: var(--surface);
     border-radius: 16px;
@@ -724,70 +698,9 @@ body {
     opacity: 0.8;
 }
 
-/* Bottom Navigation - Mobile Optimized */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border-light);
-    display: flex;
-    justify-content: space-around;
-    padding: 12px 16px;
-    z-index: 1000;
-    backdrop-filter: blur(10px);
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-decoration: none;
-    color: var(--text-light);
-    font-size: 12px;
-    transition: all 0.3s ease;
-    padding: 8px 12px;
-    border-radius: 10px;
-    touch-action: manipulation;
-    flex: 1;
-    max-width: 100px;
-}
-
-.nav-item.active {
-    color: var(--primary-color);
-    background: var(--primary-50);
-}
-
-.nav-item:active {
-    color: var(--primary-color);
-    transform: translateY(-2px) scale(0.95);
-}
-
-.nav-emoji {
-    font-size: 20px;
-}
-
-/* iOS Safe Areas */
-@supports (padding: max(0px)) {
-    .main-header {
-        padding-top: max(12px, env(safe-area-inset-top));
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-    }
-
-    .main-content {
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-        padding-bottom: max(16px, env(safe-area-inset-bottom));
-    }
-
-    .bottom-nav {
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-    }
+/* New class to make a card span all columns of the grid */
+.span-full {
+    grid-column: 1 / -1;
 }
 
 /* Tablet and larger screens */
@@ -849,12 +762,10 @@ body {
         font-size: 28px;
     }
 
-    /* Wallet balance larger on desktop */
     .stat-number.wallet-balance {
         font-size: 22px;
     }
 
-    /* Show floating cards on desktop/tablet */
     .hero-image {
         display: block;
         position: relative;
@@ -864,7 +775,7 @@ body {
     .floating-card {
         position: absolute;
         padding: 12px 14px;
-        background: var(--greyish-card-bg); /* Greyish background */
+        background: var(--greyish-card-bg);
         border-radius: 12px;
         box-shadow: var(--shadow-hover);
         display: flex;
@@ -877,7 +788,7 @@ body {
         white-space: nowrap;
         max-width: 180px;
         touch-action: manipulation;
-        border: 1px solid var(--greyish-icon-border); /* Greyish border */
+        border: 1px solid var(--greyish-icon-border);
     }
 
     .floating-card:active {
@@ -888,24 +799,24 @@ body {
     .floating-card.delivery {
         top: 10%;
         left: 5%;
-        background: var(--greyish-card-bg); /* Greyish */
-        color: var(--primary-color); /* Green text */
+        background: var(--greyish-card-bg);
+        color: var(--primary-color);
         animation-delay: 0s;
     }
 
     .floating-card.grocery {
         top: 40%;
         right: 5%;
-        background: var(--greyish-card-bg); /* Greyish */
-        color: var(--primary-color); /* Green text */
+        background: var(--greyish-card-bg);
+        color: var(--primary-color);
         animation-delay: 1s;
     }
 
     .floating-card.food {
         bottom: 10%;
         left: 20%;
-        background: var(--greyish-card-bg); /* Greyish */
-        color: var(--primary-color); /* Green text */
+        background: var(--greyish-card-bg);
+        color: var(--primary-color);
         animation-delay: 2s;
     }
 
@@ -959,7 +870,6 @@ body {
         font-size: 22px;
     }
 
-    /* Ensure uniform small link size on small screens */
     .action-link.browse-link,
     .action-link.view-details-link,
     .action-link.history-link,
@@ -968,31 +878,16 @@ body {
         padding: 8px 10px;
     }
 
-    /* Wallet balance smaller on mobile */
     .stat-number.wallet-balance {
         font-size: 18px;
     }
 
-    /* Even smaller text for "Total" on small screens */
     .stat-label {
         font-size: 9px;
     }
 
     .stat-icon-small {
         font-size: 8px;
-    }
-
-    .bottom-nav {
-        padding: 12px 8px;
-    }
-
-    .nav-item {
-        padding: 6px 4px;
-        font-size: 11px;
-    }
-
-    .nav-emoji {
-        font-size: 18px;
     }
 }
 
@@ -1036,7 +931,6 @@ body {
         min-width: auto;
     }
 
-    /* Ensure uniform extra small link size */
     .action-link.browse-link,
     .action-link.view-details-link,
     .action-link.history-link,
@@ -1045,31 +939,16 @@ body {
         padding: 8px 10px;
     }
 
-    /* Wallet balance extra small on tiny screens */
     .stat-number.wallet-balance {
         font-size: 16px;
     }
 
-    /* Even smaller text for "Total" on extra small screens */
     .stat-label {
         font-size: 8px;
     }
 
     .stat-icon-small {
         font-size: 7px;
-    }
-
-    .bottom-nav {
-        padding: 8px 12px;
-    }
-
-    .nav-item {
-        font-size: 11px;
-        padding: 6px 8px;
-    }
-
-    .nav-emoji {
-        font-size: 18px;
     }
 }
 
