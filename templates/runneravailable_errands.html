@@ -595,6 +595,31 @@ body {
             color: var(--text-primary);
         }
 
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            font-size: 0.78rem;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #000000;
+            padding: 6px 8px;
+            text-align: left;
+            word-break: break-word;
+        }
+
+        .items-table th {
+            background: var(--primary-50);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .items-table td {
+            color: var(--text-secondary);
+        }
+
         .errand-description p {
             color: var(--text-secondary);
             line-height: 1.6;
@@ -1346,25 +1371,7 @@ body {
                   'items'];
     const rows = [];
 
-    // Items: one row per item with Item / Description / Qty side‑by‑side
-    if (Array.isArray(pd.items) && pd.items.length) {
-        pd.items.forEach((item, idx) => {
-            if (!item || typeof item !== 'object') return;
-            const name  = item.name || item.item_name || '';
-            const qty   = item.quantity || item.qty || '';
-            // Use brand as description, fallback to price
-            const desc  = item.brand || item.price || '';
-            if (!name && !qty) return;
-
-            // Build inline HTML with three columns – we'll mark this row as HTML
-            const html = `<span style="display:inline-block; min-width:40%;">${escapeHtml(name)}</span>
-                          <span style="display:inline-block; min-width:30%;">${escapeHtml(desc)}</span>
-                          <span style="display:inline-block; min-width:20%;">${escapeHtml(qty)}</span>`;
-            rows.push({ label: `Item ${idx + 1}`, value: html, isHtml: true });
-        });
-    }
-
-    // All other fields
+    // All other fields (items are handled separately as a table)
     for (const [key, val] of Object.entries(pd)) {
         if (skip.includes(key)) continue;
         const label = key.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -1376,7 +1383,20 @@ body {
     return rows;
 }
 
+function buildItemsTable(pd) {
+    if (!Array.isArray(pd.items) || !pd.items.length) return [];
+    return pd.items
+        .filter(item => item && typeof item === 'object')
+        .map(item => ({
+            name: item.name || item.item_name || '',
+            brand: item.brand || '',
+            qty: item.quantity || item.qty || ''
+        }))
+        .filter(item => item.name || item.qty);
+}
+
 const descriptionRows = buildDescriptionRows(parsedDetails);
+const itemsTable = buildItemsTable(parsedDetails);
 
         const instructions = flatVal(parsedDetails.instructions)
             || flatVal(parsedDetails.special_instructions)
@@ -1406,6 +1426,7 @@ const descriptionRows = buildDescriptionRows(parsedDetails);
             delivery: errand.delivery_location || flatVal(parsedDetails.delivery_location) || flatVal(parsedDetails.delivery_address) || 'Not specified',
             time: deliveryTime,
             descriptionRows: descriptionRows,
+            itemsTable: itemsTable,
             weight: weight,
             instructions: instructions,
             errandContact: flatVal(parsedDetails.contact_phone) || flatVal(parsedDetails.contact_number) || flatVal(parsedDetails.phone) || flatVal(parsedDetails.phone_number) || 'Not provided',
@@ -1659,6 +1680,25 @@ const descriptionRows = buildDescriptionRows(parsedDetails);
 
                          <div class="detail-column">
                             <h4><i class="fas fa-clipboard-list"></i> Errand Details</h4>
+                            ${errand.itemsTable.length ? `
+<div style="margin-bottom: 10px;">
+    <strong style="display:block; font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">Items:</strong>
+    <table class="items-table">
+        <thead>
+            <tr><th>Item</th><th>Brand</th><th>Qty</th></tr>
+        </thead>
+        <tbody>
+            ${errand.itemsTable.map(item => `
+                <tr>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${escapeHtml(item.brand) || '—'}</td>
+                    <td>${escapeHtml(String(item.qty)) || '—'}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+</div>
+` : ''}
                             ${errand.descriptionRows.length ? errand.descriptionRows.map(row => `
 <div class="detail-item">
     <i class="fas fa-circle-dot"></i>
