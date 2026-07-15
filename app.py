@@ -667,7 +667,7 @@ def terms(): return render_template("terms.html",user=current_user(),current_dat
 def runnerterms(): return render_template("runnerterms.html")
 @app.route("/privacy")
 @login_required
-def privacy(): return render_template("Privacy.html",user=current_user())
+def privacy(): return render_template("privacy.html",user=current_user())
 @app.route("/help")
 @login_required
 def help_support(): return render_template("help.html",user=current_user())
@@ -676,7 +676,7 @@ def help_support(): return render_template("help.html",user=current_user())
 def personal_info(): return render_template("personal_info.html",user=current_user())
 @app.route("/privacy_security")
 @login_required
-def privacy_security(): return render_template("Privacy.html",user=current_user())
+def privacy_security(): return render_template("privacy.html",user=current_user())
 @app.route("/rate_app")
 @login_required
 def rate_app(): return render_template("rate.html",user=current_user())

@@ -70,50 +70,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Recent Activity -->
-        <section class="recent-activity">
-            <div class="section-header">
-                <h3>Recent Activity</h3>
-                <a href="{{ url_for('order_history') }}" class="view-all">View All</a>
-            </div>
-
-            <div class="activity-list">
-                {% if recent_errands %}
-                    {% for e in recent_errands[:5] %}
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            {% if e.type == "Grocery Shopping" %}
-                            <i class="fas fa-shopping-basket"></i>
-                            {% elif e.type == "Food Delivery" %}
-                            <i class="fas fa-utensils"></i>
-                            {% elif e.type == "Package Delivery" %}
-                            <i class="fas fa-box"></i>
-                            {% else %}
-                            <i class="fas fa-tasks"></i>
-                            {% endif %}
-                        </div>
-                        <div class="activity-content">
-                            <p>{{ e.type or "General Errand" }} - {{ e.status|title }}</p>
-                            <span class="activity-time">
-                                {% if e.created_at %}
-                                    {{ e.created_at|timesince }}
-                                {% else %}
-                                    Recently
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>No recent activity yet</p>
-                        <small>Your errand history will appear here</small>
-                    </div>
-                {% endif %}
-            </div>
-        </section>
     </main>
 </div>
 

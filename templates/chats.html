@@ -330,6 +330,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ── Context ───────────────────────────────────────────────────────────
 const currentChatId = {{ active_chat.id if active_chat else 0 }};
@@ -357,6 +358,7 @@ let progressOverlayOpen = false;
 let map = null, pickupMarker = null, deliveryMarker = null, runnerMarker = null, routePolyline = null;
 let watchId = null, currentRunnerPos = null, errandCoords = null;
 let locationSharingInterval = null, locationSharingActive = false;
+let pollLocationInterval = null;   // interval for runner location request polling
 
 const messagesArea = document.getElementById('messages-area');
 if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -382,10 +384,15 @@ changeFontSize(savedSize);
 async function fetchErrandCoords() {
     if (errandCoords) return errandCoords;
     if (!errandId) return null;
-    const r = await fetch(`/api/errand_coords/${errandId}`);
-    const d = await r.json();
-    errandCoords = d;
-    return d;
+    try {
+        const r = await fetch(`/api/errand_coords/${errandId}`);
+        const d = await r.json();
+        errandCoords = d;
+        return d;
+    } catch(e) {
+        console.error('Error fetching errand coords:', e);
+        return null;
+    }
 }
 
 function initMap() {
@@ -474,25 +481,29 @@ async function drawRoute(waypoints) {
 
 async function checkLiveLocationSharing() {
     if (userType !== 'client') return;
-    const r = await fetch(`/api/live_location_status/${errandId}`);
-    const d = await r.json();
-    locationSharingActive = d.active;
-    if (locationSharingActive) startLiveLocationPolling();
+    try {
+        const r = await fetch(`/api/live_location_status/${errandId}`);
+        const d = await r.json();
+        locationSharingActive = d.active;
+        if (locationSharingActive) startLiveLocationPolling();
+    } catch(e) { console.error('Error checking live location:', e); }
 }
 function startLiveLocationPolling() {
     if (locationSharingInterval) return;
     locationSharingInterval = setInterval(async () => {
-        const r = await fetch(`/api/runner_location/${errandId}`);
-        const d = await r.json();
-        if (d.lat && d.lng) {
-            currentRunnerPos = { lat:d.lat, lng:d.lng };
-            updateRunnerMarkerForClient();
-        } else {
-            clearInterval(locationSharingInterval);
-            locationSharingInterval = null;
-            locationSharingActive = false;
-            if (runnerMarker) { map.removeLayer(runnerMarker); runnerMarker = null; }
-        }
+        try {
+            const r = await fetch(`/api/runner_location/${errandId}`);
+            const d = await r.json();
+            if (d.lat && d.lng) {
+                currentRunnerPos = { lat:d.lat, lng:d.lng };
+                updateRunnerMarkerForClient();
+            } else {
+                clearInterval(locationSharingInterval);
+                locationSharingInterval = null;
+                locationSharingActive = false;
+                if (runnerMarker) { map.removeLayer(runnerMarker); runnerMarker = null; }
+            }
+        } catch(e) { console.error('Error polling runner location:', e); }
     }, 3000);
 }
 function updateRunnerMarkerForClient() {
@@ -507,24 +518,30 @@ function updateRunnerMarkerForClient() {
 }
 
 async function requestLiveLocation() {
-    const r = await fetch('/api/request_runner_location', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
-    });
-    const d = await r.json();
-    if (d.success) {
-        alert('Location request sent.');
-        document.getElementById('request-location-btn').disabled = true;
-    } else alert(d.error || 'Failed');
+    try {
+        const r = await fetch('/api/request_runner_location', {
+            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId})
+        });
+        const d = await r.json();
+        if (d.success) {
+            alert('Location request sent.');
+            const btn = document.getElementById('request-location-btn');
+            if (btn) btn.disabled = true;
+        } else alert(d.error || 'Failed');
+    } catch(e) { alert('Error requesting location.'); }
 }
 async function respondLocationRequest(accept) {
-    const r = await fetch('/api/respond_location_request', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, accept})
-    });
-    const d = await r.json();
-    if (d.success) {
-        if (accept) locationSharingActive = true;
-        document.getElementById('location-request-prompt').style.display = 'none';
-    } else alert(d.error || 'Failed');
+    try {
+        const r = await fetch('/api/respond_location_request', {
+            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({errand_id:errandId, accept})
+        });
+        const d = await r.json();
+        if (d.success) {
+            if (accept) locationSharingActive = true;
+            const prompt = document.getElementById('location-request-prompt');
+            if (prompt) prompt.style.display = 'none';
+        } else alert(d.error || 'Failed');
+    } catch(e) { alert('Error responding.'); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -533,34 +550,44 @@ async function respondLocationRequest(accept) {
 async function openProgress() {
     progressOverlayOpen = true;
     document.getElementById('progress-overlay').classList.add('open');
-    // removed: document.getElementById('overlay-backdrop').classList.add('open');
-    await fetchServerProgress();
-    await fetchClientButtonState();
+
+    // Wrap in try/catch so overlay still opens even if these fail
+    try { await fetchServerProgress(); } catch(e) { console.warn('fetchServerProgress failed:', e); }
+    try { await fetchClientButtonState(); } catch(e) { console.warn('fetchClientButtonState failed:', e); }
+
     renderProgress();
-    if (userType === 'runner') setInterval(pollLocationRequest, 5000);
+
+    if (userType === 'runner') {
+        if (pollLocationInterval) clearInterval(pollLocationInterval);
+        pollLocationInterval = setInterval(pollLocationRequest, 5000);
+    }
 }
 
 async function closeProgress() {
     progressOverlayOpen = false;
     document.getElementById('progress-overlay').classList.remove('open');
-    // removed: document.getElementById('overlay-backdrop').classList.remove('open');
+
     if (map) { map.remove(); map = null; pickupMarker = deliveryMarker = runnerMarker = routePolyline = null; }
-    clearInterval(locationSharingInterval);
-    locationSharingInterval = null;        // also reset the interval variable
+
+    if (locationSharingInterval) { clearInterval(locationSharingInterval); locationSharingInterval = null; }
+    if (pollLocationInterval)   { clearInterval(pollLocationInterval);   pollLocationInterval = null; }
+
     stopRunnerLocationWatch();
 }
 
 async function fetchServerProgress() {
     if (!errandId) return;
-    const r = await fetch(`/api/stage_progress?errand_id=${errandId}`);
-    const d = await r.json();
-    if (userType === 'runner' && progressOverlayOpen) {
+    try {
+        const r = await fetch(`/api/stage_progress?errand_id=${errandId}`);
+        const d = await r.json();
+        if (userType === 'runner' && progressOverlayOpen) {
+            if (typeof d.errand_deducted !== 'undefined') errandDeducted = d.errand_deducted;
+            return;
+        }
+        if (Array.isArray(d.stages)) stageProgress = d.stages;
+        if (typeof d.runner_marked_complete !== 'undefined') runnerMarkedComplete = d.runner_marked_complete;
         if (typeof d.errand_deducted !== 'undefined') errandDeducted = d.errand_deducted;
-        return;
-    }
-    if (Array.isArray(d.stages)) stageProgress = d.stages;
-    if (typeof d.runner_marked_complete !== 'undefined') runnerMarkedComplete = d.runner_marked_complete;
-    if (typeof d.errand_deducted !== 'undefined') errandDeducted = d.errand_deducted;
+    } catch(e) { console.error('Error in fetchServerProgress:', e); }
 }
 
 async function fetchClientButtonState() {
@@ -573,7 +600,7 @@ async function fetchClientButtonState() {
         } else {
             errandStartedAt = null;
         }
-    } catch(e) {}
+    } catch(e) { console.error('Error in fetchClientButtonState:', e); }
 }
 
 function renderProgress() {
@@ -665,13 +692,14 @@ function renderProgress() {
     }
 }
 
-// Poll for location request (runner)
 async function pollLocationRequest() {
     if (userType !== 'runner' || !progressOverlayOpen || !errandId) return;
-    const r = await fetch(`/api/live_location_request_status/${errandId}`);
-    const d = await r.json();
-    const prompt = document.getElementById('location-request-prompt');
-    if (prompt) prompt.style.display = d.requested && !locationSharingActive ? 'block' : 'none';
+    try {
+        const r = await fetch(`/api/live_location_request_status/${errandId}`);
+        const d = await r.json();
+        const prompt = document.getElementById('location-request-prompt');
+        if (prompt) prompt.style.display = d.requested && !locationSharingActive ? 'block' : 'none';
+    } catch(e) { console.error('Error polling location request:', e); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -959,7 +987,11 @@ document.getElementById('messages-area').addEventListener('click', function(e) {
 });
 
 if (currentChatId) startPolling();
-window.addEventListener('beforeunload', () => clearInterval(pollInterval));
+window.addEventListener('beforeunload', () => {
+    clearInterval(pollInterval);
+    if (locationSharingInterval) clearInterval(locationSharingInterval);
+    if (pollLocationInterval) clearInterval(pollLocationInterval);
+});
 </script>
 </body>
 </html>
