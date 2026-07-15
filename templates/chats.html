@@ -29,7 +29,7 @@
             border-top: 1px solid #ddd; display: flex;
             justify-content: space-around; align-items: center; z-index: 200;
         }
-        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#666; text-decoration:none; gap:3px; flex:1; padding:6px 0; }
+        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#666; text-decoration:none; gap:3px; flex:1; padding:6px 0; cursor:pointer; }
         .nav-item.active { color:#28a745; font-weight:bold; }
         .nav-item i { font-size:18px; }
 
@@ -149,19 +149,40 @@
         /* ---------- Mobile layout ---------- */
         @media (max-width:768px) {
             .chat-sidebar {
-                display: none;                     /* hidden by default */
+                display: none;
             }
             .chat-sidebar:not(.mobile-hidden) {
-                display: flex;                     /* shown when no chat is active */
+                display: flex;
                 width: 100%;
             }
             .chat-main {
                 display: flex !important;
             }
             .chat-main.mobile-hidden {
-                display: none !important;           /* hidden when no chat selected */
+                display: none !important;
             }
             .message { max-width: 88%; }
+        }
+
+        /* ─── Errand Info Modal ─── */
+        #errand-info-modal .modal-content {
+            text-align: left;
+            max-width: 400px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .info-value {
+            color: #333;
+            word-break: break-word;
         }
     </style>
 </head>
@@ -169,7 +190,7 @@
 
 <div class="app-shell">
     <div class="chat-container">
-        <!-- SIDEBAR (chat list) -->
+        <!-- SIDEBAR (chat list) – unchanged -->
         <div class="chat-sidebar {% if active_chat %}mobile-hidden{% endif %}">
             <div class="sidebar-header">
                 <h2 style="margin-bottom:6px;"><i class="fas fa-comments"></i> Messages</h2>
@@ -235,7 +256,7 @@
             </ul>
         </div>
 
-        <!-- MAIN CHAT AREA -->
+        <!-- MAIN CHAT AREA – unchanged -->
         <div class="chat-main {% if not active_chat %}mobile-hidden{% endif %}">
             {% if active_chat %}
             <div class="chat-header">
@@ -290,23 +311,39 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAV -->
+    <!-- BOTTOM NAV – Info button added -->
     <div class="bottom-nav">
         {% if user.user_type == 'client' %}
         <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' or request.endpoint == 'chat_detail' %}active{% endif %}"><i class="fas fa-comment-dots"></i><span>Chats</span></a>
-        <a href="{{ url_for('order_history') }}" class="nav-item"><i class="fas fa-clipboard-list"></i><span>Errands</span></a>
+        <!-- Replaced Errands with Info -->
+        <div class="nav-item" onclick="openErrandInfo()"><i class="fas fa-info-circle"></i><span>Info</span></div>
         <a href="{{ url_for('home_page') }}" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="{{ url_for('order_history') }}" class="nav-item"><i class="fas fa-history"></i><span>History</span></a>
         {% else %}
         <a href="{{ url_for('chats') }}" class="nav-item {% if request.endpoint == 'chats' or request.endpoint == 'chat_detail' %}active{% endif %}"><i class="fas fa-comment-dots"></i><span>Chats</span></a>
-        <a href="{{ url_for('runnerhome') }}" class="nav-item"><i class="fas fa-tasks"></i><span>Active</span></a>
+        <!-- Replaced Active with Info -->
+        <div class="nav-item" onclick="openErrandInfo()"><i class="fas fa-info-circle"></i><span>Info</span></div>
         <a href="{{ url_for('runneravailable_errands') }}" class="nav-item"><i class="fas fa-list-ul"></i><span>Available</span></a>
         <a href="{{ url_for('runnercompleted') }}" class="nav-item"><i class="fas fa-check-double"></i><span>Completed</span></a>
         {% endif %}
     </div>
 </div>
 
-<!-- Rating Modal -->
+<!-- Errand Info Modal -->
+<div id="errand-info-modal" class="modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; color:#28a745;"><i class="fas fa-info-circle"></i> Errand Details</h3>
+            <button onclick="document.getElementById('errand-info-modal').style.display='none'" style="background:transparent; border:none; font-size:18px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="errand-info-content" style="text-align:left;">
+            <!-- filled dynamically -->
+        </div>
+        <button class="btn-outline" onclick="document.getElementById('errand-info-modal').style.display='none'" style="margin-top:16px;">Close</button>
+    </div>
+</div>
+
+<!-- Rating Modal (unchanged) -->
 <div id="rating-modal" class="modal">
     <div class="modal-content">
         <h3>Rate Runner</h3>
@@ -330,13 +367,23 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ── Context ───────────────────────────────────────────────────────────
 const currentChatId = {{ active_chat.id if active_chat else 0 }};
 const currentUserId = {{ user.id }};
 const userType = "{{ user.user_type }}";
 const errandId = {{ active_chat.errand_id if active_chat else 0 }};
+const errandData = {
+    errand_id: "{{ active_chat.errand_id if active_chat else '' }}",
+    status: "{{ active_errand.status if active_errand else '' }}",
+    created_at: "{{ active_chat.created_at | chat_timestamp if active_chat else '' }}",
+    client_name: "{{ user.fullname if user.user_type == 'client' else (active_chat.client.fullname if active_chat else '') }}",
+    runner_name: "{{ user.fullname if user.user_type == 'runner' else (active_chat.runner.fullname if active_chat else '') }}",
+    pickup_address: "{{ active_errand.pickup_address if active_errand else '' }}",
+    delivery_address: "{{ active_errand.delivery_address if active_errand else '' }}",
+    agreed_price: "{{ '%.2f'|format(agreed_price) if agreed_price else '' }}",
+    estimated_duration: "{{ active_errand.estimated_duration if active_errand else '' }}"
+};
 
 let lastMessageId = {{ messages[-1].id if messages else 0 }};
 let pollInterval = null;
@@ -358,7 +405,7 @@ let progressOverlayOpen = false;
 let map = null, pickupMarker = null, deliveryMarker = null, runnerMarker = null, routePolyline = null;
 let watchId = null, currentRunnerPos = null, errandCoords = null;
 let locationSharingInterval = null, locationSharingActive = false;
-let pollLocationInterval = null;   // interval for runner location request polling
+let pollLocationInterval = null;
 
 const messagesArea = document.getElementById('messages-area');
 if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -379,7 +426,7 @@ document.getElementById('font-size-slider').value = savedSize;
 changeFontSize(savedSize);
 
 // ═══════════════════════════════════════════════════════════════════════
-// MAP
+// MAP (complete, fixed version)
 // ═══════════════════════════════════════════════════════════════════════
 async function fetchErrandCoords() {
     if (errandCoords) return errandCoords;
@@ -545,13 +592,12 @@ async function respondLocationRequest(accept) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// PROGRESS OVERLAY
+// PROGRESS OVERLAY (fixed)
 // ═══════════════════════════════════════════════════════════════════════
 async function openProgress() {
     progressOverlayOpen = true;
     document.getElementById('progress-overlay').classList.add('open');
 
-    // Wrap in try/catch so overlay still opens even if these fail
     try { await fetchServerProgress(); } catch(e) { console.warn('fetchServerProgress failed:', e); }
     try { await fetchClientButtonState(); } catch(e) { console.warn('fetchClientButtonState failed:', e); }
 
@@ -825,7 +871,6 @@ function updateMessageStatuses() {
 }
 setInterval(updateMessageStatuses, 5000);
 
-// Text / Camera / Voice (unchanged)
 function escapeHtml(s){ if(!s)return''; return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 function createMessageEl(id, content, isSent, time) {
     const div = document.createElement('div');
@@ -984,6 +1029,44 @@ document.getElementById('messages-area').addEventListener('click', function(e) {
     if (e.target.tagName === 'IMG') {
         openImageViewer(e.target.src);
     }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// ERRAND INFO MODAL – the new feature
+// ═══════════════════════════════════════════════════════════════════════
+async function openErrandInfo() {
+    if (!errandId || !errandData.errand_id) {
+        alert('No errand information available.');
+        return;
+    }
+    const modal = document.getElementById('errand-info-modal');
+    const contentDiv = document.getElementById('errand-info-content');
+    modal.style.display = 'flex';
+
+    const data = errandData;  // already loaded from template
+    let html = '';
+    const fields = [
+        { label: 'Errand ID', value: data.errand_id },
+        { label: 'Status', value: data.status ? data.status.toUpperCase() : 'Unknown' },
+        { label: 'Requested', value: data.created_at },
+        { label: 'Client', value: data.client_name },
+        { label: 'Runner', value: data.runner_name || 'Not assigned' },
+        { label: 'Pickup Address', value: data.pickup_address || 'Not set' },
+        { label: 'Delivery Address', value: data.delivery_address || 'Not set' },
+        { label: 'Agreed Price', value: data.agreed_price ? '$' + data.agreed_price : 'N/A' },
+        { label: 'ETA', value: data.estimated_duration || 'Not set' }
+    ];
+    fields.forEach(f => {
+        if (f.value !== undefined && f.value !== null && f.value !== '') {
+            html += `<div class="info-row"><span class="info-label">${f.label}</span><span class="info-value">${f.value}</span></div>`;
+        }
+    });
+    contentDiv.innerHTML = html || '<p>No details available.</p>';
+}
+
+// Close modal when clicking outside
+document.getElementById('errand-info-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
 });
 
 if (currentChatId) startPolling();
