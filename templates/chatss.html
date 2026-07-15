@@ -533,7 +533,7 @@ async function respondLocationRequest(accept) {
 async function openProgress() {
     progressOverlayOpen = true;
     document.getElementById('progress-overlay').classList.add('open');
-    // removed: document.getElementById('overlay-backdrop').classList.add('open');
+    document.getElementById('overlay-backdrop').classList.add('open');
     await fetchServerProgress();
     await fetchClientButtonState();
     renderProgress();
@@ -543,10 +543,9 @@ async function openProgress() {
 async function closeProgress() {
     progressOverlayOpen = false;
     document.getElementById('progress-overlay').classList.remove('open');
-    // removed: document.getElementById('overlay-backdrop').classList.remove('open');
+    document.getElementById('overlay-backdrop').classList.remove('open');
     if (map) { map.remove(); map = null; pickupMarker = deliveryMarker = runnerMarker = routePolyline = null; }
     clearInterval(locationSharingInterval);
-    locationSharingInterval = null;        // also reset the interval variable
     stopRunnerLocationWatch();
 }
 

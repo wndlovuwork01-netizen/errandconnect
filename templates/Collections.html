@@ -92,10 +92,6 @@
         <div class="estimated-fee-display"><span>Est.</span><span id="estimated_fee" class="fee-amount">$0.00</span></div>
     </div>
 
-    <div class="container">
-        <div class="content-wrapper">
-            <div class="mobile-header"><div class="logo"><div class="logo-icon"><i class="fas fa-box-open"></i></div><div><h1>ErrandConnect</h1><div class="service-tag">Collection Service</div></div></div></div>
-
             <div class="form-section">
                 <div class="progress-bar"><div class="progress"></div></div>
 
@@ -211,75 +207,236 @@
 </div>
 <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Collection Request</button>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        let map,pickupMarker,dropoffMarker,routeLine,selectionMode='pickup';
-        function initMap(){map=L.map('map').setView([-1.2921,36.8219],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);document.getElementById('mapHint').style.display='block';map.on('click',e=>{if(selectionMode==='pickup')setPickupLocation(e.latlng.lat,e.latlng.lng);else setDropoffLocation(e.latlng.lat,e.latlng.lng);if(navigator.vibrate)navigator.vibrate(50);});if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{map.setView([pos.coords.latitude,pos.coords.longitude],13);if(!pickupMarker)setPickupLocation(pos.coords.latitude,pos.coords.longitude);});}}
-        function setSelectionMode(mode){selectionMode=mode;let p=document.getElementById('selectPickupBtn'),d=document.getElementById('selectDropoffBtn'),hint=document.getElementById('mapHint');p.classList.toggle('active',mode==='pickup');d.classList.toggle('active',mode==='dropoff');d.classList.toggle('dropoff',mode==='dropoff');hint.textContent=mode==='pickup'?"Tap map to set Collection address":"Tap map to set Delivery address";hint.style.background=mode==='pickup'?"rgba(76,175,80,0.9)":"rgba(33,150,243,0.9)";hint.style.display='block';}
-        function setPickupLocation(lat,lng){if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([lat,lng],{icon:L.divIcon({html:"<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-map-marker-alt'></i></div>",iconSize:[28,28],iconAnchor:[14,28]})}).addTo(map).bindPopup("Collection");document.getElementById('pickup_lat').value=lat;document.getElementById('pickup_lon').value=lng;reverseGeocode(lat,lng,'collection_address');updateRoute();if(!dropoffMarker)setTimeout(()=>setSelectionMode('dropoff'),1000);}
-        function setDropoffLocation(lat,lng){if(dropoffMarker)map.removeLayer(dropoffMarker);dropoffMarker=L.marker([lat,lng],{icon:L.divIcon({html:"<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>",iconSize:[28,28],iconAnchor:[14,28]})}).addTo(map).bindPopup("Delivery");document.getElementById('dropoff_lat').value=lat;document.getElementById('dropoff_lon').value=lng;reverseGeocode(lat,lng,'delivery_address');updateRoute();}
-        function updateRoute(){if(pickupMarker&&dropoffMarker){let p=pickupMarker.getLatLng(),d=dropoffMarker.getLatLng();fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`).then(res=>res.json()).then(data=>{if(data.routes?.length){let coords=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);if(routeLine)map.removeLayer(routeLine);routeLine=L.polyline(coords,{color:'#4CAF50',weight:4}).addTo(map);map.fitBounds(routeLine.getBounds(),{padding:[30,30]});updateUIwithDistance(data.routes[0].distance/1000);}}).catch(()=>fallbackDistance(p,d));}}
-        function fallbackDistance(p,d){updateUIwithDistance(haversine(p.lat,p.lng,d.lat,d.lng));}
-        function haversine(lat1,lon1,lat2,lon2){const R=6371;let dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;let a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-        function reverseGeocode(lat,lng,inputId){fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r=>r.json()).then(data=>{if(data.display_name)document.getElementById(inputId).value=data.display_name;});}
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, pickupMarker, dropoffMarker, routeLine, selectionMode = 'pickup';
 
-        let selectedServiceType='package',selectedItemType='package',totalItems=1;
-        function updateUIwithDistance(distKm){
-            let distanceFee=distKm<=2?2.50:distKm<=10?4.00:distKm<=25?6.50:distKm<=50?9.00:12.00;
-            let serviceTypeFee={package:5.00,document:3.00,item:6.00}[selectedServiceType]||5.00;
-            let itemTypeFee={package:2.00,document:1.00,electronics:5.00,clothing:1.50,fragile:8.00,other:3.00}[selectedItemType]||3.00;
-            let weightFee=0;document.querySelectorAll('input[name="weights[]"]').forEach(inp=>{let w=parseFloat(inp.value)||0;weightFee+=w;});
-            if(weightFee>0){if(weightFee<=10)weightFee=1.00;else if(weightFee<=25)weightFee=2.50;else if(weightFee<=50)weightFee=4.00;else if(weightFee<=100)weightFee=7.00;else weightFee=10.00;}else weightFee=0;
-            let itemCount=document.querySelectorAll('input[name="items[]"]').length,itemCountFee=itemCount*1.50;
-            let specialFee=0,handling=document.getElementById('handling_requirements').value;if(handling==='careful')specialFee+=3.00;if(handling==='special')specialFee+=5.00;
-            let condition=document.getElementById('item_condition').value;if(condition==='fragile')specialFee+=4.00;if(condition==='perishable')specialFee+=6.00;
-            let timeFee=0,collTime=document.getElementById('collection_time').value,delTime=document.getElementById('delivery_time').value;
-            if(collTime==='specific'&&document.getElementById('specific_collection_time').value)timeFee+=2.00;else if(collTime==='morning'||collTime==='evening')timeFee+=1.50;
-            if(delTime==='specific'&&document.getElementById('specific_delivery_time').value)timeFee+=2.00;else if(delTime==='morning'||delTime==='evening')timeFee+=1.50;
-            let valueFee=Math.min((parseFloat(document.getElementById('estimated_value').value)||0)*0.02,10);
-            let total=Math.min(Math.max(distanceFee+serviceTypeFee+itemTypeFee+weightFee+itemCountFee+specialFee+timeFee+valueFee,5.00),100.00);
-            let estMinutes=Math.round(distKm*3);
-            document.getElementById('estimated_fee').innerText='$'+total.toFixed(2);
-            document.getElementById('estimated_fee_hidden').value=total.toFixed(2);
-            document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
-            document.getElementById('infoDistance').innerHTML=distKm.toFixed(1)+' <small>km</small>';
-            document.getElementById('infoTime').innerHTML=estMinutes+' <small>min</small>';
-            document.getElementById('infoFee').innerText='$'+total.toFixed(2);
-            updateDeliveryMethod(getDeliveryMethod());
+    function initMap() {
+        map = L.map('map').setView([-1.2921, 36.8219], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+        document.getElementById('mapHint').style.display = 'block';
+        map.on('click', e => {
+            if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
+            else setDropoffLocation(e.latlng.lat, e.latlng.lng);
+            if (navigator.vibrate) navigator.vibrate(50);
+        });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                map.setView([pos.coords.latitude, pos.coords.longitude], 13);
+                if (!pickupMarker) setPickupLocation(pos.coords.latitude, pos.coords.longitude);
+            });
+        }
+    }
+
+    function setSelectionMode(mode) {
+        selectionMode = mode;
+        let p = document.getElementById('selectPickupBtn'),
+            d = document.getElementById('selectDropoffBtn'),
+            hint = document.getElementById('mapHint');
+        p.classList.toggle('active', mode === 'pickup');
+        d.classList.toggle('active', mode === 'dropoff');
+        d.classList.toggle('dropoff', mode === 'dropoff');
+        hint.textContent = mode === 'pickup' ? "Tap map to set Collection address" : "Tap map to set Delivery address";
+        hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
+        hint.style.display = 'block';
+    }
+
+    function setPickupLocation(lat, lng) {
+        if (pickupMarker) map.removeLayer(pickupMarker);
+        pickupMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-map-marker-alt'></i></div>",
+                iconSize: [28, 28],
+                iconAnchor: [14, 28]
+            })
+        }).addTo(map).bindPopup("Collection");
+        document.getElementById('pickup_lat').value = lat;
+        document.getElementById('pickup_lon').value = lng;
+        reverseGeocode(lat, lng, 'collection_address');
+        updateRoute();
+        if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
+    }
+
+    function setDropoffLocation(lat, lng) {
+        if (dropoffMarker) map.removeLayer(dropoffMarker);
+        dropoffMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>",
+                iconSize: [28, 28],
+                iconAnchor: [14, 28]
+            })
+        }).addTo(map).bindPopup("Delivery");
+        document.getElementById('dropoff_lat').value = lat;
+        document.getElementById('dropoff_lon').value = lng;
+        reverseGeocode(lat, lng, 'delivery_address');
+        updateRoute();
+    }
+
+    function updateRoute() {
+        if (pickupMarker && dropoffMarker) {
+            let p = pickupMarker.getLatLng(),
+                d = dropoffMarker.getLatLng();
+            fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.routes?.length) {
+                        let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                        if (routeLine) map.removeLayer(routeLine);
+                        routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
+                        map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+                        updateUIwithDistance(data.routes[0].distance / 1000);
+                    }
+                })
+                .catch(() => fallbackDistance(p, d));
+        }
+    }
+
+    function fallbackDistance(p, d) {
+        updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng));
+    }
+
+    function haversine(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        let dLat = (lat2 - lat1) * Math.PI / 180,
+            dLon = (lon2 - lon1) * Math.PI / 180;
+        let a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function reverseGeocode(lat, lng, inputId) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(r => r.json())
+            .then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; });
+    }
+
+    // Hardcoded service/item types (no selectors exist in HTML)
+    let selectedServiceType = 'package',
+        selectedItemType = 'package';
+
+    function updateUIwithDistance(distKm) {
+        let distanceFee = distKm <= 2 ? 2.50 : distKm <= 10 ? 4.00 : distKm <= 25 ? 6.50 : distKm <= 50 ? 9.00 : 12.00;
+        let serviceTypeFee = { package: 5.00, document: 3.00, item: 6.00 }[selectedServiceType] || 5.00;
+        let itemTypeFee = { package: 2.00, document: 1.00, electronics: 5.00, clothing: 1.50, fragile: 8.00, other: 3.00 }[selectedItemType] || 3.00;
+
+        // Weight fee from weights[] inputs
+        let totalWeight = 0;
+        document.querySelectorAll('input[name="weights[]"]').forEach(inp => { totalWeight += parseFloat(inp.value) || 0; });
+        let weightFee = 0;
+        if (totalWeight > 0) {
+            if (totalWeight <= 10) weightFee = 1.00;
+            else if (totalWeight <= 25) weightFee = 2.50;
+            else if (totalWeight <= 50) weightFee = 4.00;
+            else if (totalWeight <= 100) weightFee = 7.00;
+            else weightFee = 10.00;
         }
 
-        function getDeliveryMethod(){let totalWeight=0;document.querySelectorAll('input[name="weights[]"]').forEach(inp=>{totalWeight+=parseFloat(inp.value)||0;});let fragile=document.getElementById('item_condition').value==='fragile'||selectedItemType==='fragile',electronics=selectedItemType==='electronics';if(totalWeight<=10&&!fragile&&!electronics)return{title:'Bike Delivery',icon:'fas fa-bicycle',description:'Suitable for light items and documents',color:'#4CAF50'};if(totalWeight<=50)return{title:'Vehicle Delivery',icon:'fas fa-car',description:'Requires vehicle for medium-sized items',color:'#FF9800'};return{title:'Van Required',icon:'fas fa-truck',description:'Large or heavy items require van delivery',color:'#f44336'};}
-        function updateDeliveryMethod(method){let indicator=document.getElementById('deliveryMethodIndicator');if(method){indicator.style.display='flex';document.getElementById('deliveryMethodIcon').className=method.icon;document.getElementById('deliveryMethodTitle').innerText=method.title;document.getElementById('deliveryMethodDescription').innerText=method.description;indicator.style.borderLeft=`3px solid ${method.color}`;}else indicator.style.display='none';}
+        let itemCount = document.querySelectorAll('input[name="items[]"]').length;
+        let itemCountFee = itemCount * 1.50;
 
-        document.getElementById('collection_time').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.getElementById('delivery_time').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.getElementById('handling_requirements').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.getElementById('item_condition').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.getElementById('estimated_value').addEventListener('input',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.querySelectorAll('input[name="weights[]"]').forEach(inp=>inp.addEventListener('input',()=>{if(pickupMarker&&dropoffMarker)updateRoute();}));
+        // Time fee based on collection/delivery time selections
+        let timeFee = 0,
+            collTime = document.getElementById('collection_time').value,
+            delTime = document.getElementById('delivery_time').value;
+        if (collTime === 'specific' && document.getElementById('specific_collection_time').value) timeFee += 2.00;
+        else if (collTime === 'morning' || collTime === 'evening') timeFee += 1.50;
+        if (delTime === 'specific' && document.getElementById('specific_delivery_time').value) timeFee += 2.00;
+        else if (delTime === 'morning' || delTime === 'evening') timeFee += 1.50;
 
-        function selectServiceType(type,element){document.querySelectorAll('.service-type').forEach(el=>el.classList.remove('active'));element.classList.add('active');selectedServiceType=type;if(pickupMarker&&dropoffMarker)updateRoute();}
-        function selectItemType(type,element){document.querySelectorAll('.item-type').forEach(el=>el.classList.remove('active'));element.classList.add('active');selectedItemType=type;if(pickupMarker&&dropoffMarker)updateRoute();}
-        function toggleSpecificCollectionTime(){let div=document.getElementById('specific_collection_time_input');if(document.getElementById('collection_time').value==='specific')div.classList.add('expanded');else div.classList.remove('expanded');}
-        function toggleSpecificDeliveryTime(){let div=document.getElementById('specific_delivery_time_input');if(document.getElementById('delivery_time').value==='specific')div.classList.add('expanded');else div.classList.remove('expanded');}
-        function addItem(){let container=document.getElementById('items-container');let newItem=document.createElement('div');newItem.className='collection-item';newItem.innerHTML=`<div class="collection-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-box"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="collection-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-ruler-combined"></i><input type="text" name="sizes[]" placeholder="Size/Dimensions"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-weight-hanging"></i><input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;container.appendChild(newItem);totalItems++;setTimeout(()=>newItem.querySelector('input')?.focus(),100);if(pickupMarker&&dropoffMarker)updateRoute();}
-        function removeItem(btn){btn.closest('.collection-item')?.remove();totalItems--;if(pickupMarker&&dropoffMarker)updateRoute();}
-        function displayFileName(input){document.getElementById('file_name').innerText=input.files.length?(input.files.length>1?`${input.files.length} files`:input.files[0].name):'';}
-        function updateProgress(){let filled=Array.from(document.querySelectorAll('input,select,textarea')).filter(i=>i.value&&i.type!='hidden').length;document.querySelector('.progress').style.width=Math.min((filled/document.querySelectorAll('input,select,textarea').length)*100,100)+'%';}
-        document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',updateProgress));
+        // Removed specialFee (handling_requirements, item_condition) and valueFee (estimated_value) – fields don't exist
+        let total = Math.min(Math.max(distanceFee + serviceTypeFee + itemTypeFee + weightFee + itemCountFee + timeFee, 5.00), 100.00);
+        let estMinutes = Math.round(distKm * 3);
+        document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
+        document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
+        document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
+        document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
+        document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
+        document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
+        updateDeliveryMethod(getDeliveryMethod());
+    }
 
-        document.getElementById('collectionsForm').addEventListener('submit',function(e){
-            if(!document.getElementById('collection_address').value.trim()){alert('Please set collection address on map.');e.preventDefault();return false;}
-            if(!document.getElementById('delivery_address').value.trim()){alert('Please set delivery address on map.');e.preventDefault();return false;}
-            if(!document.getElementById('collection_contact').value.trim()){alert('Enter collection contact name.');e.preventDefault();return false;}
-            if(!document.getElementById('collection_phone').value.trim()){alert('Enter collection phone number.');e.preventDefault();return false;}
-            let hasItem=false;document.querySelectorAll('input[name="items[]"]').forEach(i=>{if(i.value.trim())hasItem=true;});
-            if(!hasItem){alert('Add at least one item.');e.preventDefault();return false;}
-            let price=parseFloat(document.getElementById('service_price').value);if(isNaN(price)||price<0.50){alert('Service price must be at least $0.50.');e.preventDefault();return false;}
-            if(!document.getElementById('phone_number').value.trim()){alert('Enter phone number.');e.preventDefault();return false;}
-        });
+    function getDeliveryMethod() {
+        let totalWeight = 0;
+        document.querySelectorAll('input[name="weights[]"]').forEach(inp => { totalWeight += parseFloat(inp.value) || 0; });
+        // No fragile/electronics condition – using default itemType only
+        let fragile = selectedItemType === 'fragile',
+            electronics = selectedItemType === 'electronics';
+        if (totalWeight <= 10 && !fragile && !electronics)
+            return { title: 'Bike Delivery', icon: 'fas fa-bicycle', description: 'Suitable for light items and documents', color: '#4CAF50' };
+        if (totalWeight <= 50)
+            return { title: 'Vehicle Delivery', icon: 'fas fa-car', description: 'Requires vehicle for medium-sized items', color: '#FF9800' };
+        return { title: 'Van Required', icon: 'fas fa-truck', description: 'Large or heavy items require van delivery', color: '#f44336' };
+    }
 
-        window.onload=function(){initMap();updateProgress();};
-    </script>
+    function updateDeliveryMethod(method) {
+        let indicator = document.getElementById('deliveryMethodIndicator');
+        if (method) {
+            indicator.style.display = 'flex';
+            document.getElementById('deliveryMethodIcon').className = method.icon;
+            document.getElementById('deliveryMethodTitle').innerText = method.title;
+            document.getElementById('deliveryMethodDescription').innerText = method.description;
+            indicator.style.borderLeft = `3px solid ${method.color}`;
+        } else {
+            indicator.style.display = 'none';
+        }
+    }
+
+    // Event listeners for fields that exist
+    document.getElementById('collection_time').addEventListener('change', () => { if (pickupMarker && dropoffMarker) updateRoute(); });
+    document.getElementById('delivery_time').addEventListener('change', () => { if (pickupMarker && dropoffMarker) updateRoute(); });
+    // Removed listeners for handling_requirements, item_condition, estimated_value (do not exist)
+    document.querySelectorAll('input[name="weights[]"]').forEach(inp => inp.addEventListener('input', () => { if (pickupMarker && dropoffMarker) updateRoute(); }));
+
+    function toggleSpecificCollectionTime() {
+        let div = document.getElementById('specific_collection_time_input');
+        if (document.getElementById('collection_time').value === 'specific') div.classList.add('expanded');
+        else div.classList.remove('expanded');
+    }
+
+    function toggleSpecificDeliveryTime() {
+        let div = document.getElementById('specific_delivery_time_input');
+        if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded');
+        else div.classList.remove('expanded');
+    }
+
+    function addItem() {
+        let container = document.getElementById('items-container');
+        let newItem = document.createElement('div');
+        newItem.className = 'collection-item';
+        newItem.innerHTML = `<div class="collection-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-box"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="collection-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-ruler-combined"></i><input type="text" name="sizes[]" placeholder="Size/Dimensions"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-weight-hanging"></i><input type="number" name="weights[]" placeholder="Weight (lbs)" step="0.1" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;
+        container.appendChild(newItem);
+        // Add event listener to new weight input
+        newItem.querySelector('input[name="weights[]"]').addEventListener('input', () => { if (pickupMarker && dropoffMarker) updateRoute(); });
+        if (pickupMarker && dropoffMarker) updateRoute();
+    }
+
+    function removeItem(btn) {
+        btn.closest('.collection-item')?.remove();
+        if (pickupMarker && dropoffMarker) updateRoute();
+    }
+
+    function updateProgress() {
+        let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type !== 'hidden').length;
+        document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%';
+    }
+    document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
+
+    document.getElementById('collectionsForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('collection_address').value.trim()) { alert('Please set collection address on map.'); e.preventDefault(); return false; }
+        if (!document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
+        if (!document.getElementById('collection_contact').value.trim()) { alert('Enter collection contact name.'); e.preventDefault(); return false; }
+        if (!document.getElementById('collection_phone').value.trim()) { alert('Enter collection phone number.'); e.preventDefault(); return false; }
+        let hasItem = false;
+        document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+        if (!hasItem) { alert('Add at least one item.'); e.preventDefault(); return false; }
+        let price = parseFloat(document.getElementById('service_price').value);
+        if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
+        if (!document.getElementById('phone_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
+    });
+
+    window.onload = function() {
+        initMap();
+        updateProgress();
+    };
+</script>
 </body>
 </html>

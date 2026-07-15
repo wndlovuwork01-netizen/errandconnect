@@ -174,12 +174,6 @@
         </div>
     </div>
 
-    <div class="container">
-        <div class="content-wrapper">
-            <div class="mobile-header">
-                <div class="logo"><div class="logo-icon"><i class="fas fa-file-invoice-dollar"></i></div><div><h1>ErrandConnect</h1><div class="service-tag">Bill Payment Service</div></div></div>
-            </div>
-
             <div class="form-section">
                 <div class="progress-bar"><div class="progress"></div></div>
 
@@ -224,162 +218,182 @@
                     <button type="submit" class="submit-btn"><i class="fas fa-lock"></i> Secure Bill Payment Request</button>
                 </form>
             </div>
-        </div>
-    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        let map, pickupMarker, dropoffMarker, routeLine;
-        let selectionMode = 'pickup';
-        let urgentPayment = false;
-        let billCounter = 1;
+<script>
+    let map, pickupMarker, dropoffMarker, routeLine;
+    let selectionMode = 'pickup';
+    let urgentPayment = false; // kept but unused without the toggle
+    let billCounter = 1;
 
-        function initMap() {
-            map = L.map('map').setView([-1.2921, 36.8219], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
-            document.getElementById('mapHint').style.display = 'block';
-            map.on('click', e => {
-                if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
-                else setDropoffLocation(e.latlng.lat, e.latlng.lng);
-                if (navigator.vibrate) navigator.vibrate(50);
-            });
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    map.setView([pos.coords.latitude, pos.coords.longitude], 13);
-                    if (!pickupMarker) setPickupLocation(pos.coords.latitude, pos.coords.longitude);
-                });
-            }
-        }
-
-        function setSelectionMode(mode) {
-            selectionMode = mode;
-            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
-            p.classList.toggle('active', mode === 'pickup'); d.classList.toggle('active', mode === 'dropoff'); d.classList.toggle('dropoff', mode === 'dropoff');
-            hint.textContent = mode === 'pickup' ? "Tap map to set Payment Location" : "Tap map to set Delivery Address";
-            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)"; hint.style.display = 'block';
-        }
-
-        function setPickupLocation(lat, lng) {
-            if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-store'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Payment Location");
-            document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'payment_location'); updateRoute();
-            if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
-        }
-
-        function setDropoffLocation(lat, lng) {
-            if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery Address");
-            document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address'); updateRoute();
-        }
-
-        function updateRoute() {
-            if (pickupMarker && dropoffMarker) {
-                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
-                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
-                    .then(res => res.json()).then(data => {
-                        if (data.routes?.length) {
-                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                            if (routeLine) map.removeLayer(routeLine);
-                            routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
-                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
-                            updateUIwithDistance(data.routes[0].distance / 1000);
-                        }
-                    }).catch(() => fallbackDistance(p, d));
-            }
-        }
-
-        function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
-        function haversine(lat1, lon1, lat2, lon2) { const R = 6371; let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180; let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
-        function reverseGeocode(lat, lng, inputId) { fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; }); }
-
-        function updateUIwithDistance(distKm) {
-            let baseFee = 5.00 + (distKm <= 5 ? 2.00 : distKm <= 15 ? 3.50 : distKm <= 30 ? 5.00 : 7.00);
-            let totalBill = calculateTotalBillAmount();
-            let processingFee = Math.min(Math.max(totalBill * 0.01, 1), 10);
-            let urgencyFee = urgentPayment ? 2.00 : 0;
-            let totalFee = baseFee + processingFee + urgencyFee;
-            let estMinutes = Math.round(distKm * 4);
-            document.getElementById('estimated_fee').innerText = '$' + totalFee.toFixed(2);
-            document.getElementById('estimated_fee_hidden').value = totalFee.toFixed(2);
-            document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
-            document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
-            document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
-            document.getElementById('infoFee').innerText = '$' + totalFee.toFixed(2);
-            document.getElementById('serviceFeeAmount').innerText = '$' + totalFee.toFixed(2);
-            document.getElementById('totalAmount').innerText = '$' + (totalBill + totalFee).toFixed(2);
-            updateServiceType(); updatePaymentTimeline();
-        }
-
-        function calculateTotalBillAmount() {
-            let total = 0;
-            document.querySelectorAll('input[name="amounts[]"]').forEach(input => { let v = parseFloat(input.value); if (!isNaN(v)) total += v; });
-            document.getElementById('total_display').innerText = total.toFixed(2);
-            return total;
-        }
-
-        function toggleUrgencyFee() { urgentPayment = document.getElementById('urgent_payment').checked; if (pickupMarker && dropoffMarker) updateRoute(); }
-        function toggleOtherPaymentInput() { let div = document.getElementById('other_payment_input'); document.getElementById('payment_method').value === 'other' ? div.classList.add('expanded') : div.classList.remove('expanded'); }
-        function toggleEmailInput() { let div = document.getElementById('email_input'); document.getElementById('confirmation_delivery').value === 'email' ? div.classList.add('expanded') : div.classList.remove('expanded'); }
-        function toggleOtherBillInput(select, index) { let div = document.getElementById(`other_bill_input_${index}`); select.value === 'other' ? div.classList.add('expanded') : div.classList.remove('expanded'); }
-
-        function updatePaymentTimeline() {
-            let indicator = document.getElementById('paymentTimelineIndicator');
-            let urgency = document.getElementById('payment_urgency').value;
-            let dueDate = document.getElementById('due_date').value;
-            let data = { normal: { title: 'Standard Processing', description: 'Will be processed within 3-5 business days', icon: 'fas fa-calendar-check' }, urgent: { title: 'Urgent Processing', description: 'Will be processed within 24 hours', icon: 'fas fa-clock' }, asap: { title: 'ASAP Processing', description: 'Will be processed today', icon: 'fas fa-bolt' } };
-            let info = data[urgency] || data.normal;
-            indicator.style.display = 'flex'; document.getElementById('timelineIcon').className = info.icon; document.getElementById('timelineTitle').innerText = info.title; document.getElementById('timelineDescription').innerText = info.description + (dueDate ? ` | Due: ${new Date(dueDate).toLocaleDateString()}` : '');
-        }
-
-        function updateServiceType() {
-            let indicator = document.getElementById('serviceTypeIndicator'); indicator.style.display = 'flex';
-            if (urgentPayment) { document.getElementById('serviceTypeIcon').className = 'fas fa-bolt'; document.getElementById('serviceTypeTitle').innerText = 'Urgent Payment'; document.getElementById('serviceTypeDescription').innerText = 'Priority service (+$2.00 urgency fee)'; }
-            else { document.getElementById('serviceTypeIcon').className = 'fas fa-file-invoice-dollar'; document.getElementById('serviceTypeTitle').innerText = 'Bill Payment Service'; document.getElementById('serviceTypeDescription').innerText = 'Standard bill payment service'; }
-        }
-
-        function addBill() {
-            let container = document.getElementById('bills-container');
-            let newBill = document.createElement('div'); newBill.className = 'bill-item';
-            newBill.innerHTML = `<div class="bill-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-file-invoice"></i><select name="bill_types[]" required onchange="toggleOtherBillInput(this, ${billCounter})"><option value="">Select bill type</option><option value="electricity">Electricity</option><option value="water">Water</option><option value="internet">Internet</option><option value="phone">Phone/Mobile</option><option value="cable">Cable TV</option><option value="rent">Rent</option><option value="mortgage">Mortgage</option><option value="credit_card">Credit Card</option><option value="loan">Loan Payment</option><option value="insurance">Insurance</option><option value="school_fees">School Fees</option><option value="government_fees">Government Fees</option><option value="parking_ticket">Parking Ticket</option><option value="traffic_fine">Traffic Fine</option><option value="tax">Tax Payment</option><option value="other">Other</option></select></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="amounts[]" placeholder="Amount" step="0.01" required></div></div><div class="bill-row"><div class="input-with-icon"><i class="fas fa-hashtag"></i><input type="text" name="account_numbers[]" placeholder="Account Number" required></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeBill(this)">×</button></div>`;
-            container.appendChild(newBill);
-            let otherDiv = document.createElement('div'); otherDiv.id = `other_bill_input_${billCounter}`; otherDiv.className = 'expanding-input'; otherDiv.innerHTML = `<div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_bill_name_${billCounter}" name="other_bill_names[]" placeholder="Specify bill type"></div>`;
-            container.appendChild(otherDiv);
-            billCounter++;
-            newBill.querySelector('input[name="amounts[]"]').addEventListener('input', () => { calculateTotalBillAmount(); if(pickupMarker && dropoffMarker) updateRoute(); });
-            calculateTotalBillAmount(); if(pickupMarker && dropoffMarker) updateRoute();
-        }
-
-        function removeBill(btn) {
-            let item = btn.closest('.bill-item'); let container = item.parentElement;
-            let index = Array.from(container.querySelectorAll('.bill-item')).indexOf(item);
-            item.remove(); let other = document.getElementById(`other_bill_input_${index}`); if (other) other.remove();
-            calculateTotalBillAmount(); if(pickupMarker && dropoffMarker) updateRoute();
-        }
-
-        function displayFileName(input) { document.getElementById('file_name').innerText = input.files[0]?.name || ''; }
-        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%'; }
-        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
-        document.addEventListener('input', function(e) { if (e.target.name === 'amounts[]' && pickupMarker && dropoffMarker) { calculateTotalBillAmount(); updateRoute(); } });
-
-        document.getElementById('billPaymentForm').addEventListener('submit', function(e) {
-            if (!document.getElementById('payment_location').value.trim()) { alert('Please set payment location on map.'); e.preventDefault(); return false; }
-            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
-            let hasBill = false; document.querySelectorAll('select[name="bill_types[]"]').forEach(s => { if (s.value) hasBill = true; });
-            if (!hasBill) { alert('Please add at least one bill.'); e.preventDefault(); return false; }
-            let totalBill = calculateTotalBillAmount();
-            if (totalBill <= 0) { alert('Total bill amount must be greater than zero.'); e.preventDefault(); return false; }
-            let price = parseFloat(document.getElementById('service_price').value);
-            if (isNaN(price) || price < 0.75) { alert('Service price must be at least $0.75.'); e.preventDefault(); return false; }
-            if (!document.getElementById('contact_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
+    function initMap() {
+        map = L.map('map').setView([-1.2921, 36.8219], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+        document.getElementById('mapHint').style.display = 'block';
+        map.on('click', e => {
+            if (selectionMode === 'pickup') setPickupLocation(e.latlng.lat, e.latlng.lng);
+            else setDropoffLocation(e.latlng.lat, e.latlng.lng);
+            if (navigator.vibrate) navigator.vibrate(50);
         });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                map.setView([pos.coords.latitude, pos.coords.longitude], 13);
+                if (!pickupMarker) setPickupLocation(pos.coords.latitude, pos.coords.longitude);
+            });
+        }
+    }
 
-        window.onload = function() {
-            let today = new Date().toISOString().split('T')[0];
-            document.getElementById('due_date').value = today; document.getElementById('due_date').min = today;
-            initMap(); updateProgress(); calculateTotalBillAmount(); updateServiceType(); updatePaymentTimeline();
-        };
-    </script>
+    function setSelectionMode(mode) {
+        selectionMode = mode;
+        let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
+        p.classList.toggle('active', mode === 'pickup');
+        d.classList.toggle('active', mode === 'dropoff');
+        d.classList.toggle('dropoff', mode === 'dropoff');
+        hint.textContent = mode === 'pickup' ? "Tap map to set Payment Location" : "Tap map to set Delivery Address";
+        hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
+        hint.style.display = 'block';
+    }
+
+    function setPickupLocation(lat, lng) {
+        if (pickupMarker) map.removeLayer(pickupMarker);
+        pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-store'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Payment Location");
+        document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng;
+        reverseGeocode(lat, lng, 'payment_location'); updateRoute();
+        if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
+    }
+
+    function setDropoffLocation(lat, lng) {
+        if (dropoffMarker) map.removeLayer(dropoffMarker);
+        dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery Address");
+        document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng;
+        // Note: there's no 'delivery_address' input in the HTML, so we skip reverse geocoding it.
+        updateRoute();
+    }
+
+    function updateRoute() {
+        if (pickupMarker && dropoffMarker) {
+            let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
+            fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
+                .then(res => res.json()).then(data => {
+                    if (data.routes?.length) {
+                        let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                        if (routeLine) map.removeLayer(routeLine);
+                        routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
+                        map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+                        updateUIwithDistance(data.routes[0].distance / 1000);
+                    }
+                }).catch(() => fallbackDistance(p, d));
+        }
+    }
+
+    function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
+    function haversine(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+        let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+    function reverseGeocode(lat, lng, inputId) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(r => r.json())
+            .then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; });
+    }
+
+    function updateUIwithDistance(distKm) {
+        let baseFee = 5.00 + (distKm <= 5 ? 2.00 : distKm <= 15 ? 3.50 : distKm <= 30 ? 5.00 : 7.00);
+        let totalBill = calculateTotalBillAmount();
+        let processingFee = Math.min(Math.max(totalBill * 0.01, 1), 10);
+        let urgencyFee = urgentPayment ? 2.00 : 0; // urgentPayment remains false
+        let totalFee = baseFee + processingFee + urgencyFee;
+        let estMinutes = Math.round(distKm * 4);
+        document.getElementById('estimated_fee').innerText = '$' + totalFee.toFixed(2);
+        document.getElementById('estimated_fee_hidden').value = totalFee.toFixed(2);
+        document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
+        document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
+        document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
+        document.getElementById('infoFee').innerText = '$' + totalFee.toFixed(2);
+    }
+
+    function calculateTotalBillAmount() {
+        let total = 0;
+        document.querySelectorAll('input[name="amounts[]"]').forEach(input => {
+            let v = parseFloat(input.value);
+            if (!isNaN(v)) total += v;
+        });
+        document.getElementById('total_display').innerText = total.toFixed(2);
+        return total;
+    }
+
+    // Removed toggleUrgencyFee, toggleEmailInput, updatePaymentTimeline, updateServiceType (missing HTML elements).
+    function toggleOtherPaymentInput() {
+        let div = document.getElementById('other_payment_input');
+        document.getElementById('payment_method').value === 'other' ? div.classList.add('expanded') : div.classList.remove('expanded');
+    }
+    function toggleOtherBillInput(select, index) {
+        let div = document.getElementById(`other_bill_input_${index}`);
+        if (div) div.classList.toggle('expanded', select.value === 'other');
+    }
+
+    function addBill() {
+        let container = document.getElementById('bills-container');
+        let newBill = document.createElement('div'); newBill.className = 'bill-item';
+        newBill.innerHTML = `<div class="bill-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-file-invoice"></i><select name="bill_types[]" required onchange="toggleOtherBillInput(this, ${billCounter})"><option value="">Select bill type</option><option value="electricity">Electricity</option><option value="water">Water</option><option value="internet">Internet</option><option value="phone">Phone/Mobile</option><option value="cable">Cable TV</option><option value="rent">Rent</option><option value="mortgage">Mortgage</option><option value="credit_card">Credit Card</option><option value="loan">Loan Payment</option><option value="insurance">Insurance</option><option value="school_fees">School Fees</option><option value="government_fees">Government Fees</option><option value="parking_ticket">Parking Ticket</option><option value="traffic_fine">Traffic Fine</option><option value="tax">Tax Payment</option><option value="other">Other</option></select></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="amounts[]" placeholder="Amount" step="0.01" required></div></div><div class="bill-row"><div class="input-with-icon"><i class="fas fa-hashtag"></i><input type="text" name="account_numbers[]" placeholder="Account Number" required></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeBill(this)">×</button></div>`;
+        container.appendChild(newBill);
+        let otherDiv = document.createElement('div'); otherDiv.id = `other_bill_input_${billCounter}`; otherDiv.className = 'expanding-input';
+        otherDiv.innerHTML = `<div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_bill_name_${billCounter}" name="other_bill_names[]" placeholder="Specify bill type"></div>`;
+        container.appendChild(otherDiv);
+        billCounter++;
+        newBill.querySelector('input[name="amounts[]"]').addEventListener('input', () => {
+            calculateTotalBillAmount();
+            if(pickupMarker && dropoffMarker) updateRoute();
+        });
+        calculateTotalBillAmount();
+        if(pickupMarker && dropoffMarker) updateRoute();
+    }
+
+    function removeBill(btn) {
+        let item = btn.closest('.bill-item');
+        let container = item.parentElement;
+        let index = Array.from(container.querySelectorAll('.bill-item')).indexOf(item);
+        item.remove();
+        let other = document.getElementById(`other_bill_input_${index}`);
+        if (other) other.remove();
+        calculateTotalBillAmount();
+        if(pickupMarker && dropoffMarker) updateRoute();
+    }
+
+    function updateProgress() {
+        let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length;
+        document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%';
+    }
+    document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'amounts[]' && pickupMarker && dropoffMarker) {
+            calculateTotalBillAmount();
+            updateRoute();
+        }
+    });
+
+    document.getElementById('billPaymentForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('payment_location').value.trim()) {
+            alert('Please set payment location on map.'); e.preventDefault(); return false;
+        }
+        // No delivery address field, so removed that check.
+        let hasBill = false;
+        document.querySelectorAll('select[name="bill_types[]"]').forEach(s => { if (s.value) hasBill = true; });
+        if (!hasBill) { alert('Please add at least one bill.'); e.preventDefault(); return false; }
+        let totalBill = calculateTotalBillAmount();
+        if (totalBill <= 0) { alert('Total bill amount must be greater than zero.'); e.preventDefault(); return false; }
+        let price = parseFloat(document.getElementById('service_price').value);
+        if (isNaN(price) || price < 0.75) { alert('Service price must be at least $0.75.'); e.preventDefault(); return false; }
+        if (!document.getElementById('contact_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
+    });
+
+    window.onload = function() {
+        initMap();
+        updateProgress();
+        calculateTotalBillAmount();
+    };
+</script>
 </body>
 </html>
