@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
+        /* ===== All existing styles remain the same ===== */
         :root {
             --primary: #4CAF50;
             --primary-light: #66BB6A;
@@ -114,43 +115,6 @@
         .content-wrapper {
             padding-top: 58px;
             padding-bottom: 20px;
-        }
-
-        .mobile-header {
-            background: var(--gradient);
-            color: white;
-            padding: 12px 15px;
-            text-align: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .logo-icon {
-            background: rgba(255, 255, 255, 0.2);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
-
-        .service-tag {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 15px;
-            font-size: 10px;
         }
 
         #map {
@@ -261,6 +225,32 @@
             font-weight: 600;
             font-size: 13px;
         }
+        .label-with-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .label-with-btn label {
+            margin-bottom: 0;
+        }
+        .location-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .location-btn:active {
+            transform: scale(0.95);
+        }
         .input-with-icon {
             position: relative;
         }
@@ -335,6 +325,10 @@
             width: 100%;
             margin-bottom: 12px;
             font-weight: 600;
+            border: none;
+        }
+        .add-item:active {
+            transform: scale(0.98);
         }
         .budget-weight-row {
             display: grid;
@@ -459,6 +453,582 @@
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path fill="%234CAF50" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>');
         }
 
+        /* ===== Popular Brands Carousel ===== */
+        .brands-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 10px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .brands-carousel::-webkit-scrollbar {
+            height: 4px;
+        }
+        .brands-carousel::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 2px;
+        }
+        .brand-card {
+            flex: 0 0 80px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.2s, transform 0.1s;
+            scroll-snap-align: start;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-card:active {
+            transform: scale(0.95);
+        }
+        .brand-card.selected {
+            border-color: var(--primary);
+            background: #f0fdf0;
+        }
+        .brand-card img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .brand-card span {
+            font-size: 11px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70px;
+        }
+        .brand-card .brand-name {
+            font-weight: 600;
+        }
+
+        /* Selected brand display */
+        #selectedBrandDisplay {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        /* ===== Branch Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-title .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 0 8px;
+        }
+        .modal-title .back-btn:active {
+            transform: scale(0.9);
+        }
+        .branch-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.1s;
+            border-radius: 6px;
+        }
+        .branch-item:active {
+            background: #f0f0f0;
+        }
+        .branch-item .branch-city {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .branch-item .branch-address {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ===== Grocery List Modal ===== */
+        .grocery-modal .modal-content {
+            max-width: 700px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            max-height: 85vh;
+        }
+
+        .grocery-modal .modal-title {
+            flex-shrink: 0;
+        }
+
+        /* Products Grid - 4 columns, 6 rows visible on landing, scrollable for more */
+        .products-grid {
+            --row-h: 118px;
+            --row-gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: var(--row-h);
+            gap: var(--row-gap);
+            overflow-y: auto;
+            flex-shrink: 1;
+            min-height: 0;
+            max-height: calc((var(--row-h) * 6) + (var(--row-gap) * 5));
+            padding: 4px 4px 8px;
+            align-content: start;
+        }
+        .product-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid #eee;
+            padding: 6px 4px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            overflow: hidden;
+        }
+        .product-card:active {
+            transform: scale(0.95);
+        }
+        .product-card .product-image-wrap {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-card .product-img {
+            width: 100%;
+            height: 100%;
+            max-width: 62px;
+            max-height: 62px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+        .product-card .product-emoji {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        .product-card .product-name {
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .product-card .product-added {
+            color: var(--primary);
+            font-size: 10px;
+        }
+
+        /* Brands List - 6 rows visible on landing, scrollable for more */
+        .brands-list {
+            --brand-row-h: 64px;
+            --brand-row-gap: 4px;
+            overflow-y: auto;
+            flex-shrink: 1;
+            min-height: 0;
+            max-height: calc((var(--brand-row-h) * 6) + (var(--brand-row-gap) * 5));
+            padding: 4px 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--brand-row-gap);
+        }
+        .brand-item-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border-bottom: 1px solid #f0f0f0;
+            border-radius: 6px;
+            flex-shrink: 0;
+            min-height: var(--brand-row-h);
+        }
+        .brand-item-row .brand-thumb {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .brand-item-row .brand-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .brand-item-row .brand-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .brand-item-row .brand-desc {
+            font-size: 12px;
+            color: #888;
+        }
+        .brand-item-row .brand-price {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 14px;
+        }
+        .brand-item-row .brand-promo {
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+        .brand-item-row .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .brand-item-row .qty-control button {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-item-row .qty-control button:active {
+            transform: scale(0.92);
+        }
+        .brand-item-row .qty-control .qty-num {
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 20px;
+            text-align: center;
+        }
+        .brand-item-row .add-to-cart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .brand-item-row .add-to-cart-btn:active {
+            transform: scale(0.95);
+        }
+        .brand-item-row .added-badge {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ===== Main Form Cart Display ===== */
+        #mainCartDisplay {
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 2px solid var(--primary-light);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        #mainCartDisplay .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+        #mainCartDisplay .cart-header .cart-count-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            padding: 1px 10px;
+            font-size: 12px;
+        }
+        #mainCartDisplay .cart-items-list {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 6px;
+        }
+        #mainCartDisplay .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        #mainCartDisplay .cart-item-row .item-name {
+            flex: 1;
+        }
+        #mainCartDisplay .cart-item-row .item-qty {
+            margin: 0 8px;
+            color: #888;
+        }
+        #mainCartDisplay .cart-item-row .item-price {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        #mainCartDisplay .cart-item-row .remove-btn-sm {
+            color: #ff4444;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+            margin-left: 6px;
+        }
+        #mainCartDisplay .cart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 6px;
+            border-top: 2px solid #ddd;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        #mainCartDisplay .cart-footer .cart-total-price {
+            color: var(--primary-dark);
+            font-size: 16px;
+        }
+        #mainCartDisplay .cart-footer .cart-total-weight {
+            color: #666;
+            font-size: 13px;
+        }
+        #mainCartDisplay .cart-footer .clear-cart-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #mainCartDisplay .cart-footer .clear-cart-btn:active {
+            transform: scale(0.95);
+        }
+        #mainCartDisplay .empty-cart-msg {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            padding: 8px 0;
+        }
+
+        /* ===== Cart Summary (Modal) ===== */
+        .cart-summary {
+            flex-shrink: 0;
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .cart-summary .cart-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .cart-summary .cart-total {
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--primary-dark);
+        }
+        .cart-summary .cart-count {
+            font-size: 13px;
+            color: #666;
+        }
+        .cart-summary .cart-weight {
+            font-size: 12px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            background: rgba(76,175,80,0.12);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .cart-summary .view-cart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .cart-summary .view-cart-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Cart Detail (Modal) */
+        .cart-detail {
+            flex-shrink: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: #fafafa;
+            border-radius: 8px;
+            display: none;
+        }
+        .cart-detail.show {
+            display: block;
+        }
+        .cart-detail .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-detail .cart-item-row .remove-item-btn {
+            color: #ff4444;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+        }
+        .add-all-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 8px;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .add-all-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 600px) {
+            .products-grid {
+                --row-h: 92px;
+                --row-gap: 6px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .product-card .product-img {
+                max-width: 46px;
+                max-height: 46px;
+            }
+            .product-card .product-emoji {
+                font-size: 26px;
+            }
+            .product-card .product-name {
+                font-size: 10px;
+            }
+            .grocery-modal .modal-content {
+                height: auto;
+                max-height: 92vh;
+                padding: 10px;
+            }
+            .brands-list {
+                --brand-row-h: 56px;
+            }
+            .brand-item-row {
+                padding: 5px 4px;
+                flex-wrap: wrap;
+            }
+            .brand-item-row .brand-thumb {
+                width: 36px;
+                height: 36px;
+            }
+            .brand-item-row .brand-price {
+                font-size: 13px;
+            }
+            .brand-item-row .qty-control button {
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+            }
+            #mainCartDisplay .cart-items-list {
+                max-height: 80px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .products-grid {
+                --row-h: 82px;
+                --row-gap: 5px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .product-card .product-img {
+                max-width: 38px;
+                max-height: 38px;
+            }
+            .product-card .product-emoji {
+                font-size: 20px;
+            }
+            .product-card .product-name {
+                font-size: 9px;
+            }
+            .brand-item-row .brand-name {
+                font-size: 12px;
+            }
+        }
+
         @media (min-width: 768px) {
             body { padding: 10px; display: flex; justify-content: center; }
             .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -467,10 +1037,13 @@
             .grocery-item { flex-direction: row; align-items: center; }
             .grocery-row { flex: 1; }
             .item-actions { margin-left: 10px; }
+            .brand-card { flex: 0 0 90px; }
         }
         @media (max-width: 320px) {
             .route-info-value { font-size: 11px; }
             .map-btn { font-size: 11px; padding: 8px; }
+            .brand-card { flex: 0 0 70px; }
+            .brand-card img { width: 30px; height: 30px; }
         }
     </style>
 </head>
@@ -486,89 +1059,762 @@
         </div>
     </div>
 
-            <div class="form-section">
-                <div class="progress-bar"><div class="progress"></div></div>
+    <div class="form-section">
+        <div class="progress-bar"><div class="progress"></div></div>
 
-                <!-- MAP SECTION -->
-                <div class="map-wrapper">
-                    <div class="map-controls">
-                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-store"></i> Set Store</button>
-                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+        <!-- MAP SECTION -->
+        <div class="map-wrapper">
+            <div class="map-controls">
+                <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-store"></i> Set Store</button>
+                <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+            </div>
+            <div id="mapHint" class="map-hint">Tap map to set location</div>
+            <div id="map"></div>
+            <div class="route-info-bar" id="routeInfoBar">
+                <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
+                <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
+                <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
+            </div>
+        </div>
+
+        <form method="post" action="{{ url_for('create_grocery_errand') }}" id="groceryForm">
+            <input type="hidden" id="pickup_lat" name="pickup_lat">
+            <input type="hidden" id="pickup_lon" name="pickup_lon">
+            <input type="hidden" id="dropoff_lat" name="dropoff_lat">
+            <input type="hidden" id="dropoff_lon" name="dropoff_lon">
+            <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
+            <input type="hidden" id="distance_km_hidden" name="distance_km">
+            <input type="hidden" id="store_preference" name="store_preference" value="">
+
+            <h2><i class="fas fa-store"></i> Store / Delivery Information</h2>
+
+            <!-- Popular Brands Carousel -->
+            <div class="form-group">
+                <label>Popular Supermarkets</label>
+                <div class="brands-carousel" id="brandsCarousel"></div>
+                <div id="selectedBrandDisplay"></div>
+            </div>
+
+            <!-- Other Store Input -->
+            <div id="other_store_input" class="expanding-input">
+                <div class="input-with-icon">
+                    <i class="fas fa-edit"></i>
+                    <input type="text" id="other_store_name" name="other_store_name" placeholder="Enter store name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="store_location">Store Address</label>
+                <div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="store_location" name="store_location" readonly onfocus="this.removeAttribute('readonly')"></div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="form-group">
+                <div class="label-with-btn">
+                    <label for="delivery_address">Delivery Address</label>
+                    <button type="button" class="location-btn" id="useCurrentLocationBtn">
+                        <i class="fas fa-crosshairs"></i> Use your location
+                    </button>
+                </div>
+                <div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" required readonly onfocus="this.removeAttribute('readonly')"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="delivery_time">Delivery Time</label>
+                <div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div>
+                <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
+            </div>
+            <div class="section-divider"></div>
+
+            <h2><i class="fas fa-list-alt"></i> Shopping List</h2>
+
+            <!-- Browse Store Items Button -->
+            <div id="groceryListBtnContainer" style="display:none; margin-bottom:12px;">
+                <button type="button" class="add-item" id="openGroceryListBtn" style="background: var(--accent);">
+                    <i class="fas fa-utensils"></i> Browse Store Items
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Shopping Items</label>
+                <div id="items-container">
+                    <div class="grocery-item"><div class="grocery-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div>
+                </div>
+
+                <!-- ===== NEW: Cart Display in Main Form ===== -->
+                <div id="mainCartDisplay">
+                    <div class="cart-header">
+                        <span><i class="fas fa-shopping-cart"></i> Your Cart</span>
+                        <span class="cart-count-badge" id="mainCartCount">0 items</span>
                     </div>
-                    <div id="mapHint" class="map-hint">Tap map to set location</div>
-                    <div id="map"></div>
-                    <div class="route-info-bar" id="routeInfoBar">
-                        <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
-                        <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
-                        <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
+                    <div class="cart-items-list" id="mainCartItems">
+                        <div class="empty-cart-msg">No items added yet. Browse store items above.</div>
+                    </div>
+                    <div class="cart-footer">
+                        <span>Total: <span class="cart-total-price" id="mainCartTotal">$0.00</span></span>
+                        <span class="cart-total-weight" id="mainCartWeight"><i class="fas fa-weight-hanging"></i> 0.0 kg</span>
+                        <button class="clear-cart-btn" onclick="clearMainCart()">Clear</button>
                     </div>
                 </div>
 
-                <form method="post" action="{{ url_for('create_grocery_errand') }}" id="groceryForm">
-                    <input type="hidden" id="pickup_lat" name="pickup_lat">
-                    <input type="hidden" id="pickup_lon" name="pickup_lon">
-                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
-                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
-                    <!-- ========== NEW: Estimated Fee Hidden Field ========== -->
-                    <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
-                    <input type="hidden" id="distance_km_hidden" name="distance_km">
+                <!-- ===== MODIFIED: Add Another Item Button ===== -->
+                <button type="button" class="add-item" id="addAnotherItemBtn" onclick="openGroceryListFromAdd()">
+                    <i class="fas fa-plus"></i> Add Another Item
+                </button>
 
-                    <h2><i class="fas fa-store"></i> Store / Delivery Information</h2>
-                    <div class="form-group">
-                        <label for="store_preference">Preferred Supermarket</label>
-                        <div class="input-with-icon"><i class="fas fa-store-alt"></i><select id="store_preference" name="store_preference" required onchange="toggleOtherStoreInput()"><option value="">Select a store</option><option value="walmart">Sai Mart</option><option value="kroger">Choppies</option><option value="target">Tripple Best</option><option value="other">Other</option></select></div>
-                        <div id="other_store_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_store_name" name="other_store_name" placeholder="Store name"></div></div>
-                    </div>
-                    <div class="form-group"><label for="store_location">Store Address</label><div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="store_location" name="store_location" readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="form-group"><label for="delivery_time">Delivery Time</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
-                    <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
-                    <div class="section-divider"></div>
+                <div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Est. weight (kg)" step="0.1" min="0"></div>
+            </div>
+            <input type="file" id="file_input" class="file-input" name="shopping_list" accept="image/*,.pdf" onchange="displayFileName(this)" style="display:none;">
+            <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-list-alt"></i> Shopping List</h2>
-                    <div class="form-group">
-                        <label>Shopping Items</label>
-                        <div id="items-container">
-                            <div class="grocery-item"><div class="grocery-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div>
-                        </div>
-                        <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
-                        <div class="input-with-icon"><i class="fas fa-weight-hanging"></i><input type="number" id="estimated_weight" name="estimated_weight" placeholder="Est. weight (kg)" step="0.1" min="0"></div></div>
-                    <input type="file" id="file_input" class="file-input" name="shopping_list" accept="image/*,.pdf" onchange="displayFileName(this)" style="display:none;">
-                    <div class="section-divider"></div>
+            <div class="preference-item"><label for="payment_method">Payment Method</label><select id="payment_method" name="payment_method"><option value="cash">Cash</option><option value="card">Credit/Debit Card</option><option value="mobile">Mobile Payment</option></select></div>
+            <div class="section-divider"></div>
 
-                   <div class="preference-item"><label for="payment_method">Payment Method</label><select id="payment_method" name="payment_method"><option value="cash">Cash</option><option value="card">Credit/Debit Card</option><option value="mobile">Mobile Payment</option></select></div>
-                    <div class="section-divider"></div>
+            <h2><i class="fas fa-truck"></i> Delivery Instructions</h2>
+            <div class="form-group"><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions..."></textarea></div>
+            <div class="section-divider"></div>
 
-                    <h2><i class="fas fa-truck"></i> Delivery Instructions</h2>
-                    <div class="form-group"><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Special delivery instructions..."></textarea></div>
-                    <div class="section-divider"></div>
+            <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+            <div class="service-phone-row"><div class="form-group"><label for="service_price">Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.75" required></div></div><div class="form-group"><label for="phone_number">Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div></div>
+            <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Grocery Errand</button>
+        </form>
+    </div>
 
-                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-                    <div class="service-phone-row"><div class="form-group"><label for="service_price">Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.75" required></div></div><div class="form-group"><label for="phone_number">Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" placeholder="Phone number" required></div></div></div>
-                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Grocery Errand</button>
-                </form>
+    <!-- Branch Selection Modal -->
+    <div class="modal-overlay" id="branchModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBranchModal()">&times;</span>
+            <div class="modal-title" id="modalTitle">Select Branch</div>
+            <div id="branchList"></div>
+        </div>
+    </div>
+
+    <!-- Grocery List Modal -->
+    <div class="modal-overlay grocery-modal" id="groceryModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeGroceryModal()">&times;</span>
+            <div class="modal-title" id="groceryModalTitle">
+                <button class="back-btn" id="groceryBackBtn" style="display:none;" onclick="goBackToProducts()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span id="groceryModalTitleText">Store Grocery List</span>
             </div>
 
+            <!-- Products Grid View -->
+            <div class="products-grid" id="productsGrid"></div>
+
+            <!-- Brands List View (hidden initially) -->
+            <div class="brands-list" id="brandsList" style="display:none;"></div>
+
+            <!-- Cart Summary (Modal) -->
+            <div class="cart-summary" id="cartSummary">
+                <div class="cart-left">
+                    <span class="cart-total" id="cartTotalDisplay">$0.00</span>
+                    <span class="cart-count" id="cartCountDisplay">(0 items)</span>
+                    <span class="cart-weight" id="cartWeightDisplay"><i class="fas fa-weight-hanging"></i> 0.0 kg</span>
+                </div>
+                <button class="view-cart-btn" id="viewCartBtn" onclick="toggleCartDetail()">
+                    <i class="fas fa-shopping-cart"></i> View Cart
+                </button>
+            </div>
+
+            <!-- Cart Detail (Modal) -->
+            <div class="cart-detail" id="cartDetail">
+                <div id="cartDetailItems"></div>
+                <button class="add-all-btn" onclick="addCartToShoppingList()">
+                    <i class="fas fa-plus-circle"></i> Add All to Shopping List
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // ========== GROCERY DATA ==========
+        const groceryData = {
+            'sai_mart': {
+                products: [
+                    { name: 'Bread', emoji: '🍞', brands: [{ name: 'Albany', price: 2.49, promotion: 'Buy 2 get 1 free' }, { name: 'Sasko', price: 1.99, promotion: '' }, { name: 'Sunbake', price: 2.29, promotion: 'New recipe' }, { name: 'Premier', price: 2.99, promotion: 'Premium' }] },
+                    { name: 'Milk', emoji: '🥛', brands: [{ name: 'Clover', price: 2.09, promotion: '' }, { name: 'Parmalat', price: 1.99, promotion: 'Save 10c' }, { name: 'Lancewood', price: 2.29, promotion: 'Fresh' }, { name: 'Dairybelle', price: 2.19, promotion: '' }] },
+                    { name: 'Cheese', emoji: '🧀', brands: [{ name: 'Clover', price: 3.49, promotion: '' }, { name: 'Lancewood', price: 3.99, promotion: 'Special' }, { name: 'Knorr', price: 4.49, promotion: 'Premium' }, { name: 'Parmalat', price: 3.29, promotion: 'Save 50c' }] },
+                    { name: 'Chicken', emoji: '🍗', brands: [{ name: 'Rainbow', price: 4.99, promotion: 'Fresh' }, { name: 'County Fair', price: 4.49, promotion: '' }, { name: 'Supreme', price: 5.29, promotion: 'Premium' }] },
+                    { name: 'Fish', emoji: '🐟', brands: [{ name: 'Oceana', price: 5.99, promotion: 'Wild caught' }, { name: 'I&J', price: 6.49, promotion: '' }, { name: 'Fresh Catch', price: 5.49, promotion: 'Special' }] },
+                    { name: 'Rice', emoji: '🍚', brands: [{ name: 'Tastic', price: 2.99, promotion: 'Bulk buy' }, { name: 'Golden Choice', price: 3.29, promotion: '' }, { name: 'Uncle Ben\'s', price: 3.99, promotion: 'Premium' }] },
+                    { name: 'Pasta', emoji: '🍝', brands: [{ name: 'Barilla', price: 2.79, promotion: '' }, { name: 'San Remo', price: 1.99, promotion: 'Save 50c' }, { name: 'Pasta Perfect', price: 2.29, promotion: '' }] },
+                    { name: 'Yogurt', emoji: '🥄', brands: [{ name: 'Danone', price: 2.49, promotion: '' }, { name: 'Clover', price: 2.29, promotion: 'New flavour' }, { name: 'Parmalat', price: 2.19, promotion: 'Special' }] },
+                    { name: 'Buns', emoji: '🍔', brands: [{ name: 'Sunbake', price: 1.99, promotion: '2 for $3' }, { name: 'Sasko', price: 1.79, promotion: '' }, { name: 'Premier', price: 2.19, promotion: 'Fresh' }] },
+                    { name: 'Ice Cream', emoji: '🍦', brands: [{ name: 'Ola', price: 4.99, promotion: 'Family pack' }, { name: 'Nestlé', price: 5.49, promotion: '' }, { name: 'Magnum', price: 6.99, promotion: 'Premium' }] },
+                    { name: 'Beans', emoji: '🫘', brands: [{ name: 'KOO', price: 1.99, promotion: '' }, { name: 'Rhodes', price: 2.29, promotion: 'Save 20c' }, { name: 'Baked Beans Co', price: 2.49, promotion: '' }] },
+                    { name: 'Macaroni', emoji: '🍝', brands: [{ name: 'Barilla', price: 2.99, promotion: '' }, { name: 'San Remo', price: 2.49, promotion: 'Special' }, { name: 'Pasta Perfect', price: 2.69, promotion: '' }] },
+                    { name: 'Butter', emoji: '🧈', brands: [{ name: 'Clover', price: 2.99, promotion: '' }, { name: 'Lancewood', price: 3.29, promotion: 'Save' }] },
+                    { name: 'Eggs', emoji: '🥚', brands: [{ name: 'Sai Farms', price: 2.49, promotion: 'Fresh' }, { name: 'Free Range', price: 3.99, promotion: 'Premium' }] },
+                    { name: 'Cereal', emoji: '🥣', brands: [{ name: 'Kellogg\'s', price: 4.49, promotion: '' }, { name: 'Oats', price: 2.99, promotion: 'Healthy' }] },
+                    { name: 'Juice', emoji: '🧃', brands: [{ name: 'Liqui Fruit', price: 2.99, promotion: '' }, { name: 'Tropicana', price: 3.49, promotion: 'Fresh' }] },
+                    { name: 'Chips', emoji: '🍟', brands: [{ name: 'Lays', price: 1.99, promotion: '' }, { name: 'Doritos', price: 2.49, promotion: 'New' }] },
+                    { name: 'Cake', emoji: '🎂', brands: [{ name: 'Sai Delights', price: 3.99, promotion: 'Birthday special' }, { name: 'Premier', price: 4.49, promotion: '' }] }
+                ]
+            },
+            'mega_save': {
+                products: [
+                    { name: 'Bread', emoji: '🍞', brands: [{ name: 'Albany', price: 2.29, promotion: '' }, { name: 'Sasko', price: 1.89, promotion: 'Special' }, { name: 'Sunbake', price: 2.19, promotion: '' }] },
+                    { name: 'Milk', emoji: '🥛', brands: [{ name: 'Clover', price: 1.99, promotion: '' }, { name: 'Parmalat', price: 1.89, promotion: 'Save' }, { name: 'Dairybelle', price: 2.09, promotion: '' }] },
+                    { name: 'Cheese', emoji: '🧀', brands: [{ name: 'Clover', price: 3.29, promotion: '' }, { name: 'Lancewood', price: 3.79, promotion: 'Save' }, { name: 'Parmalat', price: 3.19, promotion: '' }] },
+                    { name: 'Chicken', emoji: '🍗', brands: [{ name: 'Rainbow', price: 4.79, promotion: '' }, { name: 'County Fair', price: 4.29, promotion: 'Special' }] },
+                    { name: 'Fish', emoji: '🐟', brands: [{ name: 'Oceana', price: 5.79, promotion: '' }, { name: 'I&J', price: 6.29, promotion: 'Fresh' }] },
+                    { name: 'Rice', emoji: '🍚', brands: [{ name: 'Tastic', price: 2.79, promotion: 'Bulk' }, { name: 'Golden Choice', price: 3.09, promotion: '' }] },
+                    { name: 'Pasta', emoji: '🍝', brands: [{ name: 'San Remo', price: 1.89, promotion: '' }, { name: 'Pasta Perfect', price: 2.19, promotion: 'Special' }] },
+                    { name: 'Yogurt', emoji: '🥄', brands: [{ name: 'Danone', price: 2.39, promotion: '' }, { name: 'Clover', price: 2.19, promotion: 'New' }] },
+                    { name: 'Buns', emoji: '🍔', brands: [{ name: 'Sunbake', price: 1.89, promotion: '' }, { name: 'Sasko', price: 1.69, promotion: '2 for $3' }] },
+                    { name: 'Ice Cream', emoji: '🍦', brands: [{ name: 'Ola', price: 4.79, promotion: '' }, { name: 'Nestlé', price: 5.29, promotion: 'Save' }] },
+                    { name: 'Beans', emoji: '🫘', brands: [{ name: 'KOO', price: 1.79, promotion: '' }, { name: 'Rhodes', price: 2.09, promotion: '' }] }
+                ]
+            },
+            'tm_pick_n_pay': {
+                products: [
+                    { name: 'Bread', emoji: '🍞', brands: [{ name: 'Albany', price: 2.59, promotion: '' }, { name: 'Sasko', price: 2.09, promotion: 'Premium' }, { name: 'Sunbake', price: 2.39, promotion: '' }, { name: 'Premier', price: 3.09, promotion: 'New' }] },
+                    { name: 'Milk', emoji: '🥛', brands: [{ name: 'Clover', price: 2.19, promotion: '' }, { name: 'Parmalat', price: 2.09, promotion: 'Fresh' }, { name: 'Lancewood', price: 2.39, promotion: '' }, { name: 'Dairybelle', price: 2.29, promotion: 'Save' }] },
+                    { name: 'Cheese', emoji: '🧀', brands: [{ name: 'Clover', price: 3.59, promotion: '' }, { name: 'Lancewood', price: 4.09, promotion: 'Special' }, { name: 'Knorr', price: 4.59, promotion: 'Premium' }] },
+                    { name: 'Chicken', emoji: '🍗', brands: [{ name: 'Rainbow', price: 5.09, promotion: 'Fresh' }, { name: 'County Fair', price: 4.59, promotion: '' }, { name: 'Supreme', price: 5.39, promotion: 'Premium' }] },
+                    { name: 'Fish', emoji: '🐟', brands: [{ name: 'Oceana', price: 6.19, promotion: 'Wild caught' }, { name: 'I&J', price: 6.69, promotion: '' }] },
+                    { name: 'Rice', emoji: '🍚', brands: [{ name: 'Tastic', price: 3.19, promotion: '' }, { name: 'Uncle Ben\'s', price: 4.29, promotion: 'Premium' }] },
+                    { name: 'Pasta', emoji: '🍝', brands: [{ name: 'Barilla', price: 2.99, promotion: '' }, { name: 'San Remo', price: 2.19, promotion: 'Save' }] },
+                    { name: 'Yogurt', emoji: '🥄', brands: [{ name: 'Danone', price: 2.59, promotion: 'New' }, { name: 'Clover', price: 2.39, promotion: '' }, { name: 'Parmalat', price: 2.29, promotion: '' }] },
+                    { name: 'Buns', emoji: '🍔', brands: [{ name: 'Sunbake', price: 2.09, promotion: '' }, { name: 'Premier', price: 2.39, promotion: 'Fresh' }] },
+                    { name: 'Ice Cream', emoji: '🍦', brands: [{ name: 'Ola', price: 5.19, promotion: 'Family pack' }, { name: 'Magnum', price: 7.19, promotion: 'Premium' }] },
+                    { name: 'Beans', emoji: '🫘', brands: [{ name: 'KOO', price: 2.19, promotion: '' }, { name: 'Rhodes', price: 2.49, promotion: 'Save' }] }
+                ]
+            },
+            'fmg': {
+                products: [
+                    { name: 'Bread', emoji: '🍞', brands: [{ name: 'Albany', price: 2.39, promotion: '' }, { name: 'Sasko', price: 1.99, promotion: 'Special' }] },
+                    { name: 'Milk', emoji: '🥛', brands: [{ name: 'Clover', price: 2.09, promotion: '' }, { name: 'Parmalat', price: 1.99, promotion: '' }] },
+                    { name: 'Cheese', emoji: '🧀', brands: [{ name: 'Clover', price: 3.39, promotion: '' }, { name: 'Lancewood', price: 3.89, promotion: '' }] },
+                    { name: 'Chicken', emoji: '🍗', brands: [{ name: 'Rainbow', price: 4.89, promotion: '' }, { name: 'County Fair', price: 4.39, promotion: '' }] },
+                    { name: 'Fish', emoji: '🐟', brands: [{ name: 'Oceana', price: 5.99, promotion: '' }, { name: 'I&J', price: 6.49, promotion: '' }] },
+                    { name: 'Rice', emoji: '🍚', brands: [{ name: 'Tastic', price: 2.99, promotion: '' }, { name: 'Golden Choice', price: 3.29, promotion: '' }] },
+                    { name: 'Pasta', emoji: '🍝', brands: [{ name: 'San Remo', price: 1.99, promotion: '' }, { name: 'Pasta Perfect', price: 2.29, promotion: '' }] },
+                    { name: 'Yogurt', emoji: '🥄', brands: [{ name: 'Danone', price: 2.49, promotion: '' }, { name: 'Clover', price: 2.29, promotion: '' }] }
+                ]
+            }
+        };
+
+        // ========== PRODUCT IMAGES ==========
+        const productImages = {
+            'Bread': 'https://loremflickr.com/240/240/bread,loaf',
+            'Milk': 'https://loremflickr.com/240/240/milk,bottle',
+            'Cheese': 'https://loremflickr.com/240/240/cheese,block',
+            'Chicken': 'https://loremflickr.com/240/240/chicken,raw',
+            'Fish': 'https://loremflickr.com/240/240/fish,fresh',
+            'Rice': 'https://loremflickr.com/240/240/rice,grain',
+            'Pasta': 'https://loremflickr.com/240/240/pasta,dry',
+            'Yogurt': 'https://loremflickr.com/240/240/yogurt,cup',
+            'Buns': 'https://loremflickr.com/240/240/buns,bread',
+            'Ice Cream': 'https://loremflickr.com/240/240/icecream,tub',
+            'Beans': 'https://loremflickr.com/240/240/beans,can',
+            'Macaroni': 'https://loremflickr.com/240/240/macaroni,pasta',
+            'Butter': 'https://loremflickr.com/240/240/butter,block',
+            'Eggs': 'https://loremflickr.com/240/240/eggs,carton',
+            'Cereal': 'https://loremflickr.com/240/240/cereal,bowl',
+            'Juice': 'https://loremflickr.com/240/240/juice,carton',
+            'Chips': 'https://loremflickr.com/240/240/chips,bag',
+            'Cake': 'https://loremflickr.com/240/240/cake,slice'
+        };
+
+        // ========== PRODUCT WEIGHTS ==========
+        const productWeights = {
+            'Bread': 0.6, 'Milk': 1.0, 'Cheese': 0.4, 'Chicken': 1.2, 'Fish': 0.8,
+            'Rice': 2.0, 'Pasta': 0.5, 'Yogurt': 0.5, 'Buns': 0.4, 'Ice Cream': 1.0,
+            'Beans': 0.4, 'Macaroni': 0.5, 'Butter': 0.25, 'Eggs': 0.6, 'Cereal': 0.5,
+            'Juice': 1.0, 'Chips': 0.15, 'Cake': 0.8
+        };
+        function getProductWeight(productName) {
+            return productWeights[productName] ?? 0.3;
+        }
+
+        // ========== POPULAR STORES ==========
+        const popularStores = [
+            {
+                id: 'sai_mart',
+                name: 'Sai Mart',
+                logo: 'https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=122101161320784028',
+                branches: [
+                    { city: 'Harare', address: '123 Main St, Harare', lat: -17.8252, lon: 31.0335 },
+                    { city: 'Bulawayo', address: '456 2nd Ave, Bulawayo', lat: -20.1468, lon: 28.5848 },
+                    { city: 'Gweru', address: '789 3rd St, Gweru', lat: -19.4610, lon: 29.8146 }
+                ]
+            },
+            {
+                id: 'mega_save',
+                name: 'Mega Save',
+                logo: 'https://cdn.prod.website-files.com/65b902ce7ed46a722efc4c8a/65ca5e4f620089c4e45ca847_hardware.webp',
+                branches: [
+                    { city: 'Harare', address: '101 Samora Machel Ave, Harare', lat: -17.8292, lon: 31.0522 },
+                    { city: 'Mutare', address: '202 Main St, Mutare', lat: -18.9706, lon: 32.6706 }
+                ]
+            },
+            {
+                id: 'tm_pick_n_pay',
+                name: 'TM Pick n Pay',
+                logo: 'https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=1040143689407633',
+                branches: [
+                    { city: 'Harare', address: '303 Chitungwiza, Harare', lat: -17.8179, lon: 31.0442 },
+                    { city: 'Chitungwiza', address: '404 Zengeza, Chitungwiza', lat: -17.9931, lon: 31.0475 },
+                    { city: 'Bulawayo', address: '505 5th Ave, Bulawayo', lat: -20.1542, lon: 28.5824 }
+                ]
+            },
+            {
+                id: 'fmg',
+                name: 'FMG',
+                logo: 'https://via.placeholder.com/80x80?text=FMG',
+                branches: [
+                    { city: 'Harare', address: '601 Josiah Tongogara, Harare', lat: -17.8280, lon: 31.0450 },
+                    { city: 'Bulawayo', address: '702 Robert Mugabe Way, Bulawayo', lat: -20.1600, lon: 28.5800 },
+                    { city: 'Mutare', address: '803 Herbert Chitepo, Mutare', lat: -18.9720, lon: 32.6720 }
+                ]
+            }
+        ];
+
         // ========== MAP LOGIC ==========
         let map, pickupMarker, dropoffMarker, routeLine;
         let selectionMode = 'pickup';
         let shopMarkers = [];
         let fetchTimeout;
+        let selectedStoreId = null;
+        let cart = [];
+        let selectedProduct = null;
+        let lastDistanceKm = 0;
 
+        // ========== CART FUNCTIONS ==========
+        function calculateCartWeight() {
+            return cart.reduce((sum, item) => sum + (item.weight ?? getProductWeight(item.productName)) * item.qty, 0);
+        }
+
+        // ===== Render Cart in Main Form =====
+        function renderMainCart() {
+            const container = document.getElementById('mainCartDisplay');
+            const itemsContainer = document.getElementById('mainCartItems');
+            const countBadge = document.getElementById('mainCartCount');
+            const totalDisplay = document.getElementById('mainCartTotal');
+            const weightDisplay = document.getElementById('mainCartWeight');
+
+            if (cart.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            countBadge.textContent = cart.length + ' items';
+
+            let total = 0;
+            let weight = 0;
+            itemsContainer.innerHTML = '';
+
+            cart.forEach(item => {
+                total += item.price * item.qty;
+                weight += (item.weight ?? getProductWeight(item.productName)) * item.qty;
+                const div = document.createElement('div');
+                div.className = 'cart-item-row';
+                div.innerHTML = `
+                    <span class="item-name">${item.productName} (${item.brandName})</span>
+                    <span class="item-qty">×${item.qty}</span>
+                    <span class="item-price">$${(item.price * item.qty).toFixed(2)}</span>
+                    <button class="remove-btn-sm" onclick="removeFromMainCart('${item.storeId}','${item.productName}','${item.brandName}')">×</button>
+                `;
+                itemsContainer.appendChild(div);
+            });
+
+            totalDisplay.textContent = '$' + total.toFixed(2);
+            weightDisplay.innerHTML = '<i class="fas fa-weight-hanging"></i> ' + weight.toFixed(1) + ' kg';
+
+            // Sync the estimated weight field
+            if (cart.length > 0) {
+                document.getElementById('estimated_weight').value = weight.toFixed(1);
+                refreshFeeDisplay();
+            }
+            updateProgress();
+        }
+
+        function removeFromMainCart(storeId, productName, brandName) {
+            cart = cart.filter(c => !(c.storeId === storeId && c.productName === productName && c.brandName === brandName));
+            renderMainCart();
+            // Also update modal if open
+            if (document.getElementById('groceryModal').classList.contains('active')) {
+                updateCartSummary();
+                if (selectedProduct) {
+                    showBrands(storeId, selectedProduct);
+                }
+            }
+        }
+
+        function clearMainCart() {
+            if (cart.length === 0) return;
+            if (confirm('Clear all items from your cart?')) {
+                cart = [];
+                renderMainCart();
+                if (document.getElementById('groceryModal').classList.contains('active')) {
+                    updateCartSummary();
+                    if (selectedProduct && selectedStoreId) {
+                        showBrands(selectedStoreId, selectedProduct);
+                    } else if (selectedStoreId) {
+                        renderProducts(selectedStoreId);
+                    }
+                }
+            }
+        }
+
+        // ===== Open Grocery List from "Add Another Item" =====
+        function openGroceryListFromAdd() {
+            if (!selectedStoreId) {
+                alert('Please select a supermarket first using the "Browse Store Items" button.');
+                return;
+            }
+            // Open the grocery modal with the current cart preserved
+            openGroceryModal(selectedStoreId);
+        }
+
+        // ===== Main update function that syncs both displays =====
+        function updateAllCarts() {
+            renderMainCart();
+            if (document.getElementById('groceryModal').classList.contains('active')) {
+                updateCartSummary();
+            }
+        }
+
+        // ========== GROCERY LIST FUNCTIONS ==========
+        function openGroceryModal(storeId) {
+            const store = popularStores.find(s => s.id === storeId);
+            if (!store) return;
+            const data = groceryData[storeId];
+            if (!data) {
+                alert('No grocery list available for this store yet.');
+                return;
+            }
+
+            document.getElementById('groceryModalTitleText').textContent = store.name + ' - Grocery List';
+            document.getElementById('groceryModal').classList.add('active');
+
+            document.getElementById('groceryBackBtn').style.display = 'none';
+            document.getElementById('brandsList').style.display = 'none';
+            document.getElementById('productsGrid').style.display = 'grid';
+            selectedProduct = null;
+
+            renderProducts(storeId);
+            updateCartSummary();
+            document.getElementById('cartDetail').classList.remove('show');
+            document.getElementById('viewCartBtn').innerHTML = '<i class="fas fa-shopping-cart"></i> View Cart';
+        }
+
+        function renderProducts(storeId) {
+            const data = groceryData[storeId];
+            if (!data) return;
+            const container = document.getElementById('productsGrid');
+            container.innerHTML = '';
+            container.style.display = 'grid';
+
+            data.products.forEach(product => {
+                const inCart = cart.some(c => c.storeId === storeId && c.productName === product.name);
+                const imgUrl = productImages[product.name];
+                const div = document.createElement('div');
+                div.className = 'product-card';
+                div.innerHTML = `
+                    <div class="product-image-wrap">
+                        ${imgUrl ? `<img class="product-img" src="${imgUrl}" alt="${product.name}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;product-emoji&quot;>${product.emoji}</div>');">` : `<div class="product-emoji">${product.emoji}</div>`}
+                    </div>
+                    <div class="product-name">${product.name}</div>
+                    ${inCart ? '<div class="product-added"><i class="fas fa-check-circle"></i> Added</div>' : ''}
+                `;
+                div.addEventListener('click', () => {
+                    showBrands(storeId, product);
+                });
+                container.appendChild(div);
+            });
+        }
+
+        function showBrands(storeId, product) {
+            selectedProduct = product;
+            document.getElementById('groceryBackBtn').style.display = 'block';
+            document.getElementById('productsGrid').style.display = 'none';
+            document.getElementById('brandsList').style.display = 'flex';
+            document.getElementById('groceryModalTitleText').textContent = product.emoji + ' ' + product.name + ' - Select a Brand';
+
+            const container = document.getElementById('brandsList');
+            container.innerHTML = '';
+
+            const imgUrl = productImages[product.name];
+
+            product.brands.forEach((brand) => {
+                const inCart = cart.find(c => c.storeId === storeId && c.productName === product.name && c.brandName === brand.name);
+                const qty = inCart ? inCart.qty : 0;
+
+                const div = document.createElement('div');
+                div.className = 'brand-item-row';
+                div.innerHTML = `
+                    ${imgUrl ? `<img class="brand-thumb" src="${imgUrl}" alt="${product.name}" loading="lazy" onerror="this.remove();">` : ''}
+                    <div class="brand-info">
+                        <div class="brand-name">${brand.name}</div>
+                        ${brand.promotion ? `<div class="brand-promo">${brand.promotion}</div>` : ''}
+                        <div class="brand-price">$${brand.price.toFixed(2)}</div>
+                    </div>
+                    <div class="qty-control">
+                        <button onclick="changeQty('${storeId}','${product.name}','${brand.name}',${brand.price},-1)" ${qty === 0 ? 'style="color:#ccc;"' : ''}>−</button>
+                        <span class="qty-num">${qty}</span>
+                        <button onclick="changeQty('${storeId}','${product.name}','${brand.name}',${brand.price},1)">+</button>
+                    </div>
+                    ${qty > 0 ? '<span class="added-badge"><i class="fas fa-check-circle"></i> In Cart</span>' : ''}
+                `;
+                container.appendChild(div);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-all-btn';
+            addBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add Selected Brand to Cart';
+            addBtn.addEventListener('click', () => {
+                const selectedBrand = product.brands.find((b) => {
+                    const inCart = cart.find(c => c.storeId === storeId && c.productName === product.name && c.brandName === b.name);
+                    return inCart && inCart.qty > 0;
+                });
+                if (selectedBrand) {
+                    goBackToProducts();
+                } else {
+                    const firstBrand = product.brands[0];
+                    addToCart(storeId, product.name, firstBrand.name, firstBrand.price);
+                    goBackToProducts();
+                }
+            });
+            container.appendChild(addBtn);
+        }
+
+        function changeQty(storeId, productName, brandName, price, delta) {
+            const existing = cart.find(c => c.storeId === storeId && c.productName === productName && c.brandName === brandName);
+            if (existing) {
+                existing.qty += delta;
+                if (existing.qty <= 0) {
+                    cart = cart.filter(c => !(c.storeId === storeId && c.productName === productName && c.brandName === brandName));
+                }
+            } else if (delta > 0) {
+                cart.push({ storeId, productName, brandName, price, weight: getProductWeight(productName), qty: 1 });
+            }
+            // Update both displays
+            renderMainCart();
+            updateCartSummary();
+            if (selectedProduct) {
+                showBrands(storeId, selectedProduct);
+            }
+        }
+
+        function addToCart(storeId, productName, brandName, price) {
+            const existing = cart.find(c => c.storeId === storeId && c.productName === productName && c.brandName === brandName);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ storeId, productName, brandName, price, weight: getProductWeight(productName), qty: 1 });
+            }
+            renderMainCart();
+            updateCartSummary();
+        }
+
+        function goBackToProducts() {
+            document.getElementById('groceryBackBtn').style.display = 'none';
+            document.getElementById('brandsList').style.display = 'none';
+            document.getElementById('productsGrid').style.display = 'grid';
+            if (selectedStoreId) {
+                const store = popularStores.find(s => s.id === selectedStoreId);
+                document.getElementById('groceryModalTitleText').textContent = store ? store.name + ' - Grocery List' : 'Store Grocery List';
+                renderProducts(selectedStoreId);
+            }
+            selectedProduct = null;
+        }
+
+        function updateCartSummary() {
+            let total = 0;
+            let count = 0;
+            cart.forEach(item => { total += item.price * item.qty; count += item.qty; });
+            const weight = calculateCartWeight();
+            document.getElementById('cartTotalDisplay').textContent = '$' + total.toFixed(2);
+            document.getElementById('cartCountDisplay').textContent = `(${count} items)`;
+            document.getElementById('cartWeightDisplay').innerHTML = `<i class="fas fa-weight-hanging"></i> ${weight.toFixed(1)} kg`;
+
+            if (document.getElementById('cartDetail').classList.contains('show')) {
+                renderCartDetail();
+            }
+        }
+
+        function toggleCartDetail() {
+            const detail = document.getElementById('cartDetail');
+            const btn = document.getElementById('viewCartBtn');
+            if (detail.classList.contains('show')) {
+                detail.classList.remove('show');
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> View Cart';
+            } else {
+                detail.classList.add('show');
+                btn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Cart';
+                renderCartDetail();
+            }
+        }
+
+        function renderCartDetail() {
+            const container = document.getElementById('cartDetailItems');
+            container.innerHTML = '';
+            if (cart.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#999;padding:8px;">Cart is empty</div>';
+                return;
+            }
+            cart.forEach(item => {
+                const lineWeight = (item.weight ?? getProductWeight(item.productName)) * item.qty;
+                const div = document.createElement('div');
+                div.className = 'cart-item-row';
+                div.innerHTML = `
+                    <span>${item.productName} (${item.brandName}) × ${item.qty} <small style="color:#999;">(${lineWeight.toFixed(1)}kg)</small></span>
+                    <span>$${(item.price * item.qty).toFixed(2)} <button class="remove-item-btn" onclick="removeFromCartModal('${item.storeId}','${item.productName}','${item.brandName}')">×</button></span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeFromCartModal(storeId, productName, brandName) {
+            cart = cart.filter(c => !(c.storeId === storeId && c.productName === productName && c.brandName === brandName));
+            renderMainCart();
+            updateCartSummary();
+            if (selectedProduct) {
+                showBrands(storeId, selectedProduct);
+            }
+            if (document.getElementById('cartDetail').classList.contains('show')) {
+                renderCartDetail();
+            }
+        }
+
+        function addCartToShoppingList() {
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                return;
+            }
+
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+
+            cart.forEach(item => {
+                const newItem = document.createElement('div');
+                newItem.className = 'grocery-item';
+                newItem.innerHTML = `
+                    <div class="grocery-row">
+                        <div class="input-with-icon" style="flex:2">
+                            <i class="fas fa-apple-alt"></i>
+                            <input type="text" name="items[]" value="${item.productName} (${item.brandName})" required>
+                        </div>
+                        <div class="input-with-icon" style="flex:1">
+                            <i class="fas fa-sort-amount-up"></i>
+                            <input type="text" name="quantities[]" value="${item.qty}" required>
+                        </div>
+                    </div>
+                    <div class="grocery-row">
+                        <div class="input-with-icon">
+                            <i class="fas fa-tag"></i>
+                            <input type="text" name="brands[]" placeholder="Brand (optional)" value="${item.brandName}">
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                    </div>
+                `;
+                container.appendChild(newItem);
+            });
+
+            const finalWeight = calculateCartWeight();
+            closeGroceryModal();
+            cart = [];
+            renderMainCart();
+            document.getElementById('estimated_weight').value = finalWeight > 0 ? finalWeight.toFixed(1) : '';
+            refreshFeeDisplay();
+            updateProgress();
+        }
+
+        function closeGroceryModal() {
+            document.getElementById('groceryModal').classList.remove('active');
+            document.getElementById('cartDetail').classList.remove('show');
+            document.getElementById('viewCartBtn').innerHTML = '<i class="fas fa-shopping-cart"></i> View Cart';
+            document.getElementById('productsGrid').style.display = 'grid';
+            document.getElementById('brandsList').style.display = 'none';
+            document.getElementById('groceryBackBtn').style.display = 'none';
+            // Re-render main cart (just in case)
+            renderMainCart();
+        }
+
+        // ========== BRAND SELECTION ==========
+        function selectBrand(store) {
+            document.getElementById('store_preference').value = store.id;
+            selectedStoreId = store.id;
+            document.getElementById('groceryListBtnContainer').style.display = 'block';
+
+            if (store.branches && store.branches.length > 0) {
+                const branch = store.branches[0];
+                document.getElementById('store_location').value = branch.address;
+                setPickupLocation(branch.lat, branch.lon);
+                map.flyTo([branch.lat, branch.lon], 15, { duration: 1.5 });
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${store.name} - ${branch.city}`;
+            } else {
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${store.name}`;
+            }
+
+            document.getElementById('other_store_input').classList.remove('expanded');
+            document.getElementById('other_store_name').value = '';
+
+            clearBrandSelection();
+            const cards = document.querySelectorAll('.brand-card');
+            cards.forEach(c => {
+                if (c.dataset.id === store.id) c.classList.add('selected');
+            });
+
+            openBranchModal(store);
+        }
+
+        // ========== BRANCH MODAL ==========
+        function openBranchModal(brand) {
+            document.getElementById('modalTitle').textContent = brand.name + ' - Select a branch';
+            const list = document.getElementById('branchList');
+            list.innerHTML = '';
+            brand.branches.forEach((branch) => {
+                const item = document.createElement('div');
+                item.className = 'branch-item';
+                item.innerHTML = `
+                    <div class="branch-city">${branch.city}</div>
+                    <div class="branch-address">${branch.address}</div>
+                `;
+                item.addEventListener('click', () => {
+                    selectBranch(brand, branch);
+                });
+                list.appendChild(item);
+            });
+            document.getElementById('branchModal').classList.add('active');
+        }
+
+        function selectBranch(brand, branch) {
+            closeBranchModal();
+            document.getElementById('store_preference').value = brand.id;
+            document.getElementById('store_location').value = branch.address;
+            document.getElementById('other_store_input').classList.remove('expanded');
+            document.getElementById('other_store_name').value = '';
+            setPickupLocation(branch.lat, branch.lon);
+            map.flyTo([branch.lat, branch.lon], 15, { duration: 1.5 });
+            document.getElementById('selectedBrandDisplay').innerText = `Selected: ${brand.name} - ${branch.city}`;
+            clearBrandSelection();
+            const cards = document.querySelectorAll('.brand-card');
+            cards.forEach(c => {
+                if (c.dataset.id === brand.id) c.classList.add('selected');
+            });
+            document.getElementById('groceryListBtnContainer').style.display = 'block';
+            selectedStoreId = brand.id;
+        }
+
+        function closeBranchModal() {
+            document.getElementById('branchModal').classList.remove('active');
+        }
+
+        // ========== MAP LOGIC ==========
         const iconColors = {
             supermarket: '#4CAF50', grocery: '#FF9800', restaurant: '#E91E63', cafe: '#795548',
             fast_food: '#F44336', bar: '#9C27B0', pub: '#9C27B0', nightclub: '#673AB7',
             fuel: '#2196F3', bank: '#00897B', electronics: '#00BCD4', shop: '#607D8B',
             bus: '#FFC107', law: '#3F51B5', butcher: '#D32F2F', default: '#888888'
-        };
-
-        const storeMapping = {
-            'walmart': 'walmart', 'kroger': 'kroger', 'target': 'target',
-            'whole foods': 'whole_foods', 'whole foods market': 'whole_foods',
-            'local grocery': 'local', 'local supermarket': 'local'
         };
 
         function getIconForType(tags) {
@@ -601,22 +1847,30 @@
             const storeLocationField = document.getElementById('store_location');
             let matched = false;
             const lowerName = name.toLowerCase();
-            for (let [key, value] of Object.entries(storeMapping)) {
-                if (lowerName.includes(key)) { select.value = value; matched = true; break; }
-            }
-            if (!matched) {
-                if (name.toLowerCase().includes('supermarket') || name.toLowerCase().includes('grocery')) {
-                    select.value = 'local';
-                } else {
-                    select.value = 'other';
-                    otherInput.classList.add('expanded');
-                    otherNameField.value = name;
-                }
+            const foundBrand = popularStores.find(s => s.name.toLowerCase() === lowerName);
+            if (foundBrand) {
+                select.value = foundBrand.id;
+                matched = true;
+                storeLocationField.value = address;
+                clearBrandSelection();
+                const cards = document.querySelectorAll('.brand-card');
+                cards.forEach(c => {
+                    if (c.dataset.id === foundBrand.id) c.classList.add('selected');
+                });
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${foundBrand.name}`;
+                document.getElementById('groceryListBtnContainer').style.display = 'block';
+                selectedStoreId = foundBrand.id;
             } else {
+                select.value = 'other';
+                otherInput.classList.add('expanded');
+                otherNameField.value = name;
+                storeLocationField.value = address;
+                document.getElementById('groceryListBtnContainer').style.display = 'none';
+            }
+            if (matched) {
                 otherInput.classList.remove('expanded');
                 otherNameField.value = '';
             }
-            storeLocationField.value = address;
         }
 
         async function fetchPOIsInViewport() {
@@ -650,9 +1904,10 @@
                     let popupContent = `<strong>${name}</strong><br>${address}<br><button class="shop-select-btn" data-lat="${lat}" data-lng="${lon}" data-name="${name.replace(/'/g,"\\'")}" data-addr="${address.replace(/'/g,"\\'")}" data-shop="${el.tags?.shop||''}">Select this place</button>`;
                     marker.bindPopup(popupContent);
                     marker.on('popupopen', function(){
-                        document.querySelector('.shop-select-btn')?.addEventListener('click',function(e){
-                            setStoreFromNameAndAddress(this.dataset.name,this.dataset.addr);
-                            setPickupLocation(parseFloat(this.dataset.lat),parseFloat(this.dataset.lng));
+                        document.querySelector('.shop-select-btn')?.addEventListener('click', function(e){
+                            setStoreFromNameAndAddress(this.dataset.name, this.dataset.addr);
+                            setPickupLocation(parseFloat(this.dataset.lat), parseFloat(this.dataset.lng));
+                            map.flyTo([parseFloat(this.dataset.lat), parseFloat(this.dataset.lng)], 15);
                             map.closePopup();
                         });
                     });
@@ -720,7 +1975,12 @@
         function reverseGeocode(lat,lng,inputId){fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r=>r.json()).then(data=>{if(data.display_name)document.getElementById(inputId).value=data.display_name;}).catch(()=>{});}
 
         // ========== FEE & INFO BAR ==========
+        function refreshFeeDisplay(){
+            updateUIwithDistance(lastDistanceKm);
+        }
+
         function updateUIwithDistance(distKm){
+            lastDistanceKm = distKm;
             let distanceFee=0;
             if(distKm<=0.1)distanceFee=0.75;else if(distKm<=1.5)distanceFee=1.25;else if(distKm<=4.99)distanceFee=2.25;else if(distKm<=15)distanceFee=2.75;else distanceFee=3.25;
             let timeFee=calculateTimeFee();let weightFee=calculateWeightFee();
@@ -728,12 +1988,10 @@
             let estMinutes=Math.round(distKm*5);
             document.getElementById('estimated_fee').innerText='$'+total.toFixed(2);
             document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
-            // ========== UPDATE HIDDEN FIELD FOR BACKEND ==========
             document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('infoDistance').innerHTML=distKm.toFixed(1)+' <small>km</small>';
             document.getElementById('infoTime').innerHTML=estMinutes+' <small>min</small>';
             document.getElementById('infoFee').innerText='$'+total.toFixed(2);
-            updateDeliveryMethod(distKm);
         }
 
         function calculateTimeFee(){
@@ -747,37 +2005,181 @@
             if(weight<=0)return 0;if(weight<=5)return 0.50;if(weight<=10)return 1.00;if(weight<=20)return 2.00;return 3.00;
         }
 
-        document.getElementById('delivery_time').addEventListener('change',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.getElementById('specific_time').addEventListener('input',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
-        document.getElementById('estimated_weight').addEventListener('input',()=>{if(pickupMarker&&dropoffMarker)updateRoute();});
+        // ========== BRAND CAROUSEL ==========
+        function renderBrands() {
+            const container = document.getElementById('brandsCarousel');
+            container.innerHTML = '';
+            const otherCard = document.createElement('div');
+            otherCard.className = 'brand-card';
+            otherCard.dataset.id = 'other';
+            otherCard.innerHTML = `<i class="fas fa-plus-circle" style="font-size:28px;color:var(--primary-dark);"></i><span>Other</span>`;
+            otherCard.addEventListener('click', () => {
+                document.getElementById('store_preference').value = 'other';
+                document.getElementById('other_store_input').classList.add('expanded');
+                document.getElementById('other_store_name').focus();
+                clearBrandSelection();
+                document.getElementById('selectedBrandDisplay').innerText = 'Enter custom store name above';
+                document.getElementById('groceryListBtnContainer').style.display = 'none';
+                selectedStoreId = null;
+            });
+            container.appendChild(otherCard);
 
-        // ========== UI HELPERS ==========
-        function toggleOtherStoreInput(){let div=document.getElementById('other_store_input');if(document.getElementById('store_preference').value==='other')div.classList.add('expanded');else div.classList.remove('expanded');}
-        function toggleSpecificTimeInput(){let div=document.getElementById('specific_time_input');if(document.getElementById('delivery_time').value==='specific')div.classList.add('expanded');else div.classList.remove('expanded');}
-        function addItem(){let container=document.getElementById('items-container');let newItem=document.createElement('div');newItem.className='grocery-item';newItem.innerHTML=`<div class="grocery-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;container.appendChild(newItem);setTimeout(()=>newItem.querySelector('input')?.focus(),100);}
-        function removeItem(btn){btn.closest('.grocery-item')?.remove();}
-        function displayFileName(input){document.getElementById('file_name').innerText=input.files[0]?.name||'';}
-        function updateProgress(){let filled=Array.from(document.querySelectorAll('input,select,textarea')).filter(i=>i.value&&i.type!='hidden').length;let total=document.querySelectorAll('input,select,textarea').length;document.querySelector('.progress').style.width=Math.min((filled/total)*100,100)+'%';}
-        document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',updateProgress));
-
-        document.getElementById('groceryForm').addEventListener('submit',function(e){
-            let storePref=document.getElementById('store_preference').value;
-            if(!storePref){alert('Please select a store.');e.preventDefault();return false;}
-            if(storePref==='other'&&!document.getElementById('other_store_name').value.trim()){alert('Please specify store name.');e.preventDefault();return false;}
-            if(!document.getElementById('delivery_address').value.trim()){alert('Please set a delivery address on the map.');e.preventDefault();return false;}
-            let hasItem=false;document.querySelectorAll('input[name="items[]"]').forEach(i=>{if(i.value.trim())hasItem=true;});
-            if(!hasItem){alert('Please add at least one grocery item.');e.preventDefault();return false;}
-            let price=parseFloat(document.getElementById('service_price').value);
-            if(isNaN(price)||price<0.75){alert('Service price must be at least $0.75.');e.preventDefault();return false;}
-            if(!document.getElementById('phone_number').value.trim()){alert('Please enter your phone number.');e.preventDefault();return false;}
-        });
-
-        function initAutoSliding(){
-            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp=>{const check=()=>{inp.classList.remove('sliding-text');if(inp.scrollWidth>inp.clientWidth&&inp.value.trim()!==''){inp.classList.add('sliding-text');inp.style.animationDuration=Math.max(10,inp.value.length/2)+'s';}};inp.addEventListener('input',()=>setTimeout(check,100));inp.addEventListener('focus',()=>inp.style.animationPlayState='paused');inp.addEventListener('blur',()=>{if(inp.classList.contains('sliding-text'))inp.style.animationPlayState='running';});setTimeout(check,300);});
-            window.addEventListener('resize',()=>document.querySelectorAll('input.sliding-text').forEach(i=>i.classList.remove('sliding-text')));
+            popularStores.forEach(store => {
+                const card = document.createElement('div');
+                card.className = 'brand-card';
+                card.dataset.id = store.id;
+                card.innerHTML = `
+                    <img src="${store.logo}" alt="${store.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+                    <span class="brand-name">${store.name}</span>
+                `;
+                const fallbackSpan = document.createElement('span');
+                fallbackSpan.style.display = 'none';
+                fallbackSpan.textContent = store.name;
+                card.appendChild(fallbackSpan);
+                card.addEventListener('click', () => {
+                    selectBrand(store);
+                });
+                container.appendChild(card);
+            });
         }
 
-        window.onload=function(){initMap();initAutoSliding();updateProgress();};
+        function clearBrandSelection() {
+            document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        // ========== "USE CURRENT LOCATION" BUTTON ==========
+        document.getElementById('useCurrentLocationBtn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        setDropoffLocation(lat, lng);
+                        map.flyTo([lat, lng], 15, { duration: 1.5 });
+                        setSelectionMode('dropoff');
+                    },
+                    (error) => {
+                        alert('Unable to retrieve your location.');
+                    }
+                );
+            } else {
+                alert('Geolocation not supported.');
+            }
+        });
+
+        // ========== GROCERY LIST BUTTON ==========
+        document.getElementById('openGroceryListBtn').addEventListener('click', function() {
+            if (selectedStoreId) {
+                openGroceryModal(selectedStoreId);
+            } else {
+                alert('Please select a supermarket first.');
+            }
+        });
+
+        // ========== UI HELPERS ==========
+        function toggleSpecificTimeInput() {
+            let div = document.getElementById('specific_time_input');
+            if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded');
+            else div.classList.remove('expanded');
+        }
+
+        function addItem() {
+            // This is now replaced by the "Add Another Item" button that opens the grocery modal
+            // But keeping for backward compatibility
+            let container = document.getElementById('items-container');
+            let newItem = document.createElement('div');
+            newItem.className = 'grocery-item';
+            newItem.innerHTML = `<div class="grocery-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-apple-alt"></i><input type="text" name="items[]" placeholder="Item name" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="grocery-row"><div class="input-with-icon"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand (optional)"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;
+            container.appendChild(newItem);
+            setTimeout(() => newItem.querySelector('input')?.focus(), 100);
+        }
+
+        function removeItem(btn) {
+            btn.closest('.grocery-item')?.remove();
+        }
+
+        function displayFileName(input) {
+            document.getElementById('file_name').innerText = input.files[0]?.name || '';
+        }
+
+        function updateProgress() {
+            let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type != 'hidden').length;
+            let total = document.querySelectorAll('input,select,textarea').length;
+            document.querySelector('.progress').style.width = Math.min((filled / total) * 100, 100) + '%';
+        }
+
+        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
+        document.getElementById('estimated_weight').addEventListener('input', refreshFeeDisplay);
+
+        document.getElementById('groceryForm').addEventListener('submit', function(e) {
+            let storePref = document.getElementById('store_preference').value;
+            if (!storePref) {
+                alert('Please select a store.');
+                e.preventDefault();
+                return false;
+            }
+            if (storePref === 'other' && !document.getElementById('other_store_name').value.trim()) {
+                alert('Please specify the store name.');
+                e.preventDefault();
+                return false;
+            }
+            if (!document.getElementById('delivery_address').value.trim()) {
+                alert('Please set a delivery address.');
+                e.preventDefault();
+                return false;
+            }
+            let hasItem = false;
+            document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+            if (!hasItem) {
+                alert('Please add at least one grocery item.');
+                e.preventDefault();
+                return false;
+            }
+            let price = parseFloat(document.getElementById('service_price').value);
+            if (isNaN(price) || price < 0.75) {
+                alert('Service price must be at least $0.75.');
+                e.preventDefault();
+                return false;
+            }
+            if (!document.getElementById('phone_number').value.trim()) {
+                alert('Please enter your phone number.');
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        function initAutoSliding() {
+            document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(inp => {
+                const check = () => {
+                    inp.classList.remove('sliding-text');
+                    if (inp.scrollWidth > inp.clientWidth && inp.value.trim() !== '') {
+                        inp.classList.add('sliding-text');
+                        inp.style.animationDuration = Math.max(10, inp.value.length / 2) + 's';
+                    }
+                };
+                inp.addEventListener('input', () => setTimeout(check, 100));
+                inp.addEventListener('focus', () => inp.style.animationPlayState = 'paused');
+                inp.addEventListener('blur', () => {
+                    if (inp.classList.contains('sliding-text')) inp.style.animationPlayState = 'running';
+                });
+                setTimeout(check, 300);
+            });
+            window.addEventListener('resize', () => document.querySelectorAll('input.sliding-text').forEach(i => i.classList.remove('sliding-text')));
+        }
+
+        document.getElementById('groceryModal').addEventListener('click', function(e) {
+            if (e.target === this) closeGroceryModal();
+        });
+
+        window.onload = function() {
+            initMap();
+            renderBrands();
+            initAutoSliding();
+            updateProgress();
+            document.getElementById('other_store_input').classList.remove('expanded');
+            document.getElementById('groceryListBtnContainer').style.display = 'none';
+            renderMainCart(); // Ensure cart is hidden initially
+        };
     </script>
 </body>
 </html>
