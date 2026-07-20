@@ -13,8 +13,8 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #e8f5e9;
-            color: #333;
+            background: #1a1a1a;
+            color: #e0e0e0;
         }
 
         .app-shell {
@@ -25,69 +25,69 @@
         }
 
         .bottom-nav {
-            flex-shrink: 0; height: 56px; background: white;
-            border-top: 1px solid #ddd; display: flex;
+            flex-shrink: 0; height: 56px; background: #2a2a2a;
+            border-top: 1px solid #3a3a3a; display: flex;
             justify-content: space-around; align-items: center; z-index: 200;
         }
-        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#666; text-decoration:none; gap:3px; flex:1; padding:6px 0; cursor:pointer; }
+        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:11px; color:#aaa; text-decoration:none; gap:3px; flex:1; padding:6px 0; cursor:pointer; }
         .nav-item.active { color:#28a745; font-weight:bold; }
         .nav-item i { font-size:18px; }
 
         .chat-container { display:flex; flex:1; overflow:hidden; position:relative; min-height:0; }
-        .chat-sidebar { width:300px; background:white; border-right:1px solid #ddd; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
+        .chat-sidebar { width:300px; background:#2a2a2a; border-right:1px solid #3a3a3a; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
         .sidebar-header { padding:15px; background:#28a745; color:white; flex-shrink:0; }
         .chat-list { list-style:none; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-        .chat-item { padding:15px; border-bottom:1px solid #eee; cursor:pointer; transition:background 0.2s; }
-        .chat-item:hover { background:#f0fff4; }
-        .chat-item.active { background:#e8f5e9; border-left:4px solid #28a745; }
-        .chat-item.support { background:#fff8e1; border-left:4px solid #ff9800; }
+        .chat-item { padding:15px; border-bottom:1px solid #3a3a3a; cursor:pointer; transition:background 0.2s; }
+        .chat-item:hover { background:#333333; }
+        .chat-item.active { background:#2d3a2d; border-left:4px solid #28a745; }
+        .chat-item.support { background:#3a3325; border-left:4px solid #ff9800; }
         .chat-item-name { font-weight:bold; margin-bottom:5px; }
-        .chat-item-info { font-size:12px; color:#666; display:flex; justify-content:space-between; }
+        .chat-item-info { font-size:12px; color:#999; display:flex; justify-content:space-between; }
 
-        .chat-main { flex:1; display:flex; flex-direction:column; background: #e8f5e9; overflow:hidden; position:relative; min-height:0; }
+        .chat-main { flex:1; display:flex; flex-direction:column; background: #1a1a1a; overflow:hidden; position:relative; min-height:0; }
         .chat-header { flex-shrink:0; padding:12px 15px; background:#28a745; color:white; display:flex; justify-content:space-between; align-items:center; z-index:50; }
         .chat-header h3 { color:white; font-size:16px; margin:0; }
         .header-left { display:flex; align-items:center; gap:10px; }
         .back-btn { background:rgba(255,255,255,0.2); border:none; color:white; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
         .progress-btn { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
         .progress-btn:hover { background:rgba(255,255,255,0.3); }
-        .agreed-price { flex-shrink:0; background:#fff3cd; color:#856404; padding:7px 15px; font-size:13px; text-align:center; font-weight:600; border-bottom:1px solid #ffe082; }
-        .tracking-info { flex-shrink:0; background:#e8f5e9; padding:10px 15px; font-size:13px; border-bottom:1px solid #c8e6c9; display:flex; justify-content:space-between; align-items:center; }
+        .agreed-price { flex-shrink:0; background:#3a3325; color:#ffc107; padding:7px 15px; font-size:13px; text-align:center; font-weight:600; border-bottom:1px solid #4a4335; }
+        .tracking-info { flex-shrink:0; background:#2a2a2a; padding:10px 15px; font-size:13px; border-bottom:1px solid #3a3a3a; display:flex; justify-content:space-between; align-items:center; }
 
         .chat-messages {
             flex:1; padding:16px; overflow-y:auto; -webkit-overflow-scrolling:touch;
             display:flex; flex-direction:column; gap:10px; min-height:0;
-            background: linear-gradient(135deg, #f0f4f0 0%, #e8f5e9 100%);
+            background: linear-gradient(135deg, #222222 0%, #1a1a1a 100%);
         }
         .message { max-width:80%; padding:8px 12px; border-radius:15px; font-size:14px; position:relative; word-wrap:break-word; }
         .message.sent { align-self:flex-end; background:#28a745; color:white; border-bottom-right-radius:3px; }
-        .message.received { align-self:flex-start; background:white; border:1px solid #ddd; border-bottom-left-radius:3px; }
+        .message.received { align-self:flex-start; background:#2a2a2a; border:1px solid #3a3a3a; border-bottom-left-radius:3px; }
         .message-time { font-size:10px; margin-top:4px; opacity:0.7; text-align:right; }
         .message img { max-width:200px; max-height:200px; border-radius:10px; display:block; margin:5px 0; cursor:pointer; }
         .message audio { max-width:200px; border-radius:20px; }
 
         .message-status { font-size:10px; text-align:right; margin-top:2px; }
-        .message-status .grey { color:#aaa; }
+        .message-status .grey { color:#888; }
         .message-status .blue { color:#34b7f1; }
 
-        .chat-input-area { flex-shrink:0; padding:10px 12px; background:white; border-top:1px solid #ddd; display:flex; gap:8px; align-items:center; }
-        .chat-input { flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:22px; outline:none; font-size:14px; background:#f9f9f9; }
-        .chat-input:focus { border-color:#28a745; background:white; }
-        .icon-btn { background:#f0f4f0; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; color:#555; font-size:18px; display:inline-flex; align-items:center; justify-content:center; transition:background 0.2s; flex-shrink:0; }
-        .icon-btn:hover { background:#ddd; }
-        .icon-btn.recording { background:#ffebee; color:#d32f2f; }
+        .chat-input-area { flex-shrink:0; padding:10px 12px; background:#2a2a2a; border-top:1px solid #3a3a3a; display:flex; gap:8px; align-items:center; }
+        .chat-input { flex:1; padding:10px 14px; border:1px solid #3a3a3a; border-radius:22px; outline:none; font-size:14px; background:#333333; color:#e0e0e0; max-height:120px; overflow-y:auto; line-height:1.4; }
+        .chat-input:focus { border-color:#28a745; background:#2a2a2a; }
+        .icon-btn { background:#333333; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; color:#aaa; font-size:18px; display:inline-flex; align-items:center; justify-content:center; transition:background 0.2s; flex-shrink:0; }
+        .icon-btn:hover { background:#444444; }
+        .icon-btn.recording { background:#4a2020; color:#d32f2f; }
         .send-btn { background:#28a745; color:white; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-        #recording-time { font-size:12px; background:#ffebee; padding:3px 8px; border-radius:20px; color:#d32f2f; flex-shrink:0; }
+        #recording-time { font-size:12px; background:#4a2020; padding:3px 8px; border-radius:20px; color:#ff8080; flex-shrink:0; }
 
-        .progress-overlay { position:absolute; top:0; right:-100%; bottom:0; width:78%; max-width:320px; background:white; box-shadow:-4px 0 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; z-index:100; transition:right 0.3s ease; }
+        .progress-overlay { position:absolute; top:0; right:-100%; bottom:0; width:78%; max-width:320px; background:#ffffff; box-shadow:-4px 0 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; z-index:100; transition:right 0.3s ease; }
         .progress-overlay.open { right:0; }
-        .overlay-backdrop { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.3); z-index:99; display:none; }
+        .overlay-backdrop { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:99; display:none; }
         .overlay-backdrop.open { display:block; }
         .overlay-header { background:#28a745; color:white; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
         .overlay-header h4 { font-size:15px; font-weight:600; margin:0; }
         .overlay-close { background:rgba(255,255,255,0.2); border:none; color:white; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
         .overlay-body { flex:1; padding:20px 16px; overflow-y:auto; }
-        .overlay-note { font-size:12px; color:#888; text-align:center; padding:4px 16px 0; flex-shrink:0; }
+        .overlay-note { font-size:12px; color:#666; text-align:center; padding:4px 16px 0; flex-shrink:0; }
         .overlay-footer { padding:12px 16px; flex-shrink:0; }
 
         .confirm-delivery-btn, .cancel-btn, .rate-btn {
@@ -96,7 +96,7 @@
             display:flex; align-items:center; justify-content:center; gap:8px;
         }
         .confirm-delivery-btn:disabled, .cancel-btn:disabled, .rate-btn:disabled {
-            background:#ccc; cursor:not-allowed;
+            background:#444; cursor:not-allowed;
         }
         .confirm-delivery-btn { background:#28a745; }
         .cancel-btn { background:#d32f2f; }
@@ -104,44 +104,44 @@
 
         .stage-row { display:flex; gap:12px; margin-bottom:0; align-items:flex-start; }
         .stage-track { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
-        .stage-dot { width:24px; height:24px; border-radius:50%; border:2px solid #ddd; background:white; display:flex; align-items:center; justify-content:center; font-size:11px; color:#aaa; transition:all 0.3s; }
+        .stage-dot { width:24px; height:24px; border-radius:50%; border:2px solid #e0e0e0; background:#ffffff; display:flex; align-items:center; justify-content:center; font-size:11px; color:#999; transition:all 0.3s; }
         .stage-dot.done { background:#28a745; border-color:#28a745; color:white; }
         .stage-dot.current { border-color:#28a745; background:#e8f5e9; color:#28a745; }
         .stage-line { width:2px; height:22px; background:#e0e0e0; margin:3px 0; }
         .stage-line.done { background:#28a745; }
-        .stage-label { font-size:13px; color:#aaa; padding-top:3px; line-height:1.4; }
+        .stage-label { font-size:13px; color:#666; padding-top:3px; line-height:1.4; }
         .stage-label.done { color:#28a745; font-weight:600; }
         .stage-label.current { color:#333; font-weight:500; }
 
         .runner-stage-row { display:flex; gap:12px; margin-bottom:0; align-items:flex-start; }
-        .runner-check { width:24px; height:24px; border-radius:50%; border:2px solid #28a745; background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; margin-top:2px; }
+        .runner-check { width:24px; height:24px; border-radius:50%; border:2px solid #28a745; background:#ffffff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; margin-top:2px; }
         .runner-check.checked { background:#28a745; color:white; border-color:#28a745; }
         .runner-check.clickable { border:3px solid #28a745; animation:pulse 1.5s infinite; cursor:pointer; }
-        .runner-check.locked { border-color:#ccc; cursor:not-allowed; opacity:0.5; }
+        .runner-check.locked { border-color:#e0e0e0; cursor:not-allowed; opacity:0.5; }
         @keyframes pulse { 0%{ box-shadow:0 0 0 0 rgba(40,167,69,0.4); } 70%{ box-shadow:0 0 0 10px rgba(40,167,69,0); } 100%{ box-shadow:0 0 0 0 rgba(40,167,69,0); } }
-        .runner-stage-label { font-size:13px; color:#555; padding-top:4px; line-height:1.4; flex:1; }
+        .runner-stage-label { font-size:13px; color:#666; padding-top:4px; line-height:1.4; flex:1; }
         .runner-stage-label.checked { color:#28a745; font-weight:600; }
         .runner-stage-wrap { display:flex; flex-direction:column; }
         .runner-stage-line { width:2px; height:20px; background:#e0e0e0; margin:3px 11px; }
         .runner-stage-line.checked { background:#28a745; }
 
-        #map-container { width:100%; height:200px; margin:12px 0; border-radius:8px; border:1px solid #ddd; background:#f5f5f5; display:none; }
+        #map-container { width:100%; height:200px; margin:12px 0; border-radius:8px; border:1px solid #e0e0e0; background:#f5f5f5; display:none; }
         #map-container.active { display:block; }
         .location-btn { background:#28a745; color:white; border:none; border-radius:6px; padding:8px 12px; font-size:13px; font-weight:600; cursor:pointer; width:100%; margin:8px 0; }
-        .location-btn:disabled { background:#ccc; cursor:not-allowed; }
+        .location-btn:disabled { background:#e0e0e0; color:#999; cursor:not-allowed; }
         .location-request-buttons { display:flex; gap:8px; margin-top:8px; }
         .location-request-buttons button { flex:1; padding:8px; border-radius:6px; font-weight:600; border:none; cursor:pointer; }
         .accept-location-btn { background:#28a745; color:white; }
         .decline-location-btn { background:#f44336; color:white; }
 
-        .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:20px; }
-        .modal-content { background:white; border-radius:20px; padding:24px; width:100%; max-width:340px; text-align:center; }
+        .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+        .modal-content { background:#2a2a2a; border-radius:20px; padding:24px; width:100%; max-width:340px; text-align:center; }
         .stars { display:flex; justify-content:center; gap:8px; margin:16px 0; }
-        .stars i { font-size:28px; color:#ddd; cursor:pointer; }
+        .stars i { font-size:28px; color:#444; cursor:pointer; }
         .stars i.active { color:#ffc107; }
-        textarea { width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; resize:vertical; margin-bottom:12px; }
+        textarea { width:100%; padding:10px; border-radius:8px; border:1px solid #444; resize:vertical; margin-bottom:12px; background:#333; color:#e0e0e0; }
         .btn-primary { width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:600; margin-top:8px; cursor:pointer; }
-        .btn-outline { width:100%; padding:12px; background:transparent; border:1px solid #ddd; border-radius:8px; margin-top:8px; cursor:pointer; }
+        .btn-outline { width:100%; padding:12px; background:transparent; border:1px solid #444; border-radius:8px; margin-top:8px; cursor:pointer; color:#e0e0e0; }
 
         .font-size-control { display:flex; align-items:center; gap:6px; margin-left:10px; }
         .font-size-control input[type=range] { width:60px; }
@@ -167,22 +167,155 @@
         /* ─── Errand Info Modal ─── */
         #errand-info-modal .modal-content {
             text-align: left;
-            max-width: 400px;
+            max-width: 450px;
+            background: #ffffff;
+            color: #212121;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
             font-size: 14px;
         }
         .info-label {
             font-weight: 600;
-            color: #555;
+            color: #666666;
         }
         .info-value {
-            color: #333;
+            color: #212121;
             word-break: break-word;
+            text-align: right;
+            max-width: 60%;
+        }
+        
+        /* Additional styles for new errand info modal */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .modal-title {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666666;
+        }
+        .modal-close:hover {
+            color: #000000;
+        }
+        .errand-details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .detail-column h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #212121;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #28a745;
+        }
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .detail-item i {
+            width: 20px;
+            text-align: center;
+            color: #28a745;
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+        .detail-content {
+            flex: 1;
+        }
+        .detail-content strong {
+            display: block;
+            font-size: 0.9rem;
+            color: #666666;
+            margin-bottom: 3px;
+        }
+        .detail-content span {
+            font-size: 0.95rem;
+            color: #212121;
+        }
+        .errand-description {
+            margin: 16px 0;
+            padding: 14px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .errand-description h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #212121;
+        }
+        .errand-description p {
+            color: #666666;
+            margin: 0;
+        }
+        .location-notification {
+            position: fixed;
+            bottom: 56px;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .location-notification-content {
+            display: flex;
+            align-items: center;
+            color: #333;
+            font-size: 14px;
+        }
+        .location-notification-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .location-accept-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .location-decline-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -280,8 +413,8 @@
             <div class="chat-messages" id="messages-area">
                 {% for msg in messages %}
                 <div class="message {% if msg.sender_id == user.id %}sent{% else %}received{% endif %}" data-message-id="{{ msg.id }}">
-                    {% if msg.content.startswith('<img') or msg.content.startswith('<audio') %}{{ msg.content|safe }}{% else %}{{ msg.content }}{% endif %}
-                    <div class="message-time">{{ msg.created_at | to_cat_time }}</div>
+                    {% if msg.content.startswith('<img') or msg.content.startswith('<audio') %}{{ msg.content|safe }}{% else %}{{ msg.content|e|replace('\n', '<br>')|safe }}{% endif %}
+                    <div class="message-time">{{ msg.created_at|to_cat_time }}</div>
                 </div>
                 {% endfor %}
             </div>
@@ -291,23 +424,38 @@
                 <input type="file" id="image-input" accept="image/*" capture="environment" style="display:none;">
                 <button class="icon-btn" id="voice-record-btn"><i class="fas fa-microphone"></i></button>
                 <span id="recording-time" style="display:none;">00:00</span>
-                <input type="text" class="chat-input" id="message-input" placeholder="Type a message…">
+                <textarea class="chat-input" id="message-input" placeholder="Type a message…" rows="1" style="resize:none;"></textarea>
                 <button class="send-btn" onclick="sendMessage({{ active_chat.id }})"><i class="fas fa-paper-plane"></i></button>
             </div>
 
             <div class="progress-overlay" id="progress-overlay">
                 <div class="overlay-header"><h4 id="overlay-title">{% if user.user_type == 'runner' %}Update Progress{% else %}Errand Progress{% endif %}</h4><button class="overlay-close" onclick="closeProgress()"><i class="fas fa-times"></i></button></div>
-                <div class="overlay-body" id="overlay-body"></div>
+                <div class="overlay-body" id="overlay-body">
+                    <div id="progress-steps"></div>
+                    <div id="map-section"></div>
+                </div>
                 <p class="overlay-note" id="overlay-note">{% if user.user_type == 'runner' %}{% if active_errand and active_errand.runner_marked_complete %}Waiting for client confirmation{% else %}Tap each stage as you complete it{% endif %}{% else %}{% if active_errand and active_errand.runner_marked_complete %}Runner marked complete – please confirm delivery{% else %}Live updates from your runner{% endif %}{% endif %}</p>
                 <div class="overlay-footer" id="overlay-footer">
                     <!-- dynamically filled -->
                 </div>
             </div>
             {% else %}
-            <div class="chat-main-placeholder" style="align-items:center;justify-content:center;color:#999; display:flex; flex:1;">
-                <div style="text-align:center;"><i class="fas fa-comments" style="font-size:50px;margin-bottom:20px;color:#ddd;"></i><p>Select a chat to start messaging</p></div>
+            <div class="chat-main-placeholder" style="align-items:center;justify-content:center;color:#888; display:flex; flex:1;">
+                <div style="text-align:center;"><i class="fas fa-comments" style="font-size:50px;margin-bottom:20px;color:#555;"></i><p>Select a chat to start messaging</p></div>
             </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Location Request Notification for Runners -->
+    <div id="location-request-notification" class="location-notification" style="display:none;">
+        <div class="location-notification-content">
+            <i class="fas fa-map-marker-alt" style="color:#ffc107; margin-right:8px;"></i>
+            <span>Client is requesting your live location!</span>
+        </div>
+        <div class="location-notification-buttons">
+            <button class="location-accept-btn" onclick="respondLocationRequest(true); hideLocationNotification();">Accept</button>
+            <button class="location-decline-btn" onclick="respondLocationRequest(false); hideLocationNotification();">Decline</button>
         </div>
     </div>
 
@@ -332,14 +480,13 @@
 <!-- Errand Info Modal -->
 <div id="errand-info-modal" class="modal">
     <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0; color:#28a745;"><i class="fas fa-info-circle"></i> Errand Details</h3>
-            <button onclick="document.getElementById('errand-info-modal').style.display='none'" style="background:transparent; border:none; font-size:18px; cursor:pointer;">&times;</button>
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-info-circle"></i> Errand Details</h3>
+            <button class="modal-close" onclick="document.getElementById('errand-info-modal').style.display='none'">&times;</button>
         </div>
         <div id="errand-info-content" style="text-align:left;">
             <!-- filled dynamically -->
         </div>
-        <button class="btn-outline" onclick="document.getElementById('errand-info-modal').style.display='none'" style="margin-top:16px;">Close</button>
     </div>
 </div>
 
@@ -604,21 +751,41 @@ async function openProgress() {
     renderProgress();
 
     if (userType === 'runner') {
-        if (pollLocationInterval) clearInterval(pollLocationInterval);
-        pollLocationInterval = setInterval(pollLocationRequest, 5000);
+        // Already started on page load, just make sure it's running
+        if (!pollLocationInterval) {
+            pollLocationInterval = setInterval(pollLocationRequest, 5000);
+        }
     }
+
+    // Ensure map is properly sized when overlay opens
+    setTimeout(() => {
+        if (map) {
+            map.invalidateSize();
+        }
+    }, 300);
 }
 
 async function closeProgress() {
     progressOverlayOpen = false;
     document.getElementById('progress-overlay').classList.remove('open');
 
-    if (map) { map.remove(); map = null; pickupMarker = deliveryMarker = runnerMarker = routePolyline = null; }
+    // Don't clear pollLocationInterval here, keep it running
+    // Don't clear the map either, just in case user opens it again
+    // But we can keep the map instance, and just hide the overlay
+}
 
-    if (locationSharingInterval) { clearInterval(locationSharingInterval); locationSharingInterval = null; }
-    if (pollLocationInterval)   { clearInterval(pollLocationInterval);   pollLocationInterval = null; }
+function hideLocationNotification() {
+    const notification = document.getElementById('location-request-notification');
+    if (notification) {
+        notification.style.display = 'none';
+    }
+}
 
-    stopRunnerLocationWatch();
+function showLocationNotification() {
+    const notification = document.getElementById('location-request-notification');
+    if (notification) {
+        notification.style.display = 'flex';
+    }
 }
 
 async function fetchServerProgress() {
@@ -650,7 +817,8 @@ async function fetchClientButtonState() {
 }
 
 function renderProgress() {
-    const body = document.getElementById('overlay-body');
+    const stepsContainer = document.getElementById('progress-steps');
+    const mapSection = document.getElementById('map-section');
     let html = '';
 
     if (userType === 'runner') {
@@ -701,15 +869,24 @@ function renderProgress() {
         });
     }
 
-    // Map container
-    let mapHtml = errandId ? `<div id="map-container" class="active" style="height:200px;"></div>` : '';
-    if (userType === 'client') {
-        mapHtml += `<button class="location-btn" id="request-location-btn" onclick="requestLiveLocation()"><i class="fas fa-map-marker-alt"></i> Request Runner Live Location</button>`;
-    } else if (userType === 'runner') {
-        mapHtml += `<div id="location-request-prompt" style="display:none; margin-top:8px;"><p style="font-size:13px; color:#555;">Client is requesting your live location.</p><div class="location-request-buttons"><button class="accept-location-btn" onclick="respondLocationRequest(true)">Accept</button><button class="decline-location-btn" onclick="respondLocationRequest(false)">Decline</button></div></div>`;
+    // Update only the steps container
+    stepsContainer.innerHTML = html;
+
+    // Initialize map section only once
+    if (mapSection.innerHTML === '' && errandId) {
+        let mapHtml = `<div id="map-container" class="active" style="height:200px;"></div>`;
+        if (userType === 'client') {
+            mapHtml += `<button class="location-btn" id="request-location-btn" onclick="requestLiveLocation()"><i class="fas fa-map-marker-alt"></i> Request Runner Live Location</button>`;
+        } else if (userType === 'runner') {
+            mapHtml += `<div id="location-request-prompt" style="display:none; margin-top:8px;"><p style="font-size:13px; color:#999;">Client is requesting your live location.</p><div class="location-request-buttons"><button class="accept-location-btn" onclick="respondLocationRequest(true)">Accept</button><button class="decline-location-btn" onclick="respondLocationRequest(false)">Decline</button></div></div>`;
+        }
+        mapSection.innerHTML = mapHtml;
     }
-    body.innerHTML = html + mapHtml;
-    if (progressOverlayOpen) setTimeout(initMap, 100);
+
+    // Initialize map only if not already initialized
+    if (progressOverlayOpen && !map) {
+        setTimeout(initMap, 100);
+    }
 
     // Client button
     if (userType === 'client') {
@@ -739,12 +916,24 @@ function renderProgress() {
 }
 
 async function pollLocationRequest() {
-    if (userType !== 'runner' || !progressOverlayOpen || !errandId) return;
+    if (userType !== 'runner' || !errandId) return;
     try {
         const r = await fetch(`/api/live_location_request_status/${errandId}`);
         const d = await r.json();
-        const prompt = document.getElementById('location-request-prompt');
-        if (prompt) prompt.style.display = d.requested && !locationSharingActive ? 'block' : 'none';
+        if (d.requested && !locationSharingActive) {
+            if (progressOverlayOpen) {
+                const prompt = document.getElementById('location-request-prompt');
+                if (prompt) prompt.style.display = 'block';
+            } else {
+                showLocationNotification();
+            }
+        } else {
+            hideLocationNotification();
+            if (progressOverlayOpen) {
+                const prompt = document.getElementById('location-request-prompt');
+                if (prompt) prompt.style.display = 'none';
+            }
+        }
     } catch(e) { console.error('Error polling location request:', e); }
 }
 
@@ -877,7 +1066,8 @@ function createMessageEl(id, content, isSent, time) {
     div.className = 'message ' + (isSent ? 'sent' : 'received');
     div.setAttribute('data-message-id', id);
     const isHtml = content && (content.startsWith('<img') || content.startsWith('<audio'));
-    div.innerHTML = (isHtml ? content : escapeHtml(content))
+    const processedContent = isHtml ? content : escapeHtml(content).replace(/\n/g, '<br>');
+    div.innerHTML = processedContent
         + '<div class="message-time">' + escapeHtml(time) + '</div>'
         + (isSent ? '<div class="message-status"><i class="fas fa-check grey"></i></div>' : '');
     return div;
@@ -895,10 +1085,27 @@ function sendMessage(chatId) {
             messagesArea.appendChild(createMessageEl(data.message.id, data.message.content, true, data.message.created_at));
             messagesArea.scrollTop = messagesArea.scrollHeight;
             input.value = '';
+            input.style.height = 'auto'; // Reset auto-resize
         }
     });
 }
-document.getElementById('message-input')?.addEventListener('keypress', e => { if (e.key==='Enter') sendMessage(currentChatId); });
+
+// Auto-resize textarea
+const messageInput = document.getElementById('message-input');
+if (messageInput) {
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+}
+
+// Send message on Enter (allow newline with Shift+Enter)
+document.getElementById('message-input')?.addEventListener('keydown', e => { 
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(currentChatId);
+    } 
+});
 
 // Camera
 const cameraBtn = document.getElementById('camera-btn');
@@ -1002,6 +1209,12 @@ function pollProgress() {
 }
 setInterval(pollProgress, 500);
 pollProgress();
+
+// Start location request polling for runners
+if (userType === 'runner' && errandId) {
+    pollLocationInterval = setInterval(pollLocationRequest, 5000);
+    pollLocationRequest(); // Check immediately
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // FULL‑SCREEN IMAGE VIEWER
