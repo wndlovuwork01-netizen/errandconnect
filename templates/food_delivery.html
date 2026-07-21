@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ErrandConnect - Food Delivery</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
+        /* ===== ROOT ===== */
         :root {
             --primary: #4CAF50;
             --primary-light: #66BB6A;
@@ -20,6 +21,10 @@
             --shadow: 0 2px 10px rgba(76, 175, 80, 0.15);
             --radius: 10px;
             --transition: all 0.2s ease;
+            --row-h: 118px;
+            --row-gap: 10px;
+            --brand-row-h: 64px;
+            --brand-row-gap: 4px;
         }
 
         * {
@@ -47,6 +52,7 @@
             min-height: 100vh;
         }
 
+        /* ===== FIXED TOP BAR ===== */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -62,7 +68,6 @@
             height: 48px;
             border-bottom: 1px solid #e0e0e0;
         }
-
         .service-info {
             display: flex;
             align-items: center;
@@ -70,7 +75,6 @@
             flex: 1;
             min-width: 0;
         }
-
         .service-icon {
             font-size: 18px;
             background: var(--gradient);
@@ -83,16 +87,15 @@
             justify-content: center;
             flex-shrink: 0;
         }
-
         .service-text h3 {
             font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        .service-text p { display: none; }
-
+        .service-text p {
+            display: none;
+        }
         .estimated-fee-display {
             background: var(--gradient);
             color: white;
@@ -103,86 +106,948 @@
             min-width: 85px;
             text-align: center;
         }
+        .fee-amount {
+            font-size: 14px;
+            font-weight: 700;
+        }
 
-        .fee-amount { font-size: 14px; font-weight: 700; }
+        .content-wrapper {
+            padding-top: 58px;
+            padding-bottom: 20px;
+        }
 
-        .content-wrapper { padding-top: 58px; padding-bottom: 20px; }
-
-        .mobile-header {
-            background: var(--gradient);
+        /* ===== MAP ===== */
+        #map {
+            height: 280px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .map-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .map-btn.active {
+            background: #4CAF50;
             color: white;
-            padding: 12px 15px;
+        }
+        .map-btn.active.dropoff {
+            background: #2196F3;
+        }
+        .map-hint {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            display: none;
+        }
+        .route-info-bar {
+            background: white;
+            border-radius: 12px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9e9e9;
+        }
+        .route-info-item {
+            flex: 1;
             text-align: center;
         }
+        .route-info-label {
+            font-size: 9px;
+            color: #777;
+            text-transform: uppercase;
+        }
+        .route-info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .route-info-value small {
+            font-size: 9px;
+        }
 
-        .logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
-        .logo-icon { background: rgba(255, 255, 255, 0.2); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        h1 { font-size: 20px; margin-bottom: 2px; }
-        .service-tag { background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 15px; font-size: 10px; }
+        /* ===== LOCATE CONTROL (Leaflet) ===== */
+        .leaflet-control-locate {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .leaflet-control-locate a {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 18px;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .leaflet-control-locate.active a {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path fill="%234CAF50" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>');
+        }
 
-        #map { height: 280px; width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .map-controls { display: flex; gap: 10px; margin-bottom: 12px; }
-        .map-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: #666; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; }
-        .map-btn.active { background: #4CAF50; color: white; }
-        .map-btn.active.dropoff { background: #2196F3; }
-        .map-hint { background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 8px; text-align: center; display: none; }
-        .route-info-bar { background: white; border-radius: 12px; margin-top: 12px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #e9e9e9; }
-        .route-info-item { flex: 1; text-align: center; }
-        .route-info-label { font-size: 9px; color: #777; text-transform: uppercase; }
-        .route-info-value { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
-        .route-info-value small { font-size: 9px; }
+        /* ===== FORM ===== */
+        .form-section {
+            padding: 15px;
+        }
+        .progress-bar {
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 15px 0 20px;
+        }
+        .progress {
+            height: 100%;
+            background: var(--gradient);
+            width: 25%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        h2 {
+            font-size: 16px;
+            margin: 15px 0 12px;
+            color: var(--primary-dark);
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .label-with-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .label-with-btn label {
+            margin-bottom: 0;
+        }
+        .location-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .location-btn:active {
+            transform: scale(0.95);
+        }
+        .input-with-icon {
+            position: relative;
+        }
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+        }
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 12px 12px 38px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        textarea {
+            padding: 12px;
+        }
+        .preference-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .preference-item {
+            background: var(--light);
+            padding: 10px;
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+        .food-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 1px solid #e0e0e0;
+        }
+        .food-row {
+            display: flex;
+            gap: 8px;
+        }
+        .food-row .input-with-icon {
+            flex: 1;
+        }
+        .item-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .remove-item {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .add-item {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            font-weight: 600;
+            border: none;
+        }
+        .add-item:active {
+            transform: scale(0.98);
+        }
+        .budget-payment-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .service-phone-row {
+            display: flex;
+            gap: 12px;
+        }
+        .service-phone-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .expanding-input {
+            max-height: 0;
+            overflow: hidden;
+            transition: 0.3s;
+            opacity: 0;
+        }
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 8px;
+        }
+        .delivery-method-indicator {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .submit-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .section-divider {
+            margin: 20px 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+        .info-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 8px 12px;
+            font-size: 11px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
 
-        .form-section { padding: 15px; }
-        .progress-bar { height: 3px; background: #e0e0e0; border-radius: 2px; margin: 15px 0 20px; }
-        .progress { height: 100%; background: var(--gradient); width: 25%; border-radius: 2px; transition: width 0.3s ease; }
-        h2 { font-size: 16px; margin: 15px 0 12px; color: var(--primary-dark); padding-bottom: 6px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
-        .input-with-icon { position: relative; }
-        .input-with-icon i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px 12px 12px 38px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: white; }
-        textarea { padding: 12px; }
-        .preference-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 8px; }
-        .preference-item { background: var(--light); padding: 10px; border-radius: var(--radius); border: 1px solid #e0e0e0; }
-        .food-item { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 10px; background: var(--light); border-radius: var(--radius); border: 1px solid #e0e0e0; }
-        .food-row { display: flex; gap: 8px; }
-        .food-row .input-with-icon { flex: 1; }
-        .item-actions { display: flex; justify-content: flex-end; }
-        .remove-item { background: var(--accent); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; }
-        .add-item { background: var(--primary); color: white; padding: 10px; border-radius: var(--radius); cursor: pointer; width: 100%; margin-bottom: 12px; font-weight: 600; }
-        .budget-payment-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
-        .service-phone-row { display: flex; gap: 12px; }
-        .service-phone-row .form-group { flex: 1; margin-bottom: 0; }
-        .file-upload-wrapper { position: relative; }
-        .file-upload-input { width: 100%; padding: 12px 12px 12px 38px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; position: relative; }
-        .file-name { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--primary-dark); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(76,175,80,0.1); padding: 2px 6px; border-radius: 12px; }
-        .delivery-method-indicator { background: var(--light); border-radius: var(--radius); padding: 10px; display: flex; align-items: center; gap: 10px; margin: 15px 0; }
-        .submit-btn { background: var(--gradient); color: white; border: none; border-radius: var(--radius); padding: 14px; font-weight: 600; width: 100%; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .section-divider { margin: 20px 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary-light), transparent); }
-        .info-tip { background: rgba(76,175,80,0.1); border-left: 3px solid var(--primary); padding: 8px 12px; font-size: 11px; margin: 10px 0; border-radius: 0 8px 8px 0; }
-        .expanding-input { max-height: 0; overflow: hidden; transition: 0.3s; opacity: 0; }
-        .expanding-input.expanded { max-height: 80px; opacity: 1; margin-top: 8px; }
-        .restaurant-type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
-        .restaurant-type-item { background: var(--light); border: 2px solid #e0e0e0; border-radius: var(--radius); padding: 8px; text-align: center; cursor: pointer; font-size: 12px; }
-        .restaurant-type-item.active { border-color: var(--primary); background: rgba(76,175,80,0.1); }
+        /* ===== RESTAURANT CAROUSEL ===== */
+        .brands-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 10px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .brands-carousel::-webkit-scrollbar {
+            height: 4px;
+        }
+        .brands-carousel::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 2px;
+        }
+        .brand-card {
+            flex: 0 0 80px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.2s, transform 0.1s;
+            scroll-snap-align: start;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-card:active {
+            transform: scale(0.95);
+        }
+        .brand-card.selected {
+            border-color: var(--primary);
+            background: #f0fdf0;
+        }
+        .brand-card img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+            margin-bottom: 4px;
+            border-radius: 8px;
+        }
+        .brand-card span {
+            font-size: 11px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70px;
+        }
+        .brand-card .brand-name {
+            font-weight: 600;
+        }
+        #selectedBrandDisplay {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        /* ===== BRANCH MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-title .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary);
+            padding: 0 8px;
+        }
+        .modal-title .back-btn:active {
+            transform: scale(0.9);
+        }
+        .branch-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.1s;
+            border-radius: 6px;
+        }
+        .branch-item:active {
+            background: #f0f0f0;
+        }
+        .branch-item .branch-city {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .branch-item .branch-address {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ===== MENU MODAL ===== */
+        .menu-modal .modal-content {
+            max-width: 700px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            max-height: 85vh;
+        }
+        .menu-modal .modal-title {
+            flex-shrink: 0;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            --row-h: 118px;
+            --row-gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: var(--row-h);
+            gap: var(--row-gap);
+            overflow-y: auto;
+            flex-shrink: 1;
+            min-height: 0;
+            max-height: calc((var(--row-h) * 6) + (var(--row-gap) * 5));
+            padding: 4px 4px 8px;
+            align-content: start;
+        }
+        .product-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid #eee;
+            padding: 6px 4px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            overflow: hidden;
+        }
+        .product-card:active {
+            transform: scale(0.95);
+        }
+        .product-card .product-image-wrap {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-card .product-img {
+            width: 100%;
+            height: 100%;
+            max-width: 62px;
+            max-height: 62px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+        .product-card .product-emoji {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        .product-card .product-name {
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .product-card .product-added {
+            color: var(--primary);
+            font-size: 10px;
+        }
+
+        /* Brands List */
+        .brands-list {
+            --brand-row-h: 64px;
+            --brand-row-gap: 4px;
+            overflow-y: auto;
+            flex-shrink: 1;
+            min-height: 0;
+            max-height: calc((var(--brand-row-h) * 6) + (var(--brand-row-gap) * 5));
+            padding: 4px 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--brand-row-gap);
+        }
+        .brand-item-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border-bottom: 1px solid #f0f0f0;
+            border-radius: 6px;
+            flex-shrink: 0;
+            min-height: var(--brand-row-h);
+        }
+        .brand-item-row .brand-thumb {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .brand-item-row .brand-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .brand-item-row .brand-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .brand-item-row .brand-desc {
+            font-size: 12px;
+            color: #888;
+        }
+        .brand-item-row .brand-price {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-size: 14px;
+        }
+        .brand-item-row .brand-promo {
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+        .brand-item-row .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .brand-item-row .qty-control button {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-item-row .qty-control button:active {
+            transform: scale(0.92);
+        }
+        .brand-item-row .qty-control .qty-num {
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 20px;
+            text-align: center;
+        }
+        .brand-item-row .add-to-cart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .brand-item-row .add-to-cart-btn:active {
+            transform: scale(0.95);
+        }
+        .brand-item-row .added-badge {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ===== CART DISPLAY (Main Form) ===== */
+        #mainCartDisplay {
+            background: var(--light);
+            border-radius: var(--radius);
+            border: 2px solid var(--primary-light);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        #mainCartDisplay .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+        #mainCartDisplay .cart-header .cart-count-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            padding: 1px 10px;
+            font-size: 12px;
+        }
+        #mainCartDisplay .cart-items-list {
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 6px;
+        }
+        #mainCartDisplay .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        #mainCartDisplay .cart-item-row .item-name {
+            flex: 1;
+        }
+        #mainCartDisplay .cart-item-row .item-qty {
+            margin: 0 8px;
+            color: #888;
+        }
+        #mainCartDisplay .cart-item-row .item-price {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        #mainCartDisplay .cart-item-row .remove-btn-sm {
+            color: #ff4444;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+            margin-left: 6px;
+        }
+        #mainCartDisplay .cart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 6px;
+            border-top: 2px solid #ddd;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        #mainCartDisplay .cart-footer .cart-total-price {
+            color: var(--primary-dark);
+            font-size: 16px;
+        }
+        #mainCartDisplay .cart-footer .cart-total-weight {
+            color: #666;
+            font-size: 13px;
+        }
+        #mainCartDisplay .cart-footer .clear-cart-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #mainCartDisplay .cart-footer .clear-cart-btn:active {
+            transform: scale(0.95);
+        }
+        #mainCartDisplay .empty-cart-msg {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            padding: 8px 0;
+        }
+
+        /* ===== CART SUMMARY (Modal) ===== */
+        .cart-summary {
+            flex-shrink: 0;
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .cart-summary .cart-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .cart-summary .cart-total {
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--primary-dark);
+        }
+        .cart-summary .cart-count {
+            font-size: 13px;
+            color: #666;
+        }
+        .cart-summary .cart-weight {
+            font-size: 12px;
+            color: var(--primary-dark);
+            font-weight: 600;
+            background: rgba(76, 175, 80, 0.12);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .cart-summary .view-cart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .cart-summary .view-cart-btn:active {
+            transform: scale(0.95);
+        }
+
+        .cart-detail {
+            flex-shrink: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: #fafafa;
+            border-radius: 8px;
+            display: none;
+        }
+        .cart-detail.show {
+            display: block;
+        }
+        .cart-detail .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-detail .cart-item-row .remove-item-btn {
+            color: #ff4444;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+        }
+        .add-all-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 8px;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .add-all-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .products-grid {
+                --row-h: 92px;
+                --row-gap: 6px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .product-card .product-img {
+                max-width: 46px;
+                max-height: 46px;
+            }
+            .product-card .product-emoji {
+                font-size: 26px;
+            }
+            .product-card .product-name {
+                font-size: 10px;
+            }
+            .menu-modal .modal-content {
+                height: auto;
+                max-height: 92vh;
+                padding: 10px;
+            }
+            .brands-list {
+                --brand-row-h: 56px;
+            }
+            .brand-item-row {
+                padding: 5px 4px;
+                flex-wrap: wrap;
+            }
+            .brand-item-row .brand-thumb {
+                width: 36px;
+                height: 36px;
+            }
+            .brand-item-row .brand-price {
+                font-size: 13px;
+            }
+            .brand-item-row .qty-control button {
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+            }
+            #mainCartDisplay .cart-items-list {
+                max-height: 80px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .products-grid {
+                --row-h: 82px;
+                --row-gap: 5px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .product-card .product-img {
+                max-width: 38px;
+                max-height: 38px;
+            }
+            .product-card .product-emoji {
+                font-size: 20px;
+            }
+            .product-card .product-name {
+                font-size: 9px;
+            }
+            .brand-item-row .brand-name {
+                font-size: 12px;
+            }
+        }
 
         @media (min-width: 768px) {
-            body { padding: 10px; display: flex; justify-content: center; }
-            .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
-            .preference-grid { grid-template-columns: 1fr 1fr; }
-            .budget-payment-row { grid-template-columns: 1fr 1fr; }
-            .food-item { flex-direction: row; align-items: center; }
-            .food-row { flex: 1; }
-            .item-actions { margin-left: 10px; }
-            .restaurant-type-grid { grid-template-columns: repeat(3, 1fr); }
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+            }
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+            }
+            .preference-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .budget-payment-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .food-item {
+                flex-direction: row;
+                align-items: center;
+            }
+            .food-row {
+                flex: 1;
+            }
+            .item-actions {
+                margin-left: 10px;
+            }
+            .brand-card {
+                flex: 0 0 90px;
+            }
         }
+
         @media (max-width: 320px) {
-            .route-info-value { font-size: 11px; }
-            .map-btn { font-size: 11px; padding: 8px; }
+            .route-info-value {
+                font-size: 11px;
+            }
+            .map-btn {
+                font-size: 11px;
+                padding: 8px;
+            }
+            .brand-card {
+                flex: 0 0 70px;
+            }
+            .brand-card img {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- ===== FIXED TOP BAR ===== -->
     <div class="fixed-service-bar">
         <div class="service-info">
             <div class="service-icon"><i class="fas fa-utensils"></i></div>
@@ -194,116 +1059,1238 @@
         </div>
     </div>
 
-            <div class="form-section">
-                <div class="progress-bar"><div class="progress"></div></div>
+    <!-- ===== MAIN FORM ===== -->
+    <div class="form-section">
+        <div class="progress-bar"><div class="progress"></div></div>
 
-                <!-- MAP SECTION -->
-                <div class="map-wrapper">
-                    <div class="map-controls">
-                        <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-utensils"></i> Set Restaurant</button>
-                        <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+        <!-- MAP SECTION -->
+        <div class="map-wrapper">
+            <div class="map-controls">
+                <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-utensils"></i> Set Restaurant
+                </button>
+                <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-home"></i> Set Delivery
+                </button>
+            </div>
+            <div id="mapHint" class="map-hint">Tap map to set location</div>
+            <div id="map"></div>
+            <div class="route-info-bar" id="routeInfoBar">
+                <div class="route-info-item">
+                    <div class="route-info-label">Distance</div>
+                    <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
+                </div>
+                <div class="route-info-item">
+                    <div class="route-info-label">Est. Time</div>
+                    <div class="route-info-value" id="infoTime">0 <small>min</small></div>
+                </div>
+                <div class="route-info-item">
+                    <div class="route-info-label">Est. Fee</div>
+                    <div class="route-info-value" id="infoFee">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" action="{{ url_for('create_food_delivery_errand') }}" id="foodDeliveryForm">
+            <input type="hidden" id="pickup_lat" name="pickup_lat" />
+            <input type="hidden" id="pickup_lon" name="pickup_lon" />
+            <input type="hidden" id="dropoff_lat" name="dropoff_lat" />
+            <input type="hidden" id="dropoff_lon" name="dropoff_lon" />
+            <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00" />
+            <input type="hidden" id="distance_km_hidden" name="distance_km" />
+            <input type="hidden" id="restaurant_preference_hidden" name="restaurant_preference" value="" />
+
+            <h2><i class="fas fa-store"></i> Restaurant / Delivery Information</h2>
+
+            <!-- ===== RESTAURANT CAROUSEL ===== -->
+            <div class="form-group">
+                <label>Popular Restaurants</label>
+                <div class="brands-carousel" id="brandsCarousel"></div>
+                <div id="selectedBrandDisplay"></div>
+            </div>
+
+            <!-- Other Restaurant Input -->
+            <div id="other_restaurant_input" class="expanding-input">
+                <div class="input-with-icon">
+                    <i class="fas fa-edit"></i>
+                    <input type="text" id="other_restaurant_name" placeholder="Enter restaurant name" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="restaurant_location">Restaurant Address</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="restaurant_location" readonly onfocus="this.removeAttribute('readonly')" />
+                </div>
+            </div>
+
+            <!-- Delivery Address with "Use your location" button -->
+            <div class="form-group">
+                <div class="label-with-btn">
+                    <label for="delivery_address">Delivery Address</label>
+                    <button type="button" class="location-btn" id="useCurrentLocationBtn">
+                        <i class="fas fa-crosshairs"></i> Use your location
+                    </button>
+                </div>
+                <div class="input-with-icon">
+                    <i class="fas fa-home"></i>
+                    <input type="text" id="delivery_address" required readonly onfocus="this.removeAttribute('readonly')" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="delivery_time">Delivery Time</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-clock"></i>
+                    <select id="delivery_time" onchange="toggleSpecificTimeInput()">
+                        <option value="asap">As soon as possible</option>
+                        <option value="morning">Morning (8AM-12PM)</option>
+                        <option value="afternoon">Afternoon (12PM-5PM)</option>
+                        <option value="evening">Evening (5PM-9PM)</option>
+                        <option value="specific">Specific time</option>
+                    </select>
+                </div>
+                <div id="specific_time_input" class="expanding-input">
+                    <div class="input-with-icon">
+                        <i class="fas fa-clock"></i>
+                        <input type="text" id="specific_time" placeholder="Enter time (e.g., 2:30 PM)" />
                     </div>
-                    <div id="mapHint" class="map-hint">Tap map to set location</div>
-                    <div id="map"></div>
-                    <div class="route-info-bar" id="routeInfoBar">
-                        <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
-                        <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
-                        <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
+                </div>
+            </div>
+
+            <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display:none;">
+                <div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div>
+                <div class="delivery-method-text">
+                    <h4 id="deliveryMethodTitle">Method</h4>
+                    <p id="deliveryMethodDescription">--</p>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- ===== ORDER DETAILS ===== -->
+            <h2><i class="fas fa-list-alt"></i> Order Details</h2>
+
+            <!-- Browse Menu Button -->
+            <div id="menuBtnContainer" style="display:none; margin-bottom:12px;">
+                <button type="button" class="add-item" id="openMenuBtn" style="background:var(--accent);">
+                    <i class="fas fa-utensils"></i> Browse Restaurant Menu
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Food Items</label>
+                <div id="items-container">
+                    <div class="food-item">
+                        <div class="food-row">
+                            <div class="input-with-icon" style="flex:2;">
+                                <i class="fas fa-hamburger"></i>
+                                <input type="text" name="items[]" placeholder="Food item" required />
+                            </div>
+                            <div class="input-with-icon" style="flex:1;">
+                                <i class="fas fa-sort-amount-up"></i>
+                                <input type="text" name="quantities[]" placeholder="Qty" required />
+                            </div>
+                        </div>
+                        <div class="food-row">
+                            <div class="input-with-icon">
+                                <i class="fas fa-sticky-note"></i>
+                                <input type="text" name="instructions[]" placeholder="Special instructions" />
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                        </div>
                     </div>
                 </div>
 
-                <form method="post" action="{{ url_for('create_food_delivery_errand') }}" id="foodDeliveryForm">
-                    <input type="hidden" id="pickup_lat" name="pickup_lat">
-                    <input type="hidden" id="pickup_lon" name="pickup_lon">
-                    <input type="hidden" id="dropoff_lat" name="dropoff_lat">
-                    <input type="hidden" id="dropoff_lon" name="dropoff_lon">
-
-                    <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
-                    <input type="hidden" id="distance_km_hidden" name="distance_km">
-
-                    <h2><i class="fas fa-store"></i> Restaurant / Delivery Information</h2>
-                    <div class="form-group">
-
-                        <input type="hidden" id="restaurant_type" name="restaurant_type" value="fast_food">
+                <!-- ===== CART DISPLAY (Main Form) ===== -->
+                <div id="mainCartDisplay">
+                    <div class="cart-header">
+                        <span><i class="fas fa-shopping-cart"></i> Your Cart</span>
+                        <span class="cart-count-badge" id="mainCartCount">0 items</span>
                     </div>
-                    <div class="form-group">
-                        <label for="restaurant_preference">Preferred Restaurant</label>
-                        <div class="input-with-icon"><i class="fas fa-utensils"></i><select id="restaurant_preference" name="restaurant_preference" required onchange="toggleOtherRestaurantInput()"></select></div>
-                        <div id="other_restaurant_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-edit"></i><input type="text" id="other_restaurant_name" name="other_restaurant_name" placeholder="Restaurant name"></div></div>
+                    <div class="cart-items-list" id="mainCartItems">
+                        <div class="empty-cart-msg">No items added yet. Browse the menu above.</div>
                     </div>
-                    <div class="form-group"><label for="restaurant_location">Restaurant Address</label><div class="input-with-icon"><i class="fas fa-map-marker-alt"></i><input type="text" id="restaurant_location" name="restaurant_location" readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-                    <div class="form-group"><label for="delivery_time">Delivery Time</label><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="specific">Specific time</option></select></div></div>
-                    <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="e.g., 2:30 PM"></div></div>
-                    <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display: none;"><div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div><div class="delivery-method-text"><h4 id="deliveryMethodTitle">Method</h4><p id="deliveryMethodDescription">--</p></div></div>
-                    <div class="form-group"><label for="delivery_instructions">Special Delivery Instructions</label><textarea id="delivery_instructions" name="delivery_instructions" rows="2" placeholder="Call, buzzer, etc."></textarea></div>
-                    <div class="section-divider"></div>
+                    <div class="cart-footer">
+                        <span>Total: <span class="cart-total-price" id="mainCartTotal">$0.00</span></span>
+                        <span class="cart-total-weight" id="mainCartWeight"><i class="fas fa-weight-hanging"></i> 0.0 kg</span>
+                        <button class="clear-cart-btn" onclick="clearMainCart()">Clear</button>
+                    </div>
+                </div>
 
-                    <h2><i class="fas fa-list-alt"></i> Order Details</h2>
-                    <div id="items-container">
-                        <div class="food-item"><div class="food-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-hamburger"></i><input type="text" name="items[]" placeholder="Food item" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="food-row"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><input type="text" name="instructions[]" placeholder="Special instructions"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div>
-                    </div>
-                    <button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button>
-                    <div class="budget-payment-row">
-                        <div class="input-with-icon"><i class="fas fa-dollar-sign"></i><input type="number" id="budget_limit" name="budget_limit" placeholder="Order budget ($)" step="0.01"></div>
-                        <div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash on Delivery</option><option value="card">Card</option><option value="mobile">Mobile Payment</option></select></div>
-                    </div>
-                    <div class="section-divider"></div>
+                <!-- Add Another Item -->
+                <button type="button" class="add-item" id="addAnotherItemBtn" onclick="openMenuFromAdd()">
+                    <i class="fas fa-plus"></i> Add Another Item
+                </button>
 
-                    <div class="input-with-icon"><i class="fas fa-heart"></i><input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="Allergies / restrictions"></div>
-                    <div class="section-divider"></div>
-
-                    <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
-                    <div class="service-phone-row">
-                        <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" step="0.01" min="0.50" required></div></div>
-                        <div class="form-group"><label>Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="phone_number" name="phone_number" required></div></div>
+                <div class="budget-payment-row">
+                    <div class="input-with-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="budget_limit" name="budget_limit" placeholder="Order budget ($)" step="0.01" />
                     </div>
-                    <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Order</button>
-                </form>
+                    <div class="input-with-icon">
+                        <i class="fas fa-credit-card"></i>
+                        <select id="payment_method" name="payment_method">
+                            <option value="cash">Cash on Delivery</option>
+                            <option value="card">Card</option>
+                            <option value="mobile">Mobile Payment</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <div class="section-divider"></div>
+
+            <div class="input-with-icon">
+                <i class="fas fa-heart"></i>
+                <input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="Allergies / restrictions" />
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- ===== CONTACT & PRICING ===== -->
+            <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
+            <div class="service-phone-row">
+                <div class="form-group">
+                    <label>Service Price ($)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <input type="number" id="service_price" name="service_price" step="0.01" min="0.50" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone_number" name="phone_number" required />
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Create Order</button>
+        </form>
+    </div>
+
+    <!-- ===== BRANCH MODAL ===== -->
+    <div class="modal-overlay" id="branchModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBranchModal()">&times;</span>
+            <div class="modal-title" id="modalTitle">Select Branch</div>
+            <div id="branchList"></div>
+        </div>
+    </div>
+
+    <!-- ===== MENU MODAL ===== -->
+    <div class="modal-overlay menu-modal" id="menuModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeMenuModal()">&times;</span>
+            <div class="modal-title" id="menuModalTitle">
+                <button class="back-btn" id="menuBackBtn" style="display:none;" onclick="goBackToProducts()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span id="menuModalTitleText">Restaurant Menu</span>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid"></div>
+
+            <!-- Brands List (hidden initially) -->
+            <div class="brands-list" id="brandsList" style="display:none;"></div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary" id="cartSummary">
+                <div class="cart-left">
+                    <span class="cart-total" id="cartTotalDisplay">$0.00</span>
+                    <span class="cart-count" id="cartCountDisplay">(0 items)</span>
+                    <span class="cart-weight" id="cartWeightDisplay"><i class="fas fa-weight-hanging"></i> 0.0 kg</span>
+                </div>
+                <button class="view-cart-btn" id="viewCartBtn" onclick="toggleCartDetail()">
+                    <i class="fas fa-shopping-cart"></i> View Cart
+                </button>
+            </div>
+
+            <!-- Cart Detail -->
+            <div class="cart-detail" id="cartDetail">
+                <div id="cartDetailItems"></div>
+                <button class="add-all-btn" onclick="addCartToOrderList()">
+                    <i class="fas fa-plus-circle"></i> Add All to Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LEAFLET ===== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
     <script>
-        const restaurantLists = {
-            fast_food: [
-                { value: "mcdonalds", name: "McDonald's" }, { value: "kfc", name: "KFC" },
-                { value: "burger_king", name: "Burger King" }, { value: "wendys", name: "Wendy's" },
-                { value: "taco_bell", name: "Taco Bell" }, { value: "subway", name: "Subway" },
-                { value: "dominos", name: "Domino's Pizza" }, { value: "pizza_hut", name: "Pizza Hut" },
-                { value: "local", name: "Local Fast Food" }, { value: "other", name: "Other" }
+        // ============================================================
+        //  1.  RESTAURANT DATA (Zimbabwe chains)
+        // ============================================================
+        const restaurantData = {
+            'chicken_inn': {
+                name: 'Chicken Inn',
+                logo: 'https://lh3.googleusercontent.com/p/AF1QipPz9xXzF0a5g9j7Yz1x3s5t7v9b11d3f5h7j9k1l3n5p7r9t1v3x5z7',
+                products: [{
+                    name: 'Chicken & Chips',
+                    emoji: '🍗',
+                    brands: [
+                        { name: 'Quarter Chicken', price: 4.99, promotion: 'Popular' },
+                        { name: 'Half Chicken', price: 7.49, promotion: 'Best value' },
+                        { name: 'Full Chicken', price: 12.99, promotion: 'Family feast' }
+                    ]
+                }, {
+                    name: 'Burger',
+                    emoji: '🍔',
+                    brands: [
+                        { name: 'Classic Burger', price: 3.99, promotion: '' },
+                        { name: 'Double Burger', price: 5.49, promotion: 'Loaded' },
+                        { name: 'Chicken Burger', price: 4.49, promotion: '' }
+                    ]
+                }, {
+                    name: 'Pizza',
+                    emoji: '🍕',
+                    brands: [
+                        { name: 'Margherita', price: 6.99, promotion: '' },
+                        { name: 'Pepperoni', price: 8.49, promotion: 'Spicy' },
+                        { name: 'Supreme', price: 9.99, promotion: 'Best seller' }
+                    ]
+                }, {
+                    name: 'Wings',
+                    emoji: '🍗',
+                    brands: [
+                        { name: '6 Wings', price: 4.99, promotion: '' },
+                        { name: '12 Wings', price: 8.99, promotion: 'Party pack' },
+                        { name: '24 Wings', price: 15.99, promotion: 'Family pack' }
+                    ]
+                }, {
+                    name: 'Fries',
+                    emoji: '🍟',
+                    brands: [
+                        { name: 'Small', price: 1.99, promotion: '' },
+                        { name: 'Medium', price: 2.99, promotion: '' },
+                        { name: 'Large', price: 3.99, promotion: 'Share size' }
+                    ]
+                }, {
+                    name: 'Drinks',
+                    emoji: '🥤',
+                    brands: [
+                        { name: 'Soft Drink', price: 1.99, promotion: '' },
+                        { name: 'Milkshake', price: 2.99, promotion: 'Vanilla/Strawberry' },
+                        { name: 'Juice', price: 2.49, promotion: 'Fresh' }
+                    ]
+                }]
+            },
+            'nandos': {
+                name: 'Nando\'s',
+                logo: 'https://lh3.googleusercontent.com/p/AF1QipMz1x3z5t7v9b11d3f5h7j9k1l3n5p7r9t1v3x5z7A',
+                products: [{
+                    name: 'Peri-Peri Chicken',
+                    emoji: '🍗',
+                    brands: [
+                        { name: '¼ Chicken', price: 5.99, promotion: 'Mild' },
+                        { name: '½ Chicken', price: 8.99, promotion: 'Hot' },
+                        { name: 'Full Chicken', price: 14.99, promotion: 'Extra Hot' }
+                    ]
+                }, {
+                    name: 'Burger',
+                    emoji: '🍔',
+                    brands: [
+                        { name: 'Chicken Burger', price: 4.99, promotion: '' },
+                        { name: 'Double Chicken', price: 6.49, promotion: 'Peri-Peri sauce' }
+                    ]
+                }, {
+                    name: 'Wraps',
+                    emoji: '🌯',
+                    brands: [
+                        { name: 'Chicken Wrap', price: 5.49, promotion: '' },
+                        { name: 'Veggie Wrap', price: 4.99, promotion: 'Healthy' }
+                    ]
+                }, {
+                    name: 'Sides',
+                    emoji: '🥗',
+                    brands: [
+                        { name: 'Coleslaw', price: 2.49, promotion: '' },
+                        { name: 'Corn on the Cob', price: 2.99, promotion: '' },
+                        { name: 'Rice', price: 2.99, promotion: 'Peri-Peri rice' }
+                    ]
+                }, {
+                    name: 'Drinks',
+                    emoji: '🥤',
+                    brands: [
+                        { name: 'Soft Drink', price: 2.49, promotion: '' },
+                        { name: 'Smoothie', price: 3.49, promotion: 'Mango/Berry' }
+                    ]
+                }]
+            },
+            'pizza_inn': {
+                name: 'Pizza Inn',
+                logo: 'https://lh3.googleusercontent.com/p/AF1QipN3p5r7t9v1b11d3f5h7j9k1l3n5p7r9t1v3x5z7B',
+                products: [{
+                    name: 'Pizza',
+                    emoji: '🍕',
+                    brands: [
+                        { name: 'Margherita', price: 7.99, promotion: 'Classic' },
+                        { name: 'Pepperoni', price: 9.99, promotion: 'Spicy' },
+                        { name: 'Supreme', price: 11.99, promotion: 'Loaded' },
+                        { name: 'BBQ Chicken', price: 10.99, promotion: 'Popular' }
+                    ]
+                }, {
+                    name: 'Pasta',
+                    emoji: '🍝',
+                    brands: [
+                        { name: 'Spaghetti', price: 6.99, promotion: '' },
+                        { name: 'Bolognese', price: 7.99, promotion: 'Classic' },
+                        { name: 'Alfredo', price: 8.49, promotion: 'Creamy' }
+                    ]
+                }, {
+                    name: 'Garlic Bread',
+                    emoji: '🍞',
+                    brands: [
+                        { name: 'Garlic Bread', price: 2.99, promotion: '' },
+                        { name: 'Cheesy Garlic', price: 3.99, promotion: 'Extra cheese' }
+                    ]
+                }, {
+                    name: 'Desserts',
+                    emoji: '🍰',
+                    brands: [
+                        { name: 'Chocolate Cake', price: 3.99, promotion: '' },
+                        { name: 'Ice Cream', price: 2.99, promotion: '' }
+                    ]
+                }, {
+                    name: 'Drinks',
+                    emoji: '🥤',
+                    brands: [
+                        { name: 'Soft Drink', price: 2.49, promotion: '' },
+                        { name: 'Juice', price: 2.99, promotion: 'Fresh' }
+                    ]
+                }]
+            },
+            'steers': {
+                name: 'Steers',
+                logo: 'https://lh3.googleusercontent.com/p/AF1QipO5p7r9t1v3x5z7b11d3f5h7j9k1l3n5p7r9t1v3C',
+                products: [{
+                    name: 'Burger',
+                    emoji: '🍔',
+                    brands: [
+                        { name: 'Classic', price: 4.99, promotion: '' },
+                        { name: 'Double Stack', price: 6.99, promotion: 'Best seller' },
+                        { name: 'Chicken Burger', price: 5.49, promotion: '' },
+                        { name: 'Veggie Burger', price: 4.99, promotion: 'Plant-based' }
+                    ]
+                }, {
+                    name: 'Hot Dog',
+                    emoji: '🌭',
+                    brands: [
+                        { name: 'Classic', price: 3.99, promotion: '' },
+                        { name: 'Chili Dog', price: 4.99, promotion: 'Spicy' }
+                    ]
+                }, {
+                    name: 'Fries',
+                    emoji: '🍟',
+                    brands: [
+                        { name: 'Small', price: 2.49, promotion: '' },
+                        { name: 'Large', price: 3.99, promotion: 'Share' }
+                    ]
+                }, {
+                    name: 'Milkshake',
+                    emoji: '🥤',
+                    brands: [
+                        { name: 'Vanilla', price: 3.49, promotion: '' },
+                        { name: 'Strawberry', price: 3.49, promotion: '' },
+                        { name: 'Chocolate', price: 3.49, promotion: '' }
+                    ]
+                }]
+            },
+            'kfc': {
+                name: 'KFC',
+                logo: 'https://lh3.googleusercontent.com/p/AF1QipQ1x3z5t7v9b11d3f5h7j9k1l3n5p7r9t1v3x5zD',
+                products: [{
+                    name: 'Fried Chicken',
+                    emoji: '🍗',
+                    brands: [
+                        { name: '2 Piece', price: 5.99, promotion: '' },
+                        { name: '4 Piece', price: 9.99, promotion: 'Family' },
+                        { name: '8 Piece', price: 17.99, promotion: 'Bucket' }
+                    ]
+                }, {
+                    name: 'Burger',
+                    emoji: '🍔',
+                    brands: [
+                        { name: 'Zinger', price: 5.49, promotion: 'Spicy' },
+                        { name: 'Classic', price: 4.99, promotion: '' }
+                    ]
+                }, {
+                    name: 'Fries',
+                    emoji: '🍟',
+                    brands: [
+                        { name: 'Small', price: 2.49, promotion: '' },
+                        { name: 'Large', price: 3.99, promotion: '' }
+                    ]
+                }, {
+                    name: 'Sides',
+                    emoji: '🥗',
+                    brands: [
+                        { name: 'Coleslaw', price: 2.49, promotion: '' },
+                        { name: 'Mash & Gravy', price: 2.99, promotion: '' }
+                    ]
+                }, {
+                    name: 'Drinks',
+                    emoji: '🥤',
+                    brands: [
+                        { name: 'Soft Drink', price: 2.49, promotion: '' },
+                        { name: 'Milkshake', price: 3.49, promotion: '' }
+                    ]
+                }]
+            },
+            'bakers_inn': {
+                name: 'Bakers Inn',
+                logo: 'https://lh3.googleusercontent.com/p/AF1QipR1x3z5t7v9b11d3f5h7j9k1l3n5p7r9t1v3x5zE',
+                products: [{
+                    name: 'Pastries',
+                    emoji: '🥐',
+                    brands: [
+                        { name: 'Croissant', price: 2.49, promotion: 'Buttery' },
+                        { name: 'Danish', price: 2.99, promotion: 'Fruit' },
+                        { name: 'Pain au Chocolat', price: 3.49, promotion: 'Chocolate' }
+                    ]
+                }, {
+                    name: 'Bread',
+                    emoji: '🍞',
+                    brands: [
+                        { name: 'White Loaf', price: 2.99, promotion: '' },
+                        { name: 'Brown Loaf', price: 3.49, promotion: 'Whole wheat' },
+                        { name: 'Rye Bread', price: 3.99, promotion: 'Artisan' }
+                    ]
+                }, {
+                    name: 'Cakes',
+                    emoji: '🎂',
+                    brands: [
+                        { name: 'Chocolate Cake', price: 4.99, promotion: '' },
+                        { name: 'Vanilla Slice', price: 3.99, promotion: '' },
+                        { name: 'Carrot Cake', price: 4.49, promotion: 'Popular' }
+                    ]
+                }, {
+                    name: 'Sandwiches',
+                    emoji: '🥪',
+                    brands: [
+                        { name: 'Chicken Mayo', price: 3.99, promotion: '' },
+                        { name: 'Egg & Lettuce', price: 3.49, promotion: '' },
+                        { name: 'Tuna', price: 4.49, promotion: 'Fresh' }
+                    ]
+                }, {
+                    name: 'Drinks',
+                    emoji: '🥤',
+                    brands: [
+                        { name: 'Coffee', price: 2.99, promotion: '' },
+                        { name: 'Tea', price: 2.49, promotion: '' },
+                        { name: 'Juice', price: 3.49, promotion: 'Fresh' }
+                    ]
+                }]
+            }
+        };
+
+        // ============================================================
+        //  2.  RESTAURANT BRANCHES (Zimbabwe)
+        // ============================================================
+        const restaurantBranches = {
+            'chicken_inn': [
+                { city: 'Harare', address: '123 Samora Machel Ave, Harare', lat: -17.8252, lon: 31.0335 },
+                { city: 'Bulawayo', address: '456 2nd Ave, Bulawayo', lat: -20.1468, lon: 28.5848 },
+                { city: 'Gweru', address: '789 3rd St, Gweru', lat: -19.4610, lon: 29.8146 },
+                { city: 'Mutare', address: '101 Main St, Mutare', lat: -18.9706, lon: 32.6706 }
             ],
-            casual: [
-                { value: "chilis", name: "Chili's" }, { value: "applebees", name: "Applebee's" },
-                { value: "olive_garden", name: "Olive Garden" }, { value: "texas_roadhouse", name: "Texas Roadhouse" },
-                { value: "outback", name: "Outback Steakhouse" }, { value: "red_lobster", name: "Red Lobster" },
-                { value: "local_casual", name: "Local Casual Dining" }, { value: "other", name: "Other" }
+            'nandos': [
+                { city: 'Harare', address: '202 Nelson Mandela Ave, Harare', lat: -17.8292, lon: 31.0522 },
+                { city: 'Bulawayo', address: '303 5th Ave, Bulawayo', lat: -20.1542, lon: 28.5824 },
+                { city: 'Gweru', address: '404 6th St, Gweru', lat: -19.4650, lon: 29.8180 }
             ],
-            fine_dining: [
-                { value: "ruth_chris", name: "Ruth's Chris" }, { value: "capital_grille", name: "Capital Grille" },
-                { value: "flemings", name: "Fleming's" }, { value: "morton", name: "Morton's" },
-                { value: "local_fine", name: "Local Fine Dining" }, { value: "other", name: "Other" }
+            'pizza_inn': [
+                { city: 'Harare', address: '505 Jason Moyo, Harare', lat: -17.8179, lon: 31.0442 },
+                { city: 'Chitungwiza', address: '606 Zengeza, Chitungwiza', lat: -17.9931, lon: 31.0475 },
+                { city: 'Bulawayo', address: '707 4th Ave, Bulawayo', lat: -20.1500, lon: 28.5800 },
+                { city: 'Mutare', address: '808 Herbert Chitepo, Mutare', lat: -18.9720, lon: 32.6720 }
             ],
-            cafe: [
-                { value: "starbucks", name: "Starbucks" }, { value: "dunkin", name: "Dunkin'" },
-                { value: "panera", name: "Panera Bread" }, { value: "costa", name: "Costa Coffee" },
-                { value: "local_cafe", name: "Local Café" }, { value: "other", name: "Other" }
+            'steers': [
+                { city: 'Harare', address: '909 Samora Machel, Harare', lat: -17.8280, lon: 31.0450 },
+                { city: 'Bulawayo', address: '1010 Robert Mugabe Way, Bulawayo', lat: -20.1600, lon: 28.5800 },
+                { city: 'Gweru', address: '1111 7th St, Gweru', lat: -19.4630, lon: 29.8160 }
+            ],
+            'kfc': [
+                { city: 'Harare', address: '1212 Josiah Tongogara, Harare', lat: -17.8260, lon: 31.0380 },
+                { city: 'Bulawayo', address: '1313 6th Ave, Bulawayo', lat: -20.1520, lon: 28.5830 },
+                { city: 'Chitungwiza', address: '1414 Zengeza, Chitungwiza', lat: -17.9950, lon: 31.0490 }
+            ],
+            'bakers_inn': [
+                { city: 'Harare', address: '1515 Causeway, Harare', lat: -17.8300, lon: 31.0500 },
+                { city: 'Bulawayo', address: '1616 3rd Ave, Bulawayo', lat: -20.1480, lon: 28.5850 },
+                { city: 'Gweru', address: '1717 8th St, Gweru', lat: -19.4670, lon: 29.8200 }
             ]
         };
 
-        function updateRestaurantDropdown(type) {
-            const select = document.getElementById('restaurant_preference');
-            const list = restaurantLists[type] || restaurantLists.fast_food;
-            select.innerHTML = '<option value="">Select a restaurant</option>';
-            list.forEach(r => { const o = document.createElement('option'); o.value = r.value; o.textContent = r.name; select.appendChild(o); });
-            document.getElementById('other_restaurant_name').value = '';
-            document.getElementById('other_restaurant_input').classList.remove('expanded');
-        }
-
+        // ============================================================
+        //  3.  STATE
+        // ============================================================
         let map, pickupMarker, dropoffMarker, routeLine;
         let selectionMode = 'pickup';
+        let selectedRestaurantId = null;
+        let cart = [];
+        let selectedProduct = null;
+        let lastDistanceKm = 0;
+        let shopMarkers = [];
+
+        // ============================================================
+        //  4.  CART FUNCTIONS
+        // ============================================================
+        function calculateCartWeight() {
+            let total = 0;
+            cart.forEach(item => {
+                const w = item.weight || 0.3;
+                total += w * item.qty;
+            });
+            return total;
+        }
+
+        function renderMainCart() {
+            const container = document.getElementById('mainCartDisplay');
+            const itemsContainer = document.getElementById('mainCartItems');
+            const countBadge = document.getElementById('mainCartCount');
+            const totalDisplay = document.getElementById('mainCartTotal');
+            const weightDisplay = document.getElementById('mainCartWeight');
+
+            if (cart.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'block';
+            countBadge.textContent = cart.length + ' items';
+
+            let total = 0,
+                weight = 0;
+            itemsContainer.innerHTML = '';
+            cart.forEach(item => {
+                total += item.price * item.qty;
+                weight += (item.weight || 0.3) * item.qty;
+                const div = document.createElement('div');
+                div.className = 'cart-item-row';
+                div.innerHTML = `
+                    <span class="item-name">${item.productName} (${item.brandName})</span>
+                    <span class="item-qty">×${item.qty}</span>
+                    <span class="item-price">$${(item.price * item.qty).toFixed(2)}</span>
+                    <button class="remove-btn-sm" onclick="removeFromMainCart('${item.restaurantId}','${item.productName}','${item.brandName}')">×</button>
+                `;
+                itemsContainer.appendChild(div);
+            });
+            totalDisplay.textContent = '$' + total.toFixed(2);
+            weightDisplay.innerHTML = '<i class="fas fa-weight-hanging"></i> ' + weight.toFixed(1) + ' kg';
+            refreshFeeDisplay();
+            updateProgress();
+        }
+
+        function removeFromMainCart(restaurantId, productName, brandName) {
+            cart = cart.filter(c => !(c.restaurantId === restaurantId && c.productName === productName && c.brandName ===
+                brandName));
+            renderMainCart();
+            if (document.getElementById('menuModal').classList.contains('active')) {
+                updateCartSummary();
+                if (selectedProduct) {
+                    showBrands(restaurantId, selectedProduct);
+                }
+            }
+        }
+
+        function clearMainCart() {
+            if (cart.length === 0) return;
+            if (confirm('Clear all items from your cart?')) {
+                cart = [];
+                renderMainCart();
+                if (document.getElementById('menuModal').classList.contains('active')) {
+                    updateCartSummary();
+                    if (selectedProduct && selectedRestaurantId) {
+                        showBrands(selectedRestaurantId, selectedProduct);
+                    } else if (selectedRestaurantId) {
+                        renderProducts(selectedRestaurantId);
+                    }
+                }
+            }
+        }
+
+        function updateAllCarts() {
+            renderMainCart();
+            if (document.getElementById('menuModal').classList.contains('active')) {
+                updateCartSummary();
+            }
+        }
+
+        // ============================================================
+        //  5.  MENU MODAL
+        // ============================================================
+        function openMenuModal(restaurantId) {
+            const restaurant = getRestaurantById(restaurantId);
+            if (!restaurant) return;
+            const data = restaurantData[restaurantId];
+            if (!data) {
+                alert('No menu available for this restaurant yet.');
+                return;
+            }
+            document.getElementById('menuModalTitleText').textContent = restaurant.name + ' — Menu';
+            document.getElementById('menuModal').classList.add('active');
+            document.getElementById('menuBackBtn').style.display = 'none';
+            document.getElementById('brandsList').style.display = 'none';
+            document.getElementById('productsGrid').style.display = 'grid';
+            selectedProduct = null;
+            renderProducts(restaurantId);
+            updateCartSummary();
+            document.getElementById('cartDetail').classList.remove('show');
+            document.getElementById('viewCartBtn').innerHTML = '<i class="fas fa-shopping-cart"></i> View Cart';
+        }
+
+        function renderProducts(restaurantId) {
+            const data = restaurantData[restaurantId];
+            if (!data) return;
+            const container = document.getElementById('productsGrid');
+            container.innerHTML = '';
+            container.style.display = 'grid';
+
+            data.products.forEach(product => {
+                const inCart = cart.some(c => c.restaurantId === restaurantId && c.productName === product.name);
+                const imgUrl = productImages[product.name] || '';
+                const div = document.createElement('div');
+                div.className = 'product-card';
+                div.innerHTML = `
+                    <div class="product-image-wrap">
+                        ${imgUrl ? `<img class="product-img" src="${imgUrl}" alt="${product.name}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;product-emoji&quot;>${product.emoji}</div>');">` : `<div class="product-emoji">${product.emoji}</div>`}
+                    </div>
+                    <div class="product-name">${product.name}</div>
+                    ${inCart ? '<div class="product-added"><i class="fas fa-check-circle"></i> Added</div>' : ''}
+                `;
+                div.addEventListener('click', () => {
+                    showBrands(restaurantId, product);
+                });
+                container.appendChild(div);
+            });
+        }
+
+        function showBrands(restaurantId, product) {
+            selectedProduct = product;
+            document.getElementById('menuBackBtn').style.display = 'block';
+            document.getElementById('productsGrid').style.display = 'none';
+            document.getElementById('brandsList').style.display = 'flex';
+            document.getElementById('menuModalTitleText').textContent = product.emoji + ' ' + product.name + ' — Select a variant';
+
+            const container = document.getElementById('brandsList');
+            container.innerHTML = '';
+            const imgUrl = productImages[product.name] || '';
+
+            product.brands.forEach((brand) => {
+                const inCart = cart.find(c => c.restaurantId === restaurantId && c.productName === product.name && c
+                    .brandName === brand.name);
+                const qty = inCart ? inCart.qty : 0;
+
+                const div = document.createElement('div');
+                div.className = 'brand-item-row';
+                div.innerHTML = `
+                    ${imgUrl ? `<img class="brand-thumb" src="${imgUrl}" alt="${product.name}" loading="lazy" onerror="this.remove();">` : ''}
+                    <div class="brand-info">
+                        <div class="brand-name">${brand.name}</div>
+                        ${brand.promotion ? `<div class="brand-promo">${brand.promotion}</div>` : ''}
+                        <div class="brand-price">$${brand.price.toFixed(2)}</div>
+                    </div>
+                    <div class="qty-control">
+                        <button onclick="changeQty('${restaurantId}','${product.name}','${brand.name}',${brand.price},-1)" ${qty === 0 ? 'style="color:#ccc;"' : ''}>−</button>
+                        <span class="qty-num">${qty}</span>
+                        <button onclick="changeQty('${restaurantId}','${product.name}','${brand.name}',${brand.price},1)">+</button>
+                    </div>
+                    ${qty > 0 ? '<span class="added-badge"><i class="fas fa-check-circle"></i> In Cart</span>' : ''}
+                `;
+                container.appendChild(div);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-all-btn';
+            addBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add Selected to Cart';
+            addBtn.addEventListener('click', () => {
+                const selectedBrand = product.brands.find((b) => {
+                    const inCart = cart.find(c => c.restaurantId === restaurantId && c.productName === product
+                        .name && c.brandName === b.name);
+                    return inCart && inCart.qty > 0;
+                });
+                if (selectedBrand) {
+                    goBackToProducts();
+                } else {
+                    const firstBrand = product.brands[0];
+                    addToCart(restaurantId, product.name, firstBrand.name, firstBrand.price);
+                    goBackToProducts();
+                }
+            });
+            container.appendChild(addBtn);
+        }
+
+        function changeQty(restaurantId, productName, brandName, price, delta) {
+            const existing = cart.find(c => c.restaurantId === restaurantId && c.productName === productName && c.brandName ===
+                brandName);
+            if (existing) {
+                existing.qty += delta;
+                if (existing.qty <= 0) {
+                    cart = cart.filter(c => !(c.restaurantId === restaurantId && c.productName === productName && c
+                        .brandName === brandName));
+                }
+            } else if (delta > 0) {
+                cart.push({ restaurantId, productName, brandName, price, weight: 0.3, qty: 1 });
+            }
+            renderMainCart();
+            updateCartSummary();
+            if (selectedProduct) {
+                showBrands(restaurantId, selectedProduct);
+            }
+        }
+
+        function addToCart(restaurantId, productName, brandName, price) {
+            const existing = cart.find(c => c.restaurantId === restaurantId && c.productName === productName && c.brandName ===
+                brandName);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ restaurantId, productName, brandName, price, weight: 0.3, qty: 1 });
+            }
+            renderMainCart();
+            updateCartSummary();
+        }
+
+        function goBackToProducts() {
+            document.getElementById('menuBackBtn').style.display = 'none';
+            document.getElementById('brandsList').style.display = 'none';
+            document.getElementById('productsGrid').style.display = 'grid';
+            if (selectedRestaurantId) {
+                const rest = getRestaurantById(selectedRestaurantId);
+                document.getElementById('menuModalTitleText').textContent = rest ? rest.name + ' — Menu' : 'Restaurant Menu';
+                renderProducts(selectedRestaurantId);
+            }
+            selectedProduct = null;
+        }
+
+        function updateCartSummary() {
+            let total = 0,
+                count = 0;
+            cart.forEach(item => { total += item.price * item.qty;
+                count += item.qty; });
+            const weight = calculateCartWeight();
+            document.getElementById('cartTotalDisplay').textContent = '$' + total.toFixed(2);
+            document.getElementById('cartCountDisplay').textContent = `(${count} items)`;
+            document.getElementById('cartWeightDisplay').innerHTML = `<i class="fas fa-weight-hanging"></i> ${weight.toFixed(1)} kg`;
+            if (document.getElementById('cartDetail').classList.contains('show')) {
+                renderCartDetail();
+            }
+        }
+
+        function toggleCartDetail() {
+            const detail = document.getElementById('cartDetail');
+            const btn = document.getElementById('viewCartBtn');
+            if (detail.classList.contains('show')) {
+                detail.classList.remove('show');
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> View Cart';
+            } else {
+                detail.classList.add('show');
+                btn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Cart';
+                renderCartDetail();
+            }
+        }
+
+        function renderCartDetail() {
+            const container = document.getElementById('cartDetailItems');
+            container.innerHTML = '';
+            if (cart.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#999;padding:8px;">Cart is empty</div>';
+                return;
+            }
+            cart.forEach(item => {
+                const lineWeight = (item.weight || 0.3) * item.qty;
+                const div = document.createElement('div');
+                div.className = 'cart-item-row';
+                div.innerHTML = `
+                    <span>${item.productName} (${item.brandName}) × ${item.qty} <small style="color:#999;">(${lineWeight.toFixed(1)}kg)</small></span>
+                    <span>$${(item.price * item.qty).toFixed(2)} <button class="remove-item-btn" onclick="removeFromCartModal('${item.restaurantId}','${item.productName}','${item.brandName}')">×</button></span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeFromCartModal(restaurantId, productName, brandName) {
+            cart = cart.filter(c => !(c.restaurantId === restaurantId && c.productName === productName && c.brandName ===
+                brandName));
+            renderMainCart();
+            updateCartSummary();
+            if (selectedProduct) {
+                showBrands(restaurantId, selectedProduct);
+            }
+            if (document.getElementById('cartDetail').classList.contains('show')) {
+                renderCartDetail();
+            }
+        }
+
+        function addCartToOrderList() {
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                return;
+            }
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+            cart.forEach(item => {
+                const newItem = document.createElement('div');
+                newItem.className = 'food-item';
+                newItem.innerHTML = `
+                    <div class="food-row">
+                        <div class="input-with-icon" style="flex:2">
+                            <i class="fas fa-hamburger"></i>
+                            <input type="text" name="items[]" value="${item.productName} (${item.brandName})" required />
+                        </div>
+                        <div class="input-with-icon" style="flex:1">
+                            <i class="fas fa-sort-amount-up"></i>
+                            <input type="text" name="quantities[]" value="${item.qty}" required />
+                        </div>
+                    </div>
+                    <div class="food-row">
+                        <div class="input-with-icon">
+                            <i class="fas fa-sticky-note"></i>
+                            <input type="text" name="instructions[]" placeholder="Special instructions" />
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                    </div>
+                `;
+                container.appendChild(newItem);
+            });
+            closeMenuModal();
+            cart = [];
+            renderMainCart();
+            updateProgress();
+        }
+
+        function closeMenuModal() {
+            document.getElementById('menuModal').classList.remove('active');
+            document.getElementById('cartDetail').classList.remove('show');
+            document.getElementById('viewCartBtn').innerHTML = '<i class="fas fa-shopping-cart"></i> View Cart';
+            document.getElementById('productsGrid').style.display = 'grid';
+            document.getElementById('brandsList').style.display = 'none';
+            document.getElementById('menuBackBtn').style.display = 'none';
+            renderMainCart();
+        }
+
+        // ============================================================
+        //  6.  RESTAURANT SELECTION
+        // ============================================================
+        function getRestaurantById(id) {
+            return popularRestaurants.find(r => r.id === id);
+        }
+
+        function selectRestaurant(restaurant) {
+            document.getElementById('restaurant_preference_hidden').value = restaurant.id;
+            selectedRestaurantId = restaurant.id;
+            document.getElementById('menuBtnContainer').style.display = 'block';
+
+            const branches = restaurantBranches[restaurant.id] || [];
+            if (branches.length > 0) {
+                const branch = branches[0];
+                document.getElementById('restaurant_location').value = branch.address;
+                setPickupLocation(branch.lat, branch.lon);
+                map.flyTo([branch.lat, branch.lon], 15, { duration: 1.5 });
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${restaurant.name} — ${branch.city}`;
+            } else {
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${restaurant.name}`;
+            }
+
+            document.getElementById('other_restaurant_input').classList.remove('expanded');
+            document.getElementById('other_restaurant_name').value = '';
+
+            clearBrandSelection();
+            const cards = document.querySelectorAll('.brand-card');
+            cards.forEach(c => {
+                if (c.dataset.id === restaurant.id) c.classList.add('selected');
+            });
+
+            openBranchModal(restaurant);
+        }
+
+        function openBranchModal(restaurant) {
+            document.getElementById('modalTitle').textContent = restaurant.name + ' — Select a branch';
+            const list = document.getElementById('branchList');
+            list.innerHTML = '';
+            const branches = restaurantBranches[restaurant.id] || [];
+            if (branches.length === 0) {
+                list.innerHTML = '<p style="color:#999;padding:10px;">No branches listed.</p>';
+                document.getElementById('branchModal').classList.add('active');
+                return;
+            }
+            branches.forEach((branch) => {
+                const item = document.createElement('div');
+                item.className = 'branch-item';
+                item.innerHTML = `
+                    <div class="branch-city">${branch.city}</div>
+                    <div class="branch-address">${branch.address}</div>
+                `;
+                item.addEventListener('click', () => {
+                    selectBranch(restaurant, branch);
+                });
+                list.appendChild(item);
+            });
+            document.getElementById('branchModal').classList.add('active');
+        }
+
+        function selectBranch(restaurant, branch) {
+            closeBranchModal();
+            document.getElementById('restaurant_preference_hidden').value = restaurant.id;
+            document.getElementById('restaurant_location').value = branch.address;
+            document.getElementById('other_restaurant_input').classList.remove('expanded');
+            document.getElementById('other_restaurant_name').value = '';
+            setPickupLocation(branch.lat, branch.lon);
+            map.flyTo([branch.lat, branch.lon], 15, { duration: 1.5 });
+            document.getElementById('selectedBrandDisplay').innerText = `Selected: ${restaurant.name} — ${branch.city}`;
+            clearBrandSelection();
+            const cards = document.querySelectorAll('.brand-card');
+            cards.forEach(c => {
+                if (c.dataset.id === restaurant.id) c.classList.add('selected');
+            });
+            document.getElementById('menuBtnContainer').style.display = 'block';
+            selectedRestaurantId = restaurant.id;
+        }
+
+        function closeBranchModal() {
+            document.getElementById('branchModal').classList.remove('active');
+        }
+
+        function openMenuFromAdd() {
+            if (!selectedRestaurantId) {
+                alert('Please select a restaurant first using the "Browse Restaurant Menu" button.');
+                return;
+            }
+            openMenuModal(selectedRestaurantId);
+        }
+
+        // ============================================================
+        //  7.  POPULAR RESTAURANTS
+        // ============================================================
+        const popularRestaurants = [
+            { id: 'chicken_inn', name: 'Chicken Inn', logo: 'https://via.placeholder.com/80x80?text=CI' },
+            { id: 'nandos', name: 'Nando\'s', logo: 'https://via.placeholder.com/80x80?text=ND' },
+            { id: 'pizza_inn', name: 'Pizza Inn', logo: 'https://via.placeholder.com/80x80?text=PI' },
+            { id: 'steers', name: 'Steers', logo: 'https://via.placeholder.com/80x80?text=ST' },
+            { id: 'kfc', name: 'KFC', logo: 'https://via.placeholder.com/80x80?text=KFC' },
+            { id: 'bakers_inn', name: 'Bakers Inn', logo: 'https://via.placeholder.com/80x80?text=BI' }
+        ];
+
+        // ============================================================
+        //  8.  PRODUCT IMAGES (placeholder)
+        // ============================================================
+        const productImages = {
+            'Chicken & Chips': 'https://loremflickr.com/240/240/chicken,fries',
+            'Burger': 'https://loremflickr.com/240/240/burger',
+            'Pizza': 'https://loremflickr.com/240/240/pizza',
+            'Wings': 'https://loremflickr.com/240/240/chicken,wings',
+            'Fries': 'https://loremflickr.com/240/240/fries',
+            'Drinks': 'https://loremflickr.com/240/240/drink',
+            'Peri-Peri Chicken': 'https://loremflickr.com/240/240/chicken,grilled',
+            'Wraps': 'https://loremflickr.com/240/240/wrap',
+            'Sides': 'https://loremflickr.com/240/240/salad',
+            'Pasta': 'https://loremflickr.com/240/240/pasta',
+            'Garlic Bread': 'https://loremflickr.com/240/240/garlic,bread',
+            'Desserts': 'https://loremflickr.com/240/240/cake',
+            'Hot Dog': 'https://loremflickr.com/240/240/hotdog',
+            'Milkshake': 'https://loremflickr.com/240/240/milkshake',
+            'Fried Chicken': 'https://loremflickr.com/240/240/fried,chicken',
+            'Pastries': 'https://loremflickr.com/240/240/pastry',
+            'Bread': 'https://loremflickr.com/240/240/bread,loaf',
+            'Cakes': 'https://loremflickr.com/240/240/cake,slice',
+            'Sandwiches': 'https://loremflickr.com/240/240/sandwich'
+        };
+
+        // ============================================================
+        //  9.  RENDER CAROUSEL
+        // ============================================================
+        function renderBrands() {
+            const container = document.getElementById('brandsCarousel');
+            container.innerHTML = '';
+
+            // "Other" card
+            const otherCard = document.createElement('div');
+            otherCard.className = 'brand-card';
+            otherCard.dataset.id = 'other';
+            otherCard.innerHTML =
+                `<i class="fas fa-plus-circle" style="font-size:28px;color:var(--primary-dark);"></i><span>Other</span>`;
+            otherCard.addEventListener('click', () => {
+                document.getElementById('restaurant_preference_hidden').value = 'other';
+                document.getElementById('other_restaurant_input').classList.add('expanded');
+                document.getElementById('other_restaurant_name').focus();
+                clearBrandSelection();
+                document.getElementById('selectedBrandDisplay').innerText = 'Enter custom restaurant name above';
+                document.getElementById('menuBtnContainer').style.display = 'none';
+                selectedRestaurantId = null;
+            });
+            container.appendChild(otherCard);
+
+            popularRestaurants.forEach(rest => {
+                const card = document.createElement('div');
+                card.className = 'brand-card';
+                card.dataset.id = rest.id;
+                card.innerHTML = `
+                    <img src="${rest.logo}" alt="${rest.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+                    <span class="brand-name">${rest.name}</span>
+                `;
+                const fallbackSpan = document.createElement('span');
+                fallbackSpan.style.display = 'none';
+                fallbackSpan.textContent = rest.name;
+                card.appendChild(fallbackSpan);
+                card.addEventListener('click', () => {
+                    selectRestaurant(rest);
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function clearBrandSelection() {
+            document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        // ============================================================
+        // 10.  MAP LOGIC
+        // ============================================================
+        const iconColors = {
+            restaurant: '#E91E63',
+            fast_food: '#F44336',
+            cafe: '#795548',
+            bar: '#9C27B0',
+            pub: '#9C27B0',
+            default: '#888888'
+        };
+
+        function getIconForType(tags) {
+            const amenity = tags.amenity || '';
+            if (amenity === 'restaurant') return { color: iconColors.restaurant, icon: 'fas fa-utensils' };
+            if (amenity === 'fast_food') return { color: iconColors.fast_food, icon: 'fas fa-hamburger' };
+            if (amenity === 'cafe') return { color: iconColors.cafe, icon: 'fas fa-coffee' };
+            if (amenity === 'bar' || amenity === 'pub') return { color: iconColors.bar, icon: 'fas fa-beer' };
+            return { color: iconColors.default, icon: 'fas fa-map-marker-alt' };
+        }
+
+        function fetchPOIsInViewport() {
+            if (!map) return;
+            const bounds = map.getBounds();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+            const bbox = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
+            const query =
+                `[out:json];(node["amenity"~"restaurant|fast_food|cafe|bar|pub"](${bbox});way["amenity"~"restaurant|fast_food|cafe|bar|pub"](${bbox}););out body;>;out skel qt;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            fetch(url).then(r => r.json()).then(data => {
+                const elements = data.elements || [];
+                const seen = new Set();
+                const newMarkers = [];
+                elements.forEach(el => {
+                    if (el.type !== 'node' && el.type !== 'way') return;
+                    let lat, lon;
+                    if (el.type === 'node') { lat = el.lat;
+                        lon = el.lon; } else if (el.type === 'way' && el.center) { lat = el.center.lat;
+                        lon = el.center.lon; } else return;
+                    if (seen.has(el.id)) return;
+                    seen.add(el.id);
+                    const name = el.tags?.name || '';
+                    if (!name) return;
+                    const typeInfo = getIconForType(el.tags);
+                    const markerHtml =
+                        `<div style="background-color:${typeInfo.color};width:26px;height:26px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"><i class="${typeInfo.icon}" style="font-size:12px;"></i></div>`;
+                    const marker = L.marker([lat, lon], {
+                        icon: L.divIcon({ html: markerHtml, iconSize: [26, 26], iconAnchor: [13, 26],
+                            popupAnchor: [0, -13] })
+                    }).addTo(map);
+                    const address = el.tags?.['addr:full'] || el.tags?.['addr:street'] || '';
+                    const popupContent =
+                        `<strong>${name}</strong><br>${address}<br><button class="shop-select-btn" data-lat="${lat}" data-lng="${lon}" data-name="${name.replace(/'/g,"\\'")}" data-addr="${address.replace(/'/g,"\\'")}">Select this place</button>`;
+                    marker.bindPopup(popupContent);
+                    marker.on('popupopen', function() {
+                        document.querySelector('.shop-select-btn')?.addEventListener('click', function(
+                        e) {
+                            const lat = parseFloat(this.dataset.lat);
+                            const lng = parseFloat(this.dataset.lng);
+                            const name = this.dataset.name;
+                            const addr = this.dataset.addr;
+                            // Try to match with known restaurants
+                            const matched = popularRestaurants.find(r => r.name.toLowerCase() === name
+                                .toLowerCase());
+                            if (matched) {
+                                selectRestaurant(matched);
+                                // Find matching branch
+                                const branches = restaurantBranches[matched.id] || [];
+                                const branch = branches.find(b => Math.abs(b.lat - lat) < 0.01 && Math.abs(b
+                                    .lon - lng) < 0.01) || branches[0];
+                                if (branch) {
+                                    selectBranch(matched, branch);
+                                } else {
+                                    setPickupLocation(lat, lng);
+                                    document.getElementById('restaurant_location').value = addr || name;
+                                    document.getElementById('selectedBrandDisplay').innerText =
+                                        `Selected: ${name}`;
+                                    document.getElementById('menuBtnContainer').style.display = 'block';
+                                    selectedRestaurantId = matched.id;
+                                }
+                            } else {
+                                // Custom restaurant
+                                document.getElementById('restaurant_preference_hidden').value = 'other';
+                                document.getElementById('other_restaurant_input').classList.add('expanded');
+                                document.getElementById('other_restaurant_name').value = name;
+                                document.getElementById('restaurant_location').value = addr || name;
+                                setPickupLocation(lat, lng);
+                                document.getElementById('selectedBrandDisplay').innerText =
+                                    `Selected: ${name} (custom)`;
+                                document.getElementById('menuBtnContainer').style.display = 'none';
+                                selectedRestaurantId = null;
+                            }
+                            map.closePopup();
+                        });
+                    });
+                    newMarkers.push(marker);
+                });
+                shopMarkers.forEach(m => map.removeLayer(m));
+                shopMarkers = newMarkers;
+            }).catch(() => {});
+        }
+
+        function addLocationControl() {
+            const controlDiv = L.DomUtil.create('div', 'leaflet-control-locate');
+            const link = L.DomUtil.create('a', '', controlDiv);
+            link.href = '#';
+            link.title = 'Go to my current location';
+            link.onclick = function(e) {
+                e.preventDefault();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const { latitude, longitude } = position.coords;
+                        map.setView([latitude, longitude], 15);
+                        fetchPOIsInViewport();
+                        // Also set as delivery location
+                        setDropoffLocation(latitude, longitude);
+                        const marker = L.marker([latitude, longitude], {
+                            icon: L.divIcon({
+                                html: '<div style="background-color:#2196F3;width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(map).bindPopup('You are here').openPopup();
+                    }, (error) => {
+                        alert('Unable to get your location. Please check GPS settings.');
+                    });
+                } else {
+                    alert('Geolocation not supported.');
+                }
+                return false;
+            };
+            return controlDiv;
+        }
 
         function initMap() {
-            map = L.map('map').setView([-1.2921, 36.8219], 13);
+            map = L.map('map').setView([0, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
             document.getElementById('mapHint').style.display = 'block';
             map.on('click', e => {
@@ -311,100 +2298,338 @@
                 else setDropoffLocation(e.latlng.lat, e.latlng.lng);
                 if (navigator.vibrate) navigator.vibrate(50);
             });
+            const locationControl = addLocationControl();
+            const zoomControl = document.querySelector('.leaflet-control-zoom');
+            if (zoomControl && zoomControl.parentNode) {
+                zoomControl.parentNode.insertBefore(locationControl, zoomControl.nextSibling);
+            } else {
+                map.getContainer().appendChild(locationControl);
+            }
+            map.on('moveend', function() {
+                if (window._poiTimeout) clearTimeout(window._poiTimeout);
+                window._poiTimeout = setTimeout(() => { fetchPOIsInViewport(); }, 500);
+            });
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    map.setView([pos.coords.latitude, pos.coords.longitude], 13);
-                    if (!pickupMarker) setPickupLocation(pos.coords.latitude, pos.coords.longitude);
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const { latitude, longitude } = position.coords;
+                    map.setView([latitude, longitude], 12);
+                    setDropoffLocation(latitude, longitude);
+                    fetchPOIsInViewport();
+                }, (error) => {
+                    map.setView([-1.2921, 36.8219], 12);
+                    fetchPOIsInViewport();
                 });
+            } else {
+                map.setView([-1.2921, 36.8219], 12);
+                fetchPOIsInViewport();
             }
         }
 
         function setSelectionMode(mode) {
             selectionMode = mode;
-            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
-            p.classList.toggle('active', mode === 'pickup'); d.classList.toggle('active', mode === 'dropoff'); d.classList.toggle('dropoff', mode === 'dropoff');
-            hint.textContent = mode === 'pickup' ? "Tap map to set Restaurant" : "Tap map to set Delivery";
-            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)"; hint.style.display = 'block';
+            const p = document.getElementById('selectPickupBtn');
+            const d = document.getElementById('selectDropoffBtn');
+            const hint = document.getElementById('mapHint');
+            p.classList.toggle('active', mode === 'pickup');
+            d.classList.toggle('active', mode === 'dropoff');
+            d.classList.toggle('dropoff', mode === 'dropoff');
+            hint.textContent = mode === 'pickup' ? 'Tap map to set Restaurant' : 'Tap map to set Delivery';
+            hint.style.background = mode === 'pickup' ? 'rgba(76,175,80,0.9)' : 'rgba(33,150,243,0.9)';
+            hint.style.display = 'block';
         }
 
         function setPickupLocation(lat, lng) {
             if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-utensils'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Restaurant");
-            document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'restaurant_location'); updateRoute();
+            pickupMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-utensils'></i></div>",
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 28]
+                })
+            }).addTo(map).bindPopup('Restaurant');
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'restaurant_location');
+            updateRoute();
             if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
         }
 
         function setDropoffLocation(lat, lng) {
             if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
-            document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address'); updateRoute();
+            dropoffMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>",
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 28]
+                })
+            }).addTo(map).bindPopup('Delivery');
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'delivery_address');
+            updateRoute();
         }
 
         function updateRoute() {
             if (pickupMarker && dropoffMarker) {
-                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
-                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
-                    .then(res => res.json()).then(data => {
-                        if (data.routes?.length) {
-                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                const p = pickupMarker.getLatLng();
+                const d = dropoffMarker.getLatLng();
+                fetch(
+                        `https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`
+                        )
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
                             if (routeLine) map.removeLayer(routeLine);
                             routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
-                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+                            map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
                             updateUIwithDistance(data.routes[0].distance / 1000);
-                        } else fallbackDistance(p, d);
-                    }).catch(() => fallbackDistance(p, d));
+                        } else {
+                            fallbackDistance(p, d);
+                        }
+                    })
+                    .catch(() => fallbackDistance(p, d));
             }
         }
 
-        function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
-        function haversine(lat1, lon1, lat2, lon2) { const R = 6371; let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180; let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
-        function reverseGeocode(lat, lng, inputId) { fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; }).catch(()=>{}); }
+        function fallbackDistance(p, d) {
+            updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng));
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function reverseGeocode(lat, lng, inputId) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById(inputId).value = data.display_name;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        // ============================================================
+        // 11.  FEE & INFO BAR
+        // ============================================================
+        function refreshFeeDisplay() {
+            updateUIwithDistance(lastDistanceKm);
+        }
 
         function updateUIwithDistance(distKm) {
+            lastDistanceKm = distKm;
             let distanceFee = 0;
-            if (distKm <= 0.1) distanceFee = 0.50; else if (distKm <= 1.5) distanceFee = 1.00; else if (distKm <= 4.99) distanceFee = 2.00; else if (distKm <= 15) distanceFee = 2.50; else distanceFee = 3.00;
-            let total = Math.max(distanceFee + getTimeFee() + getRestaurantPremium(), 0.50);
+            if (distKm <= 0.1) distanceFee = 0.50;
+            else if (distKm <= 1.5) distanceFee = 1.00;
+            else if (distKm <= 4.99) distanceFee = 2.00;
+            else if (distKm <= 15) distanceFee = 2.50;
+            else distanceFee = 3.00;
+
+            const timeFee = getTimeFee();
+            const total = Math.max(distanceFee + timeFee, 0.50);
+
             document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
             document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
             document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
             document.getElementById('infoTime').innerHTML = Math.round(distKm * 4) + ' <small>min</small>';
             document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
-            updateDeliveryMethod(distKm, distKm <= 1.5 ? '🚶 Foot' : '🚲 Bike/Car');
+            updateDeliveryMethod(distKm, distKm <= 1.5 ? '🚶 Foot' : '🚲 Bike / Car');
         }
 
-        function getTimeFee() { let dt = document.getElementById('delivery_time').value, st = document.getElementById('specific_time').value; if (dt === 'asap') return 2.00; if (dt === 'morning') return 1.50; if (dt === 'afternoon') return 1.00; if (dt === 'evening') return 2.00; if (dt === 'specific') { if (st && st.match(/(7|8|9|10|11):\d{2}\s*PM/i)) return 2.50; return 2.00; } return 0; }
-        function getRestaurantPremium() { let type = document.getElementById('restaurant_type').value; return { fast_food:0, casual:1.00, fine_dining:2.50, cafe:0.50 }[type] || 0; }
+        function getTimeFee() {
+            const dt = document.getElementById('delivery_time').value;
+            const st = document.getElementById('specific_time').value;
+            if (dt === 'asap') return 2.00;
+            if (dt === 'morning') return 1.50;
+            if (dt === 'afternoon') return 1.00;
+            if (dt === 'evening') return 2.00;
+            if (dt === 'specific') {
+                if (st && st.match(/(7|8|9|10|11):\d{2}\s*PM/i)) return 2.50;
+                return 2.00;
+            }
+            return 0;
+        }
 
         function updateDeliveryMethod(distKm, methodText) {
-            let indicator = document.getElementById('deliveryMethodIndicator');
-            if (distKm > 0) { indicator.style.display = 'flex'; document.getElementById('deliveryMethodIcon').className = distKm <= 1.5 ? 'fas fa-walking' : 'fas fa-bicycle'; document.getElementById('deliveryMethodTitle').innerText = methodText; document.getElementById('deliveryMethodDescription').innerText = distKm <= 1.5 ? 'Can be walked' : 'Requires vehicle'; } else indicator.style.display = 'none';
+            const indicator = document.getElementById('deliveryMethodIndicator');
+            if (distKm > 0) {
+                indicator.style.display = 'flex';
+                document.getElementById('deliveryMethodIcon').className = distKm <= 1.5 ? 'fas fa-walking' :
+                    'fas fa-bicycle';
+                document.getElementById('deliveryMethodTitle').innerText = methodText;
+                document.getElementById('deliveryMethodDescription').innerText = distKm <= 1.5 ?
+                    'Can be walked' : 'Requires vehicle';
+            } else {
+                indicator.style.display = 'none';
+            }
         }
 
-        function selectRestaurantType(element, type) { document.querySelectorAll('.restaurant-type-item').forEach(i => i.classList.remove('active')); element.classList.add('active'); document.getElementById('restaurant_type').value = type; updateRestaurantDropdown(type); if (pickupMarker && dropoffMarker) updateRoute(); }
-        function toggleOtherRestaurantInput() { let div = document.getElementById('other_restaurant_input'); if (document.getElementById('restaurant_preference').value === 'other') div.classList.add('expanded'); else div.classList.remove('expanded'); }
-        function toggleSpecificTimeInput() { let div = document.getElementById('specific_time_input'); if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded'); else div.classList.remove('expanded'); }
-        function addItem() { let c = document.getElementById('items-container'); let n = document.createElement('div'); n.className = 'food-item'; n.innerHTML = `<div class="food-row"><div class="input-with-icon" style="flex:2"><i class="fas fa-hamburger"></i><input type="text" name="items[]" placeholder="Food item" required></div><div class="input-with-icon" style="flex:1"><i class="fas fa-sort-amount-up"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="food-row"><div class="input-with-icon"><i class="fas fa-sticky-note"></i><input type="text" name="instructions[]" placeholder="Special instructions"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`; c.appendChild(n); setTimeout(() => n.querySelector('input')?.focus(), 100); }
-        function removeItem(btn) { btn.closest('.food-item')?.remove(); }
-        function displayFileName(input) { document.getElementById('file_name').innerText = input.files[0]?.name || ''; }
-        function updateProgress() { let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length; document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%'; }
-        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
+        // ============================================================
+        // 12.  UI HELPERS
+        // ============================================================
+        function toggleSpecificTimeInput() {
+            const div = document.getElementById('specific_time_input');
+            if (document.getElementById('delivery_time').value === 'specific') {
+                div.classList.add('expanded');
+            } else {
+                div.classList.remove('expanded');
+            }
+        }
 
-        document.getElementById('foodDeliveryForm').addEventListener('submit', function(e) {
-            const restPref = document.getElementById('restaurant_preference').value;
-            if (!restPref) { alert('Please select a restaurant.'); e.preventDefault(); return false; }
-            if (restPref === 'other' && !document.getElementById('other_restaurant_name').value.trim()) { alert('Please specify restaurant name.'); e.preventDefault(); return false; }
-            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set a delivery address on the map.'); e.preventDefault(); return false; }
-            let hasItem = false; document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
-            if (!hasItem) { alert('Please add at least one food item.'); e.preventDefault(); return false; }
-            const price = parseFloat(document.getElementById('service_price').value);
-            if (isNaN(price) || price < 0.50) { alert('Service price must be at least $0.50.'); e.preventDefault(); return false; }
-            if (!document.getElementById('phone_number').value.trim()) { alert('Please enter your phone number.'); e.preventDefault(); return false; }
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'food-item';
+            newItem.innerHTML = `
+                <div class="food-row">
+                    <div class="input-with-icon" style="flex:2">
+                        <i class="fas fa-hamburger"></i>
+                        <input type="text" name="items[]" placeholder="Food item" required />
+                    </div>
+                    <div class="input-with-icon" style="flex:1">
+                        <i class="fas fa-sort-amount-up"></i>
+                        <input type="text" name="quantities[]" placeholder="Qty" required />
+                    </div>
+                </div>
+                <div class="food-row">
+                    <div class="input-with-icon">
+                        <i class="fas fa-sticky-note"></i>
+                        <input type="text" name="instructions[]" placeholder="Special instructions" />
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+            setTimeout(() => newItem.querySelector('input')?.focus(), 100);
+        }
+
+        function removeItem(btn) {
+            btn.closest('.food-item')?.remove();
+        }
+
+        function updateProgress() {
+            const filled = Array.from(document.querySelectorAll('input,select,textarea'))
+                .filter(i => i.value && i.type !== 'hidden').length;
+            const total = document.querySelectorAll('input,select,textarea').length;
+            document.querySelector('.progress').style.width = Math.min((filled / total) * 100, 100) + '%';
+        }
+
+        // ============================================================
+        // 13.  "USE YOUR LOCATION" BUTTON
+        // ============================================================
+        document.getElementById('useCurrentLocationBtn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        setDropoffLocation(lat, lng);
+                        map.flyTo([lat, lng], 15, { duration: 1.5 });
+                        setSelectionMode('dropoff');
+                        // Also show a marker
+                        const marker = L.marker([lat, lng], {
+                            icon: L.divIcon({
+                                html: '<div style="background-color:#2196F3;width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(map).bindPopup('Your location').openPopup();
+                        setTimeout(() => map.removeLayer(marker), 5000);
+                    },
+                    (error) => {
+                        alert('Unable to retrieve your location. Please check GPS settings.');
+                    }
+                );
+            } else {
+                alert('Geolocation not supported.');
+            }
         });
 
-        window.onload = function() { initMap(); updateProgress(); updateRestaurantDropdown('fast_food'); };
+        // ============================================================
+        // 14.  MENU BUTTON
+        // ============================================================
+        document.getElementById('openMenuBtn').addEventListener('click', function() {
+            if (selectedRestaurantId) {
+                openMenuModal(selectedRestaurantId);
+            } else {
+                alert('Please select a restaurant first.');
+            }
+        });
+
+        // ============================================================
+        // 15.  FORM SUBMIT
+        // ============================================================
+        document.getElementById('foodDeliveryForm').addEventListener('submit', function(e) {
+            const restPref = document.getElementById('restaurant_preference_hidden').value;
+            if (!restPref) {
+                alert('Please select a restaurant.');
+                e.preventDefault();
+                return false;
+            }
+            if (restPref === 'other' && !document.getElementById('other_restaurant_name').value.trim()) {
+                alert('Please specify the restaurant name.');
+                e.preventDefault();
+                return false;
+            }
+            if (!document.getElementById('delivery_address').value.trim()) {
+                alert('Please set a delivery address on the map.');
+                e.preventDefault();
+                return false;
+            }
+            let hasItem = false;
+            document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+            if (!hasItem) {
+                alert('Please add at least one food item.');
+                e.preventDefault();
+                return false;
+            }
+            const price = parseFloat(document.getElementById('service_price').value);
+            if (isNaN(price) || price < 0.50) {
+                alert('Service price must be at least $0.50.');
+                e.preventDefault();
+                return false;
+            }
+            if (!document.getElementById('phone_number').value.trim()) {
+                alert('Please enter your phone number.');
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // ============================================================
+        // 16.  MODAL CLOSE ON OVERLAY
+        // ============================================================
+        document.getElementById('menuModal').addEventListener('click', function(e) {
+            if (e.target === this) closeMenuModal();
+        });
+        document.getElementById('branchModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBranchModal();
+        });
+
+        // ============================================================
+        // 17.  INIT
+        // ============================================================
+        window.onload = function() {
+            initMap();
+            renderBrands();
+            updateProgress();
+            document.getElementById('other_restaurant_input').classList.remove('expanded');
+            document.getElementById('menuBtnContainer').style.display = 'none';
+            renderMainCart();
+            // Ensure "Use your location" button works
+            console.log('Food Delivery ready — Use your location button is active.');
+        };
     </script>
 </body>
 </html>

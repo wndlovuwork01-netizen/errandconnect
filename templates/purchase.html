@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ErrandConnect - General Purchasing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <style>
+        /* ===== ROOT ===== */
         :root {
             --primary: #4CAF50;
             --primary-light: #66BB6A;
@@ -47,6 +48,7 @@
             min-height: 100vh;
         }
 
+        /* ===== FIXED TOP BAR ===== */
         .fixed-service-bar {
             position: fixed;
             top: 0;
@@ -62,7 +64,6 @@
             height: 48px;
             border-bottom: 1px solid #e0e0e0;
         }
-
         .service-info {
             display: flex;
             align-items: center;
@@ -70,7 +71,6 @@
             flex: 1;
             min-width: 0;
         }
-
         .service-icon {
             font-size: 18px;
             background: var(--gradient);
@@ -83,18 +83,15 @@
             justify-content: center;
             flex-shrink: 0;
         }
-
         .service-text h3 {
             font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .service-text p {
             display: none;
         }
-
         .estimated-fee-display {
             background: var(--gradient);
             color: white;
@@ -105,7 +102,6 @@
             min-width: 85px;
             text-align: center;
         }
-
         .fee-amount {
             font-size: 14px;
             font-weight: 700;
@@ -116,48 +112,12 @@
             padding-bottom: 20px;
         }
 
-        .mobile-header {
-            background: var(--gradient);
-            color: white;
-            padding: 12px 15px;
-            text-align: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .logo-icon {
-            background: rgba(255, 255, 255, 0.2);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
-
-        .service-tag {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 15px;
-            font-size: 10px;
-        }
-
+        /* ===== MAP ===== */
         #map {
             height: 280px;
             width: 100%;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .map-controls {
             display: flex;
@@ -187,7 +147,7 @@
             background: #2196F3;
         }
         .map-hint {
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 5px 12px;
             border-radius: 20px;
@@ -205,7 +165,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
             border: 1px solid #e9e9e9;
         }
         .route-info-item {
@@ -226,17 +186,41 @@
             font-size: 9px;
         }
 
+        /* ===== LOCATE CONTROL (Leaflet) ===== */
+        .leaflet-control-locate {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .leaflet-control-locate a {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 18px;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .leaflet-control-locate.active a {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path fill="%234CAF50" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>');
+        }
+
+        /* ===== FORM ===== */
         .form-section {
             padding: 15px;
         }
-
         .progress-bar {
             height: 3px;
             background: #e0e0e0;
             border-radius: 2px;
             margin: 15px 0 20px;
         }
-
         .progress {
             height: 100%;
             background: var(--gradient);
@@ -244,7 +228,6 @@
             border-radius: 2px;
             transition: width 0.3s ease;
         }
-
         h2 {
             font-size: 16px;
             margin: 15px 0 12px;
@@ -254,22 +237,44 @@
             display: flex;
             gap: 8px;
         }
-
         .form-group {
             margin-bottom: 16px;
         }
-
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
             font-size: 13px;
         }
-
+        .label-with-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .label-with-btn label {
+            margin-bottom: 0;
+        }
+        .location-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .location-btn:active {
+            transform: scale(0.95);
+        }
         .input-with-icon {
             position: relative;
         }
-
         .input-with-icon i {
             position: absolute;
             left: 12px;
@@ -278,8 +283,9 @@
             color: var(--primary);
             font-size: 14px;
         }
-
-        input, select, textarea {
+        input,
+        select,
+        textarea {
             width: 100%;
             padding: 12px 12px 12px 38px;
             border: 1px solid #ddd;
@@ -287,11 +293,9 @@
             font-size: 14px;
             background: white;
         }
-
         textarea {
             padding: 12px;
         }
-
         .purchase-type-selector {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -308,7 +312,7 @@
         }
         .purchase-type.active {
             border-color: var(--primary);
-            background: rgba(76,175,80,0.1);
+            background: rgba(76, 175, 80, 0.1);
         }
         .store-suggestion-tags {
             display: flex;
@@ -323,6 +327,9 @@
             padding: 4px 10px;
             font-size: 11px;
             cursor: pointer;
+        }
+        .store-tag:active {
+            transform: scale(0.95);
         }
         .purchase-item {
             display: flex;
@@ -364,8 +371,13 @@
             width: 100%;
             margin-bottom: 12px;
             font-weight: 600;
+            border: none;
         }
-        .budget-weight-row, .collection-row {
+        .add-item:active {
+            transform: scale(0.98);
+        }
+        .budget-weight-row,
+        .collection-row {
             display: grid;
             grid-template-columns: 1fr;
             gap: 12px;
@@ -385,32 +397,16 @@
             flex: 1;
             margin-bottom: 0;
         }
-        .file-upload-wrapper {
-            position: relative;
-        }
-        .file-upload-input {
-            width: 100%;
-            padding: 12px 12px 12px 38px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            position: relative;
-        }
-        .file-name {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 10px;
-            color: var(--primary-dark);
-            max-width: 100px;
+        .expanding-input {
+            max-height: 0;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            background: rgba(76,175,80,0.1);
-            padding: 2px 6px;
-            border-radius: 12px;
+            transition: 0.3s;
+            opacity: 0;
+        }
+        .expanding-input.expanded {
+            max-height: 80px;
+            opacity: 1;
+            margin-top: 8px;
         }
         .delivery-method-indicator {
             background: var(--light);
@@ -441,7 +437,7 @@
             background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
         }
         .info-tip {
-            background: rgba(76,175,80,0.1);
+            background: rgba(76, 175, 80, 0.1);
             border-left: 3px solid var(--primary);
             padding: 8px 12px;
             font-size: 11px;
@@ -451,34 +447,195 @@
             align-items: flex-start;
             gap: 8px;
         }
-        .expanding-input {
-            max-height: 0;
+
+        /* ===== STORE CAROUSEL ===== */
+        .brands-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 10px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .brands-carousel::-webkit-scrollbar {
+            height: 4px;
+        }
+        .brands-carousel::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 2px;
+        }
+        .brand-card {
+            flex: 0 0 80px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.2s, transform 0.1s;
+            scroll-snap-align: start;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-card:active {
+            transform: scale(0.95);
+        }
+        .brand-card.selected {
+            border-color: var(--primary);
+            background: #f0fdf0;
+        }
+        .brand-card img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+            margin-bottom: 4px;
+            border-radius: 8px;
+        }
+        .brand-card span {
+            font-size: 11px;
+            display: block;
+            white-space: nowrap;
             overflow: hidden;
-            transition: 0.3s;
-            opacity: 0;
+            text-overflow: ellipsis;
+            max-width: 70px;
         }
-        .expanding-input.expanded {
-            max-height: 80px;
-            opacity: 1;
-            margin-top: 8px;
+        .brand-card .brand-name {
+            font-weight: 600;
         }
+        #selectedBrandDisplay {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        /* ===== BRANCH MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .branch-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.1s;
+            border-radius: 6px;
+        }
+        .branch-item:active {
+            background: #f0f0f0;
+        }
+        .branch-item .branch-city {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .branch-item .branch-address {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (min-width: 768px) {
-            body { padding: 10px; display: flex; justify-content: center; }
-            .container { max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow); }
-            .budget-weight-row, .collection-row { grid-template-columns: 1fr 1fr; }
-            .delivery-row { grid-template-columns: 1fr 1fr; }
-            .purchase-item { flex-direction: row; align-items: center; }
-            .purchase-row { flex: 1; }
-            .item-actions { margin-left: 10px; }
+            body {
+                padding: 10px;
+                display: flex;
+                justify-content: center;
+            }
+            .container {
+                max-width: 500px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+            }
+            .budget-weight-row,
+            .collection-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .delivery-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .purchase-item {
+                flex-direction: row;
+                align-items: center;
+            }
+            .purchase-row {
+                flex: 1;
+            }
+            .item-actions {
+                margin-left: 10px;
+            }
+            .brand-card {
+                flex: 0 0 90px;
+            }
         }
         @media (max-width: 320px) {
-            .route-info-value { font-size: 11px; }
-            .map-btn { font-size: 11px; padding: 8px; }
-            .purchase-type-selector { grid-template-columns: 1fr; }
+            .route-info-value {
+                font-size: 11px;
+            }
+            .map-btn {
+                font-size: 11px;
+                padding: 8px;
+            }
+            .purchase-type-selector {
+                grid-template-columns: 1fr;
+            }
+            .brand-card {
+                flex: 0 0 70px;
+            }
+            .brand-card img {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- ===== FIXED TOP BAR ===== -->
     <div class="fixed-service-bar">
         <div class="service-info">
             <div class="service-icon"><i class="fas fa-shopping-bag"></i></div>
@@ -490,73 +647,463 @@
         </div>
     </div>
 
+    <!-- ===== MAIN FORM ===== -->
     <div class="form-section">
         <div class="progress-bar"><div class="progress"></div></div>
 
+        <!-- MAP SECTION -->
         <div class="map-wrapper">
             <div class="map-controls">
-                <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')"><i class="fas fa-store"></i> Set Store</button>
-                <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')"><i class="fas fa-home"></i> Set Delivery</button>
+                <button type="button" class="map-btn active" id="selectPickupBtn" onclick="setSelectionMode('pickup')">
+                    <i class="fas fa-store"></i> Set Store
+                </button>
+                <button type="button" class="map-btn" id="selectDropoffBtn" onclick="setSelectionMode('dropoff')">
+                    <i class="fas fa-home"></i> Set Delivery
+                </button>
             </div>
             <div id="mapHint" class="map-hint">Tap map to set location</div>
             <div id="map"></div>
             <div class="route-info-bar" id="routeInfoBar">
-                <div class="route-info-item"><div class="route-info-label">Distance</div><div class="route-info-value" id="infoDistance">0 <small>km</small></div></div>
-                <div class="route-info-item"><div class="route-info-label">Est. Time</div><div class="route-info-value" id="infoTime">0 <small>min</small></div></div>
-                <div class="route-info-item"><div class="route-info-label">Est. Fee</div><div class="route-info-value" id="infoFee">$0.00</div></div>
+                <div class="route-info-item">
+                    <div class="route-info-label">Distance</div>
+                    <div class="route-info-value" id="infoDistance">0 <small>km</small></div>
+                </div>
+                <div class="route-info-item">
+                    <div class="route-info-label">Est. Time</div>
+                    <div class="route-info-value" id="infoTime">0 <small>min</small></div>
+                </div>
+                <div class="route-info-item">
+                    <div class="route-info-label">Est. Fee</div>
+                    <div class="route-info-value" id="infoFee">$0.00</div>
+                </div>
             </div>
         </div>
 
         <form method="post" action="{{ url_for('create_purchase_errand') }}" id="purchaseForm">
-            <input type="hidden" id="pickup_lat" name="pickup_lat">
-            <input type="hidden" id="pickup_lon" name="pickup_lon">
-            <input type="hidden" id="dropoff_lat" name="dropoff_lat">
-            <input type="hidden" id="dropoff_lon" name="dropoff_lon">
-            <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00">
-            <input type="hidden" id="distance_km_hidden" name="distance_km">
+            <input type="hidden" id="pickup_lat" name="pickup_lat" />
+            <input type="hidden" id="pickup_lon" name="pickup_lon" />
+            <input type="hidden" id="dropoff_lat" name="dropoff_lat" />
+            <input type="hidden" id="dropoff_lon" name="dropoff_lon" />
+            <input type="hidden" id="estimated_fee_hidden" name="estimated_fee" value="0.00" />
+            <input type="hidden" id="distance_km_hidden" name="distance_km" />
+            <input type="hidden" id="store_preference_hidden" name="store_preference" value="" />
 
             <h2><i class="fas fa-tags"></i> Purchase Type</h2>
             <div class="purchase-type-selector">
-                <div class="purchase-type active" data-type="retail" onclick="selectPurchaseType(this, 'retail')"><i class="fas fa-store"></i><span>Retail Store</span></div>
-                <div class="purchase-type" data-type="pharmacy" onclick="selectPurchaseType(this, 'pharmacy')"><i class="fas fa-prescription-bottle"></i><span>Pharmacy</span></div>
-                <div class="purchase-type" data-type="other" onclick="selectPurchaseType(this, 'other')"><i class="fas fa-box"></i><span>Other Items</span></div>
+                <div class="purchase-type active" data-type="retail" onclick="selectPurchaseType(this, 'retail')">
+                    <i class="fas fa-store"></i><span>Retail Store</span>
+                </div>
+                <div class="purchase-type" data-type="pharmacy" onclick="selectPurchaseType(this, 'pharmacy')">
+                    <i class="fas fa-prescription-bottle"></i><span>Pharmacy</span>
+                </div>
+                <div class="purchase-type" data-type="other" onclick="selectPurchaseType(this, 'other')">
+                    <i class="fas fa-box"></i><span>Other Items</span>
+                </div>
             </div>
 
-            <h2><i class="fas fa-map-marker-alt"></i> Pickup/Delivery Location</h2>
-            <div class="form-group"><label for="store_name">Store / Business Name</label><div class="input-with-icon"><i class="fas fa-store-alt"></i><input type="text" id="store_name" name="store_name" placeholder="Where should we purchase from?" required></div><div class="store-suggestions"><div class="store-suggestion-tags"><span class="store-tag" onclick="setStoreName('Walmart')">Walmart</span><span class="store-tag" onclick="setStoreName('Target')">Target</span><span class="store-tag" onclick="setStoreName('CVS Pharmacy')">CVS</span><span class="store-tag" onclick="setStoreName('Walgreens')">Walgreens</span><span class="store-tag" onclick="setStoreName('Best Buy')">Best Buy</span><span class="store-tag" onclick="setStoreName('Home Depot')">Home Depot</span></div></div></div>
-            <div class="form-group"><label for="store_location">Store Address</label><div class="input-with-icon"><i class="fas fa-map-pin"></i><input type="text" id="store_location" name="store_location" placeholder="Enter store address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-            <div class="form-group"><label for="delivery_address">Delivery Address</label><div class="input-with-icon"><i class="fas fa-home"></i><input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')"></div></div>
-            <div class="delivery-row"><div class="input-with-icon"><i class="fas fa-clock"></i><select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()"><option value="asap">As soon as possible</option><option value="morning">Morning (8AM-12PM)</option><option value="afternoon">Afternoon (12PM-5PM)</option><option value="evening">Evening (5PM-9PM)</option><option value="specific">Specific time</option></select></div></div>
-            <div id="specific_time_input" class="expanding-input"><div class="input-with-icon"><i class="fas fa-clock"></i><input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)"></div></div>
+            <h2><i class="fas fa-store-alt"></i> Popular Stores</h2>
+            <!-- ===== STORE CAROUSEL ===== -->
+            <div class="form-group">
+                <label>Select a store</label>
+                <div class="brands-carousel" id="brandsCarousel"></div>
+                <div id="selectedBrandDisplay"></div>
+            </div>
+
+            <!-- Other Store Input -->
+            <div id="other_store_input" class="expanding-input">
+                <div class="input-with-icon">
+                    <i class="fas fa-edit"></i>
+                    <input type="text" id="other_store_name" placeholder="Enter store name" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="store_name">Store / Business Name</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-store-alt"></i>
+                    <input type="text" id="store_name" name="store_name" placeholder="Where should we purchase from?" required />
+                </div>
+                <div class="store-suggestion-tags" id="suggestionTags">
+                    <!-- populated dynamically -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="store_location">Store Address</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-map-pin"></i>
+                    <input type="text" id="store_location" name="store_location" placeholder="Enter store address" required readonly onfocus="this.removeAttribute('readonly')" />
+                </div>
+            </div>
+
+            <!-- Delivery Address with "Use your location" button -->
+            <div class="form-group">
+                <div class="label-with-btn">
+                    <label for="delivery_address">Delivery Address</label>
+                    <button type="button" class="location-btn" id="useCurrentLocationBtn">
+                        <i class="fas fa-crosshairs"></i> Use your location
+                    </button>
+                </div>
+                <div class="input-with-icon">
+                    <i class="fas fa-home"></i>
+                    <input type="text" id="delivery_address" name="delivery_address" placeholder="Delivery address" required readonly onfocus="this.removeAttribute('readonly')" />
+                </div>
+            </div>
+
+            <div class="delivery-row">
+                <div class="input-with-icon">
+                    <i class="fas fa-clock"></i>
+                    <select id="delivery_time" name="delivery_time" onchange="toggleSpecificTimeInput()">
+                        <option value="asap">As soon as possible</option>
+                        <option value="morning">Morning (8AM-12PM)</option>
+                        <option value="afternoon">Afternoon (12PM-5PM)</option>
+                        <option value="evening">Evening (5PM-9PM)</option>
+                        <option value="specific">Specific time</option>
+                    </select>
+                </div>
+            </div>
+            <div id="specific_time_input" class="expanding-input">
+                <div class="input-with-icon">
+                    <i class="fas fa-clock"></i>
+                    <input type="text" id="specific_time" name="specific_time" placeholder="Enter time (e.g., 2:30 PM)" />
+                </div>
+            </div>
+
+            <div id="deliveryMethodIndicator" class="delivery-method-indicator" style="display:none;">
+                <div class="delivery-method-icon"><i id="deliveryMethodIcon" class="fas fa-walking"></i></div>
+                <div class="delivery-method-text">
+                    <h4 id="deliveryMethodTitle">Method</h4>
+                    <p id="deliveryMethodDescription">--</p>
+                </div>
+            </div>
+
             <div class="section-divider"></div>
 
             <h2><i class="fas fa-list-check"></i> What to Purchase</h2>
-            <div class="form-group"><label>Purchase Items</label><div class="info-tip"><i class="fas fa-info-circle"></i> Be as specific as possible. Include brand, size, color, etc.</div><div id="items-container"><div class="purchase-item"><div class="purchase-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-cube"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="purchase-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand(optional)"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div></div></div><button type="button" class="add-item" onclick="addItem()"><i class="fas fa-plus"></i> Add Another Item</button></div>
+            <div class="form-group">
+                <label>Purchase Items</label>
+                <div class="info-tip">
+                    <i class="fas fa-info-circle"></i>
+                    Be as specific as possible. Include brand, size, color, etc.
+                </div>
+                <div id="items-container">
+                    <div class="purchase-item">
+                        <div class="purchase-row">
+                            <div class="input-with-icon" style="flex:2;">
+                                <i class="fas fa-cube"></i>
+                                <input type="text" name="items[]" placeholder="Item description" required />
+                            </div>
+                            <div class="input-with-icon" style="flex:1;">
+                                <i class="fas fa-hashtag"></i>
+                                <input type="text" name="quantities[]" placeholder="Qty" required />
+                            </div>
+                        </div>
+                        <div class="purchase-row">
+                            <div class="input-with-icon" style="flex:1;">
+                                <i class="fas fa-tag"></i>
+                                <input type="text" name="brands[]" placeholder="Brand (optional)" />
+                            </div>
+                            <div class="input-with-icon" style="flex:1;">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0" />
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="add-item" onclick="addItem()">
+                    <i class="fas fa-plus"></i> Add Another Item
+                </button>
+            </div>
+
             <div class="section-divider"></div>
 
-            <div class="form-group"><label for="payment_method">Payment Method</label><div class="input-with-icon"><i class="fas fa-credit-card"></i><select id="payment_method" name="payment_method"><option value="cash">Cash On Delivery</option><option value="runner_card">Mobile payment</option></select></div></div>
+            <div class="form-group">
+                <label for="payment_method">Payment Method</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-credit-card"></i>
+                    <select id="payment_method" name="payment_method">
+                        <option value="cash">Cash On Delivery</option>
+                        <option value="runner_card">Mobile payment</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="section-divider"></div>
 
             <h2>Additional Information</h2>
-            <div class="form-group"><textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any other important details about your purchase..."></textarea></div>
+            <div class="form-group">
+                <textarea id="special_instructions" name="special_instructions" rows="3" placeholder="Any other important details about your purchase..."></textarea>
+            </div>
+
             <div class="section-divider"></div>
 
             <h2><i class="fas fa-user-circle"></i> Contact & Pricing</h2>
             <div class="service-phone-row">
-                <div class="form-group"><label>Service Price ($)</label><div class="input-with-icon"><i class="fas fa-hand-holding-usd"></i><input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.75" required></div></div>
-                <div class="form-group"><label>Your Phone Number</label><div class="input-with-icon"><i class="fas fa-phone"></i><input type="tel" id="contact_number" name="contact_number" placeholder="Your phone number" required></div></div>
+                <div class="form-group">
+                    <label>Service Price ($)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <input type="number" id="service_price" name="service_price" placeholder="Your price" step="0.01" min="0.75" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Your Phone Number</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="contact_number" name="contact_number" placeholder="Your phone number" required />
+                    </div>
+                </div>
             </div>
+
             <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Submit Purchase Request</button>
         </form>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- ===== BRANCH MODAL ===== -->
+    <div class="modal-overlay" id="branchModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBranchModal()">&times;</span>
+            <div class="modal-title" id="modalTitle">Select Branch</div>
+            <div id="branchList"></div>
+        </div>
+    </div>
+
+    <!-- ===== LEAFLET ===== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
     <script>
+        // ============================================================
+        //  1.  STORE DATA (Zimbabwe-based, categorized by purchase type)
+        // ============================================================
+        const storeLists = {
+            retail: [
+                { id: 'ok_zimbabwe', name: 'OK Zimbabwe', logo: 'https://via.placeholder.com/80x80?text=OK' },
+                { id: 'pick_n_pay', name: 'Pick n Pay', logo: 'https://via.placeholder.com/80x80?text=PnP' },
+                { id: 'game', name: 'Game', logo: 'https://via.placeholder.com/80x80?text=Game' },
+                { id: 'edgars', name: 'Edgars', logo: 'https://via.placeholder.com/80x80?text=Edgars' },
+                { id: 'tm_supermarket', name: 'TM Supermarket', logo: 'https://via.placeholder.com/80x80?text=TM' },
+                { id: 'spar', name: 'Spar', logo: 'https://via.placeholder.com/80x80?text=Spar' },
+                { id: 'walmart', name: 'Walmart', logo: 'https://via.placeholder.com/80x80?text=WMT' },
+                { id: 'target', name: 'Target', logo: 'https://via.placeholder.com/80x80?text=TGT' }
+            ],
+            pharmacy: [
+                { id: 'cvs', name: 'CVS Pharmacy', logo: 'https://via.placeholder.com/80x80?text=CVS' },
+                { id: 'walgreens', name: 'Walgreens', logo: 'https://via.placeholder.com/80x80?text=Walg' },
+                { id: 'rite_aid', name: 'Rite Aid', logo: 'https://via.placeholder.com/80x80?text=Rite' },
+                { id: 'local_pharm', name: 'Local Pharmacy', logo: 'https://via.placeholder.com/80x80?text=Pharm' },
+                { id: 'medicines_mart', name: 'Medicines Mart', logo: 'https://via.placeholder.com/80x80?text=MedM' }
+            ],
+            other: [
+                { id: 'specific_address', name: 'Specific Address', logo: 'https://via.placeholder.com/80x80?text=Addr' },
+                { id: 'online_pickup', name: 'Online Pickup', logo: 'https://via.placeholder.com/80x80?text=Online' },
+                { id: 'local_business', name: 'Local Business', logo: 'https://via.placeholder.com/80x80?text=Biz' },
+                { id: 'specialty_store', name: 'Specialty Store', logo: 'https://via.placeholder.com/80x80?text=Spec' }
+            ]
+        };
+
+        // Branch data for each store (only for some, fallback for others)
+        const storeBranches = {
+            'ok_zimbabwe': [
+                { city: 'Harare', address: '123 Samora Machel Ave, Harare', lat: -17.8252, lon: 31.0335 },
+                { city: 'Bulawayo', address: '456 2nd Ave, Bulawayo', lat: -20.1468, lon: 28.5848 },
+                { city: 'Gweru', address: '789 3rd St, Gweru', lat: -19.4610, lon: 29.8146 },
+                { city: 'Mutare', address: '101 Main St, Mutare', lat: -18.9706, lon: 32.6706 }
+            ],
+            'pick_n_pay': [
+                { city: 'Harare', address: '202 Nelson Mandela Ave, Harare', lat: -17.8292, lon: 31.0522 },
+                { city: 'Bulawayo', address: '303 5th Ave, Bulawayo', lat: -20.1542, lon: 28.5824 },
+                { city: 'Chitungwiza', address: '404 Zengeza, Chitungwiza', lat: -17.9931, lon: 31.0475 }
+            ],
+            'game': [
+                { city: 'Harare', address: '505 Jason Moyo, Harare', lat: -17.8179, lon: 31.0442 },
+                { city: 'Bulawayo', address: '606 4th Ave, Bulawayo', lat: -20.1500, lon: 28.5800 },
+                { city: 'Gweru', address: '707 6th St, Gweru', lat: -19.4650, lon: 29.8180 }
+            ],
+            'edgars': [
+                { city: 'Harare', address: '808 Samora Machel, Harare', lat: -17.8280, lon: 31.0450 },
+                { city: 'Bulawayo', address: '909 Robert Mugabe Way, Bulawayo', lat: -20.1600, lon: 28.5800 },
+                { city: 'Mutare', address: '1010 Herbert Chitepo, Mutare', lat: -18.9720, lon: 32.6720 }
+            ],
+            'tm_supermarket': [
+                { city: 'Harare', address: '1111 Josiah Tongogara, Harare', lat: -17.8260, lon: 31.0380 },
+                { city: 'Bulawayo', address: '1212 6th Ave, Bulawayo', lat: -20.1520, lon: 28.5830 },
+                { city: 'Chitungwiza', address: '1313 Zengeza, Chitungwiza', lat: -17.9950, lon: 31.0490 }
+            ],
+            'spar': [
+                { city: 'Harare', address: '1414 Causeway, Harare', lat: -17.8300, lon: 31.0500 },
+                { city: 'Bulawayo', address: '1515 3rd Ave, Bulawayo', lat: -20.1480, lon: 28.5850 },
+                { city: 'Gweru', address: '1616 8th St, Gweru', lat: -19.4670, lon: 29.8200 }
+            ],
+            // Fallback for other stores (empty branches)
+            'walmart': [],
+            'target': [],
+            'cvs': [],
+            'walgreens': [],
+            'rite_aid': [],
+            'local_pharm': [],
+            'medicines_mart': [],
+            'specific_address': [],
+            'online_pickup': [],
+            'local_business': [],
+            'specialty_store': []
+        };
+
+        // ============================================================
+        //  2.  STATE
+        // ============================================================
         let map, pickupMarker, dropoffMarker, routeLine;
         let selectionMode = 'pickup';
+        let selectedStoreId = null;
+        let lastDistanceKm = 0;
+        let shopMarkers = [];
+        let selectedPurchaseType = 'retail';
+
+        // ============================================================
+        //  3.  MAP LOGIC (same as before)
+        // ============================================================
+        const iconColors = {
+            supermarket: '#4CAF50',
+            grocery: '#FF9800',
+            pharmacy: '#E91E63',
+            department_store: '#2196F3',
+            hardware: '#795548',
+            shop: '#607D8B',
+            default: '#888888'
+        };
+
+        function getIconForType(tags) {
+            const shop = tags.shop || '';
+            const amenity = tags.amenity || '';
+            if (shop === 'supermarket') return { color: iconColors.supermarket, icon: 'fas fa-store' };
+            if (shop === 'grocery') return { color: iconColors.grocery, icon: 'fas fa-shopping-basket' };
+            if (amenity === 'pharmacy' || shop === 'pharmacy') return { color: iconColors.pharmacy, icon: 'fas fa-prescription-bottle' };
+            if (shop === 'department_store') return { color: iconColors.department_store, icon: 'fas fa-building' };
+            if (shop === 'hardware') return { color: iconColors.hardware, icon: 'fas fa-tools' };
+            if (shop === 'clothes') return { color: iconColors.default, icon: 'fas fa-tshirt' };
+            if (shop === 'electronics') return { color: iconColors.default, icon: 'fas fa-laptop' };
+            if (shop === 'furniture') return { color: iconColors.default, icon: 'fas fa-couch' };
+            return { color: iconColors.default, icon: 'fas fa-map-marker-alt' };
+        }
+
+        function fetchPOIsInViewport() {
+            if (!map) return;
+            const bounds = map.getBounds();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+            const bbox = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
+            const query =
+                `[out:json];(node["shop"~"supermarket|grocery|department_store|hardware|clothes|electronics|furniture|pharmacy|convenience"](${bbox});way["shop"~"supermarket|grocery|department_store|hardware|clothes|electronics|furniture|pharmacy|convenience"](${bbox});node["amenity"~"pharmacy"](${bbox});way["amenity"~"pharmacy"](${bbox}););out body;>;out skel qt;`;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            fetch(url).then(r => r.json()).then(data => {
+                const elements = data.elements || [];
+                const seen = new Set();
+                const newMarkers = [];
+                elements.forEach(el => {
+                    if (el.type !== 'node' && el.type !== 'way') return;
+                    let lat, lon;
+                    if (el.type === 'node') { lat = el.lat;
+                        lon = el.lon; } else if (el.type === 'way' && el.center) { lat = el.center.lat;
+                        lon = el.center.lon; } else return;
+                    if (seen.has(el.id)) return;
+                    seen.add(el.id);
+                    const name = el.tags?.name || '';
+                    if (!name) return;
+                    const typeInfo = getIconForType(el.tags);
+                    const markerHtml =
+                        `<div style="background-color:${typeInfo.color};width:26px;height:26px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"><i class="${typeInfo.icon}" style="font-size:12px;"></i></div>`;
+                    const marker = L.marker([lat, lon], {
+                        icon: L.divIcon({ html: markerHtml, iconSize: [26, 26], iconAnchor: [13, 26],
+                            popupAnchor: [0, -13] })
+                    }).addTo(map);
+                    const address = el.tags?.['addr:full'] || el.tags?.['addr:street'] || '';
+                    const popupContent =
+                        `<strong>${name}</strong><br>${address}<br><button class="shop-select-btn" data-lat="${lat}" data-lng="${lon}" data-name="${name.replace(/'/g,"\\'")}" data-addr="${address.replace(/'/g,"\\'")}">Select this store</button>`;
+                    marker.bindPopup(popupContent);
+                    marker.on('popupopen', function() {
+                        document.querySelector('.shop-select-btn')?.addEventListener('click', function(
+                        e) {
+                            const lat = parseFloat(this.dataset.lat);
+                            const lng = parseFloat(this.dataset.lng);
+                            const name = this.dataset.name;
+                            const addr = this.dataset.addr;
+                            // Try to match with known stores (search all categories)
+                            const allStores = Object.values(storeLists).flat();
+                            const matched = allStores.find(s => s.name.toLowerCase() === name
+                            .toLowerCase());
+                            if (matched) {
+                                selectStore(matched);
+                                const branches = storeBranches[matched.id] || [];
+                                const branch = branches.find(b => Math.abs(b.lat - lat) < 0.01 && Math.abs(
+                                    b.lon - lng) < 0.01) || branches[0];
+                                if (branch) {
+                                    selectBranch(matched, branch);
+                                } else {
+                                    setPickupLocation(lat, lng);
+                                    document.getElementById('store_location').value = addr || name;
+                                    document.getElementById('selectedBrandDisplay').innerText =
+                                        `Selected: ${name}`;
+                                    selectedStoreId = matched.id;
+                                    document.getElementById('store_preference_hidden').value = matched.id;
+                                }
+                            } else {
+                                // Custom store
+                                document.getElementById('store_preference_hidden').value = 'other';
+                                document.getElementById('other_store_input').classList.add('expanded');
+                                document.getElementById('other_store_name').value = name;
+                                document.getElementById('store_location').value = addr || name;
+                                setPickupLocation(lat, lng);
+                                document.getElementById('selectedBrandDisplay').innerText =
+                                    `Selected: ${name} (custom)`;
+                                selectedStoreId = null;
+                            }
+                            map.closePopup();
+                        });
+                    });
+                    newMarkers.push(marker);
+                });
+                shopMarkers.forEach(m => map.removeLayer(m));
+                shopMarkers = newMarkers;
+            }).catch(() => {});
+        }
+
+        function addLocationControl() {
+            const controlDiv = L.DomUtil.create('div', 'leaflet-control-locate');
+            const link = L.DomUtil.create('a', '', controlDiv);
+            link.href = '#';
+            link.title = 'Go to my current location';
+            link.onclick = function(e) {
+                e.preventDefault();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const { latitude, longitude } = position.coords;
+                        map.setView([latitude, longitude], 15);
+                        fetchPOIsInViewport();
+                        setDropoffLocation(latitude, longitude);
+                        const marker = L.marker([latitude, longitude], {
+                            icon: L.divIcon({
+                                html: '<div style="background-color:#2196F3;width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(map).bindPopup('You are here').openPopup();
+                        setTimeout(() => map.removeLayer(marker), 5000);
+                    }, (error) => {
+                        alert('Unable to get your location. Please check GPS settings.');
+                    });
+                } else {
+                    alert('Geolocation not supported.');
+                }
+                return false;
+            };
+            return controlDiv;
+        }
 
         function initMap() {
-            map = L.map('map').setView([-1.2921, 36.8219], 13);
+            map = L.map('map').setView([0, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
             document.getElementById('mapHint').style.display = 'block';
             map.on('click', e => {
@@ -564,88 +1111,169 @@
                 else setDropoffLocation(e.latlng.lat, e.latlng.lng);
                 if (navigator.vibrate) navigator.vibrate(50);
             });
+            const locationControl = addLocationControl();
+            const zoomControl = document.querySelector('.leaflet-control-zoom');
+            if (zoomControl && zoomControl.parentNode) {
+                zoomControl.parentNode.insertBefore(locationControl, zoomControl.nextSibling);
+            } else {
+                map.getContainer().appendChild(locationControl);
+            }
+            map.on('moveend', function() {
+                if (window._poiTimeout) clearTimeout(window._poiTimeout);
+                window._poiTimeout = setTimeout(() => { fetchPOIsInViewport(); }, 500);
+            });
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    let { latitude, longitude } = pos.coords;
-                    map.setView([latitude, longitude], 13);
-                    if (!pickupMarker) setPickupLocation(latitude, longitude);
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const { latitude, longitude } = position.coords;
+                    map.setView([latitude, longitude], 12);
+                    setDropoffLocation(latitude, longitude);
+                    fetchPOIsInViewport();
+                }, (error) => {
+                    map.setView([-1.2921, 36.8219], 12);
+                    fetchPOIsInViewport();
                 });
+            } else {
+                map.setView([-1.2921, 36.8219], 12);
+                fetchPOIsInViewport();
             }
         }
 
         function setSelectionMode(mode) {
             selectionMode = mode;
-            let p = document.getElementById('selectPickupBtn'), d = document.getElementById('selectDropoffBtn'), hint = document.getElementById('mapHint');
+            const p = document.getElementById('selectPickupBtn');
+            const d = document.getElementById('selectDropoffBtn');
+            const hint = document.getElementById('mapHint');
             p.classList.toggle('active', mode === 'pickup');
             d.classList.toggle('active', mode === 'dropoff');
             d.classList.toggle('dropoff', mode === 'dropoff');
-            hint.textContent = mode === 'pickup' ? "Tap map to set Store" : "Tap map to set Delivery";
-            hint.style.background = mode === 'pickup' ? "rgba(76,175,80,0.9)" : "rgba(33,150,243,0.9)";
+            hint.textContent = mode === 'pickup' ? 'Tap map to set Store' : 'Tap map to set Delivery';
+            hint.style.background = mode === 'pickup' ? 'rgba(76,175,80,0.9)' : 'rgba(33,150,243,0.9)';
             hint.style.display = 'block';
         }
 
         function setPickupLocation(lat, lng) {
             if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-store'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Store");
-            document.getElementById('pickup_lat').value = lat; document.getElementById('pickup_lon').value = lng;
-            reverseGeocode(lat, lng, 'store_location'); updateRoute();
+            pickupMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    html: "<div style='background:#4CAF50;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-store'></i></div>",
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 28]
+                })
+            }).addTo(map).bindPopup('Store');
+            document.getElementById('pickup_lat').value = lat;
+            document.getElementById('pickup_lon').value = lng;
+            reverseGeocode(lat, lng, 'store_location');
+            updateRoute();
             if (!dropoffMarker) setTimeout(() => setSelectionMode('dropoff'), 1000);
         }
 
         function setDropoffLocation(lat, lng) {
             if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: L.divIcon({ html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>", iconSize: [28,28], iconAnchor: [14,28] }) }).addTo(map).bindPopup("Delivery");
-            document.getElementById('dropoff_lat').value = lat; document.getElementById('dropoff_lon').value = lng;
-            reverseGeocode(lat, lng, 'delivery_address'); updateRoute();
+            dropoffMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    html: "<div style='background:#2196F3;width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;'><i class='fas fa-home'></i></div>",
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 28]
+                })
+            }).addTo(map).bindPopup('Delivery');
+            document.getElementById('dropoff_lat').value = lat;
+            document.getElementById('dropoff_lon').value = lng;
+            reverseGeocode(lat, lng, 'delivery_address');
+            updateRoute();
         }
 
         function updateRoute() {
             if (pickupMarker && dropoffMarker) {
-                let p = pickupMarker.getLatLng(), d = dropoffMarker.getLatLng();
-                fetch(`https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`)
-                    .then(res => res.json()).then(data => {
-                        if (data.routes?.length) {
-                            let coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                const p = pickupMarker.getLatLng();
+                const d = dropoffMarker.getLatLng();
+                fetch(
+                        `https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`
+                        )
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.routes && data.routes.length) {
+                            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
                             if (routeLine) map.removeLayer(routeLine);
                             routeLine = L.polyline(coords, { color: '#4CAF50', weight: 4 }).addTo(map);
-                            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+                            map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
                             updateUIwithDistance(data.routes[0].distance / 1000);
-                        } else fallbackDistance(p, d);
-                    }).catch(() => fallbackDistance(p, d));
+                        } else {
+                            fallbackDistance(p, d);
+                        }
+                    })
+                    .catch(() => fallbackDistance(p, d));
             }
         }
 
-        function fallbackDistance(p, d) { updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng)); }
-        function haversine(lat1, lon1, lat2, lon2) { const R = 6371; let dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180; let a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
-        function reverseGeocode(lat, lng, inputId) { fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(data => { if (data.display_name) document.getElementById(inputId).value = data.display_name; }).catch(()=>{}); }
+        function fallbackDistance(p, d) {
+            updateUIwithDistance(haversine(p.lat, p.lng, d.lat, d.lng));
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function reverseGeocode(lat, lng, inputId) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById(inputId).value = data.display_name;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        // ============================================================
+        //  4.  FEE & INFO BAR
+        // ============================================================
+        function refreshFeeDisplay() {
+            updateUIwithDistance(lastDistanceKm);
+        }
 
         function updateUIwithDistance(distKm) {
+            lastDistanceKm = distKm;
             let distanceFee = 0;
-            if (distKm <= 0.5) distanceFee = 1.00; else if (distKm <= 3) distanceFee = 1.75; else if (distKm <= 10) distanceFee = 2.50; else if (distKm <= 20) distanceFee = 3.50; else distanceFee = 4.50;
-            let timeFee = getTimeFee();
-            let complexityFee = getComplexityFee();
+            if (distKm <= 0.5) distanceFee = 1.00;
+            else if (distKm <= 3) distanceFee = 1.75;
+            else if (distKm <= 10) distanceFee = 2.50;
+            else if (distKm <= 20) distanceFee = 3.50;
+            else distanceFee = 4.50;
+
+            const timeFee = getTimeFee();
+            const complexityFee = getComplexityFee();
+
             let totalItemValue = 0;
             document.querySelectorAll('input[name="prices[]"]').forEach(input => {
-                let price = parseFloat(input.value) || 0;
+                const price = parseFloat(input.value) || 0;
                 let qty = 1;
-                let qtyInput = input.closest('.purchase-item')?.querySelector('input[name="quantities[]"]');
+                const qtyInput = input.closest('.purchase-item')?.querySelector('input[name="quantities[]"]');
                 if (qtyInput) qty = parseFloat(qtyInput.value) || 1;
                 totalItemValue += price * qty;
             });
-            let serviceFee = Math.min(Math.max(totalItemValue * 0.1, 1), 10);
-            let total = Math.max(distanceFee + timeFee + complexityFee + serviceFee, 3.00);
-            let estMinutes = Math.round(distKm * 4);
+            const serviceFee = Math.min(Math.max(totalItemValue * 0.1, 1), 10);
+            const total = Math.max(distanceFee + timeFee + complexityFee + serviceFee, 3.00);
+            const estMinutes = Math.round(distKm * 4);
+
             document.getElementById('estimated_fee').innerText = '$' + total.toFixed(2);
             document.getElementById('estimated_fee_hidden').value = total.toFixed(2);
             document.getElementById('distance_km_hidden').value = distKm.toFixed(2);
             document.getElementById('infoDistance').innerHTML = distKm.toFixed(1) + ' <small>km</small>';
             document.getElementById('infoTime').innerHTML = estMinutes + ' <small>min</small>';
             document.getElementById('infoFee').innerText = '$' + total.toFixed(2);
+
+            updateDeliveryMethod(distKm, distKm <= 1.5 ? '🚶 Foot' : '🚲 Bike / Car');
         }
 
         function getTimeFee() {
-            let dt = document.getElementById('delivery_time').value,
-                st = document.getElementById('specific_time').value;
+            const dt = document.getElementById('delivery_time').value;
+            const st = document.getElementById('specific_time').value;
             if (dt === 'asap') return 3.00;
             if (dt === 'morning') return 2.50;
             if (dt === 'afternoon') return 2.00;
@@ -663,57 +1291,374 @@
             return 0.50;
         }
 
-        document.getElementById('delivery_time').addEventListener('change', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.getElementById('specific_time').addEventListener('input', () => { if(pickupMarker && dropoffMarker) updateRoute(); });
-        document.addEventListener('input', function(e) { if (e.target.name === 'prices[]' && pickupMarker && dropoffMarker) updateRoute(); });
+        function updateDeliveryMethod(distKm, methodText) {
+            const indicator = document.getElementById('deliveryMethodIndicator');
+            if (distKm > 0) {
+                indicator.style.display = 'flex';
+                document.getElementById('deliveryMethodIcon').className = distKm <= 1.5 ? 'fas fa-walking' :
+                    'fas fa-bicycle';
+                document.getElementById('deliveryMethodTitle').innerText = methodText;
+                document.getElementById('deliveryMethodDescription').innerText = distKm <= 1.5 ?
+                    'Can be walked' : 'Requires vehicle';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
 
-        let selectedPurchaseType = 'retail';
+        // ============================================================
+        //  5.  STORE SELECTION
+        // ============================================================
+        function getStoreById(id) {
+            for (const type in storeLists) {
+                const found = storeLists[type].find(s => s.id === id);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function selectStore(store) {
+            document.getElementById('store_preference_hidden').value = store.id;
+            selectedStoreId = store.id;
+            document.getElementById('store_name').value = store.name;
+
+            const branches = storeBranches[store.id] || [];
+            if (branches.length > 0) {
+                const branch = branches[0];
+                document.getElementById('store_location').value = branch.address;
+                setPickupLocation(branch.lat, branch.lon);
+                map.flyTo([branch.lat, branch.lon], 15, { duration: 1.5 });
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${store.name} — ${branch.city}`;
+            } else {
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${store.name}`;
+                // still set pickup to some default? We'll keep current location.
+                // We can leave as is.
+            }
+
+            document.getElementById('other_store_input').classList.remove('expanded');
+            document.getElementById('other_store_name').value = '';
+
+            clearBrandSelection();
+            const cards = document.querySelectorAll('.brand-card');
+            cards.forEach(c => {
+                if (c.dataset.id === store.id) c.classList.add('selected');
+            });
+
+            openBranchModal(store);
+        }
+
+        function openBranchModal(store) {
+            document.getElementById('modalTitle').textContent = store.name + ' — Select a branch';
+            const list = document.getElementById('branchList');
+            list.innerHTML = '';
+            const branches = storeBranches[store.id] || [];
+            if (branches.length === 0) {
+                list.innerHTML = '<p style="color:#999;padding:10px;">No branches listed. You can still use the address field.</p>';
+                document.getElementById('branchModal').classList.add('active');
+                return;
+            }
+            branches.forEach((branch) => {
+                const item = document.createElement('div');
+                item.className = 'branch-item';
+                item.innerHTML = `
+                    <div class="branch-city">${branch.city}</div>
+                    <div class="branch-address">${branch.address}</div>
+                `;
+                item.addEventListener('click', () => {
+                    selectBranch(store, branch);
+                });
+                list.appendChild(item);
+            });
+            document.getElementById('branchModal').classList.add('active');
+        }
+
+        function selectBranch(store, branch) {
+            closeBranchModal();
+            document.getElementById('store_preference_hidden').value = store.id;
+            document.getElementById('store_location').value = branch.address;
+            document.getElementById('store_name').value = store.name;
+            document.getElementById('other_store_input').classList.remove('expanded');
+            document.getElementById('other_store_name').value = '';
+            setPickupLocation(branch.lat, branch.lon);
+            map.flyTo([branch.lat, branch.lon], 15, { duration: 1.5 });
+            document.getElementById('selectedBrandDisplay').innerText = `Selected: ${store.name} — ${branch.city}`;
+            clearBrandSelection();
+            const cards = document.querySelectorAll('.brand-card');
+            cards.forEach(c => {
+                if (c.dataset.id === store.id) c.classList.add('selected');
+            });
+            selectedStoreId = store.id;
+        }
+
+        function closeBranchModal() {
+            document.getElementById('branchModal').classList.remove('active');
+        }
+
+        // ============================================================
+        //  6.  RENDER CAROUSEL (now depends on purchase type)
+        // ============================================================
+        function renderBrands(type) {
+            const container = document.getElementById('brandsCarousel');
+            container.innerHTML = '';
+
+            // "Other" card - always present
+            const otherCard = document.createElement('div');
+            otherCard.className = 'brand-card';
+            otherCard.dataset.id = 'other';
+            otherCard.innerHTML =
+                `<i class="fas fa-plus-circle" style="font-size:28px;color:var(--primary-dark);"></i><span>Other</span>`;
+            otherCard.addEventListener('click', () => {
+                document.getElementById('store_preference_hidden').value = 'other';
+                document.getElementById('other_store_input').classList.add('expanded');
+                document.getElementById('other_store_name').focus();
+                clearBrandSelection();
+                document.getElementById('selectedBrandDisplay').innerText = 'Enter custom store name above';
+                selectedStoreId = null;
+                document.getElementById('store_name').value = '';
+            });
+            container.appendChild(otherCard);
+
+            // Get stores for this type
+            const stores = storeLists[type] || storeLists.retail;
+            stores.forEach(store => {
+                const card = document.createElement('div');
+                card.className = 'brand-card';
+                card.dataset.id = store.id;
+                card.innerHTML = `
+                    <img src="${store.logo}" alt="${store.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+                    <span class="brand-name">${store.name}</span>
+                `;
+                const fallbackSpan = document.createElement('span');
+                fallbackSpan.style.display = 'none';
+                fallbackSpan.textContent = store.name;
+                card.appendChild(fallbackSpan);
+                card.addEventListener('click', () => {
+                    selectStore(store);
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function clearBrandSelection() {
+            document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        // ============================================================
+        //  7.  PURCHASE TYPE
+        // ============================================================
         function selectPurchaseType(el, type) {
             document.querySelectorAll('.purchase-type').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
             selectedPurchaseType = type;
+            // Update suggestions
             updateStoreSuggestions(type);
+            // Re-render carousel with filtered stores
+            renderBrands(type);
+            // Also clear any selected store display
+            document.getElementById('selectedBrandDisplay').innerText = '';
+            document.getElementById('store_preference_hidden').value = '';
+            selectedStoreId = null;
             if (pickupMarker && dropoffMarker) updateRoute();
         }
+
         function updateStoreSuggestions(type) {
-            let suggestions = type === 'retail' ? ['Walmart','Target','Best Buy','Home Depot','Costco','Lowe\'s'] :
-                              type === 'pharmacy' ? ['CVS Pharmacy','Walgreens','Rite Aid','Local Pharmacy'] :
-                              ['Specific Address','Online Pickup','Local Business','Specialty Store'];
-            document.querySelector('.store-suggestion-tags').innerHTML = suggestions.map(s => `<span class="store-tag" onclick="setStoreName('${s}')">${s}</span>`).join('');
+            const suggestions = type === 'retail' ?
+                ['OK Zimbabwe', 'Pick n Pay', 'Game', 'Edgars', 'TM Supermarket', 'Spar', 'Walmart', 'Target'] :
+                type === 'pharmacy' ?
+                ['CVS Pharmacy', 'Walgreens', 'Rite Aid', 'Local Pharmacy', 'Medicines Mart'] :
+                ['Specific Address', 'Online Pickup', 'Local Business', 'Specialty Store'];
+            document.getElementById('suggestionTags').innerHTML = suggestions.map(s =>
+                `<span class="store-tag" onclick="setStoreName('${s}')">${s}</span>`
+            ).join('');
         }
-        function setStoreName(name) { document.getElementById('store_name').value = name; }
+
+        function setStoreName(name) {
+            document.getElementById('store_name').value = name;
+            // Try to find a matching store in the current type's list
+            const stores = storeLists[selectedPurchaseType] || storeLists.retail;
+            const matched = stores.find(s => s.name.toLowerCase() === name.toLowerCase());
+            if (matched) {
+                selectStore(matched);
+            } else {
+                // If not found, treat as custom
+                document.getElementById('store_preference_hidden').value = 'other';
+                document.getElementById('other_store_input').classList.add('expanded');
+                document.getElementById('other_store_name').value = name;
+                document.getElementById('selectedBrandDisplay').innerText = `Selected: ${name} (custom)`;
+                selectedStoreId = null;
+                clearBrandSelection();
+            }
+        }
+
+        // ============================================================
+        //  8.  UI HELPERS
+        // ============================================================
         function toggleSpecificTimeInput() {
-            let div = document.getElementById('specific_time_input');
-            if (document.getElementById('delivery_time').value === 'specific') div.classList.add('expanded');
-            else div.classList.remove('expanded');
+            const div = document.getElementById('specific_time_input');
+            if (document.getElementById('delivery_time').value === 'specific') {
+                div.classList.add('expanded');
+            } else {
+                div.classList.remove('expanded');
+            }
         }
+
         function addItem() {
-            let container = document.getElementById('items-container');
-            let newItem = document.createElement('div');
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
             newItem.className = 'purchase-item';
-            newItem.innerHTML = `<div class="purchase-row"><div class="input-with-icon" style="flex:2;"><i class="fas fa-cube"></i><input type="text" name="items[]" placeholder="Item description" required></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-hashtag"></i><input type="text" name="quantities[]" placeholder="Qty" required></div></div><div class="purchase-row"><div class="input-with-icon" style="flex:1;"><i class="fas fa-tag"></i><input type="text" name="brands[]" placeholder="Brand(optional)"></div><div class="input-with-icon" style="flex:1;"><i class="fas fa-dollar-sign"></i><input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0"></div></div><div class="item-actions"><button type="button" class="remove-item" onclick="removeItem(this)">×</button></div>`;
+            newItem.innerHTML = `
+                <div class="purchase-row">
+                    <div class="input-with-icon" style="flex:2;">
+                        <i class="fas fa-cube"></i>
+                        <input type="text" name="items[]" placeholder="Item description" required />
+                    </div>
+                    <div class="input-with-icon" style="flex:1;">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" name="quantities[]" placeholder="Qty" required />
+                    </div>
+                </div>
+                <div class="purchase-row">
+                    <div class="input-with-icon" style="flex:1;">
+                        <i class="fas fa-tag"></i>
+                        <input type="text" name="brands[]" placeholder="Brand (optional)" />
+                    </div>
+                    <div class="input-with-icon" style="flex:1;">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" name="prices[]" placeholder="Est. price ($)" step="0.01" min="0" />
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
+                </div>
+            `;
             container.appendChild(newItem);
             setTimeout(() => newItem.querySelector('input')?.focus(), 100);
+            newItem.querySelector('input[name="prices[]"]')?.addEventListener('input', () => {
+                if (pickupMarker && dropoffMarker) updateRoute();
+            });
+            newItem.querySelector('input[name="quantities[]"]')?.addEventListener('input', () => {
+                if (pickupMarker && dropoffMarker) updateRoute();
+            });
         }
-        function removeItem(btn) { btn.closest('.purchase-item')?.remove(); }
-        function updateProgress() {
-            let filled = Array.from(document.querySelectorAll('input,select,textarea')).filter(i => i.value && i.type!='hidden').length;
-            document.querySelector('.progress').style.width = Math.min((filled / document.querySelectorAll('input,select,textarea').length) * 100, 100) + '%';
-        }
-        document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('input', updateProgress));
 
-        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
-            if (!document.getElementById('store_name').value.trim()) { alert('Please enter store name.'); e.preventDefault(); return false; }
-            if (!document.getElementById('store_location').value.trim()) { alert('Please set store address on map.'); e.preventDefault(); return false; }
-            if (!document.getElementById('delivery_address').value.trim()) { alert('Please set delivery address on map.'); e.preventDefault(); return false; }
-            let hasItem = false;
-            document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
-            if (!hasItem) { alert('Add at least one item.'); e.preventDefault(); return false; }
-            if (parseFloat(document.getElementById('service_price').value) < 0.75) { alert('Service price must be at least $0.75'); e.preventDefault(); return false; }
-            if (!document.getElementById('contact_number').value.trim()) { alert('Enter phone number.'); e.preventDefault(); return false; }
+        function removeItem(btn) {
+            btn.closest('.purchase-item')?.remove();
+        }
+
+        function updateProgress() {
+            const filled = Array.from(document.querySelectorAll('input,select,textarea'))
+                .filter(i => i.value && i.type !== 'hidden').length;
+            const total = document.querySelectorAll('input,select,textarea').length;
+            document.querySelector('.progress').style.width = Math.min((filled / total) * 100, 100) + '%';
+        }
+
+        // ============================================================
+        //  9.  "USE YOUR LOCATION" BUTTON
+        // ============================================================
+        document.getElementById('useCurrentLocationBtn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        setDropoffLocation(lat, lng);
+                        map.flyTo([lat, lng], 15, { duration: 1.5 });
+                        setSelectionMode('dropoff');
+                        const marker = L.marker([lat, lng], {
+                            icon: L.divIcon({
+                                html: '<div style="background-color:#2196F3;width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(map).bindPopup('Your location').openPopup();
+                        setTimeout(() => map.removeLayer(marker), 5000);
+                    },
+                    (error) => {
+                        alert('Unable to retrieve your location. Please check GPS settings.');
+                    }
+                );
+            } else {
+                alert('Geolocation not supported.');
+            }
         });
 
-        window.onload = function() { initMap(); updateProgress(); };
+        // ============================================================
+        // 10.  FORM SUBMIT
+        // ============================================================
+        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+            const storePref = document.getElementById('store_preference_hidden').value;
+            if (!storePref) {
+                if (!document.getElementById('store_name').value.trim()) {
+                    alert('Please select a store or enter a store name.');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            if (!document.getElementById('store_location').value.trim()) {
+                alert('Please set the store address on the map.');
+                e.preventDefault();
+                return false;
+            }
+            if (!document.getElementById('delivery_address').value.trim()) {
+                alert('Please set a delivery address on the map.');
+                e.preventDefault();
+                return false;
+            }
+            let hasItem = false;
+            document.querySelectorAll('input[name="items[]"]').forEach(i => { if (i.value.trim()) hasItem = true; });
+            if (!hasItem) {
+                alert('Please add at least one item.');
+                e.preventDefault();
+                return false;
+            }
+            const price = parseFloat(document.getElementById('service_price').value);
+            if (isNaN(price) || price < 0.75) {
+                alert('Service price must be at least $0.75.');
+                e.preventDefault();
+                return false;
+            }
+            if (!document.getElementById('contact_number').value.trim()) {
+                alert('Please enter your phone number.');
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // ============================================================
+        // 11.  MODAL CLOSE ON OVERLAY
+        // ============================================================
+        document.getElementById('branchModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBranchModal();
+        });
+
+        // ============================================================
+        // 12.  INIT
+        // ============================================================
+        window.onload = function() {
+            initMap();
+            // Initial render for 'retail'
+            renderBrands('retail');
+            updateStoreSuggestions('retail');
+            updateProgress();
+            document.getElementById('other_store_input').classList.remove('expanded');
+            // Event listeners for price updates
+            document.querySelectorAll('input[name="prices[]"]').forEach(el => {
+                el.addEventListener('input', () => {
+                    if (pickupMarker && dropoffMarker) updateRoute();
+                });
+            });
+            document.querySelectorAll('input[name="quantities[]"]').forEach(el => {
+                el.addEventListener('input', () => {
+                    if (pickupMarker && dropoffMarker) updateRoute();
+                });
+            });
+            document.getElementById('delivery_time').addEventListener('change', () => {
+                if (pickupMarker && dropoffMarker) updateRoute();
+            });
+            document.getElementById('specific_time').addEventListener('input', () => {
+                if (pickupMarker && dropoffMarker) updateRoute();
+            });
+            console.log('General Purchasing ready — Popular stores now depend on purchase type.');
+        };
     </script>
 </body>
 </html>
